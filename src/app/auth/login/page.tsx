@@ -111,7 +111,7 @@ function LoginForm() {
         onSubmit={onSubmit}
         className="relative w-full max-w-sm space-y-4 rounded-xl bg-white p-6 shadow-lg dark:bg-gray-800 dark:shadow-gray-800"
       >
-        <div className="relative mx-auto my-2 flex h-14 w-48 items-center justify-center shadow">
+        <div className="relative mx-auto my-2 flex h-14 w-48 items-center justify-center">
           <Image
             src="/images/logo-light.png"
             alt="Afrobeutic Logo"
