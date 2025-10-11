@@ -162,8 +162,8 @@ const SignUp: React.FC = () => {
       <div className="pointer-events-none absolute -top-24 -left-32 h-96 w-96 rounded-full bg-gradient-to-tr from-blue-700/40 to-indigo-600/30 opacity-60 blur-3xl" />
       <div className="pointer-events-none absolute -right-32 -bottom-24 h-96 w-96 rounded-full bg-gradient-to-br from-purple-700/30 to-pink-600/20 opacity-50 blur-3xl" />
 
-      <div className="flex h-full min-h-screen w-full flex-col items-center justify-center border border-gray-200/30 bg-white/40 shadow-2xl backdrop-blur-md dark:border-white/8 dark:bg-white/5">
-        <div className="relative flex flex-col items-center justify-center border border-gray-200/20 bg-white/50 p-8 shadow-lg backdrop-blur-sm md:rounded-lg md:p-12 dark:border-white/5 dark:bg-white/5">
+      <div className="flex h-full min-h-screen w-full flex-col items-center justify-center border border-gray-200/30 bg-white/40 py-5 shadow-2xl backdrop-blur-md dark:border-white/8 dark:bg-white/5">
+        <div className="relative flex flex-col items-center justify-center border border-gray-200/20 bg-white/50 p-8 shadow-lg backdrop-blur-sm md:rounded-lg md:px-12 dark:border-white/5 dark:bg-white/5">
           <div className="absolute top-4 right-4">
             <button
               type="button"
