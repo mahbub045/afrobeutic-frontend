@@ -1,0 +1,186 @@
+import apiClient from "@/services/api-client";
+import axios from "axios";
+import { NextAuthOptions, User as NextAuthUser } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+
+// Extend NextAuth's user type to include all API response data
+interface UserWithToken extends NextAuthUser {
+  accessToken?: string;
+  uid?: string;
+  avatar?: string | null;
+  first_name?: string;
+  last_name?: string;
+  role?: string;
+  country?: string;
+}
+
+// TypeScript Declaration Module for Custom Session and User Properties
+declare module "next-auth" {
+  interface Session {
+    user: {
+      name?: string | null;
+      email?: string | null;
+      uid?: string;
+      avatar?: string | null;
+      first_name?: string;
+      last_name?: string;
+      role?: string;
+      country?: string;
+      accessToken?: string;
+    };
+  }
+
+  interface User {
+    accessToken?: string;
+    uid?: string;
+    avatar?: string | null;
+    first_name?: string;
+    last_name?: string;
+    role?: string;
+    country?: string;
+  }
+
+  interface JWT {
+    accessToken?: string;
+    uid?: string;
+    avatar?: string | null;
+    first_name?: string;
+    last_name?: string;
+    role?: string;
+    country?: string;
+  }
+}
+
+export const authOptions: NextAuthOptions = {
+  session: {
+    strategy: "jwt",
+    maxAge: 12 * 60 * 60, // 12 hours
+  },
+  pages: {
+    signIn: "auth/login",
+    signOut: "auth/login",
+  },
+  providers: [
+    CredentialsProvider({
+      id: "credentials",
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "text" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        try {
+          if (!credentials) {
+            throw new Error("No credentials provided");
+          }
+
+          // First, authenticate and get tokens
+          const loginResponse = await apiClient.post("/auth/login", {
+            email: credentials.email,
+            password: credentials.password,
+          });
+          // console.log("Login Response:", loginResponse);
+
+          if (loginResponse.data?.access) {
+            // Then fetch user info using the access token
+            const userInfoResponse = await axios.get(
+              `${process.env.NEXT_PUBLIC_APIBASE_URL}/auth/me`,
+              {
+                headers: {
+                  Authorization: `Bearer ${loginResponse.data.access}`,
+                  "Content-Type": "application/json",
+                },
+              },
+            );
+            // console.log("User Info Response:", userInfoResponse.data);
+
+            const userInfo = userInfoResponse.data;
+
+            return {
+              id: userInfo.uid || "default_id",
+              name:
+                `${userInfo.first_name} ${userInfo.last_name}`.trim() ||
+                userInfo.email,
+              email: userInfo.email,
+              uid: userInfo.uid,
+              avatar: userInfo.avatar,
+              first_name: userInfo.first_name,
+              last_name: userInfo.last_name,
+              role: userInfo.role,
+              country: userInfo.country,
+              accessToken: loginResponse.data.access,
+            };
+          }
+          return null;
+        } catch (error) {
+          console.error("Authentication error:", error);
+          // Handle throttling explicitly
+          if (axios.isAxiosError(error) && error.response?.status === 429) {
+            const retryAfterHeader = error.response.headers?.["retry-after"] as
+              | string
+              | undefined;
+            const retryAfter = retryAfterHeader
+              ? Number(retryAfterHeader)
+              : NaN;
+            const seconds = Number.isFinite(retryAfter)
+              ? retryAfter
+              : undefined;
+            const message = seconds
+              ? `Request was throttled. Expected available in ${seconds} seconds.`
+              : "Request was throttled. Expected available in 12 seconds.";
+            throw new Error(message);
+          }
+          throw new Error("Invalid email or password.");
+        }
+      },
+    }),
+  ],
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        const userWithToken = user as UserWithToken;
+        if (userWithToken.accessToken) {
+          token.accessToken = userWithToken.accessToken;
+        }
+        if (userWithToken.uid) {
+          token.uid = userWithToken.uid;
+        }
+        if (userWithToken.avatar !== undefined) {
+          token.avatar = userWithToken.avatar;
+        }
+        if (userWithToken.first_name) {
+          token.first_name = userWithToken.first_name;
+        }
+        if (userWithToken.last_name) {
+          token.last_name = userWithToken.last_name;
+        }
+        if (userWithToken.role) {
+          token.role = userWithToken.role;
+        }
+        // gender removed
+        if (userWithToken.country) {
+          token.country = userWithToken.country;
+        }
+      }
+      return token;
+    },
+
+    async session({ session, token }) {
+      session.user = {
+        ...session.user,
+        uid: token.uid as string | undefined,
+        avatar: token.avatar as string | null | undefined,
+        first_name: token.first_name as string | undefined,
+        last_name: token.last_name as string | undefined,
+        role: token.role as string | undefined,
+        country: token.country as string | undefined,
+        accessToken: token.accessToken as string | undefined,
+      };
+      return session;
+    },
+
+    async redirect({ url, baseUrl }) {
+      return url.startsWith(baseUrl) ? url : baseUrl;
+    },
+  },
+};
