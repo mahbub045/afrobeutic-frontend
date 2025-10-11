@@ -69,6 +69,7 @@ const NavBar: React.FC<NavBarProps> = ({ onMobileMenuToggle }) => {
               variant="ghost"
               size="icon"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="dark:shadow-gray-600"
             >
               <Sun className="h-4 w-4 scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
               <Moon className="absolute h-4 w-4 scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
@@ -76,7 +77,11 @@ const NavBar: React.FC<NavBarProps> = ({ onMobileMenuToggle }) => {
             </Button>
 
             {/* Notifications */}
-            <Button variant="ghost" size="icon" className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative dark:shadow-gray-600"
+            >
               <Bell className="h-4 w-4" />
               <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs text-white">
                 3

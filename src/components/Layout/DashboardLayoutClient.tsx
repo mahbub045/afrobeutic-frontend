@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Footer from "./Footer";
-import NavBar from "./NavBar";
-import SideBar from "./SideBar";
+import Footer from "./Footer/Footer";
+
+import NavBar from "./NavBar/NavBar";
+import SideBar from "./SideBar/SideBar";
 
 interface DashboardLayoutClientProps {
   children: React.ReactNode;

@@ -162,8 +162,8 @@ const SignUp: React.FC = () => {
       <div className="pointer-events-none absolute -top-24 -left-32 h-96 w-96 rounded-full bg-gradient-to-tr from-blue-700/40 to-indigo-600/30 opacity-60 blur-3xl" />
       <div className="pointer-events-none absolute -right-32 -bottom-24 h-96 w-96 rounded-full bg-gradient-to-br from-purple-700/30 to-pink-600/20 opacity-50 blur-3xl" />
 
-      <div className="flex h-full min-h-screen w-full flex-col items-center justify-center border border-gray-200 bg-white shadow-2xl backdrop-blur-md dark:border-white/8 dark:bg-white/6">
-        <div className="bg-blackg-white/10 relative flex flex-col items-center justify-center border p-8 shadow-lg md:rounded-lg md:p-12 dark:bg-white/5">
+      <div className="flex h-full min-h-screen w-full flex-col items-center justify-center border border-gray-200/30 bg-white/40 shadow-2xl backdrop-blur-md dark:border-white/8 dark:bg-white/5">
+        <div className="relative flex flex-col items-center justify-center border border-gray-200/20 bg-white/50 p-8 shadow-lg backdrop-blur-sm md:rounded-lg md:p-12 dark:border-white/5 dark:bg-white/5">
           <div className="absolute top-4 right-4">
             <button
               type="button"
@@ -179,7 +179,7 @@ const SignUp: React.FC = () => {
               {theme === "dark" ? <Sun /> : <Moon />}
             </button>
           </div>
-          <div className="relative my-2 flex h-14 w-48 items-center justify-center shadow">
+          <div className="relative my-2 flex h-14 w-48 items-center justify-center">
             <Image
               src="/images/logo-light.png"
               alt="Afrobeutic Logo"
@@ -198,7 +198,7 @@ const SignUp: React.FC = () => {
           <h1 className="text-3xl font-extrabold text-gray-900 md:text-4xl dark:text-white">
             Create an Account
           </h1>
-          <p className="mt-2 max-w-md text-center text-sm text-gray-600 dark:text-white/80">
+          <p className="mt-2 mb-4 max-w-md text-center text-sm text-gray-600 dark:text-white/80">
             Join Afrobeutic — manage clients, projects and access your
             dashboard.
           </p>
@@ -270,7 +270,7 @@ const SignUp: React.FC = () => {
                         Country<span className="text-danger">*</span>
                       </label>
                       <Field as="select" name="country" id="country" required>
-                        <option value="">Select country (optional)</option>
+                        <option value="">Select country</option>
                         {countries.map((country) => (
                           <option key={country.code} value={country.code}>
                             {country.name}
