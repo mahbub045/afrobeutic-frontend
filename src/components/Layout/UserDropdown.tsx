@@ -53,7 +53,7 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="inline-flex items-center gap-2 rounded-full px-1 py-1"
+          className="inline-flex items-center gap-2 rounded-full px-1 py-1 dark:shadow-gray-600"
         >
           <Avatar className="h-8 w-8">
             <AvatarImage
@@ -85,7 +85,10 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
               {session.user.email}
             </p>
             {session.user.role && (
-              <Badge variant="secondary" className="w-fit pt-[5px] text-xs">
+              <Badge
+                variant="secondary"
+                className="w-fit pt-[5px] text-xs text-white"
+              >
                 {session.user.role
                   .split("_")
                   .map((part: string) =>

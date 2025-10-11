@@ -143,18 +143,18 @@ input[type="week"],
 input[type="color"],
 select,
 textarea {
-  @apply w-full px-4 py-3 bg-white dark:bg-white/6 border border-gray-200 dark:border-white/12 rounded-md text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/60 focus:outline-none focus:ring-1 focus:ring-primary/70 transition-shadow shadow-inner;
+  @apply focus:ring-primary/70 w-full rounded-md border border-gray-200 bg-white px-4 py-3 text-gray-900 placeholder-gray-400 shadow-inner transition-shadow focus:ring-1 focus:outline-none dark:border-white/12 dark:bg-white/6 dark:text-white dark:placeholder-white/60;
 }
 
 /* Fix select option colors in dark mode */
 select option {
-  @apply bg-white dark:bg-gray-800 text-gray-900 dark:text-white;
+  @apply bg-white text-gray-900 dark:bg-gray-800 dark:text-white;
 }
 
 /* Auto-style all buttons - base styling without size/padding/colors */
 button,
 .Button {
-  @apply font-semibold rounded-md shadow-lg transition-transform active:scale-98 disabled:opacity-60 cursor-pointer;
+  @apply cursor-pointer rounded-md font-semibold shadow-lg transition-transform active:scale-98 disabled:opacity-60;
 }
 
 /* Button color classes */
@@ -236,17 +236,17 @@ button,
 
 /* Button size classes */
 .btn-sm {
-  @apply py-1 px-3 text-sm;
+  @apply px-3 py-1 text-sm;
 }
 
 .btn-md {
-  @apply py-2 px-4 text-base;
+  @apply px-4 py-2 text-base;
 }
 
 .btn-lg {
-  @apply py-3 px-6 text-lg;
+  @apply px-6 py-3 text-lg;
 }
 
 .btn-full {
-  @apply w-full py-3 px-3 text-sm;
+  @apply w-full px-3 py-3 text-sm;
 }

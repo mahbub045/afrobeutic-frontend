@@ -11,4 +11,3 @@ export interface FormikHelpers {
   setSubmitting: (isSubmitting: boolean) => void;
   resetForm: () => void;
 }
-
