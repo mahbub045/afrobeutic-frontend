@@ -1,5 +1,7 @@
+"use client";
 import Breadcrumbs from "../CommonComponents/Breadcrumbs";
 import WelcomeMessage from "../CommonComponents/WelcomeMessage";
+import Overview from "./Overview/Overview";
 
 const ClientPanelContainer: React.FC = () => {
   return (
@@ -8,6 +10,7 @@ const ClientPanelContainer: React.FC = () => {
         items={[{ label: "Home", href: "/dashboard/client-panel" }]}
       />
       <WelcomeMessage />
+      <Overview />
     </div>
   );
 };
