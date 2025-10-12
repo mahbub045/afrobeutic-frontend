@@ -52,8 +52,8 @@ function LoginForm() {
   // Redirect if already authenticated
   useEffect(() => {
     if (status === "authenticated" && session) {
-      // Redirect based on user role
-      const role = session.user.role;
+      // Redirect based on user role (from accounts)
+      const role = session.user.accounts?.[0]?.role;
       if (role === "MANAGEMENT_ADMIN" || role === "MANAGEMENT_STAFF") {
         router.push("/dashboard/admin-panel");
       } else if (role === "OWNER" || role === "ADMIN" || role === "STAFF") {
