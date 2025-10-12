@@ -68,19 +68,19 @@ const WelcomeMessage: React.FC = () => {
 
   return (
     <Card className="border shadow-md dark:shadow-gray-600">
-      <div className="flex flex-col gap-8 p-8 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-6 p-4 sm:p-6 md:p-8 lg:flex-row lg:items-center lg:justify-between">
         {/* Left: Welcome Text Section */}
-        <div className="flex-1 space-y-4">
-          <h1 className="text-foreground text-3xl font-bold md:text-4xl">
+        <div className="flex-1 space-y-3 sm:space-y-4">
+          <h1 className="text-foreground text-2xl font-bold sm:text-3xl md:text-4xl">
             Welcome to Afrobeutic!
           </h1>
           <Badge
             variant="secondary"
-            className="bg-secondary hover:bg-secondary/90 rounded-md px-4 py-2 text-base font-semibold text-white"
+            className="bg-secondary hover:bg-secondary/90 inline-flex rounded-md px-3 py-1.5 text-sm font-semibold text-white sm:px-4 sm:py-2 sm:text-base"
           >
             {status === "loading" ? (
               <div className="flex items-center gap-2">
-                <LoaderPinwheel className="h-6 w-10 animate-spin" />
+                <LoaderPinwheel className="h-4 w-4 animate-spin sm:h-6 sm:w-10" />
               </div>
             ) : (
               <span>{userName}&apos;s account</span>
@@ -89,23 +89,26 @@ const WelcomeMessage: React.FC = () => {
         </div>
 
         {/* Right: Monitor/Dashboard Display */}
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 self-center">
           {/* Monitor Frame */}
           <div className="relative">
             {/* Monitor Screen */}
-            <div className="border-foreground bg-background h-44 w-72 rounded-t-lg border-4 p-6">
+            <div className="border-foreground bg-background h-32 w-56 rounded-t-lg border-2 p-4 sm:h-40 sm:w-64 sm:border-3 sm:p-5 lg:h-44 lg:w-72 lg:border-4 lg:p-6">
               {/* Stats Grid (2x2) */}
-              <div className="mb-4 grid grid-cols-2 gap-3">
+              <div className="mb-3 grid grid-cols-2 gap-2 sm:mb-4 sm:gap-3">
                 {stats.map((stat, index) => {
                   const Icon = stat.icon;
                   return (
-                    <div key={index} className="flex items-center gap-2">
+                    <div
+                      key={index}
+                      className="flex items-center gap-1.5 sm:gap-2"
+                    >
                       <div
-                        className={`${stat.color} flex items-center justify-center rounded-full p-1.5`}
+                        className={`${stat.color} flex items-center justify-center rounded-full p-1 sm:p-1.5`}
                       >
-                        <Icon className="h-4 w-4 text-white" />
+                        <Icon className="h-3 w-3 text-white sm:h-4 sm:w-4" />
                       </div>
-                      <div className="bg-muted/40 h-2 flex-1 rounded-full">
+                      <div className="bg-muted/40 h-1.5 flex-1 rounded-full sm:h-2">
                         <div
                           className={`${stat.color} h-full rounded-full`}
                           style={{ width: "70%" }}
@@ -117,7 +120,7 @@ const WelcomeMessage: React.FC = () => {
               </div>
 
               {/* Chart */}
-              <div className="bg-muted/20 relative h-16 rounded">
+              <div className="bg-muted/20 relative h-12 rounded sm:h-14 lg:h-16">
                 <svg
                   className="h-full w-full"
                   viewBox="0 0 120 80"
@@ -147,10 +150,10 @@ const WelcomeMessage: React.FC = () => {
 
             {/* Monitor Stand */}
             <div className="flex justify-center">
-              <div className="h-6 w-16 bg-gray-300 dark:bg-gray-700" />
+              <div className="h-4 w-12 bg-gray-300 sm:h-5 sm:w-14 lg:h-6 lg:w-16 dark:bg-gray-700" />
             </div>
             <div className="flex justify-center">
-              <div className="h-1 w-24 rounded-full bg-gray-400 dark:bg-gray-600" />
+              <div className="h-0.5 w-16 rounded-full bg-gray-400 sm:h-1 sm:w-20 lg:w-24 dark:bg-gray-600" />
             </div>
           </div>
         </div>
