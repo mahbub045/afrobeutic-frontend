@@ -24,7 +24,7 @@ const NavBar: React.FC<NavBarProps> = ({ onMobileMenuToggle }) => {
 
   return (
     <nav className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b shadow-md backdrop-blur dark:shadow-gray-600">
-      <div className="mx-auto px-4">
+      <div className="mx-auto px-4 md:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo and Mobile Menu Button */}
           <div className="flex items-center space-x-4">
@@ -34,7 +34,7 @@ const NavBar: React.FC<NavBarProps> = ({ onMobileMenuToggle }) => {
                 variant="ghost"
                 size="icon"
                 onClick={onMobileMenuToggle}
-                className="md:hidden"
+                className="md:hidden dark:shadow-gray-600"
               >
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle menu</span>
