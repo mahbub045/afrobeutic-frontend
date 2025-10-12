@@ -1,8 +1,9 @@
 "use client";
-import Breadcrumbs from "../CommonComponents/Breadcrumbs";
-import WelcomeMessage from "../CommonComponents/WelcomeMessage";
+import Breadcrumbs from "../../CommonComponents/Breadcrumbs";
+import WelcomeMessage from "../../CommonComponents/WelcomeMessage";
 import OthersInfo from "./OthersInfo/OthersInfo";
 import Overview from "./Overview/Overview";
+import SalonsAndChatBotsCard from "./SalonsAndChatBotsCard/SalonsAndChatBotsCard";
 
 const ClientPanelContainer: React.FC = () => {
   return (
@@ -13,6 +14,7 @@ const ClientPanelContainer: React.FC = () => {
       <WelcomeMessage />
       <Overview />
       <OthersInfo />
+      <SalonsAndChatBotsCard />
     </div>
   );
 };

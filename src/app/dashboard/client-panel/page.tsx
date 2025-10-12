@@ -1,4 +1,4 @@
-import ClientPanelContainer from "@/components/Dashboard/ClientPanel";
+import ClientPanelContainer from "@/components/Dashboard/ClientPanel/Home";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
