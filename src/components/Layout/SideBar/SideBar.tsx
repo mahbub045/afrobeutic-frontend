@@ -39,10 +39,9 @@ const SideBar: React.FC<SideBarProps> = ({
   const pathname = usePathname();
   const { data: session, status } = useSession();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const sessAny = session as any;
-  const role: string | null = sessAny?.user?.role
-    ? String(sessAny.user.role).toUpperCase()
+  // Get user role from accounts
+  const role: string | null = session?.user?.accounts?.[0]?.role
+    ? String(session.user.accounts[0].role).toUpperCase()
     : null;
 
   // Build items based on role

@@ -10,11 +10,11 @@ export default async function AdminPanel() {
     redirect("/auth/login");
   }
 
+  // Get user role from accounts
+  const role = session.user?.accounts?.[0]?.role;
+
   // Role-based access control - only MANAGEMENT_ADMIN and MANAGEMENT_STAFF can access
-  if (
-    session.user?.role !== "MANAGEMENT_ADMIN" &&
-    session.user?.role !== "MANAGEMENT_STAFF"
-  ) {
+  if (role !== "MANAGEMENT_ADMIN" && role !== "MANAGEMENT_STAFF") {
     redirect("/auth/login?error=access_denied");
   }
 
@@ -26,7 +26,7 @@ export default async function AdminPanel() {
       <h1 className="text-3xl font-bold">Admin Panel</h1>
       <div className="mt-4 space-y-2">
         <p>Welcome, {session.user?.email || "User"}</p>
-        <p>Role: {session.user?.role || "N/A"}</p>
+        <p>Role: {role || "N/A"}</p>
         <p>
           Name: {session.user?.first_name} {session.user?.last_name}
         </p>

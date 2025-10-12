@@ -12,7 +12,9 @@ export default async function ClientPanel() {
 
   // Role-based access control - only owner, admin, staff can access
   const allowedRoles = ["OWNER", "ADMIN", "STAFF"];
-  if (!allowedRoles.includes(session.user?.role as string)) {
+  const role = session.user?.accounts?.[0]?.role;
+
+  if (!role || !allowedRoles.includes(role)) {
     redirect("/auth/login?error=access_denied");
   }
 

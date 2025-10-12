@@ -11,8 +11,27 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="grid min-h-screen place-items-center">
-          <LoaderPinwheel className="h-10 w-10 animate-spin" />
+        // <div className="grid min-h-screen place-items-center">
+        //   <LoaderPinwheel className="h-10 w-10 animate-spin" />
+        // </div>
+        <div className="grid min-h-screen place-items-center bg-white dark:bg-gray-900">
+          <div className="flex flex-col items-center gap-2">
+            <Image
+              src="/images/loader/loader-dark.png"
+              alt="Logo"
+              width={100}
+              height={100}
+              className="hidden dark:block"
+            />
+            <Image
+              src="/images/loader/loader-light.png"
+              alt="Logo"
+              width={100}
+              height={100}
+              className="block dark:hidden"
+            />
+            <LoaderPinwheel className="h-6 w-6 animate-spin" />
+          </div>
         </div>
       }
     >
@@ -52,8 +71,8 @@ function LoginForm() {
   // Redirect if already authenticated
   useEffect(() => {
     if (status === "authenticated" && session) {
-      // Redirect based on user role
-      const role = session.user.role;
+      // Redirect based on user role (from accounts)
+      const role = session.user.accounts?.[0]?.role;
       if (role === "MANAGEMENT_ADMIN" || role === "MANAGEMENT_STAFF") {
         router.push("/dashboard/admin-panel");
       } else if (role === "OWNER" || role === "ADMIN" || role === "STAFF") {
@@ -92,7 +111,28 @@ function LoginForm() {
   // If already authenticated, don't render the form
   if (status === "authenticated") {
     return (
-      <div className="grid min-h-screen place-items-center">Redirecting…</div>
+      // <div className="grid min-h-screen place-items-center">Redirecting…</div>
+      <div className="grid min-h-screen place-items-center bg-white dark:bg-gray-900">
+        <div className="flex flex-col items-center gap-1">
+          <Image
+            src="/images/loader/loader-dark.png"
+            alt="Logo"
+            width={100}
+            height={100}
+            className="hidden dark:block"
+          />
+          <Image
+            src="/images/loader/loader-light.png"
+            alt="Logo"
+            width={100}
+            height={100}
+            className="block dark:hidden"
+          />
+          <span className="text-xs text-gray-500 dark:text-gray-400">
+            Redirecting…
+          </span>
+        </div>
+      </div>
     );
   }
 
