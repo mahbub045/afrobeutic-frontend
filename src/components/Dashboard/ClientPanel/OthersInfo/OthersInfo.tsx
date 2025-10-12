@@ -19,8 +19,8 @@ const OthersInfo: React.FC = () => {
       <Card className="border shadow-md dark:shadow-gray-600">
         <CardHeader className="relative pb-4">
           <div className="absolute -top-8 right-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-tr-lg rounded-b-lg bg-amber-500">
-                 <div className="absolute -top-1 -left-2 w-0 h-0 border-t-8 border-l-8 border-t-transparent border-l-amber-700"></div>
+            <div className="z-20 flex h-10 w-10 items-center justify-center rounded-tr-lg rounded-b-lg bg-amber-500">
+              <div className="absolute -top-0 -left-2 z-10 h-0 w-0 border-t-8 border-r-8 border-t-transparent border-r-amber-800"></div>
               <Star className="h-5 w-5 fill-white text-white" />
             </div>
           </div>
