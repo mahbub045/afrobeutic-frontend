@@ -1,6 +1,7 @@
 "use client";
 import Breadcrumbs from "../CommonComponents/Breadcrumbs";
 import WelcomeMessage from "../CommonComponents/WelcomeMessage";
+import OthersInfo from "./OthersInfo/OthersInfo";
 import Overview from "./Overview/Overview";
 
 const ClientPanelContainer: React.FC = () => {
@@ -11,6 +12,7 @@ const ClientPanelContainer: React.FC = () => {
       />
       <WelcomeMessage />
       <Overview />
+      <OthersInfo />
     </div>
   );
 };
