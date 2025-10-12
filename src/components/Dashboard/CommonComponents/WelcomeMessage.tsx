@@ -2,11 +2,17 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Calendar, Clock, TrendingUp, Users } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  LoaderPinwheel,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 
 const WelcomeMessage: React.FC = () => {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   const userName = session?.user?.first_name
     ? `${session.user.first_name} ${session.user.last_name || ""}`
@@ -72,7 +78,13 @@ const WelcomeMessage: React.FC = () => {
             variant="secondary"
             className="bg-secondary hover:bg-secondary/90 rounded-md px-4 py-2 text-base font-semibold text-white"
           >
-            {userName}&apos;s account
+            {status === "loading" ? (
+              <div className="flex items-center gap-2">
+                <LoaderPinwheel className="h-6 w-10 animate-spin" />
+              </div>
+            ) : (
+              <span>{userName}&apos;s account</span>
+            )}
           </Badge>
         </div>
 
