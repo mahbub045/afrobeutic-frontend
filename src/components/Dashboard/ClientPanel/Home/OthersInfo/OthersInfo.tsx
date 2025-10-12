@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, Star } from "lucide-react";
+import { ArrowRight, LoaderPinwheel, Star } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 
@@ -48,15 +48,39 @@ const OthersInfo: React.FC = () => {
         <CardHeader className="border-b-1 border-teal-600 pb-4">
           <CardTitle className="text-xl font-bold">Account Details</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 pt-6">
-          <div>
-            <p className="text-muted-foreground mb-1 text-sm">Account name:</p>
-            <p className="font-semibold">{userName}&apos;s account</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground mb-1 text-sm">Access Role:</p>
-            <p className="font-semibold">owner</p>
-          </div>
+        <CardContent className="space-y-4 pt-2">
+          {!session ? (
+            <div className="flex items-center justify-center py-8">
+              <LoaderPinwheel className="h-5 w-5 animate-spin" />
+            </div>
+          ) : (
+            <>
+              <div>
+                <p className="text-muted-foreground mb-1 text-sm">
+                  Account name:
+                </p>
+                <p className="font-semibold">{userName}&apos;s account</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground mb-1 text-sm">
+                  Access Role:
+                </p>
+                <p className="font-semibold">
+                  {session?.user?.accounts?.[0]?.role
+                    ?.split("_")
+                    .map((part: string) =>
+                      part
+                        .split("")
+                        .map((char: string, idx: number) =>
+                          idx === 0 ? char.toUpperCase() : char.toLowerCase(),
+                        )
+                        .join(""),
+                    )
+                    .join(" ") || "N/A"}
+                </p>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>
