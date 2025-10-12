@@ -26,7 +26,7 @@ export default function DashboardLayoutClient({
   return (
     <div className="bg-background min-h-screen">
       <NavBar onMobileMenuToggle={handleMobileMenuToggle} />
-      <div className="flex h-screen">
+      <div className="flex">
         <SideBar
           isMobileOpen={isMobileSidebarOpen}
           onMobileClose={handleMobileMenuClose}

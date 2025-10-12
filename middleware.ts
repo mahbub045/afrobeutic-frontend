@@ -2,18 +2,38 @@ import { pagesOptions } from "@/app/api/auth/[...nextauth]/pages-options";
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
+// Define Account type for middleware
+interface Account {
+  uid: string;
+  name: string;
+  owner_email: string;
+  role: string;
+}
+
 export default withAuth(
   function middleware(req) {
     const token = req.nextauth.token;
     const path = req.nextUrl.pathname;
 
+    // Check if token exists first
+    if (!token) {
+      console.log("Middleware - No token, redirecting to login");
+      const loginUrl = new URL("/auth/login", req.url);
+      loginUrl.searchParams.set("error", "unauthorized");
+      return NextResponse.redirect(loginUrl);
+    }
+
+    // Get user role from accounts
+    const accounts = token.accounts as Account[] | undefined;
+    const role = accounts?.[0]?.role;
+
     // Debug logging
     console.log("Middleware - Path:", path);
-    console.log("Middleware - Token role:", token?.role);
+    console.log("Middleware - Token role:", role);
 
-    // Check if token or role is missing
-    if (!token || !token.role) {
-      console.log("Middleware - No token or role, redirecting to login");
+    // Check if role is missing
+    if (!role) {
+      console.log("Middleware - No role, redirecting to login");
       const loginUrl = new URL("/auth/login", req.url);
       loginUrl.searchParams.set("error", "unauthorized");
       return NextResponse.redirect(loginUrl);
@@ -22,11 +42,11 @@ export default withAuth(
     // Role-based path protection
     if (path.startsWith("/dashboard/admin-panel")) {
       if (
-        token.role !== "MANAGEMENT_ADMIN" &&
-        token.role !== "MANAGEMENT_STAFF"
+        role !== "MANAGEMENT_ADMIN" &&
+        role !== "MANAGEMENT_STAFF"
       ) {
         console.log(
-          `Middleware - Access denied to dashboard/admin-panel. Role: ${token.role}, Required: MANAGEMENT_ADMIN | MANAGEMENT_STAFF`,
+          `Middleware - Access denied to dashboard/admin-panel. Role: ${role}, Required: MANAGEMENT_ADMIN | MANAGEMENT_STAFF`,
         );
         const loginUrl = new URL("/auth/login", req.url);
         loginUrl.searchParams.set("error", "access_denied");
@@ -37,11 +57,9 @@ export default withAuth(
 
     if (path.startsWith("/dashboard/client-panel")) {
       const allowedRoles = ["OWNER", "ADMIN", "STAFF"];
-      if (!allowedRoles.includes(token.role as string)) {
+      if (!allowedRoles.includes(role)) {
         console.log(
-          `Middleware - Access denied to dashboard/client-panel. Role: ${
-            token.role
-          }, Allowed: ${allowedRoles.join(", ")}`,
+          `Middleware - Access denied to dashboard/client-panel. Role: ${role}, Allowed: ${allowedRoles.join(", ")}`,
         );
         const loginUrl = new URL("/auth/login", req.url);
         loginUrl.searchParams.set("error", "access_denied");

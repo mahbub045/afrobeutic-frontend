@@ -3,6 +3,14 @@ import axios from "axios";
 import { NextAuthOptions, User as NextAuthUser } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
+// Account interface for user accounts
+interface Account {
+  uid: string;
+  name: string;
+  owner_email: string;
+  role: string;
+}
+
 // Extend NextAuth's user type to include all API response data
 interface UserWithToken extends NextAuthUser {
   accessToken?: string;
@@ -10,8 +18,8 @@ interface UserWithToken extends NextAuthUser {
   avatar?: string | null;
   first_name?: string;
   last_name?: string;
-  role?: string;
   country?: string;
+  accounts?: Account[];
 }
 
 // TypeScript Declaration Module for Custom Session and User Properties
@@ -24,9 +32,9 @@ declare module "next-auth" {
       avatar?: string | null;
       first_name?: string;
       last_name?: string;
-      role?: string;
       country?: string;
       accessToken?: string;
+      accounts?: Account[];
     };
   }
 
@@ -36,8 +44,8 @@ declare module "next-auth" {
     avatar?: string | null;
     first_name?: string;
     last_name?: string;
-    role?: string;
     country?: string;
+    accounts?: Account[];
   }
 
   interface JWT {
@@ -46,8 +54,8 @@ declare module "next-auth" {
     avatar?: string | null;
     first_name?: string;
     last_name?: string;
-    role?: string;
     country?: string;
+    accounts?: Account[];
   }
 }
 
@@ -106,8 +114,8 @@ export const authOptions: NextAuthOptions = {
               avatar: userInfo.avatar,
               first_name: userInfo.first_name,
               last_name: userInfo.last_name,
-              role: userInfo.role,
               country: userInfo.country,
+              accounts: userInfo.accounts,
               accessToken: loginResponse.data.access,
             };
           }
@@ -154,12 +162,12 @@ export const authOptions: NextAuthOptions = {
         if (userWithToken.last_name) {
           token.last_name = userWithToken.last_name;
         }
-        if (userWithToken.role) {
-          token.role = userWithToken.role;
-        }
-        // gender removed
+        // gender and role removed (role is now inside accounts)
         if (userWithToken.country) {
           token.country = userWithToken.country;
+        }
+        if (userWithToken.accounts) {
+          token.accounts = userWithToken.accounts;
         }
       }
       return token;
@@ -172,8 +180,8 @@ export const authOptions: NextAuthOptions = {
         avatar: token.avatar as string | null | undefined,
         first_name: token.first_name as string | undefined,
         last_name: token.last_name as string | undefined,
-        role: token.role as string | undefined,
         country: token.country as string | undefined,
+        accounts: token.accounts as Account[] | undefined,
         accessToken: token.accessToken as string | undefined,
       };
       return session;
