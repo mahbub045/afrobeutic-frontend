@@ -10,10 +10,10 @@ import {
   Calendar,
   HelpCircle,
   Home,
+  LifeBuoy,
   LoaderPinwheel,
   Megaphone,
   MessageSquare,
-  User,
   Users,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -52,9 +52,9 @@ const SideBar: React.FC<SideBarProps> = ({
         {
           label: "Manage Salons",
           href: "/dashboard/admin-panel/manage-salons",
-          Icon: Users,
+          Icon: LifeBuoy,
         },
-        { label: "Clients", href: "/dashboard/clients", Icon: User },
+        { label: "Clients", href: "/dashboard/clients", Icon: Users },
         {
           label: "Client Requests",
           href: "/dashboard/requests",
@@ -70,10 +70,10 @@ const SideBar: React.FC<SideBarProps> = ({
         {
           label: "Manage Salons",
           href: "/dashboard/client-panel/manage-salons",
-          Icon: Users,
+          Icon: LifeBuoy,
         },
         { label: "Chatbots", href: "/dashboard/chatbots", Icon: MessageSquare },
-        { label: "Clients", href: "/dashboard/clients", Icon: User },
+        { label: "Clients", href: "/dashboard/clients", Icon: Users },
         {
           label: "Client Requests",
           href: "/dashboard/requests",
