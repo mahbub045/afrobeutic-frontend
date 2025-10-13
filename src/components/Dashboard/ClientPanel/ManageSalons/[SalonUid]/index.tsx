@@ -14,6 +14,16 @@ import {
 } from "lucide-react";
 import { useParams, usePathname } from "next/navigation";
 import * as React from "react";
+import BookingsTab from "./Tabs/BookingsTab";
+import ChairsTab from "./Tabs/ChairsTab";
+import DashboardTab from "./Tabs/DashboardTab";
+import EmployeesTab from "./Tabs/EmployeesTab";
+import LookbookTab from "./Tabs/LookbookTab";
+import ProductsTab from "./Tabs/ProductsTab";
+import ReportTab from "./Tabs/ReportTab";
+import ServicesTab from "./Tabs/ServicesTab";
+import SettingsTab from "./Tabs/SettingsTab";
+
 
 const SingleSalonContainer: React.FC = () => {
   const { salonuid } = useParams();
@@ -64,6 +74,59 @@ const SingleSalonContainer: React.FC = () => {
     return () => window.removeEventListener("hashchange", update);
   }, [pathname, salonNavMenus]);
 
+  // Demo data for tabs (typed)
+  type Service = { id: string; name: string; price: string };
+  type Product = { id: string; name: string; stock: number };
+  type Chair = { id: string; name: string };
+  type Booking = { id: string; customer: string };
+  type LookBook = { id: string; title: string };
+  type Employee = { id: string; name: string };
+
+  const demo = React.useMemo(
+    () => ({
+      dashboard: {
+        title: "Overview",
+        content: "Summary metrics and quick links.",
+      },
+      services: {
+        title: "Services",
+        items: [
+          { id: "s1", name: "Haircut", price: "$15" },
+          { id: "s2", name: "Shave", price: "$10" },
+        ] as Service[],
+      },
+      products: {
+        title: "Products",
+        items: [
+          { id: "p1", name: "Shampoo", stock: 32 },
+          { id: "p2", name: "Conditioner", stock: 12 },
+        ] as Product[],
+      },
+      chairs: {
+        title: "Chairs",
+        items: [{ id: "c1", name: "Chair 1" }] as Chair[],
+      },
+      bookings: {
+        title: "Bookings",
+        items: [{ id: "b1", customer: "John Doe" }] as Booking[],
+      },
+      lookbook: {
+        title: "LookBook",
+        items: [{ id: "l1", title: "Summer" }] as LookBook[],
+      },
+      employees: {
+        title: "Employees",
+        items: [{ id: "e1", name: "Jane" }] as Employee[],
+      },
+      report: { title: "Report", content: "Sales and usage reports." },
+      settings: {
+        title: "Settings",
+        content: "Salon settings and preferences.",
+      },
+    }),
+    [] as const,
+  );
+
   return (
     <div className="container mx-auto px-4 py-6 md:px-6 lg:px-8">
       <Breadcrumbs
@@ -101,8 +164,40 @@ const SingleSalonContainer: React.FC = () => {
           );
         })}
       </nav>
-      <h1>Single Salon Page</h1>
-      <p>This is a placeholder for the single salon details page.</p>
+      {/* Tab content area */}
+      <section className="bg-card mt-6 rounded-md border p-6">
+        {activeTab === "dashboard" && (
+          <DashboardTab
+            title={demo.dashboard.title}
+            content={demo.dashboard.content}
+          />
+        )}
+        {activeTab === "services" && (
+          <ServicesTab items={demo.services.items} />
+        )}
+        {activeTab === "products" && (
+          <ProductsTab items={demo.products.items} />
+        )}
+        {activeTab === "chairs" && <ChairsTab items={demo.chairs.items} />}
+        {activeTab === "bookings" && (
+          <BookingsTab items={demo.bookings.items} />
+        )}
+        {activeTab === "lookbook" && (
+          <LookbookTab items={demo.lookbook.items} />
+        )}
+        {activeTab === "employees" && (
+          <EmployeesTab items={demo.employees.items} />
+        )}
+        {activeTab === "report" && (
+          <ReportTab title={demo.report.title} content={demo.report.content} />
+        )}
+        {activeTab === "settings" && (
+          <SettingsTab
+            title={demo.settings.title}
+            content={demo.settings.content}
+          />
+        )}
+      </section>
     </div>
   );
 };
