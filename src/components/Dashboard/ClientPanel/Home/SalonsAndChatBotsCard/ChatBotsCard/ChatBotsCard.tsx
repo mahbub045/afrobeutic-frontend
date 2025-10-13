@@ -51,9 +51,9 @@ const ChatBotsCard: React.FC = () => {
     <Card className="h-full shadow-md dark:shadow-gray-600">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <CardTitle className="text-xl font-semibold">My ChatBots</CardTitle>
-        <Button onClick={handleAddChatBot} size="sm" className="gap-1">
+        <Button onClick={handleAddChatBot} size="sm" className="gap-1 text-white">
           <Plus className="h-4 w-4" />
-          Add
+          Add chatbot
         </Button>
       </CardHeader>
       <CardContent>
