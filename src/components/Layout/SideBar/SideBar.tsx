@@ -94,21 +94,13 @@ const SideBar: React.FC<SideBarProps> = ({
 
   const items = buildItems();
 
-  // Determine the single most-specific active item to avoid highlighting
-  // both a parent and its child when the child route is active.
-  const normalizePath = (p?: string) => (p ? p.replace(/\/+$|\/$/g, "") : "");
-  const currentPath = normalizePath(pathname);
-  const matchingItems = items.filter((it) => {
-    const itPath = normalizePath(it.href);
-    return currentPath === itPath || currentPath.startsWith(itPath + "/");
-  });
-  const activeHref: string | null =
-    matchingItems.length === 0
-      ? null
-      : matchingItems.reduce<string | null>((best, it) => {
-          if (best === null) return it.href;
-          return it.href.length > best.length ? it.href : best;
-        }, null);
+  // Find the most specific matching nav item (longest href) to avoid highlighting both parent and child
+  const activeHref =
+    items
+      .filter(
+        (it) => pathname === it.href || pathname?.startsWith(it.href + "/"),
+      )
+      .sort((a, b) => b.href.length - a.href.length)[0]?.href ?? null;
 
   // Render navigation content
   const renderNavContent = () => {
