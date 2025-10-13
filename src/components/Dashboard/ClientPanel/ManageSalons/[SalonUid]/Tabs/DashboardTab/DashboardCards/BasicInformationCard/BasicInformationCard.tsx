@@ -16,8 +16,6 @@ const BasicInformationCard: React.FC = () => {
   // Sample data - replace with props or data fetching as needed
   const salonName = "Afrobeutic Salon";
   const salonType = "Unisex";
-  const location = "Lagos, Nigeria";
-  const established = "2018";
   const street = "12 Example Street";
   const city = "Lagos";
   const zip = "100001";
@@ -57,6 +55,7 @@ const BasicInformationCard: React.FC = () => {
           </Button>
         </div>
       </CardHeader>
+
       <Separator />
 
       <CardContent className="grid grid-cols-1 gap-4 px-6 pb-6 sm:grid-cols-2">
