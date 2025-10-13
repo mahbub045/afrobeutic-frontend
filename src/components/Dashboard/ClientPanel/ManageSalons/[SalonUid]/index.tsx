@@ -14,15 +14,15 @@ import {
 } from "lucide-react";
 import { useParams, usePathname } from "next/navigation";
 import * as React from "react";
-import BookingsTab from "./Tabs/BookingsTab";
-import ChairsTab from "./Tabs/ChairsTab";
-import DashboardTab from "./Tabs/DashboardTab";
-import EmployeesTab from "./Tabs/EmployeesTab";
-import LookbookTab from "./Tabs/LookbookTab";
-import ProductsTab from "./Tabs/ProductsTab";
-import ReportTab from "./Tabs/ReportTab";
-import ServicesTab from "./Tabs/ServicesTab";
-import SettingsTab from "./Tabs/SettingsTab";
+import BookingsTab from "./Tabs/BookingsTab/BookingsTab";
+import ChairsTab from "./Tabs/ChairsTab/ChairsTab";
+import DashboardTab from "./Tabs/DashboardTab/DashboardTab";
+import EmployeesTab from "./Tabs/EmployeesTab/EmployeesTab";
+import LookbookTab from "./Tabs/LookbookTab/LookbookTab";
+import ProductsTab from "./Tabs/ProductsTab/ProductsTab";
+import ReportTab from "./Tabs/ReportTab/ReportTab";
+import ServicesTab from "./Tabs/ServicesTab/ServicesTab";
+import SettingsTab from "./Tabs/SettingsTab/SettingsTab";
 
 
 const SingleSalonContainer: React.FC = () => {
