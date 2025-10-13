@@ -1,12 +1,11 @@
-import type { NextConfig } from "next";
 import withPWA from "@ducanh2912/next-pwa";
+import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  images:{
-    domains:["181.215.69.66"]
-  }
-  
+  images: {
+    domains: ["181.215.69.66", "api.afrobeutic.com"],
+  },
 };
 
 export default withPWA({
