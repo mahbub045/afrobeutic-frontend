@@ -10,10 +10,10 @@ import {
   Calendar,
   HelpCircle,
   Home,
+  LifeBuoy,
   LoaderPinwheel,
   Megaphone,
   MessageSquare,
-  User,
   Users,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -49,8 +49,12 @@ const SideBar: React.FC<SideBarProps> = ({
     if (role === "MANAGEMENT_ADMIN" || role === "MANAGEMENT_STAFF") {
       return [
         { label: "Home", href: "/dashboard/admin-panel", Icon: Home },
-        { label: "Manage Salon", href: "/dashboard/salon", Icon: Users },
-        { label: "Clients", href: "/dashboard/clients", Icon: User },
+        {
+          label: "Manage Salons",
+          href: "/dashboard/admin-panel/manage-salons",
+          Icon: LifeBuoy,
+        },
+        { label: "Clients", href: "/dashboard/clients", Icon: Users },
         {
           label: "Client Requests",
           href: "/dashboard/requests",
@@ -63,9 +67,13 @@ const SideBar: React.FC<SideBarProps> = ({
     if (role === "OWNER" || role === "ADMIN" || role === "STAFF") {
       return [
         { label: "Home", href: "/dashboard/client-panel", Icon: Home },
-        { label: "Manage Salon", href: "/dashboard/salon", Icon: Users },
+        {
+          label: "Manage Salons",
+          href: "/dashboard/client-panel/manage-salons",
+          Icon: LifeBuoy,
+        },
         { label: "Chatbots", href: "/dashboard/chatbots", Icon: MessageSquare },
-        { label: "Clients", href: "/dashboard/clients", Icon: User },
+        { label: "Clients", href: "/dashboard/clients", Icon: Users },
         {
           label: "Client Requests",
           href: "/dashboard/requests",
@@ -86,6 +94,14 @@ const SideBar: React.FC<SideBarProps> = ({
 
   const items = buildItems();
 
+  // Find the most specific matching nav item (longest href) to avoid highlighting both parent and child
+  const activeHref =
+    items
+      .filter(
+        (it) => pathname === it.href || pathname?.startsWith(it.href + "/"),
+      )
+      .sort((a, b) => b.href.length - a.href.length)[0]?.href ?? null;
+
   // Render navigation content
   const renderNavContent = () => {
     if (status === "loading") {
@@ -104,8 +120,7 @@ const SideBar: React.FC<SideBarProps> = ({
     return (
       <ul className="space-y-1 p-4">
         {items.map((item) => {
-          const active =
-            pathname === item.href || pathname?.startsWith(item.href + "/");
+          const active = item.href === activeHref;
           return (
             <li key={item.href}>
               <Link
