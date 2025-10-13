@@ -49,7 +49,11 @@ const SideBar: React.FC<SideBarProps> = ({
     if (role === "MANAGEMENT_ADMIN" || role === "MANAGEMENT_STAFF") {
       return [
         { label: "Home", href: "/dashboard/admin-panel", Icon: Home },
-        { label: "Manage Salon", href: "/dashboard/salon", Icon: Users },
+        {
+          label: "Manage Salons",
+          href: "/dashboard/admin-panel/manage-salons",
+          Icon: Users,
+        },
         { label: "Clients", href: "/dashboard/clients", Icon: User },
         {
           label: "Client Requests",
@@ -63,7 +67,11 @@ const SideBar: React.FC<SideBarProps> = ({
     if (role === "OWNER" || role === "ADMIN" || role === "STAFF") {
       return [
         { label: "Home", href: "/dashboard/client-panel", Icon: Home },
-        { label: "Manage Salon", href: "/dashboard/salon", Icon: Users },
+        {
+          label: "Manage Salons",
+          href: "/dashboard/client-panel/manage-salons",
+          Icon: Users,
+        },
         { label: "Chatbots", href: "/dashboard/chatbots", Icon: MessageSquare },
         { label: "Clients", href: "/dashboard/clients", Icon: User },
         {
@@ -86,6 +94,22 @@ const SideBar: React.FC<SideBarProps> = ({
 
   const items = buildItems();
 
+  // Determine the single most-specific active item to avoid highlighting
+  // both a parent and its child when the child route is active.
+  const normalizePath = (p?: string) => (p ? p.replace(/\/+$|\/$/g, "") : "");
+  const currentPath = normalizePath(pathname);
+  const matchingItems = items.filter((it) => {
+    const itPath = normalizePath(it.href);
+    return currentPath === itPath || currentPath.startsWith(itPath + "/");
+  });
+  const activeHref: string | null =
+    matchingItems.length === 0
+      ? null
+      : matchingItems.reduce<string | null>((best, it) => {
+          if (best === null) return it.href;
+          return it.href.length > best.length ? it.href : best;
+        }, null);
+
   // Render navigation content
   const renderNavContent = () => {
     if (status === "loading") {
@@ -104,8 +128,7 @@ const SideBar: React.FC<SideBarProps> = ({
     return (
       <ul className="space-y-1 p-4">
         {items.map((item) => {
-          const active =
-            pathname === item.href || pathname?.startsWith(item.href + "/");
+          const active = item.href === activeHref;
           return (
             <li key={item.href}>
               <Link
