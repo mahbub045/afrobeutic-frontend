@@ -14,18 +14,18 @@ import * as React from "react";
 import Breadcrumbs from "../../CommonComponents/Breadcrumbs";
 
 export interface SalonProps {
-  id: string;
+  uid: string;
   name: string;
   description?: string;
 }
 
 const mockSalonsData: SalonProps[] = [
-  { id: "1", name: "Test1 Salon", description: "lorem ipsum dolor sit amet" },
-  { id: "2", name: "Test2 Salon", description: "lorem ipsum dolor sit amet" },
-  { id: "3", name: "Test3 Salon", description: "lorem ipsum dolor sit amet" },
-  { id: "4", name: "Test4 Salon", description: "lorem ipsum dolor sit amet" },
-  { id: "5", name: "Test5 Salon", description: "lorem ipsum dolor sit amet" },
-  { id: "6", name: "Test6 Salon", description: "lorem ipsum dolor sit amet" },
+  { uid: "1", name: "Test1 Salon", description: "lorem ipsum dolor sit amet" },
+  { uid: "2", name: "Test2 Salon", description: "lorem ipsum dolor sit amet" },
+  { uid: "3", name: "Test3 Salon", description: "lorem ipsum dolor sit amet" },
+  { uid: "4", name: "Test4 Salon", description: "lorem ipsum dolor sit amet" },
+  { uid: "5", name: "Test5 Salon", description: "lorem ipsum dolor sit amet" },
+  { uid: "6", name: "Test6 Salon", description: "lorem ipsum dolor sit amet" },
   // Add more mock items as needed
 ];
 
@@ -67,7 +67,7 @@ const ManageSalonsContainer: React.FC = () => {
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {salons.map((s) => (
               <Card
-                key={s.id}
+                key={s.uid}
                 className="relative shadow-md dark:shadow-gray-600"
               >
                 <CardHeader>
@@ -81,7 +81,7 @@ const ManageSalonsContainer: React.FC = () => {
                 </CardContent>
                 <CardFooter>
                   <Link
-                    href={`/dashboard/client-panel/manage-salons/${s.id}`}
+                    href={`/dashboard/client-panel/manage-salons/${s.uid}`}
                     className="text-primary group ml-auto inline-flex items-center gap-2 text-sm hover:underline"
                   >
                     Explore{" "}
