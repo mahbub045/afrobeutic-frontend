@@ -1,14 +1,11 @@
 "use client";
 import * as React from "react";
 
-const DashboardTab: React.FC<{ title?: string; content?: string }> = ({
-  title = "Overview",
-  content = "Summary metrics and quick links.",
-}) => {
+const DashboardTab: React.FC = () => {
   return (
     <div>
-      <h2 className="text-lg font-semibold">{title}</h2>
-      <p className="text-muted-foreground mt-2">{content}</p>
+      <h2 className="text-lg font-semibold">sdfdf</h2>
+      <p className="text-muted-foreground mt-2">dfdf</p>
     </div>
   );
 };

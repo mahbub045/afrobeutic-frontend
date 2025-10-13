@@ -82,7 +82,6 @@ const ManageSalonsContainer: React.FC = () => {
                         <div className="from-primary/10 to-primary/5 ring-primary/20 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ring-1 transition-transform duration-300 group-hover:scale-110">
                           <Scissors className="text-primary group-hover:text-primary/80 h-8 w-8 transition-colors duration-300" />
                         </div>
-                        <div className="bg-primary absolute -top-1 -right-1 h-4 w-4 rounded-full ring-2 ring-white dark:ring-gray-900"></div>
                       </div>
                     </div>
                     <CardTitle className="text-center text-xl font-bold tracking-tight text-gray-900 dark:text-white">
@@ -99,7 +98,7 @@ const ManageSalonsContainer: React.FC = () => {
                     {/* Stats or features */}
                     <div className="text-muted-foreground mt-4 flex items-center justify-center gap-4 text-xs">
                       <div className="flex items-center gap-1">
-                        <div className="bg-primary/60 h-2 w-2 rounded-full"></div>
+                        <div className="h-2 w-2 animate-pulse rounded-full bg-green-500"></div>
                         <span>Active</span>
                       </div>
                     </div>

@@ -24,7 +24,6 @@ import ReportTab from "./Tabs/ReportTab/ReportTab";
 import ServicesTab from "./Tabs/ServicesTab/ServicesTab";
 import SettingsTab from "./Tabs/SettingsTab/SettingsTab";
 
-
 const SingleSalonContainer: React.FC = () => {
   const { salonuid } = useParams();
 
@@ -143,7 +142,7 @@ const SingleSalonContainer: React.FC = () => {
         ]}
       />
       {/* Horizontal pill menu below breadcrumbs */}
-      <nav className="mt-4 mb-4 flex flex-wrap items-center gap-2">
+      <nav className="mt-4 mb-4 flex flex-wrap items-center justify-center gap-2">
         {salonNavMenus.map((menu) => {
           const Icon = menu.Icon;
           const isActive = menu.href ? activeTab === menu.href : false;
@@ -165,13 +164,8 @@ const SingleSalonContainer: React.FC = () => {
         })}
       </nav>
       {/* Tab content area */}
-      <section className="bg-card mt-6 rounded-md border p-6">
-        {activeTab === "dashboard" && (
-          <DashboardTab
-            title={demo.dashboard.title}
-            content={demo.dashboard.content}
-          />
-        )}
+      <section className="mt-6">
+        {activeTab === "dashboard" && <DashboardTab />}
         {activeTab === "services" && (
           <ServicesTab items={demo.services.items} />
         )}
