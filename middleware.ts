@@ -2,14 +2,6 @@ import { pagesOptions } from "@/app/api/auth/[...nextauth]/pages-options";
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
-// Define Account type for middleware
-interface Account {
-  uid: string;
-  name: string;
-  owner_email: string;
-  role: string;
-}
-
 export default withAuth(
   function middleware(req) {
     const token = req.nextauth.token;
@@ -23,9 +15,8 @@ export default withAuth(
       return NextResponse.redirect(loginUrl);
     }
 
-    // Get user role from accounts
-    const accounts = token.accounts as Account[] | undefined;
-    const role = accounts?.[0]?.role;
+    // Get user role directly from token
+    const role = token.role as string | undefined;
 
     // Debug logging
     console.log("Middleware - Path:", path);
@@ -41,10 +32,7 @@ export default withAuth(
 
     // Role-based path protection
     if (path.startsWith("/dashboard/admin-panel")) {
-      if (
-        role !== "MANAGEMENT_ADMIN" &&
-        role !== "MANAGEMENT_STAFF"
-      ) {
+      if (role !== "MANAGEMENT_ADMIN" && role !== "MANAGEMENT_STAFF") {
         console.log(
           `Middleware - Access denied to dashboard/admin-panel. Role: ${role}, Required: MANAGEMENT_ADMIN | MANAGEMENT_STAFF`,
         );
