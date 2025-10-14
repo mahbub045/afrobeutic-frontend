@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosRequestHeaders } from "axios";
 import { getSession } from "next-auth/react";
 
 // Create a reusable Axios instance
@@ -24,9 +24,14 @@ apiClient.interceptors.request.use(
     }
 
     const token = session?.user?.accessToken;
+    const accountId = session?.user?.account_id;
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    if (accountId) {
+      const headers = config.headers as AxiosRequestHeaders;
+      headers["X-ACCOUNT-ID"] = accountId;
     }
 
     return config;

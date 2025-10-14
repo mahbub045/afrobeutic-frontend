@@ -39,9 +39,9 @@ const SideBar: React.FC<SideBarProps> = ({
   const pathname = usePathname();
   const { data: session, status } = useSession();
 
-  // Get user role from accounts
-  const role: string | null = session?.user?.accounts?.[0]?.role
-    ? String(session.user.accounts[0].role).toUpperCase()
+  // Get user role directly from session
+  const role: string | null = session?.user?.role
+    ? String(session.user.role).toUpperCase()
     : null;
 
   // Build items based on role
