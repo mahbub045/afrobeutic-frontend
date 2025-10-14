@@ -3,23 +3,16 @@ import axios from "axios";
 import { NextAuthOptions, User as NextAuthUser } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-// Account interface for user accounts
-interface Account {
-  uid: string;
-  name: string;
-  owner_email: string;
-  role: string;
-}
-
 // Extend NextAuth's user type to include all API response data
 interface UserWithToken extends NextAuthUser {
   accessToken?: string;
   uid?: string;
+  account_id?: string; // Added account id from login response
   avatar?: string | null;
   first_name?: string;
   last_name?: string;
   country?: string;
-  accounts?: Account[];
+  role?: string;
 }
 
 // TypeScript Declaration Module for Custom Session and User Properties
@@ -29,39 +22,43 @@ declare module "next-auth" {
       name?: string | null;
       email?: string | null;
       uid?: string;
+      account_id?: string; // session account id
       avatar?: string | null;
       first_name?: string;
       last_name?: string;
       country?: string;
       accessToken?: string;
-      accounts?: Account[];
+      role?: string;
     };
   }
 
   interface User {
     accessToken?: string;
     uid?: string;
+    account_id?: string;
     avatar?: string | null;
     first_name?: string;
     last_name?: string;
     country?: string;
-    accounts?: Account[];
+    role?: string;
   }
 
   interface JWT {
     accessToken?: string;
     uid?: string;
+    account_id?: string;
     avatar?: string | null;
     first_name?: string;
     last_name?: string;
     country?: string;
-    accounts?: Account[];
+    role?: string;
   }
 }
 
 export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
+    // maxAge: 30, // 30 seconds for testing
     maxAge: 12 * 60 * 60, // 12 hours
   },
   pages: {
@@ -97,6 +94,7 @@ export const authOptions: NextAuthOptions = {
                 headers: {
                   Authorization: `Bearer ${loginResponse.data.access}`,
                   "Content-Type": "application/json",
+                  "X-ACCOUNT-ID": loginResponse.data.account_id || "",
                 },
               },
             );
@@ -115,8 +113,9 @@ export const authOptions: NextAuthOptions = {
               first_name: userInfo.first_name,
               last_name: userInfo.last_name,
               country: userInfo.country,
-              accounts: userInfo.accounts,
+              role: userInfo.role,
               accessToken: loginResponse.data.access,
+              account_id: loginResponse.data.account_id,
             };
           }
           return null;
@@ -153,6 +152,9 @@ export const authOptions: NextAuthOptions = {
         if (userWithToken.uid) {
           token.uid = userWithToken.uid;
         }
+        if (userWithToken.account_id) {
+          token.account_id = userWithToken.account_id;
+        }
         if (userWithToken.avatar !== undefined) {
           token.avatar = userWithToken.avatar;
         }
@@ -162,12 +164,11 @@ export const authOptions: NextAuthOptions = {
         if (userWithToken.last_name) {
           token.last_name = userWithToken.last_name;
         }
-        // gender and role removed (role is now inside accounts)
         if (userWithToken.country) {
           token.country = userWithToken.country;
         }
-        if (userWithToken.accounts) {
-          token.accounts = userWithToken.accounts;
+        if (userWithToken.role) {
+          token.role = userWithToken.role;
         }
       }
       return token;
@@ -177,11 +178,12 @@ export const authOptions: NextAuthOptions = {
       session.user = {
         ...session.user,
         uid: token.uid as string | undefined,
+        account_id: token.account_id as string | undefined,
         avatar: token.avatar as string | null | undefined,
         first_name: token.first_name as string | undefined,
         last_name: token.last_name as string | undefined,
         country: token.country as string | undefined,
-        accounts: token.accounts as Account[] | undefined,
+        role: token.role as string | undefined,
         accessToken: token.accessToken as string | undefined,
       };
       return session;

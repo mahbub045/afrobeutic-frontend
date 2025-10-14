@@ -51,9 +51,9 @@ const SalonsCard: React.FC = () => {
     <Card className="h-full shadow-md dark:shadow-gray-600">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <CardTitle className="text-xl font-semibold">My Salons</CardTitle>
-        <Button onClick={handleAddSalon} size="sm" className="gap-1">
+        <Button onClick={handleAddSalon} size="sm" className="gap-1 text-white">
           <Plus className="h-4 w-4" />
-          Add
+          Add salon
         </Button>
       </CardHeader>
       <CardContent>
@@ -72,7 +72,7 @@ const SalonsCard: React.FC = () => {
             {demoSalons.map((salon) => (
               <div
                 key={salon.id}
-                className="bg-card hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-4 transition-colors shadow-md dark:shadow-gray-600"
+                className="bg-card hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-4 shadow-md transition-colors dark:shadow-gray-600"
               >
                 <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
                   <Store className="text-primary h-5 w-5" />

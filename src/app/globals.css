@@ -43,7 +43,8 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
+  /* --background: oklch(1 0 0); */
+  --background: #F6F8FB;
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -154,7 +155,7 @@ select option {
 /* Auto-style all buttons - base styling without size/padding/colors */
 button,
 .Button {
-  @apply cursor-pointer rounded-md font-semibold shadow-lg transition-transform active:scale-98 disabled:opacity-60;
+  @apply cursor-pointer rounded-md font-semibold shadow-md transition-transform active:scale-98 disabled:opacity-60;
 }
 
 /* Button color classes */

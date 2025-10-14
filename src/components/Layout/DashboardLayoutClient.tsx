@@ -32,7 +32,7 @@ export default function DashboardLayoutClient({
           onMobileClose={handleMobileMenuClose}
         />
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main className="min-h-screen flex-1 overflow-y-auto">{children}</main>
       </div>
       <Footer />
     </div>
