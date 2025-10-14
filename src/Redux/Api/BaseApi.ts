@@ -7,8 +7,12 @@ const baseQuery = fetchBaseQuery({
   prepareHeaders: async (headers) => {
     const session = await getSession();
     const token = session?.user?.accessToken;
+    const accountId = session?.user?.account_id;
     if (token) {
       headers.set("Authorization", `Bearer ${token}`);
+    }
+    if (accountId) {
+      headers.set("X-ACCOUNT-ID", accountId);
     }
     return headers;
   },

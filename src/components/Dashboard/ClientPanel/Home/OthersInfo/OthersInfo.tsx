@@ -66,7 +66,7 @@ const OthersInfo: React.FC = () => {
                   Access Role:
                 </p>
                 <p className="font-semibold">
-                  {session?.user?.accounts?.[0]?.role
+                  {session?.user?.role
                     ?.split("_")
                     .map((part: string) =>
                       part

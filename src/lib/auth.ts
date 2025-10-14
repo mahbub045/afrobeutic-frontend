@@ -7,6 +7,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 interface UserWithToken extends NextAuthUser {
   accessToken?: string;
   uid?: string;
+  account_id?: string; // Added account id from login response
   avatar?: string | null;
   first_name?: string;
   last_name?: string;
@@ -21,6 +22,7 @@ declare module "next-auth" {
       name?: string | null;
       email?: string | null;
       uid?: string;
+      account_id?: string; // session account id
       avatar?: string | null;
       first_name?: string;
       last_name?: string;
@@ -33,6 +35,7 @@ declare module "next-auth" {
   interface User {
     accessToken?: string;
     uid?: string;
+    account_id?: string;
     avatar?: string | null;
     first_name?: string;
     last_name?: string;
@@ -43,6 +46,7 @@ declare module "next-auth" {
   interface JWT {
     accessToken?: string;
     uid?: string;
+    account_id?: string;
     avatar?: string | null;
     first_name?: string;
     last_name?: string;
@@ -90,6 +94,7 @@ export const authOptions: NextAuthOptions = {
                 headers: {
                   Authorization: `Bearer ${loginResponse.data.access}`,
                   "Content-Type": "application/json",
+                  "X-ACCOUNT-ID": loginResponse.data.account_id || "",
                 },
               },
             );
@@ -110,6 +115,7 @@ export const authOptions: NextAuthOptions = {
               country: userInfo.country,
               role: userInfo.role,
               accessToken: loginResponse.data.access,
+              account_id: loginResponse.data.account_id,
             };
           }
           return null;
@@ -146,6 +152,9 @@ export const authOptions: NextAuthOptions = {
         if (userWithToken.uid) {
           token.uid = userWithToken.uid;
         }
+        if (userWithToken.account_id) {
+          token.account_id = userWithToken.account_id;
+        }
         if (userWithToken.avatar !== undefined) {
           token.avatar = userWithToken.avatar;
         }
@@ -169,6 +178,7 @@ export const authOptions: NextAuthOptions = {
       session.user = {
         ...session.user,
         uid: token.uid as string | undefined,
+        account_id: token.account_id as string | undefined,
         avatar: token.avatar as string | null | undefined,
         first_name: token.first_name as string | undefined,
         last_name: token.last_name as string | undefined,

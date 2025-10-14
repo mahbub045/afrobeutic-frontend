@@ -10,8 +10,8 @@ export default async function AdminPanel() {
     redirect("/auth/login");
   }
 
-  // Get user role from accounts
-  const role = session.user?.accounts?.[0]?.role;
+  // Get user role (stored top-level on user via auth.ts)
+  const role = session.user?.role;
 
   // Role-based access control - only MANAGEMENT_ADMIN and MANAGEMENT_STAFF can access
   if (role !== "MANAGEMENT_ADMIN" && role !== "MANAGEMENT_STAFF") {
