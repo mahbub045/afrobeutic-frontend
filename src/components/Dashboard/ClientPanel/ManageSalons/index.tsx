@@ -45,14 +45,9 @@ const ManageSalonsContainer: React.FC = () => {
       />
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Manage Salons</h1>
-        <Button asChild variant="default" size="sm">
-          <Link
-            href="/dashboard/client-panel/manage-salons/new"
-            className="inline-flex items-center gap-2 text-white"
-          >
-            <Plus className="h-4 w-4" />
-            Add new Salon
-          </Link>
+        <Button variant="default" size="sm" className="text-white">
+          <Plus className="h-4 w-4" />
+          Add new Salon
         </Button>
       </div>
 
