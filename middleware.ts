@@ -7,6 +7,11 @@ export default withAuth(
     const token = req.nextauth.token;
     const path = req.nextUrl.pathname;
 
+    // Do not run auth checks on auth routes (login, signup, etc.)
+    if (path.startsWith("/auth")) {
+      return NextResponse.next();
+    }
+
     // Check if token exists first
     if (!token) {
       console.log("Middleware - No token, redirecting to login");
@@ -79,6 +84,5 @@ export const config = {
     "/dashboard/client-panel",
     "/dashboard/client-panel/:path*",
     "/dashboard/:path*",
-    "/auth/login",
   ],
 };
