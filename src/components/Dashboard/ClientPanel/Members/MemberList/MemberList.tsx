@@ -1,6 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Plus } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { EllipsisVertical, Plus } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 
@@ -35,6 +41,27 @@ const MemberList: React.FC = () => {
             key={index}
             className="group hover:shadow-primary/10 relative flex flex-col items-center overflow-hidden border border-gray-200/60 bg-white/80 p-5 text-center shadow-md backdrop-blur-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl dark:border-gray-700/60 dark:bg-gray-900/80 dark:shadow-gray-600 dark:hover:shadow-gray-600/30"
           >
+            <div className="absolute top-2 right-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger className="rounded-md px-1 dark:shadow-gray-600">
+                  <EllipsisVertical className="cursor-pointer" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem className="cursor-pointer">
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer">
+                    Delete
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer">
+                    Deactivate
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer">
+                    Activate
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
             <Image
               src={member.image}
               alt={member.name}
