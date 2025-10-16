@@ -19,6 +19,10 @@ const NavBar: React.FC<NavBarProps> = ({ onMobileMenuToggle }) => {
   const { theme, setTheme } = useTheme();
 
   const handleSignOut = () => {
+    // Broadcast logout event to all tabs
+    localStorage.setItem("logout-event", Date.now().toString());
+
+    // Perform the actual sign out
     signOut({ callbackUrl: "/auth/login" });
   };
 
