@@ -14,7 +14,7 @@ const AccountList: React.FC = () => {
       name: "Samuel Ade",
       email: "samuel.ade@example.com",
       uid: "acc-example-2",
-      role: "Manager",
+      role: "Admin",
     },
     {
       name: "Chidi Okafor",
@@ -35,28 +35,27 @@ const AccountList: React.FC = () => {
     <>
       <div className="flex flex-wrap gap-5">
         {accounts.map((account, index) => (
-          <div key={index} className="relative w-full max-w-md">
-            {/* Role badge stays outside the Link */}
-            <div className="absolute top-3 right-3 z-20">
-              <span className="bg-secondary rounded px-2 py-1 text-xs text-white">
-                {account.role}
-              </span>
-            </div>
-
+          <div key={index} className="w-full max-w-md">
             <Link
               href={`/dashboard/accounts/${account.uid ?? index}`}
               aria-label={`Open account ${account.name}`}
             >
               <Card className="group hover:shadow-primary/10 relative flex min-h-16 w-full transform flex-row items-center gap-4 overflow-hidden border border-gray-200/60 bg-white/80 px-4 py-8 shadow-md backdrop-blur-sm transition-all duration-300 hover:min-h-[5.5rem] hover:-translate-y-0.5 hover:scale-105 hover:shadow-lg dark:border-gray-700/60 dark:bg-gray-900/80 dark:shadow-gray-600">
-                <div className="flex w-full flex-row items-center gap-4 transition-all duration-300">
+                <div className="flex w-full flex-row items-center gap-4">
+                  {/* Role badge stays outside the Link */}
+                  <div className="absolute top-3 right-3 z-20">
+                    <span className="bg-secondary rounded px-2 py-1 text-xs text-white">
+                      {account.role}
+                    </span>
+                  </div>
                   <div className="flex flex-col items-start truncate">
-                    <h3 className="truncate text-sm font-semibold">
+                    <h3 className="truncate text-primary text-lg font-semibold">
                       {account.name}&apos;s account
                     </h3>
-                    <p className="truncate text-xs text-gray-600 dark:text-gray-400">
+                    <p className="truncate text-xs">
                       {account.email}
                     </p>
-                    <p className="mt-1 truncate text-xs text-gray-500 dark:text-gray-400">
+                    <p className="mt-3 truncate text-xs text-gray-500 dark:text-gray-400">
                       <span className="font-medium">Account ID:</span>{" "}
                       {account.uid}
                     </p>
