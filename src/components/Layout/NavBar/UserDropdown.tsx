@@ -128,9 +128,9 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
             <DropdownMenuItem asChild>
               <Link
                 className="cursor-pointer"
-                href="/dashboard/client-panel/accounts/switch-accounts"
+                href="/dashboard/client-panel/accounts/switch-account"
               >
-                Switch accounts
+                Switch account
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
@@ -153,9 +153,9 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
             <DropdownMenuItem asChild>
               <Link
                 className="cursor-pointer"
-                href="/dashboard/admin-panel/switch-accounts"
+                href="/dashboard/admin-panel/accounts/switch-account"
               >
-                Switch Accounts
+                Switch Account
               </Link>
             </DropdownMenuItem>
           </>
