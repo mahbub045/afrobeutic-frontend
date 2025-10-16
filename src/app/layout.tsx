@@ -1,4 +1,5 @@
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
+import SessionMonitor from "@/components/SessionMonitor";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Viewport } from "next";
 import { Geist, Inter } from "next/font/google";
@@ -244,7 +245,10 @@ export default function RootLayout({
         >
           <ServiceWorkerRegistration />
           {/* <PWAInstallPrompt /> */}
-          <Providers>{children}</Providers>
+          <Providers>
+            <SessionMonitor />
+            {children}
+          </Providers>
         </ThemeProvider>
       </body>
     </html>

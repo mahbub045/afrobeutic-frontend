@@ -12,9 +12,12 @@ import {
 import {
   AlertTriangle,
   LoaderPinwheel,
+  Moon,
   RotateCcw,
+  Sun,
   XCircle,
 } from "lucide-react";
+import { useTheme } from "next-themes";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
@@ -23,6 +26,11 @@ function VerifyErrorContent() {
   const searchParams = useSearchParams();
   const [errorMessage, setErrorMessage] = useState("Something went wrong.");
   const [errorType, setErrorType] = useState("default");
+  const { theme, setTheme } = useTheme();
+
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
 
   useEffect(() => {
     const error = searchParams.get("error");
@@ -61,7 +69,26 @@ function VerifyErrorContent() {
   return (
     <div className="from-background to-muted/20 flex min-h-screen items-center justify-center bg-gradient-to-br p-4">
       <div className="w-full max-w-md">
-        <Card className="border-2 shadow-lg">
+        <Card className="relative border-2 !border-none shadow-md dark:shadow-gray-600">
+          <div className="absolute top-4 right-4">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className={`rounded-md p-2 transition ${
+                theme === "dark"
+                  ? "!bg-white/6 !text-white/90 hover:!bg-white/10"
+                  : "!bg-gray-200 !text-gray-700 hover:!bg-gray-300"
+              }`}
+              aria-label="Toggle dark mode"
+              title="Toggle dark mode"
+            >
+              {theme === "dark" ? (
+                <Sun className="h-4 w-4" />
+              ) : (
+                <Moon className="h-4 w-4" />
+              )}
+            </button>
+          </div>
           <CardHeader className="space-y-4 text-center">
             {getIcon()}
             <CardTitle className="text-foreground text-2xl font-bold">

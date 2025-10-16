@@ -48,6 +48,13 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
       ? `${session.user.first_name} ${session.user.last_name}`
       : session.user.name || "");
 
+  // Role helpers
+  const role: string | undefined = session.user.role;
+  const isClientRole = ["OWNER", "ADMIN", "STAFF"].includes(role || "");
+  const isManagementRole = ["MANAGEMENT_ADMIN", "MANAGEMENT_STAFF"].includes(
+    role || "",
+  );
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -85,10 +92,7 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
               {session.user.email}
             </p>
             {session.user.role && (
-              <Badge
-                variant="secondary"
-                className="w-fit pt-[5px] text-xs text-white"
-              >
+              <Badge variant="secondary" className="w-fit text-xs text-white">
                 {session.user.role
                   .split("_")
                   .map((part: string) =>
@@ -106,21 +110,56 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
         </DropdownMenuLabel>
 
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link className="cursor-pointer" href="/dashboard">
-            Dashboard
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link className="cursor-pointer" href="/profile">
-            Profile
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link className="cursor-pointer" href="/orders">
-            Orders
-          </Link>
-        </DropdownMenuItem>
+        {isClientRole && (
+          <>
+            <DropdownMenuItem asChild>
+              <Link className="cursor-pointer" href="/client-panel/profile">
+                Profile
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link
+                className="cursor-pointer"
+                href="/dashboard/client-panel/members"
+              >
+                Members
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link
+                className="cursor-pointer"
+                href="/dashboard/client-panel/accounts/switch-account"
+              >
+                Switch account
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link
+                className="cursor-pointer"
+                href="/dashboard/client-panel/accounts/billings"
+              >
+                Billings
+              </Link>
+            </DropdownMenuItem>
+          </>
+        )}
+        {isManagementRole && (
+          <>
+            <DropdownMenuItem asChild>
+              <Link className="cursor-pointer" href="/admin-panel/profile">
+                Profile
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link
+                className="cursor-pointer"
+                href="/dashboard/admin-panel/accounts/switch-account"
+              >
+                Switch Account
+              </Link>
+            </DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuItem asChild>
           <Link className="cursor-pointer" href="/settings">
             Settings
