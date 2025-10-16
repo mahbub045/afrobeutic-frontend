@@ -23,7 +23,11 @@ export default function Unauthorized() {
   };
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-gradient-to-b from-white via-slate-50 to-slate-100 dark:from-[#050816] dark:via-[#071020] dark:to-[#000000]">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-b from-white via-slate-50 to-slate-100 dark:from-[#050816] dark:via-[#071020] dark:to-[#000000]">
+      {/* decorative blobs */}
+      <div className="pointer-events-none absolute -top-24 -left-32 h-96 w-96 rounded-full bg-gradient-to-tr from-blue-700/40 to-indigo-600/30 opacity-60 blur-3xl" />
+      <div className="pointer-events-none absolute -right-32 -bottom-24 h-96 w-96 rounded-full bg-gradient-to-br from-purple-700/30 to-pink-600/20 opacity-50 blur-3xl" />
+
       <Card className="relative mx-4 w-full max-w-md rounded-2xl border border-gray-200/20 bg-white/60 px-8 py-12 text-center shadow-md backdrop-blur-sm dark:border-white/6 dark:bg-white/4 dark:shadow-gray-600">
         <div className="absolute top-4 right-4">
           <button

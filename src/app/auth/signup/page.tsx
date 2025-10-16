@@ -157,13 +157,13 @@ const SignUp: React.FC = () => {
   };
 
   return (
-    <div className="relative w-full overflow-hidden bg-gradient-to-b from-white via-slate-50 to-slate-100 dark:from-[#0f1724] dark:via-[#0b1220] dark:to-[#02040a]">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-b from-white via-slate-50 to-slate-100 dark:from-[#050816] dark:via-[#071020] dark:to-[#000000]">
       {/* decorative blobs */}
       <div className="pointer-events-none absolute -top-24 -left-32 h-96 w-96 rounded-full bg-gradient-to-tr from-blue-700/40 to-indigo-600/30 opacity-60 blur-3xl" />
       <div className="pointer-events-none absolute -right-32 -bottom-24 h-96 w-96 rounded-full bg-gradient-to-br from-purple-700/30 to-pink-600/20 opacity-50 blur-3xl" />
 
-      <div className="flex h-full min-h-screen w-full flex-col items-center justify-center border border-gray-200/30 bg-white/40 py-5 shadow-2xl backdrop-blur-md dark:border-white/8 dark:bg-white/5">
-        <div className="relative flex flex-col items-center justify-center border border-gray-200/20 bg-white/50 p-8 shadow-lg backdrop-blur-sm md:rounded-lg md:px-12 dark:border-white/5 dark:bg-white/5">
+      <div className="flex h-full min-h-screen w-full flex-col items-center justify-center py-5">
+        <div className="relative flex w-full max-w-2xl flex-col items-center justify-center rounded-xl bg-white/60 p-6 shadow-md backdrop-blur-sm dark:bg-white/4 dark:shadow-gray-600">
           <div className="absolute top-4 right-4">
             <button
               type="button"
@@ -198,7 +198,7 @@ const SignUp: React.FC = () => {
           <h1 className="text-3xl font-extrabold text-gray-900 md:text-4xl dark:text-white">
             Create an Account
           </h1>
-          <p className="mt-2 mb-4 max-w-md text-center text-sm text-gray-600 dark:text-white/80">
+          <p className="mt-0 mb-6 text-center text-sm text-gray-600 dark:text-white/80">
             Join Afrobeutic — manage clients, projects and access your
             dashboard.
           </p>
