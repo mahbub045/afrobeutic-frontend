@@ -78,7 +78,7 @@ const SignUp: React.FC = () => {
 
       // Redirect to login page or email verification page
       setTimeout(() => {
-        router.push("/auth/login");
+        router.push("/auth/signup/success");
       }, 2000);
     } catch (error: unknown) {
       console.error("Registration error:", error);
