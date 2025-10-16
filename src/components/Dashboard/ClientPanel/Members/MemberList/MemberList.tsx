@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -39,9 +40,9 @@ const MemberList: React.FC = () => {
         {members.map((member, index) => (
           <Card
             key={index}
-            className="group hover:shadow-primary/10 relative flex flex-col items-center overflow-hidden border border-gray-200/60 bg-white/80 p-5 text-center shadow-md backdrop-blur-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl dark:border-gray-700/60 dark:bg-gray-900/80 dark:shadow-gray-600 dark:hover:shadow-gray-600/30"
+            className="group hover:shadow-primary/10 relative flex flex-col items-center gap-2 overflow-hidden border border-gray-200/60 bg-white/80 p-8 text-center shadow-md backdrop-blur-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl dark:border-gray-700/60 dark:bg-gray-900/80 dark:shadow-gray-600 dark:hover:shadow-gray-600/30"
           >
-            <div className="absolute top-2 right-2">
+            <div className="absolute top-2 left-2">
               <DropdownMenu>
                 <DropdownMenuTrigger className="rounded-md px-1 dark:shadow-gray-600">
                   <EllipsisVertical className="cursor-pointer" />
@@ -62,20 +63,23 @@ const MemberList: React.FC = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
+            <Badge
+              variant="secondary"
+              className="absolute top-2 right-2 w-fit text-xs text-white"
+            >
+              {member.role}
+            </Badge>
             <Image
               src={member.image}
               alt={member.name}
-              width={100}
+              width={80}
               height={100}
-              className="mb-4 rounded-full"
+              className="mt-5 mb-4 rounded-md"
             />
             <h3 className="text-xl font-bold">{member.name}</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               {member.email}
             </p>
-            <span className="rounded bg-orange-600 px-2 py-1 text-xs text-white">
-              {member.role}
-            </span>
           </Card>
         ))}
       </div>

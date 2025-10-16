@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import React from "react";
@@ -44,17 +45,18 @@ const AccountList: React.FC = () => {
                 <div className="flex w-full flex-row items-center gap-4">
                   {/* Role badge stays outside the Link */}
                   <div className="absolute top-3 right-3 z-20">
-                    <span className="bg-secondary rounded px-2 py-1 text-xs text-white">
+                    <Badge
+                      variant="secondary"
+                      className="w-fit text-xs text-white"
+                    >
                       {account.role}
-                    </span>
+                    </Badge>
                   </div>
                   <div className="flex flex-col items-start truncate">
-                    <h3 className="truncate text-primary text-lg font-semibold">
+                    <h3 className="text-primary truncate text-lg font-semibold">
                       {account.name}&apos;s account
                     </h3>
-                    <p className="truncate text-xs">
-                      {account.email}
-                    </p>
+                    <p className="truncate text-xs">{account.email}</p>
                     <p className="mt-3 truncate text-xs text-gray-500 dark:text-gray-400">
                       <span className="font-medium">Account ID:</span>{" "}
                       {account.uid}
