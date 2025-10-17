@@ -158,14 +158,14 @@ function LoginForm() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-b from-white via-slate-50 to-slate-100 p-6 dark:from-[#0f1724] dark:via-[#0b1220] dark:to-[#02040a]">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-b from-white via-slate-50 to-slate-100 dark:from-[#050816] dark:via-[#071020] dark:to-[#000000]">
       {/* decorative blobs */}
       <div className="pointer-events-none absolute -top-24 -left-32 h-96 w-96 rounded-full bg-gradient-to-tr from-blue-700/40 to-indigo-600/30 opacity-60 blur-3xl" />
       <div className="pointer-events-none absolute -right-32 -bottom-24 h-96 w-96 rounded-full bg-gradient-to-br from-purple-700/30 to-pink-600/20 opacity-50 blur-3xl" />
 
       <form
         onSubmit={onSubmit}
-        className="relative w-full max-w-sm space-y-4 rounded-xl bg-white p-6 shadow-lg dark:bg-gray-800 dark:shadow-gray-800"
+        className="relative w-full max-w-sm space-y-4 rounded-xl bg-white/60 p-6 shadow-md backdrop-blur-sm dark:bg-white/4 dark:shadow-gray-600"
       >
         <div className="relative mx-auto my-2 flex h-14 w-48 items-center justify-center">
           <Image
