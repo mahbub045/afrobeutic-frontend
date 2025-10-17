@@ -7,6 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useGetMembersQuery } from "@/Redux/Reducers/ClientPanel/Members/MembersApi";
 import { EllipsisVertical, Plus } from "lucide-react";
 import Image from "next/image";
@@ -20,6 +21,7 @@ export interface MemberProps {
   email: string;
   avatar?: string;
   role?: string;
+  status?: string;
   [key: string]: unknown;
 }
 
@@ -48,6 +50,21 @@ const MemberList: React.FC = () => {
         </Button>
       </div>
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
+        {isLoadingMembers &&
+          Array.from({ length: 12 }).map((_, idx) => (
+            <Card
+              key={`member-skeleton-${idx}`}
+              className="relative flex flex-col items-center gap-2 overflow-hidden border border-gray-200/60 bg-white/80 p-8 text-center shadow-md dark:border-gray-700/60 dark:bg-gray-900/80"
+            >
+              <div className="absolute top-2 left-2">
+                <Skeleton className="h-5 w-5 rounded" />
+              </div>
+              <Skeleton className="absolute top-2 right-2 h-5 w-16" />
+              <Skeleton className="mt-8 mb-4 h-20 w-20 rounded" />
+              <Skeleton className="h-6 w-36" />
+              <Skeleton className="h-4 w-48" />
+            </Card>
+          ))}
         {membersData?.map((member: MemberProps) => (
           <Card
             key={member.uid}
@@ -84,11 +101,27 @@ const MemberList: React.FC = () => {
               src={member.avatar || "/images/common/user.png"}
               alt={member.name}
               width={80}
-              height={100}
-              className="mt-5 mb-4 rounded-md"
+              height={80}
+              className="rounded-full object-cover"
             />
-            <h3 className="text-xl md:text-base lg:text-xl font-bold">{member.name}</h3>
-            <p className="text-sm md:text-xs lg:text-sm text-gray-600 dark:text-gray-400">
+
+            <h3 className="relative text-xl font-bold md:text-base lg:text-xl">
+              {member.name}
+              {/* animated status dot (ping + solid) at top-right of the image */}
+              {/* <div className="absolute top-1 -right-3 flex items-center">
+                <span
+                  className={`absolute inline-flex h-3 w-3 rounded-full ${
+                    member.status === "ACTIVE" ? "bg-green-400" : "bg-red-400"
+                  } animate-ping opacity-75`}
+                />
+                <span
+                  className={`relative inline-flex h-3 w-3 rounded-full ${
+                    member.status === "ACTIVE" ? "bg-green-600" : "bg-red-600"
+                  } border-2 border-white`}
+                />
+              </div> */}
+            </h3>
+            <p className="text-sm text-gray-600 md:text-xs lg:text-sm dark:text-gray-400">
               {member.email}
             </p>
           </Card>
