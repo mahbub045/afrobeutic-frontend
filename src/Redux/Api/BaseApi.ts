@@ -23,6 +23,8 @@ export const baseApi = createApi({
   tagTypes: [
     //Register tag types here
     "SignUp",
+    //Clients Panel tag types
+    "Members",
   ],
   endpoints: () => ({}),
 });

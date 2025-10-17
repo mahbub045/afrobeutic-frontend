@@ -7,40 +7,32 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useGetMembersQuery } from "@/Redux/Reducers/ClientPanel/Members/MembersApi";
 import { EllipsisVertical, Plus } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import AddNewUserModal from "./Modals/AddNewUserModal";
 
+// minimal Member type for this list component
+export interface MemberProps {
+  uid: string;
+  name: string;
+  email: string;
+  image?: string;
+  role?: string;
+  [key: string]: unknown;
+};
+
 const MemberList: React.FC = () => {
   const [isOpenAddUserModal, setIsOpenAddUserModal] = useState(false);
+
+  // RTK hooks
+  const { data: membersData, isLoading: isLoadingMembers } =
+    useGetMembersQuery(undefined);
 
   const handleOpenAddUserModal = () => {
     setIsOpenAddUserModal(true);
   };
-
-  const members = [
-    {
-      name: "Md Mahbub Rahman",
-      email: "mahbub.official045@gmail.com",
-      role: "Owner",
-      image: "/images/common/user.png",
-    },
-    {
-      name: "Md Mahbub Rahman",
-      email: "mahbub.official045@gmail.com",
-      role: "Staff",
-      image: "/images/common/user.png",
-    },
-    {
-      name: "Md Mahbub Rahman",
-      email: "mahbub.official045@gmail.com",
-      role: "Staff",
-      image: "/images/common/user.png",
-    },
-
-    // Add more members here
-  ];
 
   return (
     <>
@@ -56,9 +48,9 @@ const MemberList: React.FC = () => {
         </Button>
       </div>
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
-        {members.map((member, index) => (
+        {membersData?.map((member: MemberProps) => (
           <Card
-            key={index}
+            key={member.uid}
             className="group hover:shadow-primary/10 relative flex flex-col items-center gap-2 overflow-hidden border border-gray-200/60 bg-white/80 p-8 text-center shadow-md backdrop-blur-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl dark:border-gray-700/60 dark:bg-gray-900/80 dark:shadow-gray-600 dark:hover:shadow-gray-600/30"
           >
             <div className="absolute top-2 left-2">
@@ -89,7 +81,7 @@ const MemberList: React.FC = () => {
               {member.role}
             </Badge>
             <Image
-              src={member.image}
+              src={(member.image ?? "/images/common/user.png") as string}
               alt={member.name}
               width={80}
               height={100}
