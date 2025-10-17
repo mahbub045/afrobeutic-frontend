@@ -18,10 +18,10 @@ export interface MemberProps {
   uid: string;
   name: string;
   email: string;
-  image?: string;
+  avatar?: string;
   role?: string;
   [key: string]: unknown;
-};
+}
 
 const MemberList: React.FC = () => {
   const [isOpenAddUserModal, setIsOpenAddUserModal] = useState(false);
@@ -81,14 +81,14 @@ const MemberList: React.FC = () => {
               {member.role}
             </Badge>
             <Image
-              src={(member.image ?? "/images/common/user.png") as string}
+              src={member.avatar || "/images/common/user.png"}
               alt={member.name}
               width={80}
               height={100}
               className="mt-5 mb-4 rounded-md"
             />
-            <h3 className="text-xl font-bold">{member.name}</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <h3 className="text-xl md:text-base lg:text-xl font-bold">{member.name}</h3>
+            <p className="text-sm md:text-xs lg:text-sm text-gray-600 dark:text-gray-400">
               {member.email}
             </p>
           </Card>
