@@ -25,18 +25,25 @@ const MemberList: React.FC = () => {
       role: "Staff",
       image: "/images/common/user.png",
     },
+    {
+      name: "Md Mahbub Rahman",
+      email: "mahbub.official045@gmail.com",
+      role: "Staff",
+      image: "/images/common/user.png",
+    },
+
     // Add more members here
   ];
 
   return (
     <>
-      <div className="flex justify-end">
+      <div className="mb-4 flex justify-end">
         <Button variant="default" size="sm" className="text-white">
           <Plus />
           Invite User
         </Button>
       </div>
-      <div className="flex flex-wrap gap-5">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
         {members.map((member, index) => (
           <Card
             key={index}
