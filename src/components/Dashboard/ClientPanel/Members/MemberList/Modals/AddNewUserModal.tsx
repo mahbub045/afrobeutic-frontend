@@ -73,26 +73,18 @@ const AddNewUserModal: React.FC<AddNewUserModalProps> = ({
           validationSchema={validationSchema}
           onSubmit={submit}
         >
-          {({
-            values,
-            handleChange,
-            isSubmitting,
-            setFieldValue,
-            errors,
-            touched,
-          }) => (
+          {({ isSubmitting }) => (
             <Form className="mt-4 space-y-4">
-              <div>
-                <Label htmlFor="invite-email" className="mb-2">
+              <div className="relative">
+                <Label htmlFor="email" className="mb-2">
                   Email of the User<span className="text-danger">*</span>
                 </Label>
                 <Field
-                  id="invite-email"
+                  id="email"
                   name="email"
-                  as="input"
-                  placeholder="email of the inviting user"
-                  className="w-full rounded-md border bg-transparent px-3 py-1 text-base"
-                  aria-invalid={!!(touched.email && errors.email)}
+                  type="email"
+                  placeholder="Email of the inviting user"
+                  required
                 />
                 <ErrorMessage
                   name="email"
@@ -102,10 +94,13 @@ const AddNewUserModal: React.FC<AddNewUserModalProps> = ({
               </div>
 
               <div>
-                <Label htmlFor="invite-role" className="mb-2">
+                <Label htmlFor="role" className="mb-2">
                   Access Type / Role<span className="text-danger">*</span>
                 </Label>
-                <Field name="role">
+                <Field id="role" name="role" as="select" required>
+                  <option value="" disabled>
+                    Select a role
+                  </option>
                   {roles.map((role) => (
                     <option key={role.value} value={role.value}>
                       {role.label}
@@ -120,7 +115,11 @@ const AddNewUserModal: React.FC<AddNewUserModalProps> = ({
               </div>
 
               <div className="flex justify-end gap-3">
-                <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
+                <Button
+                  variant="outline"
+                  onClick={onClose}
+                  disabled={isSubmitting}
+                >
                   Cancel
                 </Button>
                 <Button type="submit" disabled={isSubmitting} className="w-40">
