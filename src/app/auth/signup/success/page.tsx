@@ -14,8 +14,12 @@ const SignupSuccess: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-gradient-to-b from-white via-slate-50 to-slate-100 dark:from-[#050816] dark:via-[#071020] dark:to-[#000000]">
-      <div className="relative mx-4 w-full max-w-2xl rounded-2xl border border-gray-200/20 bg-white/60 px-8 py-12 text-center shadow-md backdrop-blur-sm dark:border-white/6 dark:bg-white/4 dark:shadow-gray-600">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-b from-white via-slate-50 to-slate-100 dark:from-[#050816] dark:via-[#071020] dark:to-[#000000]">
+      {/* decorative blobs */}
+      <div className="pointer-events-none absolute -top-24 -left-32 h-96 w-96 rounded-full bg-gradient-to-tr from-blue-700/40 to-indigo-600/30 opacity-60 blur-3xl" />
+      <div className="pointer-events-none absolute -right-32 -bottom-24 h-96 w-96 rounded-full bg-gradient-to-br from-purple-700/30 to-pink-600/20 opacity-50 blur-3xl" />
+
+      <div className="relative mx-4 w-full max-w-xl rounded-xl border bg-white/60 px-8 py-12 text-center shadow-md backdrop-blur-sm dark:bg-white/4 dark:shadow-gray-600">
         <div className="absolute top-4 right-4">
           <button
             type="button"
@@ -46,8 +50,8 @@ const SignupSuccess: React.FC = () => {
 
         <p className="mx-auto mb-6 max-w-lg text-sm text-gray-600 dark:text-white/80">
           Thanks for signing up! We sent a verification link to your email.
-          Please check your inbox (and spam folder) and follow the link to
-          activate your account.
+          <b className="text-warning"> Please check your inbox </b> (or spam
+          folder) and follow the link to activate your account.
         </p>
 
         <Button>
@@ -56,7 +60,14 @@ const SignupSuccess: React.FC = () => {
 
         <p className="mt-6 text-xs text-gray-500 dark:text-white/60">
           Didn’t receive the email? Check again in a few minutes or request a
-          new one from your account settings after signing in.
+          new{" "}
+          <Link
+            href="/auth/signup"
+            className="text-primary text-sm font-bold hover:underline"
+          >
+            Sign-up
+          </Link>{" "}
+          form.
         </p>
       </div>
     </div>
