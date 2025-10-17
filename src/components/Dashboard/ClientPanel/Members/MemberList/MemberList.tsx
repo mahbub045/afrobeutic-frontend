@@ -9,9 +9,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { EllipsisVertical, Plus } from "lucide-react";
 import Image from "next/image";
-import React from "react";
+import { useState } from "react";
+import AddNewUserModal from "./Modals/AddNewUserModal";
 
 const MemberList: React.FC = () => {
+  const [isOpenAddUserModal, setIsOpenAddUserModal] = useState(false);
+
+  const handleOpenAddUserModal = () => {
+    setIsOpenAddUserModal(true);
+  };
+
   const members = [
     {
       name: "Md Mahbub Rahman",
@@ -38,7 +45,12 @@ const MemberList: React.FC = () => {
   return (
     <>
       <div className="mb-4 flex justify-end">
-        <Button variant="default" size="sm" className="text-white">
+        <Button
+          variant="default"
+          size="sm"
+          className="text-white"
+          onClick={handleOpenAddUserModal}
+        >
           <Plus />
           Invite User
         </Button>
@@ -90,6 +102,11 @@ const MemberList: React.FC = () => {
           </Card>
         ))}
       </div>
+      {/* Modals */}
+      <AddNewUserModal
+        isOpen={isOpenAddUserModal}
+        onClose={() => setIsOpenAddUserModal(false)}
+      />
     </>
   );
 };
