@@ -30,3 +30,8 @@ export interface EditNewMemberDialogProps {
   onClose: () => void;
   selectedMember?: MemberProps;
 }
+export interface DeleteMemberDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  selectedMember?: MemberProps;
+}

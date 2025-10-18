@@ -25,6 +25,13 @@ export const MembersApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Members"],
     }),
+    deleteMember: builder.mutation({
+      query: (uid) => ({
+        url: `/accounts/members/${uid}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Members"],
+    }),
   }),
 });
 
@@ -32,4 +39,5 @@ export const {
   useGetMembersQuery,
   useInviteMemberMutation,
   useEditMemberMutation,
+  useDeleteMemberMutation,
 } = MembersApi;

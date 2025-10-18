@@ -15,11 +15,13 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useState } from "react";
 import AddNewMemberDialog from "./Dialogs/AddNewMemberDialog";
+import DeleteMemberDialog from "./Dialogs/DeleteMemberDialog";
 import EditMemberInfoDialog from "./Dialogs/EditMemberInfoDialog";
 
 const MemberList: React.FC = () => {
   const [isOpenAddMemberModal, setIsOpenAddMemberModal] = useState(false);
   const [isOpenEditMemberModal, setIsOpenEditMemberModal] = useState(false);
+  const [isOpenDeleteMemberModal, setIsOpenDeleteMemberModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState<MemberProps | undefined>(
     undefined,
   );
@@ -35,6 +37,10 @@ const MemberList: React.FC = () => {
   const handleOpenEditMemberModal = (member: MemberProps) => {
     setSelectedMember(member);
     setIsOpenEditMemberModal(true);
+  };
+  const handleOpenDeleteMemberModal = (member: MemberProps) => {
+    setSelectedMember(member);
+    setIsOpenDeleteMemberModal(true);
   };
 
   return (
@@ -85,7 +91,10 @@ const MemberList: React.FC = () => {
                       <UserRoundPen className="text-primary" />
                       Edit
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="text-danger cursor-pointer">
+                    <DropdownMenuItem
+                      className="text-danger cursor-pointer"
+                      onClick={() => handleOpenDeleteMemberModal(member)}
+                    >
                       <UserX className="text-danger" />
                       Delete
                     </DropdownMenuItem>
@@ -139,8 +148,12 @@ const MemberList: React.FC = () => {
         isOpen={isOpenEditMemberModal}
         onClose={() => {
           setIsOpenEditMemberModal(false);
-          // setSelectedMember(undefined);
         }}
+        selectedMember={selectedMember}
+      />
+      <DeleteMemberDialog
+        isOpen={isOpenDeleteMemberModal}
+        onClose={() => setIsOpenDeleteMemberModal(false)}
         selectedMember={selectedMember}
       />
     </>
