@@ -9,7 +9,7 @@ export const MembersApi = baseApi.injectEndpoints({
       }),
       providesTags: ["Members"],
     }),
-    inviteUser: builder.mutation({
+    inviteMember: builder.mutation({
       query: (userData) => ({
         url: `/accounts/invite`,
         method: "POST",
@@ -17,7 +17,19 @@ export const MembersApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Members"],
     }),
+    editMember: builder.mutation({
+      query: ({ uid, ...memberData }) => ({
+        url: `/accounts/members/${uid}`,
+        method: "PUT",
+        body: memberData,
+      }),
+      invalidatesTags: ["Members"],
+    }),
   }),
 });
 
-export const { useGetMembersQuery, useInviteUserMutation } = MembersApi;
+export const {
+  useGetMembersQuery,
+  useInviteMemberMutation,
+  useEditMemberMutation,
+} = MembersApi;

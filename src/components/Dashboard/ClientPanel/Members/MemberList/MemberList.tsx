@@ -15,9 +15,14 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useState } from "react";
 import AddNewMemberDialog from "./Dialogs/AddNewMemberDialog";
+import EditMemberInfoDialog from "./Dialogs/EditMemberInfoDialog";
 
 const MemberList: React.FC = () => {
   const [isOpenAddMemberModal, setIsOpenAddMemberModal] = useState(false);
+  const [isOpenEditMemberModal, setIsOpenEditMemberModal] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<MemberProps | undefined>(
+    undefined,
+  );
   const { data: session } = useSession();
 
   // RTK hooks
@@ -26,6 +31,10 @@ const MemberList: React.FC = () => {
 
   const handleOpenAddMemberModal = () => {
     setIsOpenAddMemberModal(true);
+  };
+  const handleOpenEditMemberModal = (member: MemberProps) => {
+    setSelectedMember(member);
+    setIsOpenEditMemberModal(true);
   };
 
   return (
@@ -69,7 +78,10 @@ const MemberList: React.FC = () => {
                     <EllipsisVertical className="cursor-pointer" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem className="text-primary cursor-pointer">
+                    <DropdownMenuItem
+                      className="text-primary cursor-pointer"
+                      onClick={() => handleOpenEditMemberModal(member)}
+                    >
                       <UserRoundPen className="text-primary" />
                       Edit
                     </DropdownMenuItem>
@@ -122,6 +134,14 @@ const MemberList: React.FC = () => {
       <AddNewMemberDialog
         isOpen={isOpenAddMemberModal}
         onClose={() => setIsOpenAddMemberModal(false)}
+      />
+      <EditMemberInfoDialog
+        isOpen={isOpenEditMemberModal}
+        onClose={() => {
+          setIsOpenEditMemberModal(false);
+          // setSelectedMember(undefined);
+        }}
+        selectedMember={selectedMember}
       />
     </>
   );

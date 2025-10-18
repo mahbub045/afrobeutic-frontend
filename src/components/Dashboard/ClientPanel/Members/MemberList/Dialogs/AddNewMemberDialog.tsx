@@ -9,9 +9,9 @@ import {
 } from "@/components/ui/dialog";
 // using native input via Formik Field, remove custom Input import
 import { Label } from "@/components/ui/label";
-import { useInviteUserMutation } from "@/Redux/Reducers/ClientPanel/Members/MembersApi";
+import { useInviteMemberMutation } from "@/Redux/Reducers/ClientPanel/Members/MembersApi";
 import {
-  AddNewUserDialogProps,
+  AddNewMemberDialogProps,
   FormValueProps,
 } from "@/Types/ClientPanel/MemberTypes/MemberType";
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
@@ -29,14 +29,14 @@ const validationSchema = Yup.object().shape({
   role: Yup.string().required("Required"),
 });
 
-const AddNewUserDialog: React.FC<AddNewUserDialogProps> = ({
+const AddNewMemberDialog: React.FC<AddNewMemberDialogProps> = ({
   isOpen,
   onClose,
   onInvite,
 }) => {
   const initialValues: FormValueProps = { email: "", role: "" };
 
-  const [inviteUser, { isLoading }] = useInviteUserMutation();
+  const [inviteMember, { isLoading }] = useInviteMemberMutation();
 
   const handleSubmit = async (
     userData: FormValueProps,
@@ -44,7 +44,7 @@ const AddNewUserDialog: React.FC<AddNewUserDialogProps> = ({
   ) => {
     setSubmitting(true);
     try {
-      await inviteUser(userData).unwrap();
+      await inviteMember(userData).unwrap();
       onInvite?.(userData.email, userData.role);
       resetForm();
       onClose();
@@ -142,4 +142,4 @@ const AddNewUserDialog: React.FC<AddNewUserDialogProps> = ({
   );
 };
 
-export default AddNewUserDialog;
+export default AddNewMemberDialog;

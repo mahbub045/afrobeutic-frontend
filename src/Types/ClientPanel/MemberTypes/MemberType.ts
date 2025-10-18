@@ -8,7 +8,7 @@ export interface MemberProps {
   [key: string]: unknown;
 }
 
-export interface AddNewUserDialogProps {
+export interface AddNewMemberDialogProps {
   isOpen: boolean;
   onClose: () => void;
   // optional callback when invitation is sent
@@ -18,4 +18,15 @@ export interface AddNewUserDialogProps {
 export interface FormValueProps {
   email: string;
   role: string;
+}
+
+export interface EditFormValueProps {
+  role: string | undefined;
+  status: string | undefined;
+}
+
+export interface EditNewMemberDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  selectedMember?: MemberProps;
 }

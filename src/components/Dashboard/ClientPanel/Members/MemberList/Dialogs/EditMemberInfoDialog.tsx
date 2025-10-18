@@ -1,6 +1,29 @@
-import { Dialog } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { useEditMemberMutation } from "@/Redux/Reducers/ClientPanel/Members/MembersApi";
+import {
+  EditFormValueProps,
+  EditNewMemberDialogProps,
+} from "@/Types/ClientPanel/MemberTypes/MemberType";
+import { ErrorMessage, Field, Formik, Form as FormikForm } from "formik";
+import * as Yup from "yup";
 
-const EditMemberInfoDialog: React.FC = () => {
+const EditMemberInfoDialog: React.FC<EditNewMemberDialogProps> = ({
+  isOpen,
+  onClose,
+  selectedMember,
+}) => {
+  const initialValues: EditFormValueProps = { status: "", role: "" };
+
+  //   RTK hook
+  const [editMember, { isLoading }] = useEditMemberMutation();
+
   const roles = [
     { value: "ADMIN", label: "Admin - Full Access" },
     { value: "STAFF", label: "Staff - Limited Access" },
@@ -10,7 +33,89 @@ const EditMemberInfoDialog: React.FC = () => {
     { value: "INACTIVE", label: "Inactive" },
     { value: "SUSPENDED", label: "Suspended" },
   ];
-  return <Dialog>{/* JSX here */}</Dialog>;
+  const validationSchema = Yup.object().shape({
+    status: Yup.string().required("Required"),
+    role: Yup.string().required("Required"),
+  });
+
+  const handleSubmit = (values: EditFormValueProps) => {
+    // Handle form submission logic here
+    if (!selectedMember) return;
+    const memberData = {
+      uid: selectedMember.uid,
+      role: values.role,
+      status: values.status,
+    };
+    editMember(memberData)
+      .unwrap()
+      .then(() => {
+        onClose();
+      })
+      .catch((error) => {
+        console.error("Failed to edit member:", error);
+      });
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Member Information</DialogTitle>
+          <DialogDescription className="text-xs">
+            Update the member&apos;s role and status.
+          </DialogDescription>
+        </DialogHeader>
+        <Formik
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+        >
+          <FormikForm>
+            <div>
+              <Label htmlFor="role" className="mb-2">
+                Access Type / Role<span className="text-danger">*</span>
+              </Label>
+              <Field id="role" name="role" as="select" required>
+                <option value="" disabled>
+                  Select a role
+                </option>
+                {roles.map((role) => (
+                  <option key={role.value} value={role.value}>
+                    {role.label}
+                  </option>
+                ))}
+              </Field>
+              <ErrorMessage
+                name="role"
+                component="div"
+                className="text-danger mt-1 text-xs"
+              />
+            </div>
+            <div>
+              <Label htmlFor="status" className="mb-2">
+                Status<span className="text-danger">*</span>
+              </Label>
+              <Field id="status" name="status" as="select" required>
+                <option value="" disabled>
+                  Select a status
+                </option>
+                {statuses.map((status) => (
+                  <option key={status.value} value={status.value}>
+                    {status.label}
+                  </option>
+                ))}
+              </Field>
+              <ErrorMessage
+                name="status"
+                component="div"
+                className="text-danger mt-1 text-xs"
+              />
+            </div>
+          </FormikForm>
+        </Formik>
+      </DialogContent>
+    </Dialog>
+  );
 };
 
 export default EditMemberInfoDialog;
