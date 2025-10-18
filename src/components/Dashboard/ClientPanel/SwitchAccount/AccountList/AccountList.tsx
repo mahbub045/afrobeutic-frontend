@@ -53,8 +53,8 @@ const AccountList: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Search Bar */}
-      <div className="flex flex-col items-center justify-center gap-4 sm:flex-row md:justify-start">
-        <div className="relative max-w-sm flex-1">
+      <div className="flex flex-col items-center justify-center gap-4 sm:flex-row md:justify-end">
+        {/* <div className="relative max-w-sm flex-1">
           <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-500" />
           <Input
             type="text"
@@ -63,7 +63,7 @@ const AccountList: React.FC = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="!px-8"
           />
-        </div>
+        </div> */}
       </div>
 
       {/* Loading Skeleton */}

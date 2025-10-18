@@ -88,7 +88,7 @@ const ManageSalonsContainer: React.FC = () => {
           Manage Salons
         </h1>
 
-        <div className="relative min-w-sm md:min-w-xs lg:min-w-sm">
+        {/* <div className="relative min-w-sm md:min-w-xs lg:min-w-sm">
           <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-500" />
           <Input
             type="text"
@@ -97,7 +97,7 @@ const ManageSalonsContainer: React.FC = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="!px-8"
           />
-        </div>
+        </div> */}
 
         <Button variant="default" size="sm" className="text-white">
           <Plus className="h-4 w-4" />
@@ -165,9 +165,9 @@ const ManageSalonsContainer: React.FC = () => {
                       <div className="relative">
                         <div className="from-primary/10 to-primary/5 ring-primary/20 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br ring-1 transition-transform duration-300 group-hover:scale-110">
                           {/* Render salon logo if available and not failed, otherwise show Scissors icon */}
-                          {s.salon_logo && !failedLogos[s.uid] ? (
+                          {s.logo && !failedLogos[s.uid] ? (
                             <Image
-                              src={s.salon_logo}
+                              src={s.logo}
                               alt={`${s.name} logo`}
                               width={64}
                               height={64}

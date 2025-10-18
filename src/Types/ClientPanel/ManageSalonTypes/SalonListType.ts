@@ -23,7 +23,7 @@ export interface SalonProps {
   uid: string;
   name: string;
   description?: string;
-  salon_logo?: string;
+  logo?: string;
   salon_type?: string;
   email?: string;
   phone?: string;
