@@ -76,7 +76,7 @@ const EditMemberInfoDialog: React.FC<EditNewMemberDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="shadow-md dark:shadow-gray-600">
         <DialogHeader>
           <DialogTitle>Edit Member Information</DialogTitle>
           <DialogDescription className="text-xs">

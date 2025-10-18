@@ -35,7 +35,7 @@ const AddNewMemberDialog: React.FC<AddNewMemberDialogProps> = ({
   onClose,
   onInvite,
 }) => {
-    const { theme } = useTheme();
+  const { theme } = useTheme();
   const initialValues: FormValueProps = { email: "", role: "" };
 
   const [inviteMember, { isLoading }] = useInviteMemberMutation();
@@ -54,7 +54,7 @@ const AddNewMemberDialog: React.FC<AddNewMemberDialogProps> = ({
         icon: "success",
         title: "Invitation Sent",
         text: `An invitation has been sent to ${userData.email}`,
-       theme: (theme as "light" | "dark" | "auto") || "auto",
+        theme: (theme as "light" | "dark" | "auto") || "auto",
       });
     } catch (error) {
       console.error("Failed to invite user:", error);
@@ -70,7 +70,7 @@ const AddNewMemberDialog: React.FC<AddNewMemberDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="shadow-md dark:shadow-gray-600">
         <DialogHeader>
           <DialogTitle>Add new user</DialogTitle>
           <DialogDescription>
