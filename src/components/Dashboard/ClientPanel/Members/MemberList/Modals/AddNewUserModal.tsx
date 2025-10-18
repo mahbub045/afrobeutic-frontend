@@ -60,12 +60,14 @@ const AddNewUserModal: React.FC<AddNewUserModalProps> = ({
         icon: "success",
         title: "Invitation Sent",
         text: `An invitation has been sent to ${userData.email}`,
+        theme: "auto",
       });
     } catch (error) {
       console.error("Failed to invite user:", error);
       Swal.fire({
         icon: "error",
         title: "Invitation Failed",
+        theme: "auto",
       });
     } finally {
       setSubmitting(false);
