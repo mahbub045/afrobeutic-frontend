@@ -1,12 +1,29 @@
 import { baseApi } from "@/Redux/Api/BaseApi";
+import {
+  MembersQueryParams,
+  MembersResponse,
+} from "@/Types/ClientPanel/MemberTypes/MemberType";
 
 export const MembersApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getMembers: builder.query({
-      query: () => ({
-        url: `/accounts/members`,
-        method: "GET",
-      }),
+    getMembers: builder.query<MembersResponse, MembersQueryParams | void>({
+      query: (params) => {
+        const queryParams = new URLSearchParams();
+
+        if (params?.page) {
+          queryParams.append("page", params.page.toString());
+        }
+
+        if (params?.search) {
+          queryParams.append("search", params.search);
+        }
+
+        const queryString = queryParams.toString();
+        return {
+          url: `/accounts/members${queryString ? `?${queryString}` : ""}`,
+          method: "GET",
+        };
+      },
       providesTags: ["Members"],
     }),
     inviteMember: builder.mutation({
