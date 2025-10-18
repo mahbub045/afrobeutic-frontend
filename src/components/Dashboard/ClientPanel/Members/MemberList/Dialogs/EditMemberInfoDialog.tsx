@@ -21,7 +21,10 @@ const EditMemberInfoDialog: React.FC<EditNewMemberDialogProps> = ({
   onClose,
   selectedMember,
 }) => {
-  const initialValues: EditFormValueProps = { status: "", role: "" };
+  const initialValues: EditFormValueProps = {
+    status: selectedMember?.status ?? "",
+    role: selectedMember?.role ?? "",
+  };
 
   //   RTK hook
   const [editMember, { isLoading }] = useEditMemberMutation();
@@ -80,11 +83,12 @@ const EditMemberInfoDialog: React.FC<EditNewMemberDialogProps> = ({
         </DialogHeader>
         <Formik
           initialValues={initialValues}
+          enableReinitialize
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
           <FormikForm>
-            <div>
+            <div className="mb-4">
               <Label htmlFor="role" className="mb-2">
                 Access Type / Role<span className="text-danger">*</span>
               </Label>
@@ -124,7 +128,7 @@ const EditMemberInfoDialog: React.FC<EditNewMemberDialogProps> = ({
                 className="text-danger mt-1 text-xs"
               />
             </div>
-            <div className="flex justify-end gap-3">
+            <div className="mt-2 flex justify-end gap-3">
               <Button variant="outline" onClick={onClose} disabled={isLoading}>
                 Cancel
               </Button>
