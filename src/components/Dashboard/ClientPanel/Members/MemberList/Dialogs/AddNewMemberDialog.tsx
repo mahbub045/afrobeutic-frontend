@@ -15,6 +15,7 @@ import {
   FormValueProps,
 } from "@/Types/ClientPanel/MemberTypes/MemberType";
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
+import { useTheme } from "next-themes";
 import React from "react";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
@@ -34,6 +35,7 @@ const AddNewMemberDialog: React.FC<AddNewMemberDialogProps> = ({
   onClose,
   onInvite,
 }) => {
+    const { theme } = useTheme();
   const initialValues: FormValueProps = { email: "", role: "" };
 
   const [inviteMember, { isLoading }] = useInviteMemberMutation();
@@ -52,14 +54,14 @@ const AddNewMemberDialog: React.FC<AddNewMemberDialogProps> = ({
         icon: "success",
         title: "Invitation Sent",
         text: `An invitation has been sent to ${userData.email}`,
-        theme: "auto",
+       theme: (theme as "light" | "dark" | "auto") || "auto",
       });
     } catch (error) {
       console.error("Failed to invite user:", error);
       Swal.fire({
         icon: "error",
         title: "Invitation Failed",
-        theme: "auto",
+        theme: (theme as "light" | "dark" | "auto") || "auto",
       });
     } finally {
       setSubmitting(false);

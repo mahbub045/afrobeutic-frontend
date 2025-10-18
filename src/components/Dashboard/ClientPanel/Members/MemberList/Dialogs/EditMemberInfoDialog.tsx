@@ -13,6 +13,7 @@ import {
   EditNewMemberDialogProps,
 } from "@/Types/ClientPanel/MemberTypes/MemberType";
 import { ErrorMessage, Field, Formik, Form as FormikForm } from "formik";
+import { useTheme } from "next-themes";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
 
@@ -21,6 +22,7 @@ const EditMemberInfoDialog: React.FC<EditNewMemberDialogProps> = ({
   onClose,
   selectedMember,
 }) => {
+  const { theme } = useTheme();
   const initialValues: EditFormValueProps = {
     status: selectedMember?.status ?? "",
     role: selectedMember?.role ?? "",
@@ -59,7 +61,7 @@ const EditMemberInfoDialog: React.FC<EditNewMemberDialogProps> = ({
           icon: "success",
           title: "Member Updated",
           text: `Member information has been updated successfully.`,
-          theme: "auto",
+          theme: (theme as "light" | "dark" | "auto") || "auto",
         });
       })
       .catch((error) => {
@@ -67,7 +69,7 @@ const EditMemberInfoDialog: React.FC<EditNewMemberDialogProps> = ({
         Swal.fire({
           icon: "error",
           title: "Update Failed",
-          theme: "auto",
+          theme: (theme as "light" | "dark" | "auto") || "auto",
         });
       });
   };
@@ -132,7 +134,11 @@ const EditMemberInfoDialog: React.FC<EditNewMemberDialogProps> = ({
               <Button variant="outline" onClick={onClose} disabled={isLoading}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading} className="w-40">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-40 text-white"
+              >
                 {isLoading ? "Saving..." : "Save Changes"}
               </Button>
             </div>
