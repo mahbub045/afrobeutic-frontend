@@ -9,58 +9,68 @@ import {
 } from "@/components/ui/dialog";
 // using native input via Formik Field, remove custom Input import
 import { Label } from "@/components/ui/label";
+import { useInviteMemberMutation } from "@/Redux/Reducers/ClientPanel/Members/MembersApi";
+import {
+  AddNewMemberDialogProps,
+  FormValueProps,
+} from "@/Types/ClientPanel/MemberTypes/MemberType";
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
+import { useTheme } from "next-themes";
 import React from "react";
+import Swal from "sweetalert2";
 import * as Yup from "yup";
-
-export interface AddNewUserModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  // optional callback when invitation is sent
-  onInvite?: (email: string, role: string) => void;
-}
 
 const roles = [
   { value: "ADMIN", label: "Admin - Full Access" },
   { value: "STAFF", label: "Staff - Limited Access" },
 ];
 
-type FormValues = {
-  email: string;
-  role: string;
-};
-
 const validationSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Required"),
   role: Yup.string().required("Required"),
 });
 
-const AddNewUserModal: React.FC<AddNewUserModalProps> = ({
+const AddNewMemberDialog: React.FC<AddNewMemberDialogProps> = ({
   isOpen,
   onClose,
   onInvite,
 }) => {
-  const initialValues: FormValues = { email: "", role: "" };
+  const { theme } = useTheme();
+  const initialValues: FormValueProps = { email: "", role: "" };
 
-  const submit = async (
-    values: FormValues,
-    helpers: FormikHelpers<FormValues>,
+  const [inviteMember, { isLoading }] = useInviteMemberMutation();
+
+  const handleSubmit = async (
+    userData: FormValueProps,
+    { setSubmitting, resetForm }: FormikHelpers<FormValueProps>,
   ) => {
-    helpers.setSubmitting(true);
+    setSubmitting(true);
     try {
-      // placeholder for API call
-      await new Promise((r) => setTimeout(r, 600));
-      onInvite?.(values.email, values.role);
-      helpers.resetForm();
+      await inviteMember(userData).unwrap();
+      onInvite?.(userData.email, userData.role);
+      resetForm();
       onClose();
+      Swal.fire({
+        icon: "success",
+        title: "Invitation Sent",
+        text: `An invitation has been sent to ${userData.email}`,
+        theme: (theme as "light" | "dark" | "auto") || "auto",
+      });
+    } catch (error) {
+      console.error("Failed to invite user:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Invitation Failed",
+        theme: (theme as "light" | "dark" | "auto") || "auto",
+      });
     } finally {
-      helpers.setSubmitting(false);
+      setSubmitting(false);
     }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="shadow-md dark:shadow-gray-600">
         <DialogHeader>
           <DialogTitle>Add new user</DialogTitle>
           <DialogDescription>
@@ -71,7 +81,7 @@ const AddNewUserModal: React.FC<AddNewUserModalProps> = ({
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}
-          onSubmit={submit}
+          onSubmit={handleSubmit}
         >
           {({ isSubmitting }) => (
             <Form className="mt-4 space-y-4">
@@ -134,4 +144,4 @@ const AddNewUserModal: React.FC<AddNewUserModalProps> = ({
   );
 };
 
-export default AddNewUserModal;
+export default AddNewMemberDialog;
