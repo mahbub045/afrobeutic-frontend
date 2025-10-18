@@ -14,6 +14,7 @@ import {
 } from "@/Types/ClientPanel/MemberTypes/MemberType";
 import { ErrorMessage, Field, Formik, Form as FormikForm } from "formik";
 import { useTheme } from "next-themes";
+import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
 
@@ -59,18 +60,16 @@ const EditMemberInfoDialog: React.FC<EditNewMemberDialogProps> = ({
         onClose();
         Swal.fire({
           icon: "success",
+          iconColor: "#037375",
           title: "Member Updated",
           text: `Member information has been updated successfully.`,
           theme: (theme as "light" | "dark" | "auto") || "auto",
+          confirmButtonColor: "#037375",
         });
       })
       .catch((error) => {
         console.error("Failed to edit member:", error);
-        Swal.fire({
-          icon: "error",
-          title: "Update Failed",
-          theme: (theme as "light" | "dark" | "auto") || "auto",
-        });
+        toast.error("Failed to update member information.");
       });
   };
 
