@@ -239,7 +239,7 @@ const ManageSalonsContainer: React.FC = () => {
           </div>
         )}
       </div>
-      <div className="flex justify-between p-2">
+      <div className="flex justify-between">
         <div>
           {salonListData && (
             <div className="text-sm text-gray-600 dark:text-gray-400">
