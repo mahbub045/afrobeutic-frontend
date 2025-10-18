@@ -9,22 +9,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetMembersQuery } from "@/Redux/Reducers/ClientPanel/Members/MembersApi";
+import { MemberProps } from "@/Types/ClientPanel/MemberTypes/MemberType";
 import { EllipsisVertical, Plus, UserRoundPen, UserX } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useState } from "react";
 import AddNewMemberDialog from "./Dialogs/AddNewMemberDialog";
-
-// minimal Member type for this list component
-export interface MemberProps {
-  uid: string;
-  name: string;
-  email: string;
-  avatar?: string;
-  role?: string;
-  status?: string;
-  [key: string]: unknown;
-}
 
 const MemberList: React.FC = () => {
   const [isOpenAddMemberModal, setIsOpenAddMemberModal] = useState(false);
