@@ -23,6 +23,7 @@ export const baseApi = createApi({
   tagTypes: [
     //Register tag types here
     "SignUp",
+    "AcceptInvitation",
     //Clients Panel tag types
     "Members",
   ],
