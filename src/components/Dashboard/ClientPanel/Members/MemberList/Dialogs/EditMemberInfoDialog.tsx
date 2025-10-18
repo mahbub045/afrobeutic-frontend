@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -12,6 +13,7 @@ import {
   EditNewMemberDialogProps,
 } from "@/Types/ClientPanel/MemberTypes/MemberType";
 import { ErrorMessage, Field, Formik, Form as FormikForm } from "formik";
+import Swal from "sweetalert2";
 import * as Yup from "yup";
 
 const EditMemberInfoDialog: React.FC<EditNewMemberDialogProps> = ({
@@ -50,9 +52,20 @@ const EditMemberInfoDialog: React.FC<EditNewMemberDialogProps> = ({
       .unwrap()
       .then(() => {
         onClose();
+        Swal.fire({
+          icon: "success",
+          title: "Member Updated",
+          text: `Member information has been updated successfully.`,
+          theme: "auto",
+        });
       })
       .catch((error) => {
         console.error("Failed to edit member:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Update Failed",
+          theme: "auto",
+        });
       });
   };
 
@@ -110,6 +123,14 @@ const EditMemberInfoDialog: React.FC<EditNewMemberDialogProps> = ({
                 component="div"
                 className="text-danger mt-1 text-xs"
               />
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={onClose} disabled={isLoading}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isLoading} className="w-40">
+                {isLoading ? "Saving..." : "Save Changes"}
+              </Button>
             </div>
           </FormikForm>
         </Formik>
