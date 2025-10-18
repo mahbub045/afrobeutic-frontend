@@ -145,7 +145,7 @@ const SideBar: React.FC<SideBarProps> = ({
   return (
     <>
       {/* Desktop Sidebar - hidden on small screens, visible from md and up */}
-      <aside className="bg-background/50 hidden w-56 border-r md:block">
+      <aside className="bg-background/50 hidden w-56 border-r lg:block">
         <nav className="fixed top-16 h-[calc(100vh-4rem)] w-56 overflow-auto">
           {renderNavContent()}
         </nav>

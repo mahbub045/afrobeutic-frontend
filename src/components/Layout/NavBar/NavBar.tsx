@@ -38,7 +38,7 @@ const NavBar: React.FC<NavBarProps> = ({ onMobileMenuToggle }) => {
                 variant="ghost"
                 size="icon"
                 onClick={onMobileMenuToggle}
-                className="md:hidden dark:shadow-gray-600"
+                className="lg:hidden dark:shadow-gray-600"
               >
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle menu</span>

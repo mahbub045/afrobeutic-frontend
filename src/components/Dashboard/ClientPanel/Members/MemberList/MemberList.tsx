@@ -92,7 +92,7 @@ const MemberList: React.FC = () => {
     <div className="space-y-6">
       {/* Search Bar and Actions */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative max-w-md flex-1">
+        <div className="relative max-w-sm flex-1">
           <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-500" />
           <Input
             type="text"
@@ -103,23 +103,15 @@ const MemberList: React.FC = () => {
           />
         </div>
 
-        <div className="flex items-center gap-4">
-          {membersData && (
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              Total: {membersData.count} member
-              {membersData.count !== 1 ? "s" : ""}
-            </div>
-          )}
-          <Button
-            variant="default"
-            size="sm"
-            className="text-white"
-            onClick={handleOpenAddMemberModal}
-          >
-            <Plus />
-            Invite Member
-          </Button>
-        </div>
+        <Button
+          variant="default"
+          size="sm"
+          className="text-white"
+          onClick={handleOpenAddMemberModal}
+        >
+          <Plus />
+          Invite Member
+        </Button>
       </div>
 
       {/* Member Cards */}
@@ -238,39 +230,50 @@ const MemberList: React.FC = () => {
           </div>
         ) : null}
       </div>
-
-      {/* Pagination Controls */}
-      {membersData && membersData.count > membersData.results.length && (
-        <div className="flex items-center justify-center gap-4 pt-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handlePreviousPage}
-            disabled={!membersData.previous || isFetching}
-            className="flex items-center gap-2"
-          >
-            <ChevronLeft className="h-4 w-4" />
-            Previous
-          </Button>
-
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-gray-600 dark:text-gray-400">
-              Page {currentPage} of {totalPages}
-            </span>
-          </div>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleNextPage}
-            disabled={!membersData.next || isFetching}
-            className="flex items-center gap-2"
-          >
-            Next
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+      <div className="flex justify-between">
+        <div>
+          {membersData && (
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Total: {membersData.count} member
+              {membersData.count !== 1 ? "s" : ""}
+            </div>
+          )}
         </div>
-      )}
+        <div>
+          {/* Pagination Controls */}
+          {membersData && membersData.count > membersData.results.length && (
+            <div className="flex items-center justify-center gap-4 pt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePreviousPage}
+                disabled={!membersData.previous || isFetching}
+                className="flex items-center gap-2"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Previous
+              </Button>
+
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-gray-600 dark:text-gray-400">
+                  Page {currentPage} of {totalPages}
+                </span>
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleNextPage}
+                disabled={!membersData.next || isFetching}
+                className="flex items-center gap-2"
+              >
+                Next
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Modals */}
       <AddNewMemberDialog

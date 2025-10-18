@@ -27,6 +27,7 @@ export const baseApi = createApi({
     //Clients Panel tag types
     "Members",
     "AccountAccesser",
+    "SalonList",
   ],
   endpoints: () => ({}),
 });
