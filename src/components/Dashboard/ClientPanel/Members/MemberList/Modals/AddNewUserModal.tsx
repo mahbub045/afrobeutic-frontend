@@ -9,8 +9,10 @@ import {
 } from "@/components/ui/dialog";
 // using native input via Formik Field, remove custom Input import
 import { Label } from "@/components/ui/label";
+import { useInviteUserMutation } from "@/Redux/Reducers/ClientPanel/Members/MembersApi";
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
 import React from "react";
+import Swal from "sweetalert2";
 import * as Yup from "yup";
 
 export interface AddNewUserModalProps {
@@ -25,10 +27,10 @@ const roles = [
   { value: "STAFF", label: "Staff - Limited Access" },
 ];
 
-type FormValues = {
+interface FormValues {
   email: string;
   role: string;
-};
+}
 
 const validationSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Required"),
@@ -42,19 +44,31 @@ const AddNewUserModal: React.FC<AddNewUserModalProps> = ({
 }) => {
   const initialValues: FormValues = { email: "", role: "" };
 
-  const submit = async (
-    values: FormValues,
-    helpers: FormikHelpers<FormValues>,
+  const [inviteUser, { isLoading }] = useInviteUserMutation();
+
+  const handleSubmit = async (
+    userData: FormValues,
+    { setSubmitting, resetForm }: FormikHelpers<FormValues>,
   ) => {
-    helpers.setSubmitting(true);
+    setSubmitting(true);
     try {
-      // placeholder for API call
-      await new Promise((r) => setTimeout(r, 600));
-      onInvite?.(values.email, values.role);
-      helpers.resetForm();
+      await inviteUser(userData).unwrap();
+      onInvite?.(userData.email, userData.role);
+      resetForm();
       onClose();
+      Swal.fire({
+        icon: "success",
+        title: "Invitation Sent",
+        text: `An invitation has been sent to ${userData.email}`,
+      });
+    } catch (error) {
+      console.error("Failed to invite user:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Invitation Failed",
+      });
     } finally {
-      helpers.setSubmitting(false);
+      setSubmitting(false);
     }
   };
 
@@ -71,7 +85,7 @@ const AddNewUserModal: React.FC<AddNewUserModalProps> = ({
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}
-          onSubmit={submit}
+          onSubmit={handleSubmit}
         >
           {({ isSubmitting }) => (
             <Form className="mt-4 space-y-4">
