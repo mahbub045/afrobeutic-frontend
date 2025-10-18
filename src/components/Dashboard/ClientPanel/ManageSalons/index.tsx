@@ -20,6 +20,7 @@ import {
   Scissors,
   Search,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import * as React from "react";
 import Breadcrumbs from "../../CommonComponents/Breadcrumbs";
@@ -28,6 +29,10 @@ const ManageSalonsContainer: React.FC = () => {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [debouncedSearch, setDebouncedSearch] = React.useState("");
+  // Track which salon logos failed to load (by uid)
+  const [failedLogos, setFailedLogos] = React.useState<Record<string, boolean>>(
+    {},
+  );
 
   // Debounce search input
   React.useEffect(() => {
@@ -143,7 +148,7 @@ const ManageSalonsContainer: React.FC = () => {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
             {salonListData.results.map((s: SalonProps) => (
               <Card
                 key={s.uid}
@@ -158,8 +163,26 @@ const ManageSalonsContainer: React.FC = () => {
                   <CardHeader className="pt-6 pb-4">
                     <div className="mb-4 flex justify-center">
                       <div className="relative">
-                        <div className="from-primary/10 to-primary/5 ring-primary/20 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ring-1 transition-transform duration-300 group-hover:scale-110">
-                          <Scissors className="text-primary group-hover:text-primary/80 h-8 w-8 transition-colors duration-300" />
+                        <div className="from-primary/10 to-primary/5 ring-primary/20 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br ring-1 transition-transform duration-300 group-hover:scale-110">
+                          {/* Render salon logo if available and not failed, otherwise show Scissors icon */}
+                          {s.salon_logo && !failedLogos[s.uid] ? (
+                            <Image
+                              src={s.salon_logo}
+                              alt={`${s.name} logo`}
+                              width={64}
+                              height={64}
+                              className="h-16 w-16 object-cover"
+                              unoptimized
+                              onError={() =>
+                                setFailedLogos((prev) => ({
+                                  ...prev,
+                                  [s.uid]: true,
+                                }))
+                              }
+                            />
+                          ) : (
+                            <Scissors className="text-primary group-hover:text-primary/80 h-8 w-8 transition-colors duration-300" />
+                          )}
                         </div>
                       </div>
                     </div>
