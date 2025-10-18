@@ -13,7 +13,7 @@ import { EllipsisVertical, Plus, UserRoundPen, UserX } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useState } from "react";
-import AddNewUserModal from "./Modals/AddNewUserModal";
+import AddNewUserDialog from "./Dialogs/AddNewUserDialog";
 
 // minimal Member type for this list component
 export interface MemberProps {
@@ -129,7 +129,7 @@ const MemberList: React.FC = () => {
         ))}
       </div>
       {/* Modals */}
-      <AddNewUserModal
+      <AddNewUserDialog
         isOpen={isOpenAddUserModal}
         onClose={() => setIsOpenAddUserModal(false)}
       />

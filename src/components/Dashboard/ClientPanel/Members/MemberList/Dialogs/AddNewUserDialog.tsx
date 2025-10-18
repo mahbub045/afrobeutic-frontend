@@ -15,7 +15,7 @@ import React from "react";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
 
-export interface AddNewUserModalProps {
+export interface AddNewUserDialogProps {
   isOpen: boolean;
   onClose: () => void;
   // optional callback when invitation is sent
@@ -37,7 +37,7 @@ const validationSchema = Yup.object().shape({
   role: Yup.string().required("Required"),
 });
 
-const AddNewUserModal: React.FC<AddNewUserModalProps> = ({
+const AddNewUserDialog: React.FC<AddNewUserDialogProps> = ({
   isOpen,
   onClose,
   onInvite,
@@ -150,4 +150,4 @@ const AddNewUserModal: React.FC<AddNewUserModalProps> = ({
   );
 };
 
-export default AddNewUserModal;
+export default AddNewUserDialog;
