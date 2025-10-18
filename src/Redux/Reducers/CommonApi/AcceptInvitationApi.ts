@@ -1,19 +1,10 @@
 import { baseApi } from "@/Redux/Api/BaseApi";
-
-interface AcceptInvitationPayload {
-  token: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  country?: string;
-  password: string;
-  confirm_password: string;
-}
+import { AcceptInvitationPayloadProps } from "@/Types/CommonType/AcceptInvitationType";
 
 export const AcceptInvitationApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     acceptInvitation: builder.mutation({
-      query: (userData: AcceptInvitationPayload) => {
+      query: (userData: AcceptInvitationPayloadProps) => {
         const { token, ...body } = userData;
         return {
           url: `/auth/accept-invitation/${token}/`,
