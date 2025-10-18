@@ -2,10 +2,22 @@ export interface MemberProps {
   uid: string;
   name: string;
   email: string;
-  avatar?: string;
+  avatar?: string | null;
   role?: string;
   status?: string;
   [key: string]: unknown;
+}
+
+export interface MembersResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: MemberProps[];
+}
+
+export interface MembersQueryParams {
+  page?: number;
+  search?: string;
 }
 
 export interface AddNewMemberDialogProps {

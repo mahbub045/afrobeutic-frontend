@@ -7,13 +7,22 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetMembersQuery } from "@/Redux/Reducers/ClientPanel/Members/MembersApi";
 import { MemberProps } from "@/Types/ClientPanel/MemberTypes/MemberType";
-import { EllipsisVertical, Plus, UserRoundPen, UserX } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  EllipsisVertical,
+  Plus,
+  Search,
+  UserRoundPen,
+  UserX,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AddNewMemberDialog from "./Dialogs/AddNewMemberDialog";
 import DeleteMemberDialog from "./Dialogs/DeleteMemberDialog";
 import EditMemberInfoDialog from "./Dialogs/EditMemberInfoDialog";
@@ -25,11 +34,31 @@ const MemberList: React.FC = () => {
   const [selectedMember, setSelectedMember] = useState<MemberProps | undefined>(
     undefined,
   );
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
   const { data: session } = useSession();
 
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setCurrentPage(1); // Reset to first page on new search
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   // RTK hooks
-  const { data: membersData, isLoading: isLoadingMembers } =
-    useGetMembersQuery(undefined);
+  const {
+    data: membersData,
+    isLoading: isLoadingMembers,
+    isFetching,
+  } = useGetMembersQuery({
+    page: currentPage,
+    search: debouncedSearch || undefined,
+  });
 
   const handleOpenAddMemberModal = () => {
     setIsOpenAddMemberModal(true);
@@ -43,19 +72,57 @@ const MemberList: React.FC = () => {
     setIsOpenDeleteMemberModal(true);
   };
 
+  const handlePreviousPage = () => {
+    if (membersData?.previous) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (membersData?.next) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  const totalPages = membersData?.count
+    ? Math.ceil(membersData.count / (membersData.results?.length || 1))
+    : 0;
+
   return (
-    <>
-      <div className="mb-4 flex justify-end">
-        <Button
-          variant="default"
-          size="sm"
-          className="text-white"
-          onClick={handleOpenAddMemberModal}
-        >
-          <Plus />
-          Invite Member
-        </Button>
+    <div className="space-y-6">
+      {/* Search Bar and Actions */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative max-w-md flex-1">
+          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-500" />
+          <Input
+            type="text"
+            placeholder="Search members by name or email..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="!px-8"
+          />
+        </div>
+
+        <div className="flex items-center gap-4">
+          {membersData && (
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Total: {membersData.count} member
+              {membersData.count !== 1 ? "s" : ""}
+            </div>
+          )}
+          <Button
+            variant="default"
+            size="sm"
+            className="text-white"
+            onClick={handleOpenAddMemberModal}
+          >
+            <Plus />
+            Invite Member
+          </Button>
+        </div>
       </div>
+
+      {/* Member Cards */}
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
         {isLoadingMembers &&
           Array.from({ length: 12 }).map((_, idx) => (
@@ -72,55 +139,69 @@ const MemberList: React.FC = () => {
               <Skeleton className="h-4 w-48" />
             </Card>
           ))}
-        {membersData?.map((member: MemberProps) => (
-          <Card
-            key={member.uid}
-            className="group hover:shadow-primary/10 relative flex flex-col items-center gap-2 overflow-hidden border border-gray-200/60 bg-white/80 p-8 text-center shadow-md backdrop-blur-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl dark:border-gray-700/60 dark:bg-gray-900/80 dark:shadow-gray-600 dark:hover:shadow-gray-600/30"
-          >
-            {member.role !== "OWNER" && (
-              <div className="absolute top-2 left-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger className="rounded-md px-1 dark:shadow-gray-600">
-                    <EllipsisVertical className="cursor-pointer" />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem
-                      className="text-primary cursor-pointer"
-                      onClick={() => handleOpenEditMemberModal(member)}
-                    >
-                      <UserRoundPen className="text-primary" />
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="text-danger cursor-pointer"
-                      onClick={() => handleOpenDeleteMemberModal(member)}
-                    >
-                      <UserX className="text-danger" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            )}
-
-            <Badge
-              variant="secondary"
-              className="absolute top-2 right-2 w-fit text-xs text-white"
+        {!isLoadingMembers &&
+        membersData?.results &&
+        membersData.results.length > 0 ? (
+          membersData.results.map((member: MemberProps) => (
+            <Card
+              key={member.uid}
+              className="group hover:shadow-primary/10 relative flex flex-col items-center gap-2 overflow-hidden border border-gray-200/60 bg-white/80 p-8 text-center shadow-md backdrop-blur-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl dark:border-gray-700/60 dark:bg-gray-900/80 dark:shadow-gray-600 dark:hover:shadow-gray-600/30"
             >
-              {member.role}
-            </Badge>
-            <Image
-              src={member.avatar || "/images/common/user.png"}
-              alt={member.name}
-              width={80}
-              height={80}
-              className="rounded-full object-cover"
-            />
+              {member.role !== "OWNER" && (
+                <div className="absolute top-2 left-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="rounded-md px-1 dark:shadow-gray-600">
+                      <EllipsisVertical className="cursor-pointer" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem
+                        className="text-primary cursor-pointer"
+                        onClick={() => handleOpenEditMemberModal(member)}
+                      >
+                        <UserRoundPen className="text-primary" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="text-danger cursor-pointer"
+                        onClick={() => handleOpenDeleteMemberModal(member)}
+                      >
+                        <UserX className="text-danger" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
 
-            <h3 className="relative text-xl font-bold md:text-base lg:text-xl">
-              {member.name}
-              {/* animated status dot (ping + solid) at top-right of the image */}
-              {/* <div className="absolute top-1 -right-3 flex items-center">
+              <Badge
+                variant="secondary"
+                className="absolute top-2 right-2 w-fit text-xs text-white"
+              >
+                {member.role &&
+                  member.role
+                    .split("_")
+                    .map((part: string) =>
+                      part
+                        .split("")
+                        .map((char: string, idx: number) =>
+                          idx === 0 ? char.toUpperCase() : char.toLowerCase(),
+                        )
+                        .join(""),
+                    )
+                    .join(" ")}
+              </Badge>
+              <Image
+                src={member.avatar || "/images/common/user.png"}
+                alt={member.name}
+                width={80}
+                height={80}
+                className="rounded-full object-cover"
+              />
+
+              <h3 className="relative text-xl font-bold md:text-base lg:text-xl">
+                {member.name}
+                {/* animated status dot (ping + solid) at top-right of the image */}
+                {/* <div className="absolute top-1 -right-3 flex items-center">
                 <span
                   className={`absolute inline-flex h-3 w-3 rounded-full ${
                     member.status === "ACTIVE" ? "bg-green-400" : "bg-red-400"
@@ -132,13 +213,65 @@ const MemberList: React.FC = () => {
                   } border-2 border-white`}
                 />
               </div> */}
-            </h3>
-            <p className="text-sm text-gray-600 md:text-xs lg:text-sm dark:text-gray-400">
-              {member.email}
+              </h3>
+              <p className="text-sm text-gray-600 md:text-xs lg:text-sm dark:text-gray-400">
+                {member.email}
+              </p>
+            </Card>
+          ))
+        ) : !isLoadingMembers ? (
+          <div className="col-span-full flex flex-col items-center justify-center py-12 text-center">
+            <p className="text-gray-500 dark:text-gray-400">
+              {searchTerm
+                ? "No members found matching your search."
+                : "No members available."}
             </p>
-          </Card>
-        ))}
+            {searchTerm && (
+              <Button
+                variant="link"
+                onClick={() => setSearchTerm("")}
+                className="mt-2"
+              >
+                Clear search
+              </Button>
+            )}
+          </div>
+        ) : null}
       </div>
+
+      {/* Pagination Controls */}
+      {membersData && membersData.count > membersData.results.length && (
+        <div className="flex items-center justify-center gap-4 pt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePreviousPage}
+            disabled={!membersData.previous || isFetching}
+            className="flex items-center gap-2"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Previous
+          </Button>
+
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-gray-600 dark:text-gray-400">
+              Page {currentPage} of {totalPages}
+            </span>
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleNextPage}
+            disabled={!membersData.next || isFetching}
+            className="flex items-center gap-2"
+          >
+            Next
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
       {/* Modals */}
       <AddNewMemberDialog
         isOpen={isOpenAddMemberModal}
@@ -156,7 +289,7 @@ const MemberList: React.FC = () => {
         onClose={() => setIsOpenDeleteMemberModal(false)}
         selectedMember={selectedMember}
       />
-    </>
+    </div>
   );
 };
 
