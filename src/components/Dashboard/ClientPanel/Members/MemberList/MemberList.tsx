@@ -13,7 +13,7 @@ import { EllipsisVertical, Plus, UserRoundPen, UserX } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useState } from "react";
-import AddNewUserDialog from "./Dialogs/AddNewUserDialog";
+import AddNewMemberDialog from "./Dialogs/AddNewMemberDialog";
 
 // minimal Member type for this list component
 export interface MemberProps {
@@ -27,15 +27,15 @@ export interface MemberProps {
 }
 
 const MemberList: React.FC = () => {
-  const [isOpenAddUserModal, setIsOpenAddUserModal] = useState(false);
+  const [isOpenAddMemberModal, setIsOpenAddMemberModal] = useState(false);
   const { data: session } = useSession();
 
   // RTK hooks
   const { data: membersData, isLoading: isLoadingMembers } =
     useGetMembersQuery(undefined);
 
-  const handleOpenAddUserModal = () => {
-    setIsOpenAddUserModal(true);
+  const handleOpenAddMemberModal = () => {
+    setIsOpenAddMemberModal(true);
   };
 
   return (
@@ -45,10 +45,10 @@ const MemberList: React.FC = () => {
           variant="default"
           size="sm"
           className="text-white"
-          onClick={handleOpenAddUserModal}
+          onClick={handleOpenAddMemberModal}
         >
           <Plus />
-          Invite User
+          Invite Member
         </Button>
       </div>
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
@@ -129,9 +129,9 @@ const MemberList: React.FC = () => {
         ))}
       </div>
       {/* Modals */}
-      <AddNewUserDialog
-        isOpen={isOpenAddUserModal}
-        onClose={() => setIsOpenAddUserModal(false)}
+      <AddNewMemberDialog
+        isOpen={isOpenAddMemberModal}
+        onClose={() => setIsOpenAddMemberModal(false)}
       />
     </>
   );
