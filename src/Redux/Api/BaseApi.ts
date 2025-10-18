@@ -26,6 +26,7 @@ export const baseApi = createApi({
     "AcceptInvitation",
     //Clients Panel tag types
     "Members",
+    "AccountAccesser",
   ],
   endpoints: () => ({}),
 });
