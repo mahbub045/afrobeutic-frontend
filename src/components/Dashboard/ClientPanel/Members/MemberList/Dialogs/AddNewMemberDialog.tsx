@@ -17,6 +17,7 @@ import {
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
 import { useTheme } from "next-themes";
 import React from "react";
+import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
 
@@ -52,17 +53,15 @@ const AddNewMemberDialog: React.FC<AddNewMemberDialogProps> = ({
       onClose();
       Swal.fire({
         icon: "success",
+        iconColor: "#037375",
         title: "Invitation Sent",
         text: `An invitation has been sent to ${userData.email}`,
         theme: (theme as "light" | "dark" | "auto") || "auto",
+        confirmButtonColor: "#037375",
       });
     } catch (error) {
       console.error("Failed to invite user:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Invitation Failed",
-        theme: (theme as "light" | "dark" | "auto") || "auto",
-      });
+      toast.error("Failed to send invitation. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -132,7 +131,11 @@ const AddNewMemberDialog: React.FC<AddNewMemberDialogProps> = ({
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isSubmitting} className="w-40">
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-40 text-white"
+                >
                   {isSubmitting ? "Sending..." : "Send invitation"}
                 </Button>
               </div>

@@ -9,6 +9,7 @@ import {
 import { useDeleteMemberMutation } from "@/Redux/Reducers/ClientPanel/Members/MembersApi";
 import { DeleteMemberDialogProps } from "@/Types/ClientPanel/MemberTypes/MemberType";
 import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 
 const DeleteMemberDialog: React.FC<DeleteMemberDialogProps> = ({
   isOpen,
@@ -23,8 +24,13 @@ const DeleteMemberDialog: React.FC<DeleteMemberDialogProps> = ({
 
     try {
       await deleteMember(selectedMember.uid).unwrap();
-      toast.success(`${selectedMember.name} deleted successfully`);
-      onClose();
+      Swal.fire({
+        icon: "success",
+        iconColor: "#037375",
+        title: "Deleted!",
+        text: `${selectedMember.name} has been deleted.`,
+        confirmButtonColor: "#037375",
+      });
     } catch (error) {
       console.error("Failed to delete member:", error);
       toast.error("Failed to delete member. Please try again.");
