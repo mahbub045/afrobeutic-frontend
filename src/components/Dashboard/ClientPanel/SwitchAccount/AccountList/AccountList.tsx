@@ -102,7 +102,20 @@ const AccountList: React.FC = () => {
                         variant="secondary"
                         className="w-fit text-xs text-white"
                       >
-                        {account.role}
+                        {account.role &&
+                          account.role
+                            .split("_")
+                            .map((part: string) =>
+                              part
+                                .split("")
+                                .map((char: string, idx: number) =>
+                                  idx === 0
+                                    ? char.toUpperCase()
+                                    : char.toLowerCase(),
+                                )
+                                .join(""),
+                            )
+                            .join(" ")}
                       </Badge>
                     </div>
 
