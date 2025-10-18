@@ -9,7 +9,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetMembersQuery } from "@/Redux/Reducers/ClientPanel/Members/MembersApi";
-import { EllipsisVertical, Plus } from "lucide-react";
+import { EllipsisVertical, Plus, UserRoundPen, UserX } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useState } from "react";
 import AddNewUserModal from "./Modals/AddNewUserModal";
@@ -27,6 +28,7 @@ export interface MemberProps {
 
 const MemberList: React.FC = () => {
   const [isOpenAddUserModal, setIsOpenAddUserModal] = useState(false);
+  const { data: session } = useSession();
 
   // RTK hooks
   const { data: membersData, isLoading: isLoadingMembers } =
@@ -70,27 +72,26 @@ const MemberList: React.FC = () => {
             key={member.uid}
             className="group hover:shadow-primary/10 relative flex flex-col items-center gap-2 overflow-hidden border border-gray-200/60 bg-white/80 p-8 text-center shadow-md backdrop-blur-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl dark:border-gray-700/60 dark:bg-gray-900/80 dark:shadow-gray-600 dark:hover:shadow-gray-600/30"
           >
-            <div className="absolute top-2 left-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger className="rounded-md px-1 dark:shadow-gray-600">
-                  <EllipsisVertical className="cursor-pointer" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem className="cursor-pointer">
-                    Edit
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer">
-                    Delete
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer">
-                    Deactivate
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer">
-                    Activate
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+            {member.role !== "OWNER" && (
+              <div className="absolute top-2 left-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="rounded-md px-1 dark:shadow-gray-600">
+                    <EllipsisVertical className="cursor-pointer" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem className="text-primary cursor-pointer">
+                      <UserRoundPen className="text-primary" />
+                      Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="text-danger cursor-pointer">
+                      <UserX className="text-danger" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
+
             <Badge
               variant="secondary"
               className="absolute top-2 right-2 w-fit text-xs text-white"
