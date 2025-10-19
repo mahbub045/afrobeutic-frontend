@@ -113,7 +113,10 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
         {isClientRole && (
           <>
             <DropdownMenuItem asChild>
-              <Link className="cursor-pointer" href="/client-panel/profile">
+              <Link
+                className="disabled text-muted-foreground cursor-not-allowed"
+                href="/client-panel/profile"
+              >
                 Profile
               </Link>
             </DropdownMenuItem>
@@ -135,10 +138,18 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link
-                className="cursor-pointer"
+                className="disabled text-muted-foreground cursor-not-allowed"
                 href="/dashboard/client-panel/accounts/billings"
               >
                 Billings
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link
+                className="disabled text-muted-foreground cursor-not-allowed"
+                href="/settings"
+              >
+                Settings
               </Link>
             </DropdownMenuItem>
           </>
@@ -160,11 +171,6 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
             </DropdownMenuItem>
           </>
         )}
-        <DropdownMenuItem asChild>
-          <Link className="cursor-pointer" href="/settings">
-            Settings
-          </Link>
-        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="text-danger cursor-pointer"
