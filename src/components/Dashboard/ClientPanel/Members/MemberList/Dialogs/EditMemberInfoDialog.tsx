@@ -130,7 +130,12 @@ const EditMemberInfoDialog: React.FC<EditNewMemberDialogProps> = ({
               />
             </div>
             <div className="mt-2 flex justify-end gap-3">
-              <Button variant="outline" onClick={onClose} disabled={isLoading}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={isLoading}
+              >
                 Cancel
               </Button>
               <Button

@@ -51,7 +51,7 @@ const DeleteMemberDialog: React.FC<DeleteMemberDialogProps> = ({
           </DialogDescription>
 
           <div className="mt-4 flex justify-end gap-2">
-            <Button variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
             <Button

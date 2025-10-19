@@ -146,7 +146,7 @@ const AccountList: React.FC = () => {
           </div>
           <div className="flex justify-between">
             <div>
-              {accountAccesserData && (
+              {accountAccesserData && accountAccesserData.count > 0 && (
                 <div className="text-sm text-gray-600 dark:text-gray-400">
                   Total: {accountAccesserData.count} account
                   {accountAccesserData.count !== 1 ? "s" : ""}

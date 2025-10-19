@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetSalonListQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonList/SalonListApi";
-import { AlertCircle, Plus, Store } from "lucide-react";
+import { AlertCircle, Plus, Scissors, Store } from "lucide-react";
 import Link from "next/link";
 
 const SalonsCard: React.FC = () => {
@@ -52,7 +52,7 @@ const SalonsCard: React.FC = () => {
         ) : !salonsData?.results || salonsData.results.length === 0 ? (
           <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50/50 p-8 text-center dark:border-gray-700 dark:bg-gray-900/50">
             <div className="space-y-2">
-              <Store className="text-muted-foreground/50 mx-auto h-10 w-10" />
+              <Scissors className="text-muted-foreground/50 mx-auto h-10 w-10" />
               <p className="text-muted-foreground text-sm">No salons yet</p>
               <p className="text-muted-foreground text-xs">
                 Click the Add button to create your first salon
@@ -68,7 +68,7 @@ const SalonsCard: React.FC = () => {
               >
                 <div className="bg-card hover:bg-accent/50 mb-3 flex items-start gap-3 rounded-lg border p-4 shadow-md transition-colors dark:shadow-gray-600">
                   <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
-                    <Store className="text-primary h-5 w-5" />
+                    <Scissors className="text-primary h-5 w-5" />
                   </div>
                   <div className="flex-1 space-y-1">
                     <h4 className="text-sm leading-none font-medium">
