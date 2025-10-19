@@ -1,4 +1,5 @@
 "use client";
+import { ActiveAccountBanner } from "../../CommonComponents/ActiveAccountBanner";
 import Breadcrumbs from "../../CommonComponents/Breadcrumbs";
 import WelcomeMessage from "../CommonComponents/WelcomeMessage";
 import OthersInfo from "./OthersInfo/OthersInfo";
@@ -11,6 +12,7 @@ const ClientPanelContainer: React.FC = () => {
       <Breadcrumbs
         items={[{ label: "Home", href: "/dashboard/client-panel" }]}
       />
+      <ActiveAccountBanner />
       <WelcomeMessage />
       <Overview />
       <OthersInfo />

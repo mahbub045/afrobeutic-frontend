@@ -24,7 +24,15 @@ apiClient.interceptors.request.use(
     }
 
     const token = session?.user?.accessToken;
-    const accountId = session?.user?.account_id;
+
+    // Get active account from localStorage (persisted across reloads)
+    const storedAccountId =
+      typeof window !== "undefined"
+        ? localStorage.getItem("activeAccountId")
+        : null;
+
+    // Priority: stored account > session account
+    const accountId = storedAccountId || session?.user?.account_id;
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

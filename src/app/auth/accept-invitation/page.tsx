@@ -9,7 +9,7 @@ import { Eye, EyeOff, LoaderPinwheel, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import { toast } from "react-toastify";
 import * as Yup from "yup";
 
@@ -27,7 +27,7 @@ const validationSchema = Yup.object({
     .required("Required"),
 });
 
-const AcceptInvitation: React.FC = () => {
+const AcceptInvitationContent: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { theme, setTheme } = useTheme();
   const router = useRouter();
@@ -402,6 +402,20 @@ const AcceptInvitation: React.FC = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const AcceptInvitation: React.FC = () => {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-white via-slate-50 to-slate-100 dark:from-[#050816] dark:via-[#071020] dark:to-[#000000]">
+          <LoaderPinwheel className="h-12 w-12 animate-spin text-blue-600" />
+        </div>
+      }
+    >
+      <AcceptInvitationContent />
+    </Suspense>
   );
 };
 

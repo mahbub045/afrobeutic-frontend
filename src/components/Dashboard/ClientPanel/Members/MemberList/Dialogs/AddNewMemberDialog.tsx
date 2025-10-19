@@ -39,7 +39,7 @@ const AddNewMemberDialog: React.FC<AddNewMemberDialogProps> = ({
   const { theme } = useTheme();
   const initialValues: FormValueProps = { email: "", role: "" };
 
-  const [inviteMember, { isLoading }] = useInviteMemberMutation();
+  const [inviteMember] = useInviteMemberMutation();
 
   const handleSubmit = async (
     userData: FormValueProps,
