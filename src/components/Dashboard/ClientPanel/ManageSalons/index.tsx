@@ -97,10 +97,22 @@ const ManageSalonsContainer: React.FC = () => {
           />
         </div> */}
 
-        <Button variant="default" size="sm" className="text-white">
-          <Plus className="h-4 w-4" />
-          Add new Salon
-        </Button>
+        <div className="flex flex-col items-end gap-2">
+          <Button variant="default" size="sm" className="text-white">
+            <Plus className="h-4 w-4" />
+            Add new Salon
+          </Button>
+
+          {searchTerm && (
+            <Button
+              variant="link"
+              onClick={() => setSearchTerm("")}
+              className="mt-2"
+            >
+              Clear search
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Content */}
