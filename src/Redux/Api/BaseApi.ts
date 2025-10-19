@@ -22,7 +22,6 @@ export const baseApi = createApi({
   baseQuery: baseQuery,
   tagTypes: [
     //Register tag types here
-    "SignUp",
     "AcceptInvitation",
     //Clients Panel tag types
     "Members",

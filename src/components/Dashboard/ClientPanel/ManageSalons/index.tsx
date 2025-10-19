@@ -8,7 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetSalonListQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonList/SalonListApi";
 import { SalonProps } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
@@ -18,7 +17,6 @@ import {
   ChevronRight,
   Plus,
   Scissors,
-  Search,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -163,7 +161,7 @@ const ManageSalonsContainer: React.FC = () => {
                   <CardHeader className="pt-6 pb-4">
                     <div className="mb-4 flex justify-center">
                       <div className="relative">
-                        <div className="from-primary/10 to-primary/5 ring-primary/20 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br ring-1 transition-transform duration-300 group-hover:scale-110">
+                        <div className="from-primary/10 to-primary/5 ring-primary/20 flex h-18 w-18 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br ring-1 transition-transform duration-300 group-hover:scale-110">
                           {/* Render salon logo if available and not failed, otherwise show Scissors icon */}
                           {s.logo && !failedLogos[s.uid] ? (
                             <Image
@@ -171,7 +169,7 @@ const ManageSalonsContainer: React.FC = () => {
                               alt={`${s.name} logo`}
                               width={64}
                               height={64}
-                              className="h-16 w-16 object-cover"
+                              className="h-18 w-18 object-cover"
                               unoptimized
                               onError={() =>
                                 setFailedLogos((prev) => ({
