@@ -139,6 +139,12 @@ function LoginForm() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    // Clear any stored account ID to always start with main account
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("activeAccountId");
+    }
+
     const res = await signIn("credentials", {
       email,
       password,

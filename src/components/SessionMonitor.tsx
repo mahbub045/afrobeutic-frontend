@@ -9,7 +9,7 @@ import { useEffect, useRef } from "react";
  * Uses localStorage to broadcast logout events between tabs
  */
 export default function SessionMonitor() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const previousStatusRef = useRef(status);
 

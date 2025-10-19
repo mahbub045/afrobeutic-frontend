@@ -1,17 +1,37 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAccountSwitch } from "@/hooks/use-account-switch";
+import { useGetAccountAccesserQuery } from "@/Redux/Reducers/ClientPanel/SwitchAccount/SwitchAccountApi";
 import { ArrowRight, LoaderPinwheel, Star } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useMemo } from "react";
 
 const OthersInfo: React.FC = () => {
   const { data: session } = useSession();
+  const { activeAccountId } = useAccountSwitch();
+  const { data: accountsData } = useGetAccountAccesserQuery();
+
+  const isViewingDifferentAccount =
+    activeAccountId && activeAccountId !== session?.user?.account_id;
 
   const userName = session?.user?.first_name
     ? `${session.user.first_name} ${session.user.last_name || ""}`
     : session?.user?.email?.split("@")[0] || "User";
+
+  // Find the active account details
+  const activeAccount = useMemo(() => {
+    if (!isViewingDifferentAccount || !accountsData?.results) return null;
+    return accountsData.results.find((acc) => acc.uid === activeAccountId);
+  }, [isViewingDifferentAccount, activeAccountId, accountsData]);
+
+  const accountDisplayName =
+    isViewingDifferentAccount && activeAccount
+      ? `${activeAccount.owner_name}'s account`
+      : `${userName}'s account`;
 
   return (
     <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -59,14 +79,17 @@ const OthersInfo: React.FC = () => {
                 <p className="text-muted-foreground mb-1 text-sm">
                   Account name:
                 </p>
-                <p className="font-semibold">{userName}&apos;s account</p>
+                <p className="font-semibold">{accountDisplayName}</p>
               </div>
               <div>
                 <p className="text-muted-foreground mb-1 text-sm">
                   Access Role:
                 </p>
-                <p className="font-semibold">
-                  {session?.user?.role
+                <Badge variant="secondary" className="font-semibold text-white">
+                  {(isViewingDifferentAccount && activeAccount
+                    ? activeAccount.role
+                    : session?.user?.role
+                  )
                     ?.split("_")
                     .map((part: string) =>
                       part
@@ -77,7 +100,7 @@ const OthersInfo: React.FC = () => {
                         .join(""),
                     )
                     .join(" ") || "N/A"}
-                </p>
+                </Badge>
               </div>
             </>
           )}
