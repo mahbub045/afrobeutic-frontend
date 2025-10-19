@@ -2,6 +2,8 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { useAccountSwitch } from "@/hooks/use-account-switch";
+import { useGetAccountAccesserQuery } from "@/Redux/Reducers/ClientPanel/SwitchAccount/SwitchAccountApi";
 import {
   Calendar,
   Clock,
@@ -10,13 +12,30 @@ import {
   Users,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { useMemo } from "react";
 
 const WelcomeMessage: React.FC = () => {
   const { data: session, status } = useSession();
+  const { activeAccountId } = useAccountSwitch();
+  const { data: accountsData } = useGetAccountAccesserQuery();
+
+  const isViewingDifferentAccount =
+    activeAccountId && activeAccountId !== session?.user?.account_id;
 
   const userName = session?.user?.first_name
     ? `${session.user.first_name} ${session.user.last_name || ""}`
     : session?.user?.email?.split("@")[0] || "User";
+
+  // Find the active account details
+  const activeAccount = useMemo(() => {
+    if (!isViewingDifferentAccount || !accountsData?.results) return null;
+    return accountsData.results.find((acc) => acc.uid === activeAccountId);
+  }, [isViewingDifferentAccount, activeAccountId, accountsData]);
+
+  const accountDisplayName =
+    isViewingDifferentAccount && activeAccount
+      ? `${activeAccount.owner_name}'s account`
+      : `${userName}'s account`;
 
   const stats = [
     {
@@ -74,18 +93,18 @@ const WelcomeMessage: React.FC = () => {
           <h1 className="text-foreground text-2xl font-bold sm:text-3xl md:text-4xl">
             Welcome to Afrobeutic!
           </h1>
-          <Badge
+            <Badge
             variant="secondary"
             className="bg-secondary hover:bg-secondary/90 inline-flex rounded-md px-3 py-1.5 text-sm font-semibold text-white sm:px-4 sm:py-2 sm:text-base"
-          >
+            >
             {status === "loading" ? (
               <div className="flex items-center gap-2">
-                <LoaderPinwheel className="h-4 w-4 animate-spin sm:h-6 sm:w-10" />
+              <LoaderPinwheel className="h-4 w-4 animate-spin sm:h-6 sm:w-10" />
               </div>
             ) : (
-              <span>{userName}&apos;s account</span>
+              <span>{accountDisplayName}</span>
             )}
-          </Badge>
+            </Badge>
         </div>
 
         {/* Right: Monitor/Dashboard Display */}

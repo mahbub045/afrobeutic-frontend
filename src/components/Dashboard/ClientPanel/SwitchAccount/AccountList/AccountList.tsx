@@ -1,14 +1,14 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAccountSwitch } from "@/hooks/use-account-switch";
 import { useGetAccountAccesserQuery } from "@/Redux/Reducers/ClientPanel/SwitchAccount/SwitchAccountApi";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
-import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
 const AccountList: React.FC = () => {
+  const { switchAccount, activeAccountId } = useAccountSwitch();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -84,51 +84,63 @@ const AccountList: React.FC = () => {
           <div className="grid auto-rows-fr grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
             {accountAccesserData.results.map((account, index) => (
               <div key={account.uid || index} className="relative w-full">
-                <Link
-                  href={`/dashboard/accounts/${account.uid ?? index}`}
-                  aria-label={`Open account ${account.name}`}
+                <Card
+                  onClick={() => switchAccount(account.uid, account.owner_name)}
+                  className={`group hover:shadow-primary/10 relative flex h-full min-h-20 w-full transform cursor-pointer flex-row items-center gap-4 overflow-hidden border bg-white/80 px-4 pt-8 pb-6 shadow-md backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:scale-105 hover:shadow-lg dark:bg-gray-900/80 dark:shadow-gray-600 ${
+                    activeAccountId === account.uid
+                      ? "border-primary border-2 shadow-lg"
+                      : "border-gray-200/60 dark:border-gray-700/60"
+                  }`}
                 >
-                  <Card className="group hover:shadow-primary/10 relative flex h-full min-h-20 w-full transform flex-row items-center gap-4 overflow-hidden border border-gray-200/60 bg-white/80 px-4 pt-8 pb-6 shadow-md backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:scale-105 hover:shadow-lg dark:border-gray-700/60 dark:bg-gray-900/80 dark:shadow-gray-600">
-                    {/* Badge inside the Card so it visually sits in the top-right of the card */}
-                    <div className="absolute top-2 right-2 z-30">
-                      <Badge
-                        variant="secondary"
-                        className="w-fit text-xs text-white"
-                      >
-                        {account.role &&
-                          account.role
-                            .split("_")
-                            .map((part: string) =>
-                              part
-                                .split("")
-                                .map((char: string, idx: number) =>
-                                  idx === 0
-                                    ? char.toUpperCase()
-                                    : char.toLowerCase(),
-                                )
-                                .join(""),
-                            )
-                            .join(" ")}
+                  {/* Badge inside the Card so it visually sits in the top-right of the card */}
+                  <div className="absolute top-2 right-2 z-30">
+                    <Badge
+                      variant={
+                        activeAccountId === account.uid
+                          ? "default"
+                          : "secondary"
+                      }
+                      className="w-fit text-xs text-white"
+                    >
+                      {account.role &&
+                        account.role
+                          .split("_")
+                          .map((part: string) =>
+                            part
+                              .split("")
+                              .map((char: string, idx: number) =>
+                                idx === 0
+                                  ? char.toUpperCase()
+                                  : char.toLowerCase(),
+                              )
+                              .join(""),
+                          )
+                          .join(" ")}
+                    </Badge>
+                  </div>
+
+                  {activeAccountId === account.uid && (
+                    <div className="absolute top-2 left-2 z-30">
+                      <Badge variant="secondary" className="text-xs text-white">
+                        Active
                       </Badge>
                     </div>
+                  )}
 
-                    <div className="flex w-full flex-row items-center gap-4">
-                      <div className="flex flex-col items-start truncate">
-                        <h3 className="text-primary truncate text-base font-semibold lg:text-lg">
-                          {account.owner_name}&apos;s account
-                        </h3>
-                        <p className="truncate text-xs">
-                          {account.owner_email}
-                        </p>
-                        <p className="mt-2 truncate text-xs text-gray-500 dark:text-gray-400">
-                          <span className="font-medium">Account ID:</span>{" "}
-                          {account.uid}
-                        </p>
-                      </div>
-                      <div className="ml-auto" />
+                  <div className="flex w-full flex-row items-center gap-4">
+                    <div className="flex flex-col items-start truncate">
+                      <h3 className="text-primary truncate text-base font-semibold lg:text-lg">
+                        {account.owner_name}&apos;s account
+                      </h3>
+                      <p className="truncate text-xs">{account.owner_email}</p>
+                      <p className="mt-2 truncate text-xs text-gray-500 dark:text-gray-400">
+                        <span className="font-medium">Account ID:</span>{" "}
+                        {account.uid}
+                      </p>
                     </div>
-                  </Card>
-                </Link>
+                    <div className="ml-auto" />
+                  </div>
+                </Card>
               </div>
             ))}
           </div>

@@ -18,7 +18,6 @@ import {
   UserRoundPen,
   UserX,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import AddNewMemberDialog from "./Dialogs/AddNewMemberDialog";
@@ -35,8 +34,6 @@ const MemberList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-
-  const { data: session } = useSession();
 
   // Debounce search input
   useEffect(() => {

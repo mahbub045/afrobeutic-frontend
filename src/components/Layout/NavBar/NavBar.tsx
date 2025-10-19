@@ -22,6 +22,9 @@ const NavBar: React.FC<NavBarProps> = ({ onMobileMenuToggle }) => {
     // Broadcast logout event to all tabs
     localStorage.setItem("logout-event", Date.now().toString());
 
+    // Clear active account from localStorage
+    localStorage.removeItem("activeAccountId");
+
     // Perform the actual sign out
     signOut({ callbackUrl: "/auth/login" });
   };
