@@ -227,7 +227,7 @@ const MemberList: React.FC = () => {
       </div>
       <div className="flex justify-between">
         <div>
-          {membersData && (
+          {membersData && membersData.count > 0 && (
             <div className="text-sm text-gray-600 dark:text-gray-400">
               Total: {membersData.count} member
               {membersData.count !== 1 ? "s" : ""}

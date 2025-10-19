@@ -234,7 +234,7 @@ const ManageSalonsContainer: React.FC = () => {
       </div>
       <div className="flex justify-between">
         <div>
-          {salonListData && (
+          {salonListData && salonListData.count > 0 && (
             <div className="text-sm text-gray-600 dark:text-gray-400">
               Total: {salonListData.count} salon
               {salonListData.count !== 1 ? "s" : ""}
