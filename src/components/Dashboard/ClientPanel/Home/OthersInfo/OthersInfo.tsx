@@ -85,7 +85,7 @@ const OthersInfo: React.FC = () => {
                 <p className="text-muted-foreground mb-1 text-sm">
                   Access Role:
                 </p>
-                <Badge variant="secondary" className="font-semibold">
+                <Badge variant="secondary" className="font-semibold text-white">
                   {(isViewingDifferentAccount && activeAccount
                     ? activeAccount.role
                     : session?.user?.role

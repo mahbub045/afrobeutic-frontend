@@ -121,7 +121,7 @@ const AccountList: React.FC = () => {
 
                   {activeAccountId === account.uid && (
                     <div className="absolute top-2 left-2 z-30">
-                      <Badge variant="secondary" className="text-xs">
+                      <Badge variant="secondary" className="text-xs text-white">
                         Active
                       </Badge>
                     </div>

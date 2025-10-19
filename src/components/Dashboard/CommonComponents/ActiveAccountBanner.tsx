@@ -55,7 +55,7 @@ export const ActiveAccountBanner = () => {
         onClick={resetToMainAccount}
         variant="outline"
         size="sm"
-        className="w-full gap-2 sm:w-auto"
+        className="w-full gap-2 shadow-md sm:w-auto dark:shadow-gray-600"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to My Account
