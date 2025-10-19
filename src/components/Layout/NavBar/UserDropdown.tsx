@@ -60,7 +60,7 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="inline-flex items-center gap-2 rounded-full px-1 py-1 dark:shadow-gray-600"
+          className="inline-flex items-center gap-2 rounded-full px-2 py-1 dark:shadow-gray-600"
         >
           <Avatar className="h-8 w-8">
             <AvatarImage
