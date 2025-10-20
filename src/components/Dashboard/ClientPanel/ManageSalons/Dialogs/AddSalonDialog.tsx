@@ -28,10 +28,10 @@ interface AddSalonDialogProps {
 }
 interface AddSalonProps {
   name: string;
-  logo: null | string;
+  logo: string;
   salon_type: string;
   email: string;
-  phone: number;
+  phone: string;
   website: string;
   street: string;
   city: string;
@@ -39,6 +39,7 @@ interface AddSalonProps {
   country: string;
   latitude: number;
   longitude: number;
+  status: string;
   opening_hours: OpeningHour[];
 }
 
@@ -56,7 +57,7 @@ type FormValues = {
   logo: string;
   salon_type: string;
   email: string;
-  phone: number;
+  phone: string;
   website: string;
   street: string;
   city: string;
@@ -64,6 +65,7 @@ type FormValues = {
   country: string;
   latitude: number;
   longitude: number;
+  status: string;
   opening_hours: OpeningHour[];
 };
 
@@ -82,10 +84,11 @@ const getTimeDifference = (startTime: string, endTime: string): number => {
 const validationSchema = Yup.object().shape({
   name: Yup.string().required("Salon name is required"),
   logo: Yup.string(),
-  salon_type: Yup.string(),
+  salon_type: Yup.string().required("Salon type is required"),
   email: Yup.string().required("Email is required").email("Invalid email"),
-  phone: Yup.number().required("Phone number is required"),
+  phone: Yup.string().required("Phone number is required"),
   website: Yup.string().url("Invalid URL"),
+  status: Yup.string().required("Status is required"),
   street: Yup.string().required("Street is required"),
   city: Yup.string().required("City is required"),
   postal_code: Yup.string().required("Postal code is required"),
@@ -172,14 +175,83 @@ const validationSchema = Yup.object().shape({
 const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
   const [addSalon, { isLoading }] = useAddSalonMutation();
 
-  const handleSubmit = async (salonData: AddSalonProps) => {
+  // Helper function to convert time HH:MM to HH:MM:SS format
+  const convertTimeToAPIFormat = (time: string): string => {
+    if (!time || time === "" || time === "00:00") return "00:00:00";
+    // If already in HH:MM:SS format, return as is
+    if (time.split(":").length === 3) return time;
+    // Otherwise, add :00 for seconds
+    return `${time}:00`;
+  };
+
+  const handleSubmit = async (formData: FormValues) => {
     try {
-      await addSalon(salonData).unwrap();
+      // Transform the data to match API payload format
+      const payload: Partial<AddSalonProps> & {
+        name: string;
+        salon_type: string;
+        email: string;
+        phone: string;
+        status: string;
+      } = {
+        name: formData.name,
+        salon_type: formData.salon_type,
+        email: formData.email,
+        phone: formData.phone, // Pass phone as-is (string)
+        website: formData.website,
+        street: formData.street,
+        city: formData.city,
+        postal_code: formData.postal_code,
+        country: formData.country,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
+        status: formData.status,
+        ...(formData.logo && { logo: formData.logo }), // Only include logo if provided
+        opening_hours: formData.opening_hours.map((oh) => ({
+          day: oh.day,
+          opening_start_time: convertTimeToAPIFormat(oh.opening_start_time),
+          opening_end_time: convertTimeToAPIFormat(oh.opening_end_time),
+          break_start_time: oh.break_start_time
+            ? convertTimeToAPIFormat(oh.break_start_time)
+            : undefined,
+          break_end_time: oh.break_end_time
+            ? convertTimeToAPIFormat(oh.break_end_time)
+            : undefined,
+          is_closed: oh.is_closed,
+        })),
+      };
+
+      console.log("Sending payload to API:", JSON.stringify(payload, null, 2));
+
+      await addSalon(payload).unwrap();
       onClose();
       toast.success("Salon added successfully");
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Failed to add salon:", error);
-      toast.error("Failed to add salon. Please try again.");
+
+      // Display specific error messages from API
+      const apiError = error as { data?: Record<string, unknown> };
+      if (apiError?.data) {
+        const errorData = apiError.data;
+        const errorMessages: string[] = [];
+
+        Object.keys(errorData).forEach((key) => {
+          const value = errorData[key];
+          if (Array.isArray(value)) {
+            errorMessages.push(`${key}: ${value.join(", ")}`);
+          } else if (typeof value === "object" && value !== null) {
+            errorMessages.push(`${key} has errors`);
+          }
+        });
+
+        if (errorMessages.length > 0) {
+          errorMessages.forEach((msg) => toast.error(msg));
+        } else {
+          toast.error("Failed to add salon. Please try again.");
+        }
+      } else {
+        toast.error("Failed to add salon. Please try again.");
+      }
     }
   };
   const salonTypes = [
@@ -213,13 +285,13 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
           </DialogDescription>
         </DialogHeader>
         {/* Formik form for adding a new salon goes here */}
-        <Formik
+        <Formik<FormValues>
           initialValues={{
             name: "",
             logo: "",
             salon_type: "",
             email: "",
-            phone: 0,
+            phone: "",
             website: "",
             street: "",
             city: "",
@@ -227,7 +299,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
             country: "",
             latitude: 0,
             longitude: 0,
-            status: "",
+            status: "OPEN",
             opening_hours: days.map((d) => ({
               day: d,
               opening_start_time: "08:00",
@@ -279,29 +351,32 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
             </div>
             <div className="mb-4 grid grid-cols-1">
               <Label htmlFor="logo" className="mb-2">
-                Salon Logo
+                Salon Logo URL
               </Label>
               <Field
                 name="logo"
                 id="logo"
                 as="input"
                 type="file"
-                placeholder="Salon Logo"
+                placeholder="Enter logo URL (optional)"
               />
               <ErrorMessage
                 name="logo"
                 component="div"
                 className="text-danger mt-1 text-xs"
               />
+              <p className="text-muted-foreground mt-1 text-xs">
+                Enter a URL to an image (e.g., https://example.com/logo.png)
+              </p>
             </div>
             <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <Label htmlFor="role" className="mb-2">
+                <Label htmlFor="salon_type" className="mb-2">
                   Salon Type<span className="text-danger">*</span>
                 </Label>
-                <Field id="role" name="role" as="select" required>
+                <Field id="salon_type" name="salon_type" as="select" required>
                   <option value="" disabled>
-                    Select a role
+                    Select a salon type
                   </option>
                   {salonTypes.map((type) => (
                     <option key={type.value} value={type.value}>
@@ -310,7 +385,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                   ))}
                 </Field>
                 <ErrorMessage
-                  name="role"
+                  name="salon_type"
                   component="div"
                   className="text-danger mt-1 text-xs"
                 />
@@ -341,9 +416,8 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                 <Field
                   name="phone"
                   id="phone"
-                  as="input"
-                  type="number"
-                  placeholder="Phone"
+                  type="text"
+                  placeholder="Enter phone number"
                 />
                 <ErrorMessage
                   name="phone"
