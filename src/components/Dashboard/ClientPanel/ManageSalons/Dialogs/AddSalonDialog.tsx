@@ -64,6 +64,18 @@ type FormValues = {
   opening_hours: OpeningHour[];
 };
 
+// Helper function to convert time string (HH:MM) to minutes for comparison
+const timeToMinutes = (timeStr: string): number => {
+  if (!timeStr) return 0;
+  const [hours, minutes] = timeStr.split(":").map(Number);
+  return hours * 60 + minutes;
+};
+
+// Helper function to calculate duration between two times in minutes
+const getTimeDifference = (startTime: string, endTime: string): number => {
+  return timeToMinutes(endTime) - timeToMinutes(startTime);
+};
+
 const validationSchema = Yup.object().shape({
   name: Yup.string().required("Salon name is required"),
   logo: Yup.string(),
@@ -80,10 +92,75 @@ const validationSchema = Yup.object().shape({
   opening_hours: Yup.array().of(
     Yup.object().shape({
       day: Yup.string().required("Day is required"),
-      opening_start_time: Yup.string(),
-      opening_end_time: Yup.string(),
-      break_start_time: Yup.string(),
-      break_end_time: Yup.string(),
+      opening_start_time: Yup.string().when("is_closed", {
+        is: false,
+        then: (schema) => schema.required("Opening time is required"),
+        otherwise: (schema) => schema.notRequired(),
+      }),
+      opening_end_time: Yup.string()
+        .when("is_closed", {
+          is: false,
+          then: (schema) => schema.required("Closing time is required"),
+          otherwise: (schema) => schema.notRequired(),
+        })
+        .test(
+          "is-after-opening",
+          "Closing time must be after opening time",
+          function (value) {
+            const { opening_start_time, is_closed } = this.parent;
+            if (is_closed || !opening_start_time || !value) return true;
+            return getTimeDifference(opening_start_time, value) > 0;
+          },
+        ),
+      break_start_time: Yup.string()
+        .nullable()
+        .test(
+          "break-within-hours",
+          "Break start time must be within opening hours",
+          function (value) {
+            const { opening_start_time, opening_end_time, is_closed } =
+              this.parent;
+            if (is_closed || !value) return true;
+            const breakStart = timeToMinutes(value);
+            const openStart = timeToMinutes(opening_start_time);
+            const openEnd = timeToMinutes(opening_end_time);
+            return breakStart >= openStart && breakStart < openEnd;
+          },
+        ),
+      break_end_time: Yup.string()
+        .nullable()
+        .test(
+          "break-within-hours",
+          "Break end time must be within opening hours",
+          function (value) {
+            const { opening_start_time, opening_end_time, is_closed } =
+              this.parent;
+            if (is_closed || !value) return true;
+            const breakEnd = timeToMinutes(value);
+            const openStart = timeToMinutes(opening_start_time);
+            const openEnd = timeToMinutes(opening_end_time);
+            return breakEnd > openStart && breakEnd <= openEnd;
+          },
+        )
+        .test(
+          "break-end-after-start",
+          "Break end time must be after break start time",
+          function (value) {
+            const { break_start_time, is_closed } = this.parent;
+            if (is_closed || !value || !break_start_time) return true;
+            return getTimeDifference(break_start_time, value) > 0;
+          },
+        )
+        .test(
+          "break-duration",
+          "Break duration cannot exceed 2 hours",
+          function (value) {
+            const { break_start_time, is_closed } = this.parent;
+            if (is_closed || !value || !break_start_time) return true;
+            const duration = getTimeDifference(break_start_time, value);
+            return duration <= 120; // 120 minutes = 2 hours
+          },
+        ),
       is_closed: Yup.boolean(),
     }),
   ),
@@ -126,7 +203,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
         <Formik
           initialValues={{
             name: "",
-            logo: null,
+            logo: "",
             salon_type: "",
             email: "",
             phone: 0,
@@ -137,6 +214,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
             country: "",
             latitude: 0,
             longitude: 0,
+            status: "",
             opening_hours: days.map((d) => ({
               day: d,
               opening_start_time: "08:00",
@@ -420,77 +498,105 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                   </div>
 
                                   {/* Opening time */}
-                                  <div className="col-span-2 flex items-center gap-1">
-                                    <Field
-                                      as="select"
+                                  <div className="col-span-2">
+                                    <div className="flex items-center gap-1">
+                                      <Field
+                                        as="select"
+                                        name={`opening_hours.${idx}.opening_start_time`}
+                                        className="w-full"
+                                      >
+                                        {hours.map((h) =>
+                                          minutes.map((m) => (
+                                            <option
+                                              key={`${h}:${m}`}
+                                              value={`${h}:${m}`}
+                                            >{`${h}:${m}`}</option>
+                                          )),
+                                        )}
+                                      </Field>
+                                    </div>
+                                    <ErrorMessage
                                       name={`opening_hours.${idx}.opening_start_time`}
-                                      className="w-full"
-                                    >
-                                      {hours.map((h) =>
-                                        minutes.map((m) => (
-                                          <option
-                                            key={`${h}:${m}`}
-                                            value={`${h}:${m}`}
-                                          >{`${h}:${m}`}</option>
-                                        )),
-                                      )}
-                                    </Field>
+                                      component="div"
+                                      className="text-danger mt-1 text-xs"
+                                    />
                                   </div>
 
                                   {/* Closing time */}
-                                  <div className="col-span-2 flex items-center gap-1">
-                                    <Field
-                                      as="select"
+                                  <div className="col-span-2">
+                                    <div className="flex items-center gap-1">
+                                      <Field
+                                        as="select"
+                                        name={`opening_hours.${idx}.opening_end_time`}
+                                        className="w-full"
+                                      >
+                                        {hours.map((h) =>
+                                          minutes.map((m) => (
+                                            <option
+                                              key={`${h}:${m}`}
+                                              value={`${h}:${m}`}
+                                            >{`${h}:${m}`}</option>
+                                          )),
+                                        )}
+                                      </Field>
+                                    </div>
+                                    <ErrorMessage
                                       name={`opening_hours.${idx}.opening_end_time`}
-                                      className="w-full"
-                                    >
-                                      {hours.map((h) =>
-                                        minutes.map((m) => (
-                                          <option
-                                            key={`${h}:${m}`}
-                                            value={`${h}:${m}`}
-                                          >{`${h}:${m}`}</option>
-                                        )),
-                                      )}
-                                    </Field>
+                                      component="div"
+                                      className="text-danger mt-1 text-xs"
+                                    />
                                   </div>
 
                                   {/* Break start */}
-                                  <div className="col-span-2 flex items-center gap-1">
-                                    <Field
-                                      as="select"
+                                  <div className="col-span-2">
+                                    <div className="flex items-center gap-1">
+                                      <Field
+                                        as="select"
+                                        name={`opening_hours.${idx}.break_start_time`}
+                                        className="w-full"
+                                      >
+                                        <option value="">-</option>
+                                        {hours.map((h) =>
+                                          minutes.map((m) => (
+                                            <option
+                                              key={`bs-${h}:${m}`}
+                                              value={`${h}:${m}`}
+                                            >{`${h}:${m}`}</option>
+                                          )),
+                                        )}
+                                      </Field>
+                                    </div>
+                                    <ErrorMessage
                                       name={`opening_hours.${idx}.break_start_time`}
-                                      className="w-full"
-                                    >
-                                      <option value="">-</option>
-                                      {hours.map((h) =>
-                                        minutes.map((m) => (
-                                          <option
-                                            key={`bs-${h}:${m}`}
-                                            value={`${h}:${m}`}
-                                          >{`${h}:${m}`}</option>
-                                        )),
-                                      )}
-                                    </Field>
+                                      component="div"
+                                      className="text-danger mt-1 text-xs"
+                                    />
                                   </div>
 
                                   {/* Break end */}
-                                  <div className="col-span-2 flex items-center gap-1">
-                                    <Field
-                                      as="select"
+                                  <div className="col-span-2">
+                                    <div className="flex items-center gap-1">
+                                      <Field
+                                        as="select"
+                                        name={`opening_hours.${idx}.break_end_time`}
+                                        className="w-full"
+                                      >
+                                        <option value="">-</option>
+                                        {hours.map((h) =>
+                                          minutes.map((m) => (
+                                            <option
+                                              key={`be-${h}:${m}`}
+                                              value={`${h}:${m}`}
+                                            >{`${h}:${m}`}</option>
+                                          )),
+                                        )}
+                                      </Field>
+                                    </div>
+                                    <ErrorMessage
                                       name={`opening_hours.${idx}.break_end_time`}
-                                      className="w-full"
-                                    >
-                                      <option value="">-</option>
-                                      {hours.map((h) =>
-                                        minutes.map((m) => (
-                                          <option
-                                            key={`be-${h}:${m}`}
-                                            value={`${h}:${m}`}
-                                          >{`${h}:${m}`}</option>
-                                        )),
-                                      )}
-                                    </Field>
+                                      component="div"
+                                      className="text-danger mt-1 text-xs"
+                                    />
                                   </div>
 
                                   <div className="col-span-1 flex justify-end">
@@ -500,9 +606,28 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                       {({ field }: FieldProps) => (
                                         <Switch
                                           checked={Boolean(field.value)}
-                                          onCheckedChange={(v: boolean) =>
-                                            form.setFieldValue(field.name, v)
-                                          }
+                                          onCheckedChange={(v: boolean) => {
+                                            form.setFieldValue(field.name, v);
+                                            // When closed is toggled, set times to 00:00
+                                            if (v) {
+                                              form.setFieldValue(
+                                                `opening_hours.${idx}.opening_start_time`,
+                                                "00:00",
+                                              );
+                                              form.setFieldValue(
+                                                `opening_hours.${idx}.opening_end_time`,
+                                                "00:00",
+                                              );
+                                              form.setFieldValue(
+                                                `opening_hours.${idx}.break_start_time`,
+                                                "00:00",
+                                              );
+                                              form.setFieldValue(
+                                                `opening_hours.${idx}.break_end_time`,
+                                                "00:00",
+                                              );
+                                            }
+                                          }}
                                         />
                                       )}
                                     </Field>
