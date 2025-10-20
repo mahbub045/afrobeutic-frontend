@@ -23,7 +23,7 @@ const EditMemberInfoDialog: React.FC<EditNewMemberDialogProps> = ({
   onClose,
   selectedMember,
 }) => {
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const initialValues: EditFormValueProps = {
     status: selectedMember?.status ?? "",
     role: selectedMember?.role ?? "",
@@ -63,8 +63,8 @@ const EditMemberInfoDialog: React.FC<EditNewMemberDialogProps> = ({
           iconColor: "#037375",
           title: "Member Updated",
           text: `Member information has been updated successfully.`,
-          background: theme === "dark" ? "#0f1724" : undefined,
-          color: theme === "dark" ? "#e6eef0" : undefined,
+          background: resolvedTheme === "dark" ? "#0f1724" : undefined,
+          color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
           confirmButtonColor: "#037375",
         });
       })

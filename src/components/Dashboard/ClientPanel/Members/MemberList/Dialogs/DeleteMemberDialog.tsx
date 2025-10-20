@@ -17,7 +17,7 @@ const DeleteMemberDialog: React.FC<DeleteMemberDialogProps> = ({
   onClose,
   selectedMember,
 }) => {
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
   // RTK hook
   const [deleteMember, { isLoading }] = useDeleteMemberMutation();
 
@@ -31,8 +31,8 @@ const DeleteMemberDialog: React.FC<DeleteMemberDialogProps> = ({
         iconColor: "#037375",
         title: "Deleted!",
         text: `${selectedMember.name} has been deleted.`,
-        background: theme === "dark" ? "#0f1724" : undefined,
-        color: theme === "dark" ? "#e6eef0" : undefined,
+        background: resolvedTheme === "dark" ? "#0f1724" : undefined,
+        color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
         confirmButtonColor: "#037375",
       });
     } catch (error) {
