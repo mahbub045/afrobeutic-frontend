@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,6 +9,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { countries } from "@/data/countries";
+import { useAddSalonMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonApis";
 import {
   ErrorMessage,
   Field,
@@ -17,6 +19,7 @@ import {
   Form as FormikForm,
   FormikProps,
 } from "formik";
+import { toast } from "react-toastify";
 import * as Yup from "yup";
 
 interface AddSalonDialogProps {
@@ -167,8 +170,17 @@ const validationSchema = Yup.object().shape({
 });
 
 const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
+  const [addSalon, { isLoading }] = useAddSalonMutation();
+
   const handleSubmit = async (salonData: AddSalonProps) => {
-    // Handle form submission logic here
+    try {
+      await addSalon(salonData).unwrap();
+      onClose();
+      toast.success("Salon added successfully");
+    } catch (error) {
+      console.error("Failed to add salon:", error);
+      toast.error("Failed to add salon. Please try again.");
+    }
   };
   const salonTypes = [
     { value: "UNISEX", label: "Unisex Salon" },
@@ -189,6 +201,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
     String(i).padStart(2, "0"),
   );
   const minutes = ["00", "15", "30", "45"];
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       {/* Make the dialog vertically scrollable when content exceeds the viewport */}
@@ -485,7 +498,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                       </div>
 
                       <Field name="opening_hours">
-                        {({ form }: { form: FormikProps<FormValues> }) => (
+                        {({ form }: { form: FormikProps<AddSalonProps> }) => (
                           <>
                             {form.values.opening_hours.map(
                               (oh: OpeningHour, idx: number) => (
@@ -642,6 +655,23 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                   )}
                 </FieldArray>
               </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-40 text-white"
+              >
+                {isLoading ? "Adding..." : "Add New Salon"}
+              </Button>
             </div>
           </FormikForm>
         </Formik>

@@ -28,7 +28,15 @@ export const SalontApis = baseApi.injectEndpoints({
         providesTags: ["SalonList"],
       },
     ),
+    addSalon: builder.mutation({
+      query: (salonData) => ({
+        url: `/salons`,
+        method: "POST",
+        body: salonData,
+      }),
+      invalidatesTags: ["SalonList"],
+    }),
   }),
 });
 
-export const { useGetSalonListQuery } = SalontApis;
+export const { useGetSalonListQuery, useAddSalonMutation } = SalontApis;
