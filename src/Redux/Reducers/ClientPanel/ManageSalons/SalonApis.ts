@@ -4,7 +4,7 @@ import {
   SalonListResponse,
 } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
 
-export const SalonListApi = baseApi.injectEndpoints({
+export const SalontApis = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getSalonList: builder.query<SalonListResponse, SalonListQueryParams | void>(
       {
@@ -31,4 +31,4 @@ export const SalonListApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useGetSalonListQuery } = SalonListApi;
+export const { useGetSalonListQuery } = SalontApis;

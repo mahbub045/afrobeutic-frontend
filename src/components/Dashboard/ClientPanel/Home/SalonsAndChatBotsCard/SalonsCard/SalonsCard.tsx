@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useGetSalonListQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonList/SalonListApi";
+import { useGetSalonListQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonApis";
 import { AlertCircle, Plus, Scissors } from "lucide-react";
 import Link from "next/link";
 
