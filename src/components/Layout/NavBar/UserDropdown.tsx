@@ -114,7 +114,7 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
           <>
             <DropdownMenuItem asChild>
               <Link
-                className="disabled text-muted-foreground cursor-not-allowed"
+                className="text-muted-foreground cursor-not-allowed"
                 href="/client-panel/profile"
               >
                 Profile
@@ -138,7 +138,7 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link
-                className="disabled text-muted-foreground cursor-not-allowed"
+                className="text-muted-foreground cursor-not-allowed"
                 href="/dashboard/client-panel/accounts/billings"
               >
                 Billings
@@ -146,7 +146,7 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link
-                className="disabled text-muted-foreground cursor-not-allowed"
+                className="text-muted-foreground cursor-not-allowed"
                 href="/settings"
               >
                 Settings
