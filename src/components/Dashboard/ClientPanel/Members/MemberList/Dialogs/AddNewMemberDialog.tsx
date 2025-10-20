@@ -56,7 +56,8 @@ const AddNewMemberDialog: React.FC<AddNewMemberDialogProps> = ({
         iconColor: "#037375",
         title: "Invitation Sent",
         text: `An invitation has been sent to ${userData.email}`,
-        theme: (theme as "light" | "dark" | "auto") || "auto",
+        background: theme === "dark" ? "#0f1724" : undefined,
+        color: theme === "dark" ? "#e6eef0" : undefined,
         confirmButtonColor: "#037375",
       });
     } catch (error) {

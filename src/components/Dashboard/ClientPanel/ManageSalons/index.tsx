@@ -118,8 +118,8 @@ const ManageSalonsContainer: React.FC = () => {
       {/* Content */}
       <div className="mt-6">
         {isLoading ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {[...Array(6)].map((_, idx) => (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {[...Array(12)].map((_, idx) => (
               <Card
                 key={`salon-skeleton-${idx}`}
                 className="relative overflow-hidden border border-gray-200/60 bg-white/80 shadow-md dark:border-gray-700/60 dark:bg-gray-900/80"
@@ -153,7 +153,7 @@ const ManageSalonsContainer: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
             {salonListData.results.map((s: SalonProps) => (
               <Card
                 key={s.uid}

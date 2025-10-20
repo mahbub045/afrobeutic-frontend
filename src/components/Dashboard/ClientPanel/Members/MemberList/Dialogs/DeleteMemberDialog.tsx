@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { useDeleteMemberMutation } from "@/Redux/Reducers/ClientPanel/Members/MembersApi";
 import { DeleteMemberDialogProps } from "@/Types/ClientPanel/MemberTypes/MemberType";
+import { useTheme } from "next-themes";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 
@@ -16,6 +17,7 @@ const DeleteMemberDialog: React.FC<DeleteMemberDialogProps> = ({
   onClose,
   selectedMember,
 }) => {
+  const { theme } = useTheme();
   // RTK hook
   const [deleteMember, { isLoading }] = useDeleteMemberMutation();
 
@@ -29,6 +31,8 @@ const DeleteMemberDialog: React.FC<DeleteMemberDialogProps> = ({
         iconColor: "#037375",
         title: "Deleted!",
         text: `${selectedMember.name} has been deleted.`,
+        background: theme === "dark" ? "#0f1724" : undefined,
+        color: theme === "dark" ? "#e6eef0" : undefined,
         confirmButtonColor: "#037375",
       });
     } catch (error) {

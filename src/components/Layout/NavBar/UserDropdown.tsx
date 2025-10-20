@@ -60,7 +60,7 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="inline-flex items-center gap-2 rounded-full px-1 py-1 dark:shadow-gray-600"
+          className="inline-flex items-center gap-2 rounded-full px-2 py-1 dark:shadow-gray-600"
         >
           <Avatar className="h-8 w-8">
             <AvatarImage
@@ -113,7 +113,10 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
         {isClientRole && (
           <>
             <DropdownMenuItem asChild>
-              <Link className="cursor-pointer" href="/client-panel/profile">
+              <Link
+                className="text-muted-foreground cursor-not-allowed"
+                href="/client-panel/profile"
+              >
                 Profile
               </Link>
             </DropdownMenuItem>
@@ -135,10 +138,18 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link
-                className="cursor-pointer"
+                className="text-muted-foreground cursor-not-allowed"
                 href="/dashboard/client-panel/accounts/billings"
               >
                 Billings
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link
+                className="text-muted-foreground cursor-not-allowed"
+                href="/settings"
+              >
+                Settings
               </Link>
             </DropdownMenuItem>
           </>
@@ -160,11 +171,6 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
             </DropdownMenuItem>
           </>
         )}
-        <DropdownMenuItem asChild>
-          <Link className="cursor-pointer" href="/settings">
-            Settings
-          </Link>
-        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="text-danger cursor-pointer"
