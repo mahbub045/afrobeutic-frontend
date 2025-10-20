@@ -54,9 +54,9 @@ const SignupSuccess: React.FC = () => {
           folder) and follow the link to activate your account.
         </p>
 
-        <Button>
+        {/* <Button>
           <Link href="/auth/login">Go to Sign in</Link>
-        </Button>
+        </Button> */}
 
         <p className="mt-6 text-xs text-gray-500 dark:text-white/60">
           Didn’t receive the email? Check again in a few minutes or request a

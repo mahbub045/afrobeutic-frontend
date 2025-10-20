@@ -110,7 +110,7 @@ const MemberList: React.FC = () => {
       </div>
 
       {/* Member Cards */}
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {isLoadingMembers &&
           Array.from({ length: 12 }).map((_, idx) => (
             <Card
@@ -185,7 +185,7 @@ const MemberList: React.FC = () => {
                 className="rounded-full object-cover"
               />
 
-              <h3 className="relative text-xl font-bold md:text-base lg:text-xl">
+              <h3 className="relative text-xl font-bold md:text-base lg:text-lg xl:text-xl">
                 {member.name}
                 {/* animated status dot (ping + solid) at top-right of the image */}
                 {/* <div className="absolute top-1 -right-3 flex items-center">
