@@ -63,7 +63,8 @@ const EditMemberInfoDialog: React.FC<EditNewMemberDialogProps> = ({
           iconColor: "#037375",
           title: "Member Updated",
           text: `Member information has been updated successfully.`,
-          theme: (theme as "light" | "dark" | "auto") || "auto",
+          background: theme === "dark" ? "#0f1724" : undefined,
+          color: theme === "dark" ? "#e6eef0" : undefined,
           confirmButtonColor: "#037375",
         });
       })
