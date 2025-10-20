@@ -36,7 +36,7 @@ const AddNewMemberDialog: React.FC<AddNewMemberDialogProps> = ({
   onClose,
   onInvite,
 }) => {
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const initialValues: FormValueProps = { email: "", role: "" };
 
   const [inviteMember] = useInviteMemberMutation();
@@ -56,8 +56,8 @@ const AddNewMemberDialog: React.FC<AddNewMemberDialogProps> = ({
         iconColor: "#037375",
         title: "Invitation Sent",
         text: `An invitation has been sent to ${userData.email}`,
-        background: theme === "dark" ? "#0f1724" : undefined,
-        color: theme === "dark" ? "#e6eef0" : undefined,
+        background: resolvedTheme === "dark" ? "#0f1724" : undefined,
+        color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
         confirmButtonColor: "#037375",
       });
     } catch (error) {
