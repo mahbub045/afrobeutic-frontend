@@ -9,7 +9,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useGetSalonListQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonList/SalonListApi";
 import { SalonProps } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
 import {
   ArrowRight,
@@ -20,20 +19,22 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import * as React from "react";
+// import * as React from "react";
+import { useGetSalonListQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonApis";
+import { useEffect, useState } from "react";
 import Breadcrumbs from "../../CommonComponents/Breadcrumbs";
+import AddSalonDialog from "./Dialogs/AddSalonDialog";
 
 const ManageSalonsContainer: React.FC = () => {
-  const [currentPage, setCurrentPage] = React.useState(1);
-  const [searchTerm, setSearchTerm] = React.useState("");
-  const [debouncedSearch, setDebouncedSearch] = React.useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   // Track which salon logos failed to load (by uid)
-  const [failedLogos, setFailedLogos] = React.useState<Record<string, boolean>>(
-    {},
-  );
+  const [failedLogos, setFailedLogos] = useState<Record<string, boolean>>({});
+  const [isAddSalonDialogOpen, setIsAddSalonDialogOpen] = useState(false);
 
   // Debounce search input
-  React.useEffect(() => {
+  useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchTerm);
       setCurrentPage(1); // Reset to first page on new search
@@ -51,6 +52,10 @@ const ManageSalonsContainer: React.FC = () => {
     page: currentPage,
     search: debouncedSearch || undefined,
   });
+
+  const handleOpenAddSalonDialog = () => {
+    setIsAddSalonDialogOpen(true);
+  };
 
   const handlePreviousPage = () => {
     if (salonListData?.previous) {
@@ -98,7 +103,12 @@ const ManageSalonsContainer: React.FC = () => {
         </div> */}
 
         <div className="flex flex-col items-end gap-2">
-          <Button variant="default" size="sm" className="text-white">
+          <Button
+            variant="default"
+            size="sm"
+            className="text-white"
+            onClick={handleOpenAddSalonDialog}
+          >
             <Plus className="h-4 w-4" />
             Add new Salon
           </Button>
@@ -289,6 +299,11 @@ const ManageSalonsContainer: React.FC = () => {
             )}
         </div>
       </div>
+      {/* Dialogs */}
+      <AddSalonDialog
+        isOpen={isAddSalonDialogOpen}
+        onClose={() => setIsAddSalonDialogOpen(false)}
+      />
     </div>
   );
 };

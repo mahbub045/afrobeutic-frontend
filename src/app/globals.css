@@ -146,6 +146,7 @@ input[type="datetime-local"],
 input[type="month"],
 input[type="week"],
 input[type="color"],
+input[type="file"],
 select,
 textarea {
   @apply focus:ring-primary/70 w-full rounded-md border border-gray-200 bg-white px-4 py-3 text-gray-900 placeholder-gray-400 shadow-inner transition-shadow focus:ring-1 focus:outline-none dark:border-white/12 dark:bg-white/6 dark:text-white dark:placeholder-white/60;
