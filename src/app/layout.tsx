@@ -4,6 +4,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Viewport } from "next";
 import { Geist, Inter } from "next/font/google";
 import "./globals.css";
+// react-phone-input-2 requires its CSS to be imported globally
+import "react-phone-input-2/lib/style.css";
 import Providers from "./providers";
 
 // fonts - using next/font

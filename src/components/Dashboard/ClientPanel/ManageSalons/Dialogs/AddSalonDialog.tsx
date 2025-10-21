@@ -15,12 +15,14 @@ import {
   ErrorMessage,
   Field,
   FieldArray,
+  FieldInputProps,
   FieldProps,
   Formik,
   Form as FormikForm,
   FormikProps,
 } from "formik";
 import { useState } from "react";
+import PhoneInput from "react-phone-input-2";
 import { toast } from "react-toastify";
 import * as Yup from "yup";
 
@@ -58,6 +60,7 @@ type FormValues = {
   salon_type: string;
   email: string;
   phone: string;
+  country_dial_code?: string;
   website: string;
   street: string;
   city: string;
@@ -210,11 +213,14 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
         email: string;
         phone: string;
         status: string;
+        country_dial_code?: string;
       } = {
         name: formData.name,
         salon_type: formData.salon_type,
         email: formData.email,
-        phone: formData.phone, // Pass phone as-is (string)
+        // PhoneInput returns full phone string (includes +countrycode) in the phone field
+        phone: formData.phone, // already includes country dial code when entered via PhoneInput
+        country_dial_code: formData.country_dial_code,
         website: formData.website,
         street: formData.street,
         city: formData.city,
@@ -321,7 +327,9 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
       {/* Make the dialog vertically scrollable when content exceeds the viewport */}
       <DialogContent className="max-h-[80vh] !max-w-4xl overflow-y-auto shadow-md sm:!max-w-4xl md:!max-w-5xl dark:shadow-gray-600">
         <DialogHeader>
-          <DialogTitle className="text-2xl text-primary">Add New Salon</DialogTitle>
+          <DialogTitle className="text-primary text-2xl">
+            Add New Salon
+          </DialogTitle>
           <DialogDescription className="text-xs">
             Fill in the details to add a new salon.
           </DialogDescription>
@@ -333,6 +341,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
             salon_type: "",
             email: "",
             phone: "",
+            country_dial_code: "",
             website: "",
             street: "",
             city: "",
@@ -446,17 +455,76 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                       <Label htmlFor="phone" className="mb-2">
                         Phone<span className="text-danger">*</span>
                       </Label>
-                      <Field
-                        name="phone"
-                        id="phone"
-                        type="text"
-                        placeholder="Enter phone number"
-                      />
-                      <ErrorMessage
-                        name="phone"
-                        component="div"
-                        className="text-danger mt-1 text-xs"
-                      />
+                      {/* Hidden field to store selected dial code */}
+                      <Field type="hidden" name="country_dial_code" />
+                      <Field name="phone">
+                        {({
+                          field,
+                          form,
+                        }: {
+                          field: FieldInputProps<string>;
+                          form: FormikProps<FormValues>;
+                        }) => (
+                          <div>
+                            <PhoneInput
+                              value={field.value}
+                              onChange={(
+                                value: string,
+                                data?: { dialCode?: string },
+                              ) => {
+                                // data.dialCode is the numeric dial code without + (e.g. '971')
+                                const dial =
+                                  data && data.dialCode
+                                    ? `+${data.dialCode}`
+                                    : form.values.country_dial_code || "";
+                                // Keep only digits from value and prepend dial (with +)
+                                const numeric = (value || "").replace(
+                                  /[^0-9]/g,
+                                  "",
+                                );
+                                let newVal = numeric;
+                                if (dial) {
+                                  // ensure numeric does not already contain dial
+                                  if (
+                                    !numeric.startsWith(dial.replace(/\D/g, ""))
+                                  ) {
+                                    newVal = `${dial}${numeric}`;
+                                  } else {
+                                    newVal = `+${numeric}`;
+                                  }
+                                } else if (numeric) {
+                                  newVal = `+${numeric}`;
+                                }
+                                form.setFieldValue(field.name, newVal);
+                                form.setFieldValue("country_dial_code", dial);
+                              }}
+                              onBlur={() => {
+                                const dial =
+                                  form.values.country_dial_code || "";
+                                if (
+                                  dial &&
+                                  !form.values.phone?.startsWith(dial)
+                                ) {
+                                  const numeric = (
+                                    form.values.phone || ""
+                                  ).replace(/[^0-9]/g, "");
+                                  form.setFieldValue(
+                                    "phone",
+                                    `${dial}${numeric}`,
+                                  );
+                                }
+                              }}
+                              inputProps={{ name: field.name, required: true }}
+                              inputClass="w-full"
+                            />
+                            <ErrorMessage
+                              name="phone"
+                              component="div"
+                              className="text-danger mt-1 text-xs"
+                            />
+                          </div>
+                        )}
+                      </Field>
                     </div>
                     <div>
                       <Label htmlFor="website" className="mb-2">
