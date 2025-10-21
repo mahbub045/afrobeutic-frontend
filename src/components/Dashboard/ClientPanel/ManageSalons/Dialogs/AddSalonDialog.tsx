@@ -544,7 +544,9 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                 background: "var(--card)",
                                 color: "var(--card-foreground)",
                                 border: "1px solid var(--border)",
-                                // maxHeight: "200px",
+                                outline: "none",
+                                padding: "0px 8px",
+                                fontSize: "14px",
                               }}
                               // Search input styling
                               searchStyle={{
