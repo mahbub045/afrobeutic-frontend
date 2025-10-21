@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { countries } from "@/data/countries";
 import { useAddSalonMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonApis";
 import {
@@ -81,6 +81,23 @@ const getTimeDifference = (startTime: string, endTime: string): number => {
   return timeToMinutes(endTime) - timeToMinutes(startTime);
 };
 
+// Validation schema for basic information (first tab)
+const basicInfoValidationSchema = Yup.object().shape({
+  name: Yup.string().required("Salon name is required"),
+  salon_type: Yup.string().required("Salon type is required"),
+  email: Yup.string().required("Email is required").email("Invalid email"),
+  phone: Yup.string().required("Phone number is required"),
+  website: Yup.string().url("Invalid URL"),
+  status: Yup.string().required("Status is required"),
+  street: Yup.string().required("Street is required"),
+  city: Yup.string().required("City is required"),
+  postal_code: Yup.string().required("Postal code is required"),
+  country: Yup.string().required("Country is required"),
+  latitude: Yup.number().required("Latitude is required"),
+  longitude: Yup.number().required("Longitude is required"),
+});
+
+// Full validation schema for form submission
 const validationSchema = Yup.object().shape({
   name: Yup.string().required("Salon name is required"),
   salon_type: Yup.string().required("Salon type is required"),
@@ -273,12 +290,38 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
   );
   const minutes = ["00", "15", "30", "45"];
 
+  // Function to validate basic info fields
+  const validateBasicInfo = async (values: FormValues): Promise<boolean> => {
+    try {
+      await basicInfoValidationSchema.validate(
+        {
+          name: values.name,
+          salon_type: values.salon_type,
+          email: values.email,
+          phone: values.phone,
+          website: values.website,
+          status: values.status,
+          street: values.street,
+          city: values.city,
+          postal_code: values.postal_code,
+          country: values.country,
+          latitude: values.latitude,
+          longitude: values.longitude,
+        },
+        { abortEarly: false },
+      );
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       {/* Make the dialog vertically scrollable when content exceeds the viewport */}
       <DialogContent className="max-h-[80vh] !max-w-4xl overflow-y-auto shadow-md sm:!max-w-4xl md:!max-w-5xl dark:shadow-gray-600">
         <DialogHeader>
-          <DialogTitle>Add New Salon</DialogTitle>
+          <DialogTitle className="text-2xl text-primary">Add New Salon</DialogTitle>
           <DialogDescription className="text-xs">
             Fill in the details to add a new salon.
           </DialogDescription>
@@ -310,20 +353,13 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
-          {() => (
+          {({ values, setFieldTouched }) => (
             <FormikForm>
               <Tabs
                 value={activeTab}
                 onValueChange={setActiveTab}
                 className="w-full"
               >
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="basic-info">
-                    Basic Information
-                  </TabsTrigger>
-                  <TabsTrigger value="opening-hours">Opening Hours</TabsTrigger>
-                </TabsList>
-
                 <TabsContent value="basic-info" className="space-y-4">
                   <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
@@ -564,7 +600,34 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                     </Button>
                     <Button
                       type="button"
-                      onClick={() => setActiveTab("opening-hours")}
+                      onClick={async () => {
+                        const isValid = await validateBasicInfo(values);
+                        if (isValid) {
+                          setActiveTab("opening-hours");
+                        } else {
+                          // Mark all basic info fields as touched to show validation errors
+                          const basicFields = [
+                            "name",
+                            "salon_type",
+                            "email",
+                            "phone",
+                            "website",
+                            "status",
+                            "street",
+                            "city",
+                            "postal_code",
+                            "country",
+                            "latitude",
+                            "longitude",
+                          ];
+                          basicFields.forEach((field) =>
+                            setFieldTouched(field, true),
+                          );
+                          toast.error(
+                            "Please fill in all required fields before proceeding",
+                          );
+                        }
+                      }}
                       className="w-32 text-white"
                     >
                       Next
