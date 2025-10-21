@@ -467,6 +467,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                         }) => (
                           <div>
                             <PhoneInput
+                              country={"gb"}
                               value={field.value}
                               onChange={(
                                 value: string,

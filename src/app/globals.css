@@ -132,6 +132,42 @@
   }
 }
 
+/* react-phone-input-2 dark mode fixes */
+.react-tel-input .form-control {
+  /* Use theme variables so light/dark switch works */
+  background: var(--input) !important;
+  color: var(--foreground) !important;
+  border: 1px solid var(--border) !important;
+}
+.react-tel-input .flag-dropdown {
+  background: var(--input) !important;
+  border-left: 1px solid var(--border) !important;
+}
+.react-tel-input .selected-flag {
+  background: transparent !important;
+}
+.react-tel-input .country-list {
+  background: var(--card) !important;
+  color: var(--card-foreground) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+.react-tel-input .country-list .country {
+  color: var(--card-foreground) !important;
+}
+.react-tel-input .country-list .country .dial-code {
+  color: var(--muted-foreground) !important;
+}
+
+/* Ensure dropdown scrollbar visible in dark */
+.react-tel-input .country-list::-webkit-scrollbar {
+  width: 10px;
+}
+.react-tel-input .country-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 6px;
+}
+
 /* Auto-style all form inputs, selects, and textareas */
 input[type="text"],
 input[type="email"],
