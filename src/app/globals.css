@@ -159,6 +159,48 @@
   color: var(--muted-foreground) !important;
 }
 
+/* Hover / highlighted / selected state for country list in dark mode
+   Use the subtle white 6% surface so the active item stands out but
+   still matches the dark theme. Increase specificity with !important
+   to override the component's inline styles where necessary. */
+.react-tel-input .country-list .country:hover,
+.react-tel-input .country-list .country.highlight,
+.react-tel-input .country-list .country.active {
+  background: var(--bg-white-6) !important;
+  color: var(--card-foreground) !important;
+}
+.react-tel-input .country-list .country:hover .dial-code,
+.react-tel-input .country-list .country.highlight .dial-code,
+.react-tel-input .country-list .country.active .dial-code {
+  color: var(--card-foreground) !important;
+}
+
+/* Ensure the selected flag (top of the control) matches when opened/hovered */
+.react-tel-input .selected-flag,
+.react-tel-input .flag-dropdown:hover,
+.react-tel-input .flag-dropdown:focus {
+  background: var(--bg-white-10) !important;
+  color: var(--foreground) !important;
+}
+
+/* Stronger overrides to ensure placeholder and input text colors apply in all browsers */
+.react-tel-input .form-control::placeholder {
+  color: var(--muted-foreground) !important;
+  opacity: 1 !important;
+}
+.react-tel-input .form-control,
+.react-tel-input input[type="tel"],
+.react-tel-input input.form-control {
+  background: var(--input) !important;
+  color: var(--foreground) !important;
+}
+.react-tel-input .flag-dropdown,
+.react-tel-input .selected-flag,
+.react-tel-input .flag-dropdown .arrow {
+  color: var(--foreground) !important;
+  background: var(--input) !important;
+}
+
 /* Ensure dropdown scrollbar visible in dark */
 .react-tel-input .country-list::-webkit-scrollbar {
   width: 10px;

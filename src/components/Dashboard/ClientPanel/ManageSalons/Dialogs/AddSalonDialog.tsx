@@ -516,12 +516,51 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                 }
                               }}
                               inputProps={{ name: field.name, required: true }}
-                              inputClass="w-full"
+                              // Search functionality
+                              searchPlaceholder="Search"
+                              searchNotFound="No country found"
+                              enableSearch={true}
+                              // Add classes to customize dropdown and search icon via global CSS
+                              dropdownClass="afb-phone-dropdown"
+                              searchClass="afb-phone-search"
+                              // Inline styles ensure the phone input uses CSS variables
+                              // even when Tailwind utilities are not applied by the component
+                              inputClass="!w-full !h-auto px-3 py-2 rounded-md"
+                              inputStyle={{
+                                background: "var(--input)",
+                                color: "var(--foreground)",
+                                borderColor: "var(--border)",
+                                outline: "none",
+                              }}
+                              // Flag button inline styling
+                              buttonClass=""
+                              buttonStyle={{
+                                background: "var(--input)",
+                                color: "var(--foreground)",
+                                borderRight: "1px solid var(--border)",
+                              }}
+                              // Country dropdown list inline style
+                              dropdownStyle={{
+                                background: "var(--card)",
+                                color: "var(--card-foreground)",
+                                border: "1px solid var(--border)",
+                                // maxHeight: "200px",
+                              }}
+                              // Search input styling
+                              searchStyle={{
+                                background: "var(--card)",
+                                color: "var(--card-foreground)",
+                                borderColor: "var(--border)",
+                                outline: "none",
+                                padding: "8px 12px",
+                                fontSize: "14px",
+                              }}
+                              containerClass="w-full"
                             />
                             <ErrorMessage
                               name="phone"
                               component="div"
-                              className="text-danger mt-1 text-xs"
+                              className="text-danger !dark:bg-gray-800 mt-1 text-xs"
                             />
                           </div>
                         )}
