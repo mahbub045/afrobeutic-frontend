@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { countries } from "@/data/countries";
 import { useAddSalonMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonApis";
 import {
@@ -19,6 +20,7 @@ import {
   Form as FormikForm,
   FormikProps,
 } from "formik";
+import { useState } from "react";
 import { toast } from "react-toastify";
 import * as Yup from "yup";
 
@@ -171,6 +173,7 @@ const validationSchema = Yup.object().shape({
 
 const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
   const [addSalon, { isLoading }] = useAddSalonMutation();
+  const [activeTab, setActiveTab] = useState("basic-info");
 
   // Helper function to convert time HH:MM to HH:MM:SS format
   const convertTimeToAPIFormat = (time: string): string => {
@@ -307,422 +310,488 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
-          <FormikForm>
-            <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div>
-                <Label htmlFor="name" className="mb-2">
-                  Salon Name<span className="text-danger">*</span>
-                </Label>
-                <Field
-                  name="name"
-                  id="name"
-                  as="input"
-                  type="text"
-                  placeholder="Salon Name"
-                />
-                <ErrorMessage
-                  name="name"
-                  component="div"
-                  className="text-danger mt-1 text-xs"
-                />
-              </div>
-              <div>
-                <Label htmlFor="status" className="mb-2">
-                  Status
-                </Label>
-                <Field id="status" name="status" as="select" required>
-                  <option value="" disabled>
-                    Select a status
-                  </option>
-                  <option value="OPEN">Open</option>
-                  <option value="CLOSED">Closed</option>
-                </Field>
-                <ErrorMessage
-                  name="status"
-                  component="div"
-                  className="text-danger mt-1 text-xs"
-                />
-              </div>
-            </div>
-            <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div>
-                <Label htmlFor="salon_type" className="mb-2">
-                  Salon Type<span className="text-danger">*</span>
-                </Label>
-                <Field id="salon_type" name="salon_type" as="select" required>
-                  <option value="" disabled>
-                    Select a salon type
-                  </option>
-                  {salonTypes.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
-                </Field>
-                <ErrorMessage
-                  name="salon_type"
-                  component="div"
-                  className="text-danger mt-1 text-xs"
-                />
-              </div>
-              <div>
-                <Label htmlFor="email" className="mb-2">
-                  Email<span className="text-danger">*</span>
-                </Label>
-                <Field
-                  name="email"
-                  id="email"
-                  as="input"
-                  type="email"
-                  placeholder="Email"
-                />
-                <ErrorMessage
-                  name="email"
-                  component="div"
-                  className="text-danger mt-1 text-xs"
-                />
-              </div>
-            </div>
-            <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div>
-                <Label htmlFor="phone" className="mb-2">
-                  Phone<span className="text-danger">*</span>
-                </Label>
-                <Field
-                  name="phone"
-                  id="phone"
-                  type="text"
-                  placeholder="Enter phone number"
-                />
-                <ErrorMessage
-                  name="phone"
-                  component="div"
-                  className="text-danger mt-1 text-xs"
-                />
-              </div>
-              <div>
-                <Label htmlFor="website" className="mb-2">
-                  Website
-                </Label>
-                <Field
-                  name="website"
-                  id="website"
-                  as="input"
-                  type="text"
-                  placeholder="Website"
-                />
-                <ErrorMessage
-                  name="website"
-                  component="div"
-                  className="text-danger mt-1 text-xs"
-                />
-              </div>
-            </div>
-            <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div>
-                <Label htmlFor="street" className="mb-2">
-                  Street<span className="text-danger">*</span>
-                </Label>
-                <Field
-                  name="street"
-                  id="street"
-                  as="input"
-                  type="text"
-                  placeholder="Street"
-                />
-                <ErrorMessage
-                  name="street"
-                  component="div"
-                  className="text-danger mt-1 text-xs"
-                />
-              </div>
-              <div>
-                <Label htmlFor="city" className="mb-2">
-                  City<span className="text-danger">*</span>
-                </Label>
-                <Field
-                  name="city"
-                  id="city"
-                  as="input"
-                  type="text"
-                  placeholder="City"
-                />
-                <ErrorMessage
-                  name="city"
-                  component="div"
-                  className="text-danger mt-1 text-xs"
-                />
-              </div>
-            </div>
-            <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div>
-                <Label htmlFor="postal_code" className="mb-2">
-                  Postal Code<span className="text-danger">*</span>
-                </Label>
-                <Field
-                  name="postal_code"
-                  id="postal_code"
-                  as="input"
-                  type="text"
-                  placeholder="Postal Code"
-                />
-                <ErrorMessage
-                  name="postal_code"
-                  component="div"
-                  className="text-danger mt-1 text-xs"
-                />
-              </div>
-              <div>
-                <Label htmlFor="country" className="mb-2">
-                  Country<span className="text-danger">*</span>
-                </Label>
-                <Field name="country" id="country" as="select">
-                  <option value="" disabled>
-                    Select a country
-                  </option>
-                  {countries.map((country) => (
-                    <option key={country.code} value={country.code}>
-                      {country.name}
-                    </option>
-                  ))}
-                </Field>
-                <ErrorMessage
-                  name="country"
-                  component="div"
-                  className="text-danger mt-1 text-xs"
-                />
-              </div>
-            </div>
-            <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div>
-                <Label htmlFor="latitude" className="mb-2">
-                  Latitude<span className="text-danger">*</span>
-                </Label>
-                <Field
-                  name="latitude"
-                  id="latitude"
-                  as="input"
-                  type="number"
-                  placeholder="Latitude"
-                />
-                <ErrorMessage
-                  name="latitude"
-                  component="div"
-                  className="text-danger mt-1 text-xs"
-                />
-              </div>
-              <div>
-                <Label htmlFor="longitude" className="mb-2">
-                  Longitude<span className="text-danger">*</span>
-                </Label>
-                <Field
-                  name="longitude"
-                  id="longitude"
-                  as="input"
-                  type="number"
-                  placeholder="Longitude"
-                />
-                <ErrorMessage
-                  name="longitude"
-                  component="div"
-                  className="text-danger mt-1 text-xs"
-                />
-              </div>
-            </div>
-            {/* Opening hours editor */}
-            <div className="mb-6">
-              <h3 className="mb-3 text-sm font-medium">Opening Hours</h3>
-              <div className="bg-card rounded-md border p-4">
-                <FieldArray name="opening_hours">
-                  {() => (
-                    <div className="space-y-3">
-                      {/** header row */}
-                      <div className="text-muted-foreground grid grid-cols-12 gap-2 px-2 py-2 text-xs">
-                        <div className="col-span-3">Day</div>
-                        <div className="col-span-2">Opening</div>
-                        <div className="col-span-2">Closing</div>
-                        <div className="col-span-2">Break Start</div>
-                        <div className="col-span-2">Break End</div>
-                        <div className="col-span-1 text-right">Closed</div>
-                      </div>
+          {() => (
+            <FormikForm>
+              <Tabs
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="w-full"
+              >
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="basic-info">
+                    Basic Information
+                  </TabsTrigger>
+                  <TabsTrigger value="opening-hours">Opening Hours</TabsTrigger>
+                </TabsList>
 
-                      <Field name="opening_hours">
-                        {({ form }: { form: FormikProps<AddSalonProps> }) => (
-                          <>
-                            {form.values.opening_hours.map(
-                              (oh: OpeningHour, idx: number) => (
-                                <div
-                                  key={oh.day || idx}
-                                  className="grid grid-cols-12 items-center gap-2 rounded-sm border-t px-2 pt-2"
-                                >
-                                  <div className="col-span-3 text-sm">
-                                    {oh.day}
-                                  </div>
-
-                                  {/* Opening time */}
-                                  <div className="col-span-2">
-                                    <div className="flex items-center gap-1">
-                                      <Field
-                                        as="select"
-                                        name={`opening_hours.${idx}.opening_start_time`}
-                                        className="w-full"
-                                      >
-                                        {hours.map((h) =>
-                                          minutes.map((m) => (
-                                            <option
-                                              key={`${h}:${m}`}
-                                              value={`${h}:${m}`}
-                                            >{`${h}:${m}`}</option>
-                                          )),
-                                        )}
-                                      </Field>
-                                    </div>
-                                    <ErrorMessage
-                                      name={`opening_hours.${idx}.opening_start_time`}
-                                      component="div"
-                                      className="text-danger mt-1 text-xs"
-                                    />
-                                  </div>
-
-                                  {/* Closing time */}
-                                  <div className="col-span-2">
-                                    <div className="flex items-center gap-1">
-                                      <Field
-                                        as="select"
-                                        name={`opening_hours.${idx}.opening_end_time`}
-                                        className="w-full"
-                                      >
-                                        {hours.map((h) =>
-                                          minutes.map((m) => (
-                                            <option
-                                              key={`${h}:${m}`}
-                                              value={`${h}:${m}`}
-                                            >{`${h}:${m}`}</option>
-                                          )),
-                                        )}
-                                      </Field>
-                                    </div>
-                                    <ErrorMessage
-                                      name={`opening_hours.${idx}.opening_end_time`}
-                                      component="div"
-                                      className="text-danger mt-1 text-xs"
-                                    />
-                                  </div>
-
-                                  {/* Break start */}
-                                  <div className="col-span-2">
-                                    <div className="flex items-center gap-1">
-                                      <Field
-                                        as="select"
-                                        name={`opening_hours.${idx}.break_start_time`}
-                                        className="w-full"
-                                      >
-                                        <option value="">-</option>
-                                        {hours.map((h) =>
-                                          minutes.map((m) => (
-                                            <option
-                                              key={`bs-${h}:${m}`}
-                                              value={`${h}:${m}`}
-                                            >{`${h}:${m}`}</option>
-                                          )),
-                                        )}
-                                      </Field>
-                                    </div>
-                                    <ErrorMessage
-                                      name={`opening_hours.${idx}.break_start_time`}
-                                      component="div"
-                                      className="text-danger mt-1 text-xs"
-                                    />
-                                  </div>
-
-                                  {/* Break end */}
-                                  <div className="col-span-2">
-                                    <div className="flex items-center gap-1">
-                                      <Field
-                                        as="select"
-                                        name={`opening_hours.${idx}.break_end_time`}
-                                        className="w-full"
-                                      >
-                                        <option value="">-</option>
-                                        {hours.map((h) =>
-                                          minutes.map((m) => (
-                                            <option
-                                              key={`be-${h}:${m}`}
-                                              value={`${h}:${m}`}
-                                            >{`${h}:${m}`}</option>
-                                          )),
-                                        )}
-                                      </Field>
-                                    </div>
-                                    <ErrorMessage
-                                      name={`opening_hours.${idx}.break_end_time`}
-                                      component="div"
-                                      className="text-danger mt-1 text-xs"
-                                    />
-                                  </div>
-
-                                  <div className="col-span-1 flex justify-end">
-                                    <Field
-                                      name={`opening_hours.${idx}.is_closed`}
-                                    >
-                                      {({ field }: FieldProps) => (
-                                        <Switch
-                                          checked={Boolean(field.value)}
-                                          onCheckedChange={(v: boolean) => {
-                                            form.setFieldValue(field.name, v);
-                                            // When closed is toggled, set times to 00:00
-                                            if (v) {
-                                              form.setFieldValue(
-                                                `opening_hours.${idx}.opening_start_time`,
-                                                "00:00",
-                                              );
-                                              form.setFieldValue(
-                                                `opening_hours.${idx}.opening_end_time`,
-                                                "00:00",
-                                              );
-                                              form.setFieldValue(
-                                                `opening_hours.${idx}.break_start_time`,
-                                                "00:00",
-                                              );
-                                              form.setFieldValue(
-                                                `opening_hours.${idx}.break_end_time`,
-                                                "00:00",
-                                              );
-                                            }
-                                          }}
-                                        />
-                                      )}
-                                    </Field>
-                                  </div>
-                                </div>
-                              ),
-                            )}
-                          </>
-                        )}
-                      </Field>
+                <TabsContent value="basic-info" className="space-y-4">
+                  <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
+                      <Label htmlFor="name" className="mb-2">
+                        Salon Name<span className="text-danger">*</span>
+                      </Label>
+                      <Field
+                        name="name"
+                        id="name"
+                        as="input"
+                        type="text"
+                        placeholder="Salon Name"
+                      />
+                      <ErrorMessage
+                        name="name"
+                        component="div"
+                        className="text-danger mt-1 text-xs"
+                      />
                     </div>
-                  )}
-                </FieldArray>
-              </div>
-            </div>
-            <div className="flex justify-end gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                disabled={isLoading}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="w-40 text-white"
-              >
-                {isLoading ? "Adding..." : "Add New Salon"}
-              </Button>
-            </div>
-          </FormikForm>
+                    <div>
+                      <Label htmlFor="status" className="mb-2">
+                        Status
+                      </Label>
+                      <Field id="status" name="status" as="select" required>
+                        <option value="" disabled>
+                          Select a status
+                        </option>
+                        <option value="OPEN">Open</option>
+                        <option value="CLOSED">Closed</option>
+                      </Field>
+                      <ErrorMessage
+                        name="status"
+                        component="div"
+                        className="text-danger mt-1 text-xs"
+                      />
+                    </div>
+                  </div>
+                  <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
+                      <Label htmlFor="salon_type" className="mb-2">
+                        Salon Type<span className="text-danger">*</span>
+                      </Label>
+                      <Field
+                        id="salon_type"
+                        name="salon_type"
+                        as="select"
+                        required
+                      >
+                        <option value="" disabled>
+                          Select a salon type
+                        </option>
+                        {salonTypes.map((type) => (
+                          <option key={type.value} value={type.value}>
+                            {type.label}
+                          </option>
+                        ))}
+                      </Field>
+                      <ErrorMessage
+                        name="salon_type"
+                        component="div"
+                        className="text-danger mt-1 text-xs"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="email" className="mb-2">
+                        Email<span className="text-danger">*</span>
+                      </Label>
+                      <Field
+                        name="email"
+                        id="email"
+                        as="input"
+                        type="email"
+                        placeholder="Email"
+                      />
+                      <ErrorMessage
+                        name="email"
+                        component="div"
+                        className="text-danger mt-1 text-xs"
+                      />
+                    </div>
+                  </div>
+                  <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
+                      <Label htmlFor="phone" className="mb-2">
+                        Phone<span className="text-danger">*</span>
+                      </Label>
+                      <Field
+                        name="phone"
+                        id="phone"
+                        type="text"
+                        placeholder="Enter phone number"
+                      />
+                      <ErrorMessage
+                        name="phone"
+                        component="div"
+                        className="text-danger mt-1 text-xs"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="website" className="mb-2">
+                        Website
+                      </Label>
+                      <Field
+                        name="website"
+                        id="website"
+                        as="input"
+                        type="text"
+                        placeholder="Website"
+                      />
+                      <ErrorMessage
+                        name="website"
+                        component="div"
+                        className="text-danger mt-1 text-xs"
+                      />
+                    </div>
+                  </div>
+                  <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
+                      <Label htmlFor="street" className="mb-2">
+                        Street<span className="text-danger">*</span>
+                      </Label>
+                      <Field
+                        name="street"
+                        id="street"
+                        as="input"
+                        type="text"
+                        placeholder="Street"
+                      />
+                      <ErrorMessage
+                        name="street"
+                        component="div"
+                        className="text-danger mt-1 text-xs"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="city" className="mb-2">
+                        City<span className="text-danger">*</span>
+                      </Label>
+                      <Field
+                        name="city"
+                        id="city"
+                        as="input"
+                        type="text"
+                        placeholder="City"
+                      />
+                      <ErrorMessage
+                        name="city"
+                        component="div"
+                        className="text-danger mt-1 text-xs"
+                      />
+                    </div>
+                  </div>
+                  <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
+                      <Label htmlFor="postal_code" className="mb-2">
+                        Postal Code<span className="text-danger">*</span>
+                      </Label>
+                      <Field
+                        name="postal_code"
+                        id="postal_code"
+                        as="input"
+                        type="text"
+                        placeholder="Postal Code"
+                      />
+                      <ErrorMessage
+                        name="postal_code"
+                        component="div"
+                        className="text-danger mt-1 text-xs"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="country" className="mb-2">
+                        Country<span className="text-danger">*</span>
+                      </Label>
+                      <Field name="country" id="country" as="select">
+                        <option value="" disabled>
+                          Select a country
+                        </option>
+                        {countries.map((country) => (
+                          <option key={country.code} value={country.code}>
+                            {country.name}
+                          </option>
+                        ))}
+                      </Field>
+                      <ErrorMessage
+                        name="country"
+                        component="div"
+                        className="text-danger mt-1 text-xs"
+                      />
+                    </div>
+                  </div>
+                  <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
+                      <Label htmlFor="latitude" className="mb-2">
+                        Latitude<span className="text-danger">*</span>
+                      </Label>
+                      <Field
+                        name="latitude"
+                        id="latitude"
+                        as="input"
+                        type="number"
+                        placeholder="Latitude"
+                      />
+                      <ErrorMessage
+                        name="latitude"
+                        component="div"
+                        className="text-danger mt-1 text-xs"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="longitude" className="mb-2">
+                        Longitude<span className="text-danger">*</span>
+                      </Label>
+                      <Field
+                        name="longitude"
+                        id="longitude"
+                        as="input"
+                        type="number"
+                        placeholder="Longitude"
+                      />
+                      <ErrorMessage
+                        name="longitude"
+                        component="div"
+                        className="text-danger mt-1 text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Navigation buttons for first tab */}
+                  <div className="mt-6 flex justify-end gap-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={onClose}
+                      disabled={isLoading}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => setActiveTab("opening-hours")}
+                      className="w-32 text-white"
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="opening-hours" className="space-y-4">
+                  {/* Opening hours editor */}
+                  <div className="mb-6">
+                    <h3 className="mb-3 text-sm font-medium">Opening Hours</h3>
+                    <div className="bg-card rounded-md border p-4">
+                      <FieldArray name="opening_hours">
+                        {() => (
+                          <div className="space-y-3">
+                            {/** header row */}
+                            <div className="text-muted-foreground grid grid-cols-12 gap-2 px-2 py-2 text-xs">
+                              <div className="col-span-3">Day</div>
+                              <div className="col-span-2">Opening</div>
+                              <div className="col-span-2">Closing</div>
+                              <div className="col-span-2">Break Start</div>
+                              <div className="col-span-2">Break End</div>
+                              <div className="col-span-1 text-right">
+                                Closed
+                              </div>
+                            </div>
+
+                            <Field name="opening_hours">
+                              {({
+                                form,
+                              }: {
+                                form: FormikProps<AddSalonProps>;
+                              }) => (
+                                <>
+                                  {form.values.opening_hours.map(
+                                    (oh: OpeningHour, idx: number) => (
+                                      <div
+                                        key={oh.day || idx}
+                                        className="grid grid-cols-12 items-center gap-2 rounded-sm border-t px-2 pt-2"
+                                      >
+                                        <div className="col-span-3 text-sm">
+                                          {oh.day}
+                                        </div>
+
+                                        {/* Opening time */}
+                                        <div className="col-span-2">
+                                          <div className="flex items-center gap-1">
+                                            <Field
+                                              as="select"
+                                              name={`opening_hours.${idx}.opening_start_time`}
+                                              className="w-full"
+                                            >
+                                              {hours.map((h) =>
+                                                minutes.map((m) => (
+                                                  <option
+                                                    key={`${h}:${m}`}
+                                                    value={`${h}:${m}`}
+                                                  >{`${h}:${m}`}</option>
+                                                )),
+                                              )}
+                                            </Field>
+                                          </div>
+                                          <ErrorMessage
+                                            name={`opening_hours.${idx}.opening_start_time`}
+                                            component="div"
+                                            className="text-danger mt-1 text-xs"
+                                          />
+                                        </div>
+
+                                        {/* Closing time */}
+                                        <div className="col-span-2">
+                                          <div className="flex items-center gap-1">
+                                            <Field
+                                              as="select"
+                                              name={`opening_hours.${idx}.opening_end_time`}
+                                              className="w-full"
+                                            >
+                                              {hours.map((h) =>
+                                                minutes.map((m) => (
+                                                  <option
+                                                    key={`${h}:${m}`}
+                                                    value={`${h}:${m}`}
+                                                  >{`${h}:${m}`}</option>
+                                                )),
+                                              )}
+                                            </Field>
+                                          </div>
+                                          <ErrorMessage
+                                            name={`opening_hours.${idx}.opening_end_time`}
+                                            component="div"
+                                            className="text-danger mt-1 text-xs"
+                                          />
+                                        </div>
+
+                                        {/* Break start */}
+                                        <div className="col-span-2">
+                                          <div className="flex items-center gap-1">
+                                            <Field
+                                              as="select"
+                                              name={`opening_hours.${idx}.break_start_time`}
+                                              className="w-full"
+                                            >
+                                              <option value="">-</option>
+                                              {hours.map((h) =>
+                                                minutes.map((m) => (
+                                                  <option
+                                                    key={`bs-${h}:${m}`}
+                                                    value={`${h}:${m}`}
+                                                  >{`${h}:${m}`}</option>
+                                                )),
+                                              )}
+                                            </Field>
+                                          </div>
+                                          <ErrorMessage
+                                            name={`opening_hours.${idx}.break_start_time`}
+                                            component="div"
+                                            className="text-danger mt-1 text-xs"
+                                          />
+                                        </div>
+
+                                        {/* Break end */}
+                                        <div className="col-span-2">
+                                          <div className="flex items-center gap-1">
+                                            <Field
+                                              as="select"
+                                              name={`opening_hours.${idx}.break_end_time`}
+                                              className="w-full"
+                                            >
+                                              <option value="">-</option>
+                                              {hours.map((h) =>
+                                                minutes.map((m) => (
+                                                  <option
+                                                    key={`be-${h}:${m}`}
+                                                    value={`${h}:${m}`}
+                                                  >{`${h}:${m}`}</option>
+                                                )),
+                                              )}
+                                            </Field>
+                                          </div>
+                                          <ErrorMessage
+                                            name={`opening_hours.${idx}.break_end_time`}
+                                            component="div"
+                                            className="text-danger mt-1 text-xs"
+                                          />
+                                        </div>
+
+                                        <div className="col-span-1 flex justify-end">
+                                          <Field
+                                            name={`opening_hours.${idx}.is_closed`}
+                                          >
+                                            {({ field }: FieldProps) => (
+                                              <Switch
+                                                checked={Boolean(field.value)}
+                                                onCheckedChange={(
+                                                  v: boolean,
+                                                ) => {
+                                                  form.setFieldValue(
+                                                    field.name,
+                                                    v,
+                                                  );
+                                                  // When closed is toggled, set times to 00:00
+                                                  if (v) {
+                                                    form.setFieldValue(
+                                                      `opening_hours.${idx}.opening_start_time`,
+                                                      "00:00",
+                                                    );
+                                                    form.setFieldValue(
+                                                      `opening_hours.${idx}.opening_end_time`,
+                                                      "00:00",
+                                                    );
+                                                    form.setFieldValue(
+                                                      `opening_hours.${idx}.break_start_time`,
+                                                      "00:00",
+                                                    );
+                                                    form.setFieldValue(
+                                                      `opening_hours.${idx}.break_end_time`,
+                                                      "00:00",
+                                                    );
+                                                  }
+                                                }}
+                                              />
+                                            )}
+                                          </Field>
+                                        </div>
+                                      </div>
+                                    ),
+                                  )}
+                                </>
+                              )}
+                            </Field>
+                          </div>
+                        )}
+                      </FieldArray>
+                    </div>
+                  </div>
+
+                  {/* Navigation buttons for second tab */}
+                  <div className="mt-6 flex justify-between gap-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setActiveTab("basic-info")}
+                    >
+                      Previous
+                    </Button>
+                    <div className="flex gap-3">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={onClose}
+                        disabled={isLoading}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-40 text-white"
+                      >
+                        {isLoading ? "Adding..." : "Add New Salon"}
+                      </Button>
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </FormikForm>
+          )}
         </Formik>
       </DialogContent>
     </Dialog>
