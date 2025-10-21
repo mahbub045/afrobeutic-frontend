@@ -28,7 +28,6 @@ interface AddSalonDialogProps {
 }
 interface AddSalonProps {
   name: string;
-  logo: string;
   salon_type: string;
   email: string;
   phone: string;
@@ -54,7 +53,6 @@ type OpeningHour = {
 
 type FormValues = {
   name: string;
-  logo: string;
   salon_type: string;
   email: string;
   phone: string;
@@ -83,7 +81,6 @@ const getTimeDifference = (startTime: string, endTime: string): number => {
 
 const validationSchema = Yup.object().shape({
   name: Yup.string().required("Salon name is required"),
-  logo: Yup.string(),
   salon_type: Yup.string().required("Salon type is required"),
   email: Yup.string().required("Email is required").email("Invalid email"),
   phone: Yup.string().required("Phone number is required"),
@@ -206,7 +203,6 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
         latitude: formData.latitude,
         longitude: formData.longitude,
         status: formData.status,
-        ...(formData.logo && { logo: formData.logo }), // Only include logo if provided
         opening_hours: formData.opening_hours.map((oh) => ({
           day: oh.day,
           opening_start_time: convertTimeToAPIFormat(oh.opening_start_time),
@@ -288,7 +284,6 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
         <Formik<FormValues>
           initialValues={{
             name: "",
-            logo: "",
             salon_type: "",
             email: "",
             phone: "",
@@ -348,26 +343,6 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                   className="text-danger mt-1 text-xs"
                 />
               </div>
-            </div>
-            <div className="mb-4 grid grid-cols-1">
-              <Label htmlFor="logo" className="mb-2">
-                Salon Logo URL
-              </Label>
-              <Field
-                name="logo"
-                id="logo"
-                as="input"
-                type="file"
-                placeholder="Enter logo URL (optional)"
-              />
-              <ErrorMessage
-                name="logo"
-                component="div"
-                className="text-danger mt-1 text-xs"
-              />
-              <p className="text-muted-foreground mt-1 text-xs">
-                Enter a URL to an image (e.g., https://example.com/logo.png)
-              </p>
             </div>
             <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
