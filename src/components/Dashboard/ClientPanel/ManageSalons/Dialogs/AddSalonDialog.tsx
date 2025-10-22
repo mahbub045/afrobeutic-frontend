@@ -520,35 +520,16 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                               searchPlaceholder="Search"
                               searchNotFound="No country found"
                               enableSearch={true}
-                              // Add classes to customize dropdown and search icon via global CSS
-                              dropdownClass="afb-phone-dropdown"
-                              searchClass="afb-phone-search"
-                              // Inline styles ensure the phone input uses CSS variables
-                              // even when Tailwind utilities are not applied by the component
-                              inputClass="!w-full !h-auto px-3 py-2 rounded-md"
-                              inputStyle={{
-                                background: "var(--input)",
-                                color: "var(--foreground)",
-                                borderColor: "var(--border)",
-                                outline: "none",
-                              }}
-                              // Flag button inline styling
-                              buttonClass=""
-                              buttonStyle={{
-                                background: "var(--input)",
-                                color: "var(--foreground)",
-                                borderRight: "1px solid var(--border)",
-                              }}
-                              // Country dropdown list inline style
+                              // Add classes and inline styles so dropdown & search follow dark mode
+                              dropdownClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100"
+                              searchClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100"
                               dropdownStyle={{
                                 background: "var(--card)",
                                 color: "var(--card-foreground)",
                                 border: "1px solid var(--border)",
-                                outline: "none",
                                 padding: "0px 8px",
-                                fontSize: "14px",
+                                outline: "none",
                               }}
-                              // Search input styling
                               searchStyle={{
                                 background: "var(--card)",
                                 color: "var(--card-foreground)",
@@ -556,6 +537,22 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                 outline: "none",
                                 padding: "8px 12px",
                                 fontSize: "14px",
+                              }}
+                              // Inline styles ensure the phone input uses CSS variables
+                              // even when Tailwind utilities are not applied by the component
+                              inputClass="!w-full !h-auto px-3 py-2 rounded-md !bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100"
+                              inputStyle={{
+                                background: "var(--input)",
+                                color: "var(--foreground)",
+                                borderColor: "var(--border)",
+                                outline: "none",
+                              }}
+                              // Flag button inline styling
+                              buttonClass="!bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100 !border-0"
+                              buttonStyle={{
+                                background: "var(--input)",
+                                color: "var(--foreground)",
+                                borderRight: "1px solid var(--border)",
                               }}
                               containerClass="w-full"
                             />
