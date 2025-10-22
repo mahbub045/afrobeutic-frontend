@@ -316,6 +316,10 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
     "SATURDAY",
     "SUNDAY",
   ];
+  const slonStatus = [
+    { value: "ACTIVE", label: "Active" },
+    { value: "INACTIVE", label: "Inactive" },
+  ];
 
   const hours = Array.from({ length: 24 }, (_, i) =>
     String(i).padStart(2, "0"),
@@ -375,7 +379,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
             country: "",
             latitude: "",
             longitude: "",
-            status: "OPEN",
+            status: "ACTIVE",
             opening_hours: days.map((d) => ({
               day: d,
               opening_start_time: "08:00",
@@ -432,8 +436,11 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                         <option value="" disabled>
                           Select a status
                         </option>
-                        <option value="OPEN">Open</option>
-                        <option value="CLOSED">Closed</option>
+                        {slonStatus.map((s) => (
+                          <option key={s.value} value={s.value}>
+                            {s.label}
+                          </option>
+                        ))}
                       </Field>
                       <ErrorMessage
                         name="status"
