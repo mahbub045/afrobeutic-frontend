@@ -21,9 +21,11 @@ import {
   Form as FormikForm,
   FormikProps,
 } from "formik";
+import { useTheme } from "next-themes";
 import { useState } from "react";
 import PhoneInput from "react-phone-input-2";
 import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 import * as Yup from "yup";
 
 interface AddSalonDialogProps {
@@ -192,6 +194,7 @@ const validationSchema = Yup.object().shape({
 });
 
 const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
+  const { resolvedTheme } = useTheme();
   const [addSalon, { isLoading }] = useAddSalonMutation();
   const [activeTab, setActiveTab] = useState("basic-info");
 
@@ -204,6 +207,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
     return `${time}:00`;
   };
 
+  // Return true on success so caller (Formik) can reset the form and close dialog
   const handleSubmit = async (formData: FormValues) => {
     try {
       // Transform the data to match API payload format
@@ -246,8 +250,17 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
       console.log("Sending payload to API:", JSON.stringify(payload, null, 2));
 
       await addSalon(payload).unwrap();
-      onClose();
-      toast.success("Salon added successfully");
+      // toast.success("Salon added successfully");
+      Swal.fire({
+        icon: "success",
+        iconColor: "#037375",
+        title: "Added successfully",
+        text: `Successfully added ${formData.name} salon`,
+        background: resolvedTheme === "dark" ? "#0f1724" : undefined,
+        color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
+        confirmButtonColor: "#037375",
+      });
+      return true;
     } catch (error: unknown) {
       console.error("Failed to add salon:", error);
 
@@ -274,6 +287,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
       } else {
         toast.error("Failed to add salon. Please try again.");
       }
+      return false;
     }
   };
   const salonTypes = [
@@ -360,7 +374,17 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
             })),
           }}
           validationSchema={validationSchema}
-          onSubmit={handleSubmit}
+          onSubmit={async (values, { resetForm, setSubmitting }) => {
+            setSubmitting(true);
+            const success = await handleSubmit(values);
+            setSubmitting(false);
+            if (success) {
+              // Reset the form to initial values, reset to first tab, and close dialog
+              resetForm();
+              setActiveTab("basic-info");
+              onClose();
+            }
+          }}
         >
           {({ values, setFieldTouched }) => (
             <FormikForm>
@@ -520,35 +544,16 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                               searchPlaceholder="Search"
                               searchNotFound="No country found"
                               enableSearch={true}
-                              // Add classes to customize dropdown and search icon via global CSS
-                              dropdownClass="afb-phone-dropdown"
-                              searchClass="afb-phone-search"
-                              // Inline styles ensure the phone input uses CSS variables
-                              // even when Tailwind utilities are not applied by the component
-                              inputClass="!w-full !h-auto px-3 py-2 rounded-md"
-                              inputStyle={{
-                                background: "var(--input)",
-                                color: "var(--foreground)",
-                                borderColor: "var(--border)",
-                                outline: "none",
-                              }}
-                              // Flag button inline styling
-                              buttonClass=""
-                              buttonStyle={{
-                                background: "var(--input)",
-                                color: "var(--foreground)",
-                                borderRight: "1px solid var(--border)",
-                              }}
-                              // Country dropdown list inline style
+                              // Add classes and inline styles so dropdown & search follow dark mode
+                              dropdownClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100"
+                              searchClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100"
                               dropdownStyle={{
                                 background: "var(--card)",
                                 color: "var(--card-foreground)",
                                 border: "1px solid var(--border)",
-                                outline: "none",
                                 padding: "0px 8px",
-                                fontSize: "14px",
+                                outline: "none",
                               }}
-                              // Search input styling
                               searchStyle={{
                                 background: "var(--card)",
                                 color: "var(--card-foreground)",
@@ -556,6 +561,22 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                 outline: "none",
                                 padding: "8px 12px",
                                 fontSize: "14px",
+                              }}
+                              // Inline styles ensure the phone input uses CSS variables
+                              // even when Tailwind utilities are not applied by the component
+                              inputClass="!w-full !h-auto px-3 py-2 rounded-md !bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100"
+                              inputStyle={{
+                                background: "var(--input)",
+                                color: "var(--foreground)",
+                                borderColor: "var(--border)",
+                                outline: "none",
+                              }}
+                              // Flag button inline styling
+                              buttonClass="!bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100 !border-0"
+                              buttonStyle={{
+                                background: "var(--input)",
+                                color: "var(--foreground)",
+                                borderRight: "1px solid var(--border)",
                               }}
                               containerClass="w-full"
                             />
@@ -788,7 +809,12 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                             <Field
                                               as="select"
                                               name={`opening_hours.${idx}.opening_start_time`}
-                                              className="w-full"
+                                              className="w-full focus:ring-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                                              style={{
+                                                outline: "none",
+                                                boxShadow: "none",
+                                              }}
+                                              disabled={oh.is_closed}
                                             >
                                               {hours.map((h) =>
                                                 minutes.map((m) => (
@@ -813,7 +839,12 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                             <Field
                                               as="select"
                                               name={`opening_hours.${idx}.opening_end_time`}
-                                              className="w-full"
+                                              className="w-full focus:ring-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                                              style={{
+                                                outline: "none",
+                                                boxShadow: "none",
+                                              }}
+                                              disabled={oh.is_closed}
                                             >
                                               {hours.map((h) =>
                                                 minutes.map((m) => (
@@ -838,7 +869,12 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                             <Field
                                               as="select"
                                               name={`opening_hours.${idx}.break_start_time`}
-                                              className="w-full"
+                                              className="w-full focus:ring-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                                              style={{
+                                                outline: "none",
+                                                boxShadow: "none",
+                                              }}
+                                              disabled={oh.is_closed}
                                             >
                                               <option value="">-</option>
                                               {hours.map((h) =>
@@ -864,7 +900,12 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                             <Field
                                               as="select"
                                               name={`opening_hours.${idx}.break_end_time`}
-                                              className="w-full"
+                                              className="w-full focus:ring-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                                              style={{
+                                                outline: "none",
+                                                boxShadow: "none",
+                                              }}
+                                              disabled={oh.is_closed}
                                             >
                                               <option value="">-</option>
                                               {hours.map((h) =>
@@ -888,18 +929,20 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                           <Field
                                             name={`opening_hours.${idx}.is_closed`}
                                           >
-                                            {({ field }: FieldProps) => (
+                                            {({ field, form }: FieldProps) => (
                                               <Switch
                                                 checked={Boolean(field.value)}
                                                 onCheckedChange={(
                                                   v: boolean,
                                                 ) => {
+                                                  // Toggle closed flag
                                                   form.setFieldValue(
                                                     field.name,
                                                     v,
                                                   );
-                                                  // When closed is toggled, set times to 00:00
+
                                                   if (v) {
+                                                    // When marking closed, set times to 00:00
                                                     form.setFieldValue(
                                                       `opening_hours.${idx}.opening_start_time`,
                                                       "00:00",
@@ -916,6 +959,53 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                                       `opening_hours.${idx}.break_end_time`,
                                                       "00:00",
                                                     );
+                                                  } else {
+                                                    // When reopening, restore sensible defaults
+                                                    const current =
+                                                      form.values.opening_hours[
+                                                        idx
+                                                      ];
+                                                    // Only restore if times are currently 00:00 or falsy
+                                                    if (
+                                                      !current.opening_start_time ||
+                                                      current.opening_start_time ===
+                                                        "00:00"
+                                                    ) {
+                                                      form.setFieldValue(
+                                                        `opening_hours.${idx}.opening_start_time`,
+                                                        "08:00",
+                                                      );
+                                                    }
+                                                    if (
+                                                      !current.opening_end_time ||
+                                                      current.opening_end_time ===
+                                                        "00:00"
+                                                    ) {
+                                                      form.setFieldValue(
+                                                        `opening_hours.${idx}.opening_end_time`,
+                                                        "22:00",
+                                                      );
+                                                    }
+                                                    if (
+                                                      !current.break_start_time ||
+                                                      current.break_start_time ===
+                                                        "00:00"
+                                                    ) {
+                                                      form.setFieldValue(
+                                                        `opening_hours.${idx}.break_start_time`,
+                                                        "14:00",
+                                                      );
+                                                    }
+                                                    if (
+                                                      !current.break_end_time ||
+                                                      current.break_end_time ===
+                                                        "00:00"
+                                                    ) {
+                                                      form.setFieldValue(
+                                                        `opening_hours.${idx}.break_end_time`,
+                                                        "16:00",
+                                                      );
+                                                    }
                                                   }
                                                 }}
                                               />

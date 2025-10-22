@@ -21,6 +21,7 @@ import Image from "next/image";
 import Link from "next/link";
 // import * as React from "react";
 import { useGetSalonListQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonApis";
+import type { OpeningHour } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
 import { useEffect, useState } from "react";
 import Breadcrumbs from "../../CommonComponents/Breadcrumbs";
 import AddSalonDialog from "./Dialogs/AddSalonDialog";
@@ -72,6 +73,47 @@ const ManageSalonsContainer: React.FC = () => {
   const totalPages = salonListData?.count
     ? Math.ceil(salonListData.count / (salonListData.results?.length || 1))
     : 0;
+
+  // Helper: Determine if salon is open today based on opening_hours array
+  const isSalonOpenToday = (opening_hours?: OpeningHour[]) => {
+    if (!opening_hours || opening_hours.length === 0) return false;
+
+    // Map days to numeric index similar to JS Date.getDay() -> 0 (Sunday) to 6 (Saturday)
+    const dayMap: Record<string, number> = {
+      SUNDAY: 0,
+      MONDAY: 1,
+      TUESDAY: 2,
+      WEDNESDAY: 3,
+      THURSDAY: 4,
+      FRIDAY: 5,
+      SATURDAY: 6,
+    };
+
+    const todayIndex = new Date().getDay();
+
+    // Find entry for today
+    const todaysEntry = opening_hours.find((oh) => {
+      const idx = dayMap[String(oh.day).toUpperCase()];
+      return idx === todayIndex;
+    });
+
+    if (!todaysEntry) return false;
+
+    // If is_closed flag is present and true -> closed
+    if (typeof todaysEntry.is_closed === "boolean") {
+      return !todaysEntry.is_closed;
+    }
+
+    // Fallback: if opening and closing times are both 00:00:00 treat as closed
+    if (
+      todaysEntry.opening_start_time === "00:00:00" &&
+      todaysEntry.opening_end_time === "00:00:00"
+    ) {
+      return false;
+    }
+
+    return true;
+  };
 
   return (
     <div className="container mx-auto space-y-6 px-4 py-6 md:px-6 lg:px-8">
@@ -128,7 +170,7 @@ const ManageSalonsContainer: React.FC = () => {
       {/* Content */}
       <div className="mt-6">
         {isLoading ? (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {[...Array(12)].map((_, idx) => (
               <Card
                 key={`salon-skeleton-${idx}`}
@@ -136,7 +178,7 @@ const ManageSalonsContainer: React.FC = () => {
               >
                 <CardHeader className="pt-6 pb-4">
                   <div className="mb-4 flex justify-center">
-                    <Skeleton className="h-16 w-16 rounded-2xl" />
+                    <Skeleton className="h-16 w-16 rounded-full" />
                   </div>
                   <Skeleton className="mx-auto h-6 w-3/4" />
                 </CardHeader>
@@ -163,7 +205,7 @@ const ManageSalonsContainer: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {salonListData.results.map((s: SalonProps) => (
               <Card
                 key={s.uid}
@@ -210,28 +252,48 @@ const ManageSalonsContainer: React.FC = () => {
                   <CardContent className="px-6 pb-6">
                     <p className="text-muted-foreground text-center text-sm leading-6">
                       {s.description ||
-                        `${s.city || "Location"} - ${s.salon_type || "Salon"}`}
+                        `${s.city || "Location"} - ${
+                          s.salon_type
+                            ?.split("_")
+                            .map((part: string) =>
+                              part
+                                .split("")
+                                .map((char: string, idx: number) =>
+                                  idx === 0
+                                    ? char.toUpperCase()
+                                    : char.toLowerCase(),
+                                )
+                                .join(""),
+                            )
+                            .join(" ") || "Salon"
+                        }`}
                     </p>
 
                     {/* Stats or features */}
                     <div className="text-muted-foreground mt-4 flex items-center justify-center gap-4 text-xs">
                       <div className="flex items-center gap-1">
-                        <div
-                          className={`h-2 w-2 rounded-full ${
-                            s.status === "OPEN"
-                              ? "animate-pulse bg-green-500"
-                              : "bg-red-500"
-                          }`}
-                        ></div>
-                        <span>{s.status || "Active"}</span>
-                      </div>
-                      {s.salon_type && (
-                        <div className="flex items-center gap-1">
-                          <span className="text-xs font-medium">
-                            {s.salon_type}
-                          </span>
+                        <div className="relative">
+                          <span
+                            className={`absolute inline-flex h-3 w-3 rounded-full ${
+                              isSalonOpenToday(s.opening_hours)
+                                ? "animate-ping bg-green-400 opacity-75"
+                                : "animate-ping bg-red-400 opacity-75"
+                            }`}
+                          />
+                          <span
+                            className={`relative inline-flex h-3 w-3 rounded-full ${
+                              isSalonOpenToday(s.opening_hours)
+                                ? "bg-green-600"
+                                : "bg-red-600"
+                            } border-2 border-white`}
+                          />
                         </div>
-                      )}
+                        <span className="ml-1">
+                          {isSalonOpenToday(s.opening_hours)
+                            ? "Open"
+                            : "Closed"}
+                        </span>
+                      </div>
                     </div>
                   </CardContent>
 
