@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { DashboardTabProps } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
-import { MapPin, PenSquare } from "lucide-react";
+import { MapPin, PenSquare, Scissors } from "lucide-react";
 import React from "react";
 
 const BasicInformationCard: React.FC<DashboardTabProps> = ({
@@ -31,15 +31,14 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
       <CardHeader className="flex items-start justify-between gap-4 px-6">
         <div className="flex items-center gap-4">
           <Avatar className="size-12">
-            <AvatarImage
-              src="/images/dashboard/loader/avatar-placeholder.png"
-              alt="salon avatar"
-            />
-            <AvatarFallback>AS</AvatarFallback>
+            <AvatarImage src={singleSalonData?.logo || ""} alt="salon avatar" />
+            <AvatarFallback>
+              <Scissors className="size-6" />
+            </AvatarFallback>
           </Avatar>
 
           <div>
-            <CardTitle className="text-base">{salonName}</CardTitle>
+            <CardTitle className="text-base">{singleSalonData?.name}</CardTitle>
             <CardDescription className="mt-1 text-sm">
               Your salon profile at a glance
             </CardDescription>
@@ -72,23 +71,31 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
           </p>
           <div className="mt-2 grid grid-cols-2 gap-6">
             <div className="flex flex-col">
-              <p className="text-muted-foreground text-xs">STREET</p>
-              <p className="text-foreground mt-1 text-sm">{street}</p>
+              <p className="text-muted-foreground text-xs uppercase">Street</p>
+              <p className="text-foreground mt-1 text-sm">
+                {singleSalonData?.street}
+              </p>
             </div>
 
             <div className="flex flex-col">
-              <p className="text-muted-foreground text-xs">CITY</p>
-              <p className="text-foreground mt-1 text-sm">{city}</p>
+              <p className="text-muted-foreground text-xs uppercase">City</p>
+              <p className="text-foreground mt-1 text-sm">
+                {singleSalonData?.city}
+              </p>
             </div>
 
             <div className="flex flex-col">
-              <p className="text-muted-foreground text-xs">ZIP CODE</p>
-              <p className="text-foreground mt-1 text-sm">{zip}</p>
+              <p className="text-muted-foreground text-xs uppercase">
+                Postal Code
+              </p>
+              <p className="text-foreground mt-1 text-sm">
+                {singleSalonData?.postal_code}
+              </p>
             </div>
 
             <div className="flex flex-col">
-              <p className="text-muted-foreground text-xs">COUNTRY</p>
-              <p className="text-foreground mt-1 text-sm">{country}</p>
+              <p className="text-muted-foreground text-xs uppercase">Country</p>
+              <p className="text-foreground mt-1 text-sm">{singleSalonData?.country}</p>
             </div>
           </div>
         </div>

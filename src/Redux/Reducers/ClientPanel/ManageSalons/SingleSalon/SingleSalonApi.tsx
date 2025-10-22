@@ -3,7 +3,7 @@ import { baseApi } from "@/Redux/Api/BaseApi";
 export const SingleSalonApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getSingleSalonData: builder.query({
-      query: (salonUid) => {
+      query: ({ salonUid }) => {
         return {
           url: `/salons/${salonUid}`,
           method: "GET",
@@ -22,4 +22,5 @@ export const SingleSalonApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useGetSingleSalonDataQuery, useEditSingleSalonMutation } = SingleSalonApi;
+export const { useGetSingleSalonDataQuery, useEditSingleSalonMutation } =
+  SingleSalonApi;

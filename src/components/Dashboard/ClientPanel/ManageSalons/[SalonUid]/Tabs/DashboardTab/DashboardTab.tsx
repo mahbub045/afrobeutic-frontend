@@ -6,15 +6,16 @@ import DashboardCards from "./DashboardCards/DashboardCards";
 import SalonOverview from "./SalonOverview/SalonOverview";
 
 const DashboardTab: React.FC = () => {
-   const { salonuid } = useParams();
+  const params = useParams();
+  const { salonuid } = params;
   // RTK Hooks
   const {
     data: singleSalonData,
     isLoading,
     isError,
-  } = useGetSingleSalonDataQuery(salonuid);
-console.log(singleSalonData)
-  const salonData = singleSalonData;
+  } = useGetSingleSalonDataQuery({ salonUid: salonuid });
+  console.log("Data", singleSalonData)
+
   return (
     <div>
       <SalonOverview />
