@@ -6,13 +6,18 @@ import { useAccountSwitch } from "@/hooks/use-account-switch";
 import { useGetAccountAccesserQuery } from "@/Redux/Reducers/ClientPanel/SwitchAccount/SwitchAccountApi";
 import { ArrowLeft, Info } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export const ActiveAccountBanner = () => {
   const { data: session } = useSession();
   const { activeAccountId, resetToMainAccount } = useAccountSwitch();
   const { data: accountsData } = useGetAccountAccesserQuery();
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  // Ensure we don't render differing content between server and client
+  // by rendering nothing until after hydration on the client.
   const mainAccountId = session?.user?.account_id;
   const isUsingDifferentAccount =
     activeAccountId && activeAccountId !== mainAccountId;
@@ -22,6 +27,8 @@ export const ActiveAccountBanner = () => {
     if (!isUsingDifferentAccount || !accountsData?.results) return null;
     return accountsData.results.find((acc) => acc.uid === activeAccountId);
   }, [isUsingDifferentAccount, activeAccountId, accountsData]);
+
+  if (!mounted) return null;
 
   if (!isUsingDifferentAccount) {
     return null;
