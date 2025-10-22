@@ -204,6 +204,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
     return `${time}:00`;
   };
 
+  // Return true on success so caller (Formik) can reset the form and close dialog
   const handleSubmit = async (formData: FormValues) => {
     try {
       // Transform the data to match API payload format
@@ -246,8 +247,8 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
       console.log("Sending payload to API:", JSON.stringify(payload, null, 2));
 
       await addSalon(payload).unwrap();
-      onClose();
       toast.success("Salon added successfully");
+      return true;
     } catch (error: unknown) {
       console.error("Failed to add salon:", error);
 
@@ -274,6 +275,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
       } else {
         toast.error("Failed to add salon. Please try again.");
       }
+      return false;
     }
   };
   const salonTypes = [
@@ -360,7 +362,17 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
             })),
           }}
           validationSchema={validationSchema}
-          onSubmit={handleSubmit}
+          onSubmit={async (values, { resetForm, setSubmitting }) => {
+            setSubmitting(true);
+            const success = await handleSubmit(values);
+            setSubmitting(false);
+            if (success) {
+              // Reset the form to initial values, reset to first tab, and close dialog
+              resetForm();
+              setActiveTab("basic-info");
+              onClose();
+            }
+          }}
         >
           {({ values, setFieldTouched }) => (
             <FormikForm>
