@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { countries } from "@/data/countries";
 import { DashboardTabProps } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
 import { MapPin, PenSquare, Scissors } from "lucide-react";
 import React from "react";
@@ -95,7 +96,26 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
 
             <div className="flex flex-col">
               <p className="text-muted-foreground text-xs uppercase">Country</p>
-              <p className="text-foreground mt-1 text-sm">{singleSalonData?.country}</p>
+              <p className="text-foreground mt-1 text-sm">
+                {(() => {
+                  // salon may store a 2-letter country code or full name
+                  const stored = singleSalonData?.country;
+                  if (!stored) return "-";
+
+                  // If stored looks like a 2-letter code, try to resolve
+                  const code =
+                    typeof stored === "string" && stored.length === 2
+                      ? stored.toUpperCase()
+                      : null;
+                  if (code) {
+                    const found = countries.find((c) => c.code === code);
+                    if (found) return found.name;
+                  }
+
+                  // Otherwise return the stored value (possibly full name)
+                  return stored;
+                })()}
+              </p>
             </div>
           </div>
         </div>
