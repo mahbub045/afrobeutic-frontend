@@ -212,9 +212,9 @@ const ManageSalonsContainer: React.FC = () => {
                 className="group hover:shadow-primary/10 relative overflow-hidden border border-gray-200/60 bg-white/80 shadow-md backdrop-blur-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl dark:border-gray-700/60 dark:bg-gray-900/80 dark:shadow-gray-600 dark:hover:shadow-gray-600/30"
               >
                 {/* Animated border gradient */}
-                <div className="from-primary/20 to-primary/20 absolute inset-0 rounded-lg bg-gradient-to-r via-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                <div className="absolute inset-[1px] rounded-lg bg-white dark:bg-gray-900" />
-
+                <div className="from-primary/10 dark:from-primary/20 dark:to-primary/20 to-primary/10 absolute inset-0 rounded-lg bg-gradient-to-r via-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                
+                <div className="absolute inset-[1px] rounded-lg" />
                 {/* Content */}
                 <div className="relative z-10">
                   <CardHeader className="pt-6 pb-4">

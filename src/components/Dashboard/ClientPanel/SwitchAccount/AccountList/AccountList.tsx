@@ -92,6 +92,9 @@ const AccountList: React.FC = () => {
                       : "border-gray-200/60 dark:border-gray-700/60"
                   }`}
                 >
+                  {/* Animated border gradient */}
+                  <div className="from-primary/10 dark:from-primary/20 dark:to-primary/20 to-primary/10 absolute inset-0 rounded-lg bg-gradient-to-r via-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+
                   {/* Badge inside the Card so it visually sits in the top-right of the card */}
                   <div className="absolute top-2 right-2 z-30">
                     <Badge
