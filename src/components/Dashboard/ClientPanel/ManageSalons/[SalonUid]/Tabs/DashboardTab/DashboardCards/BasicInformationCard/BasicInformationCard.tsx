@@ -9,10 +9,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { DashboardTabProps } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
 import { MapPin, PenSquare } from "lucide-react";
 import React from "react";
 
-const BasicInformationCard: React.FC = () => {
+const BasicInformationCard: React.FC<DashboardTabProps> = ({
+  singleSalonData,
+  isLoading,
+  isError,
+}) => {
   // Sample data - replace with props or data fetching as needed
   const salonName = "Afrobeutic Salon";
   const salonType = "Unisex";

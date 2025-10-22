@@ -20,7 +20,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 // import * as React from "react";
-import { useGetSalonListQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonApis";
+import { useGetSalonListQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonApi";
 import type { OpeningHour } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
 import { useEffect, useState } from "react";
 import Breadcrumbs from "../../CommonComponents/Breadcrumbs";
@@ -213,7 +213,7 @@ const ManageSalonsContainer: React.FC = () => {
               >
                 {/* Animated border gradient */}
                 <div className="from-primary/10 dark:from-primary/20 dark:to-primary/20 to-primary/10 absolute inset-0 rounded-lg bg-gradient-to-r via-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                
+
                 <div className="absolute inset-[1px] rounded-lg" />
                 {/* Content */}
                 <div className="relative z-10">

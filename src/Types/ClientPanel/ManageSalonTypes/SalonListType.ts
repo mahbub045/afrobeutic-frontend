@@ -70,3 +70,9 @@ export interface FormValues {
   status: string;
   opening_hours: OpeningHour[];
 }
+
+export interface DashboardTabProps {
+  singleSalonData: SalonProps;
+  isLoading: boolean;
+  isError: boolean;
+}

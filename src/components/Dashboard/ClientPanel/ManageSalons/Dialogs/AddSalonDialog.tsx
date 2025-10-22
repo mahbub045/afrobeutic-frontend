@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { countries } from "@/data/countries";
-import { useAddSalonMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonApis";
+import { useAddSalonMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonApi";
 import {
   AddSalonDialogProps,
   FormValues,

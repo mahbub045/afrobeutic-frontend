@@ -83,10 +83,6 @@ const SingleSalonContainer: React.FC = () => {
 
   const demo = React.useMemo(
     () => ({
-      dashboard: {
-        title: "Overview",
-        content: "Summary metrics and quick links.",
-      },
       services: {
         title: "Services",
         items: [
