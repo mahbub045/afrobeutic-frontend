@@ -10,7 +10,13 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { countries } from "@/data/countries";
-import { useAddSalonMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonApis";
+import { useAddSalonMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonApi";
+import {
+  AddSalonDialogProps,
+  FormValues,
+  OpeningHour,
+  SalonProps,
+} from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
 import {
   ErrorMessage,
   Field,
@@ -27,52 +33,6 @@ import PhoneInput from "react-phone-input-2";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
-
-interface AddSalonDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-interface AddSalonProps {
-  name: string;
-  salon_type: string;
-  email: string;
-  phone: string;
-  website: string;
-  street: string;
-  city: string;
-  postal_code: string;
-  country: string;
-  latitude: number;
-  longitude: number;
-  status: string;
-  opening_hours: OpeningHour[];
-}
-
-type OpeningHour = {
-  day: string;
-  opening_start_time: string;
-  opening_end_time: string;
-  break_start_time?: string;
-  break_end_time?: string;
-  is_closed: boolean;
-};
-
-type FormValues = {
-  name: string;
-  salon_type: string;
-  email: string;
-  phone: string;
-  country_dial_code?: string;
-  website: string;
-  street: string;
-  city: string;
-  postal_code: string;
-  country: string;
-  latitude: number;
-  longitude: number;
-  status: string;
-  opening_hours: OpeningHour[];
-};
 
 // Helper function to convert time string (HH:MM) to minutes for comparison
 const timeToMinutes = (timeStr: string): number => {
@@ -98,8 +58,31 @@ const basicInfoValidationSchema = Yup.object().shape({
   city: Yup.string().required("City is required"),
   postal_code: Yup.string().required("Postal code is required"),
   country: Yup.string().required("Country is required"),
-  latitude: Yup.number().required("Latitude is required"),
-  longitude: Yup.number().required("Longitude is required"),
+  // transform empty string to undefined so required() triggers
+  latitude: Yup.mixed()
+    .transform((value) => {
+      if (value === "" || value === null || value === undefined)
+        return undefined;
+      return Number(value);
+    })
+    .required("Latitude is required")
+    .test(
+      "is-number",
+      "Latitude must be a number",
+      (val) => typeof val === "number" && !Number.isNaN(val),
+    ),
+  longitude: Yup.mixed()
+    .transform((value) => {
+      if (value === "" || value === null || value === undefined)
+        return undefined;
+      return Number(value);
+    })
+    .required("Longitude is required")
+    .test(
+      "is-number",
+      "Longitude must be a number",
+      (val) => typeof val === "number" && !Number.isNaN(val),
+    ),
 });
 
 // Full validation schema for form submission
@@ -114,8 +97,30 @@ const validationSchema = Yup.object().shape({
   city: Yup.string().required("City is required"),
   postal_code: Yup.string().required("Postal code is required"),
   country: Yup.string().required("Country is required"),
-  latitude: Yup.number().required("Latitude is required"),
-  longitude: Yup.number().required("Longitude is required"),
+  latitude: Yup.mixed()
+    .transform((value) => {
+      if (value === "" || value === null || value === undefined)
+        return undefined;
+      return Number(value);
+    })
+    .required("Latitude is required")
+    .test(
+      "is-number",
+      "Latitude must be a number",
+      (val) => typeof val === "number" && !Number.isNaN(val),
+    ),
+  longitude: Yup.mixed()
+    .transform((value) => {
+      if (value === "" || value === null || value === undefined)
+        return undefined;
+      return Number(value);
+    })
+    .required("Longitude is required")
+    .test(
+      "is-number",
+      "Longitude must be a number",
+      (val) => typeof val === "number" && !Number.isNaN(val),
+    ),
   opening_hours: Yup.array().of(
     Yup.object().shape({
       day: Yup.string().required("Day is required"),
@@ -211,7 +216,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
   const handleSubmit = async (formData: FormValues) => {
     try {
       // Transform the data to match API payload format
-      const payload: Partial<AddSalonProps> & {
+      const payload: Partial<SalonProps> & {
         name: string;
         salon_type: string;
         email: string;
@@ -230,8 +235,15 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
         city: formData.city,
         postal_code: formData.postal_code,
         country: formData.country,
-        latitude: formData.latitude,
-        longitude: formData.longitude,
+        // coerce latitude/longitude to numbers (they may be strings from inputs)
+        latitude:
+          typeof formData.latitude === "string"
+            ? Number(formData.latitude)
+            : formData.latitude,
+        longitude:
+          typeof formData.longitude === "string"
+            ? Number(formData.longitude)
+            : formData.longitude,
         status: formData.status,
         opening_hours: formData.opening_hours.map((oh) => ({
           day: oh.day,
@@ -255,7 +267,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
         icon: "success",
         iconColor: "#037375",
         title: "Added successfully",
-        text: `Successfully added ${formData.name} salon`,
+        html: `Successfully added <b class="text-primary">${formData.name}</b> salon`,
         background: resolvedTheme === "dark" ? "#0f1724" : undefined,
         color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
         confirmButtonColor: "#037375",
@@ -303,6 +315,10 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
     "FRIDAY",
     "SATURDAY",
     "SUNDAY",
+  ];
+  const slonStatus = [
+    { value: "ACTIVE", label: "Active" },
+    { value: "INACTIVE", label: "Inactive" },
   ];
 
   const hours = Array.from({ length: 24 }, (_, i) =>
@@ -361,9 +377,9 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
             city: "",
             postal_code: "",
             country: "",
-            latitude: 0,
-            longitude: 0,
-            status: "OPEN",
+            latitude: "",
+            longitude: "",
+            status: "ACTIVE",
             opening_hours: days.map((d) => ({
               day: d,
               opening_start_time: "08:00",
@@ -420,8 +436,11 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                         <option value="" disabled>
                           Select a status
                         </option>
-                        <option value="OPEN">Open</option>
-                        <option value="CLOSED">Closed</option>
+                        {slonStatus.map((s) => (
+                          <option key={s.value} value={s.value}>
+                            {s.label}
+                          </option>
+                        ))}
                       </Field>
                       <ErrorMessage
                         name="status"
@@ -790,7 +809,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                               {({
                                 form,
                               }: {
-                                form: FormikProps<AddSalonProps>;
+                                form: FormikProps<SalonProps>;
                               }) => (
                                 <>
                                   {form.values.opening_hours.map(
