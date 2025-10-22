@@ -785,7 +785,12 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                             <Field
                                               as="select"
                                               name={`opening_hours.${idx}.opening_start_time`}
-                                              className="w-full"
+                                              className="w-full focus:ring-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                                              style={{
+                                                outline: "none",
+                                                boxShadow: "none",
+                                              }}
+                                              disabled={oh.is_closed}
                                             >
                                               {hours.map((h) =>
                                                 minutes.map((m) => (
@@ -810,7 +815,12 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                             <Field
                                               as="select"
                                               name={`opening_hours.${idx}.opening_end_time`}
-                                              className="w-full"
+                                              className="w-full focus:ring-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                                              style={{
+                                                outline: "none",
+                                                boxShadow: "none",
+                                              }}
+                                              disabled={oh.is_closed}
                                             >
                                               {hours.map((h) =>
                                                 minutes.map((m) => (
@@ -835,7 +845,12 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                             <Field
                                               as="select"
                                               name={`opening_hours.${idx}.break_start_time`}
-                                              className="w-full"
+                                              className="w-full focus:ring-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                                              style={{
+                                                outline: "none",
+                                                boxShadow: "none",
+                                              }}
+                                              disabled={oh.is_closed}
                                             >
                                               <option value="">-</option>
                                               {hours.map((h) =>
@@ -861,7 +876,12 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                             <Field
                                               as="select"
                                               name={`opening_hours.${idx}.break_end_time`}
-                                              className="w-full"
+                                              className="w-full focus:ring-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                                              style={{
+                                                outline: "none",
+                                                boxShadow: "none",
+                                              }}
+                                              disabled={oh.is_closed}
                                             >
                                               <option value="">-</option>
                                               {hours.map((h) =>
@@ -885,18 +905,20 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                           <Field
                                             name={`opening_hours.${idx}.is_closed`}
                                           >
-                                            {({ field }: FieldProps) => (
+                                            {({ field, form }: FieldProps) => (
                                               <Switch
                                                 checked={Boolean(field.value)}
                                                 onCheckedChange={(
                                                   v: boolean,
                                                 ) => {
+                                                  // Toggle closed flag
                                                   form.setFieldValue(
                                                     field.name,
                                                     v,
                                                   );
-                                                  // When closed is toggled, set times to 00:00
+
                                                   if (v) {
+                                                    // When marking closed, set times to 00:00
                                                     form.setFieldValue(
                                                       `opening_hours.${idx}.opening_start_time`,
                                                       "00:00",
@@ -913,6 +935,53 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                                       `opening_hours.${idx}.break_end_time`,
                                                       "00:00",
                                                     );
+                                                  } else {
+                                                    // When reopening, restore sensible defaults
+                                                    const current =
+                                                      form.values.opening_hours[
+                                                        idx
+                                                      ];
+                                                    // Only restore if times are currently 00:00 or falsy
+                                                    if (
+                                                      !current.opening_start_time ||
+                                                      current.opening_start_time ===
+                                                        "00:00"
+                                                    ) {
+                                                      form.setFieldValue(
+                                                        `opening_hours.${idx}.opening_start_time`,
+                                                        "08:00",
+                                                      );
+                                                    }
+                                                    if (
+                                                      !current.opening_end_time ||
+                                                      current.opening_end_time ===
+                                                        "00:00"
+                                                    ) {
+                                                      form.setFieldValue(
+                                                        `opening_hours.${idx}.opening_end_time`,
+                                                        "22:00",
+                                                      );
+                                                    }
+                                                    if (
+                                                      !current.break_start_time ||
+                                                      current.break_start_time ===
+                                                        "00:00"
+                                                    ) {
+                                                      form.setFieldValue(
+                                                        `opening_hours.${idx}.break_start_time`,
+                                                        "14:00",
+                                                      );
+                                                    }
+                                                    if (
+                                                      !current.break_end_time ||
+                                                      current.break_end_time ===
+                                                        "00:00"
+                                                    ) {
+                                                      form.setFieldValue(
+                                                        `opening_hours.${idx}.break_end_time`,
+                                                        "16:00",
+                                                      );
+                                                    }
                                                   }
                                                 }}
                                               />
