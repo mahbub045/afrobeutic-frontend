@@ -21,9 +21,11 @@ import {
   Form as FormikForm,
   FormikProps,
 } from "formik";
+import { useTheme } from "next-themes";
 import { useState } from "react";
 import PhoneInput from "react-phone-input-2";
 import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 import * as Yup from "yup";
 
 interface AddSalonDialogProps {
@@ -192,6 +194,7 @@ const validationSchema = Yup.object().shape({
 });
 
 const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
+  const { resolvedTheme } = useTheme();
   const [addSalon, { isLoading }] = useAddSalonMutation();
   const [activeTab, setActiveTab] = useState("basic-info");
 
@@ -247,7 +250,16 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
       console.log("Sending payload to API:", JSON.stringify(payload, null, 2));
 
       await addSalon(payload).unwrap();
-      toast.success("Salon added successfully");
+      // toast.success("Salon added successfully");
+      Swal.fire({
+        icon: "success",
+        iconColor: "#037375",
+        title: "Added successfully",
+        text: `Successfully added ${formData.name} salon`,
+        background: resolvedTheme === "dark" ? "#0f1724" : undefined,
+        color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
+        confirmButtonColor: "#037375",
+      });
       return true;
     } catch (error: unknown) {
       console.error("Failed to add salon:", error);
