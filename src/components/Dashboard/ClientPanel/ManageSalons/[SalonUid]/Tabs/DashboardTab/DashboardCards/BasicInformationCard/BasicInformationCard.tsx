@@ -73,7 +73,7 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
                       )
                       .join(""),
                   )
-                  .join(" ")}
+                  .join(" ") || "Not Specified"}
               </Badge>
               <Button
                 variant="outline"

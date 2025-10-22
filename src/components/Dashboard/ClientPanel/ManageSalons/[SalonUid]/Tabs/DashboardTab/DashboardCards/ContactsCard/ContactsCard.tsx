@@ -10,10 +10,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { DashboardTabProps } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
 import { Check, Copy, ExternalLink, PenSquare } from "lucide-react";
 import React, { useState } from "react";
 
-const ContactsCard: React.FC = () => {
+const ContactsCard: React.FC<DashboardTabProps> = ({
+  singleSalonData,
+  isLoading,
+}) => {
   // Replace these with props or data from store
   const website = "https://chh.com";
   const phone = "0876";
@@ -45,6 +49,7 @@ const ContactsCard: React.FC = () => {
           <Button
             variant="outline"
             size="sm"
+            className="shadow-md dark:shadow-gray-600"
             aria-label="Edit basic information"
           >
             <PenSquare className="size-4" />
@@ -59,16 +64,18 @@ const ContactsCard: React.FC = () => {
         <div className="grid gap-4">
           <div className="flex items-start justify-between">
             <div className="min-w-0">
-              <p className="text-muted-foreground text-xs font-semibold tracking-wide">
-                WEBSITE
+              <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+                Website
               </p>
               <a
-                href={website}
+                href={singleSalonData?.website || "#"}
                 target="_blank"
                 rel="noreferrer"
                 className="text-primary mt-2 inline-flex items-center gap-2 text-sm font-medium"
               >
-                <span className="block max-w-[260px] truncate">{website}</span>
+                <span className="block max-w-[260px] truncate">
+                  {singleSalonData?.website || "Not Specified"}
+                </span>
                 <ExternalLink className="text-primary size-3" />
               </a>
             </div>
@@ -91,14 +98,14 @@ const ContactsCard: React.FC = () => {
 
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-muted-foreground text-xs font-semibold tracking-wide">
-                PHONE
+              <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+                Phone
               </p>
               <a
                 className="text-foreground mt-2 block text-sm"
-                href={`tel:${phone}`}
+                href={`tel:${singleSalonData?.phone || "#"}`}
               >
-                {phone}
+                {singleSalonData?.phone || "Not Specified"}
               </a>
             </div>
 
@@ -120,14 +127,14 @@ const ContactsCard: React.FC = () => {
 
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-muted-foreground text-xs font-semibold tracking-wide">
-                EMAIL
+              <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+                Email
               </p>
               <a
                 className="text-foreground mt-2 block text-sm"
-                href={`mailto:${email}`}
+                href={`mailto:${singleSalonData?.email || "#"}`}
               >
-                {email}
+                {singleSalonData?.email || "Not Specified"}
               </a>
             </div>
 

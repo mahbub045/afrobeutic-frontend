@@ -13,7 +13,7 @@ const DashboardCards: React.FC<DashboardTabProps> = ({
     <>
       <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
         <BasicInformationCard singleSalonData={singleSalonData} isLoading={isLoading} isError={isError} />
-        <ContactsCard />
+        <ContactsCard singleSalonData={singleSalonData} isLoading={isLoading} isError={isError} />
       </div>
       <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
         <ServicesCard />

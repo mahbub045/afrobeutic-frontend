@@ -14,7 +14,6 @@ const DashboardTab: React.FC = () => {
     isLoading,
     isError,
   } = useGetSingleSalonDataQuery({ salonUid: salonuid });
-  console.log("Data", singleSalonData)
 
   return (
     <div>
