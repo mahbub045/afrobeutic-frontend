@@ -15,7 +15,7 @@ import {
   FieldProps,
   Formik,
   Form as FormikForm,
-  FormikProps,
+  FormikHelpers
 } from "formik";
 import { useTheme } from "next-themes";
 import { useParams } from "next/navigation";
@@ -42,6 +42,43 @@ const EditContactInfoDialog: React.FC<EditDashboardProps> = ({
   // RTK hooks
   const [editBasicInfo, { isLoading }] = useEditSingleSalonMutation();
 
+  const handleSubmit = async (
+    values: ContactValues,
+    { setSubmitting }: FormikHelpers<ContactValues>,
+  ) => {
+    setSubmitting(true);
+    try {
+      const payload: Partial<Record<string, unknown>> = {
+        website: values.website || null,
+        phone: values.phone || null,
+        email: values.email || null,
+      };
+
+      await editBasicInfo({
+        salonUid: salonuid as string,
+        salonData: payload,
+      }).unwrap();
+
+      Swal.fire({
+        icon: "success",
+        iconColor: "#037375",
+        title: "Updated",
+        html: `Contact information updated successfully`,
+        background: resolvedTheme === "dark" ? "#0f1724" : undefined,
+        color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
+        confirmButtonColor: "#037375",
+      });
+
+      toast.success("Contacts updated");
+      onClose();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update contacts. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const schema = Yup.object().shape({
     website: Yup.string().url("Invalid URL").nullable(),
     phone: Yup.string().nullable(),
@@ -66,41 +103,9 @@ const EditContactInfoDialog: React.FC<EditDashboardProps> = ({
             email: singleSalonData?.email || "",
           }}
           validationSchema={schema}
-          onSubmit={async (values, { setSubmitting }) => {
-            setSubmitting(true);
-            try {
-              const payload: Partial<Record<string, unknown>> = {
-                website: values.website || null,
-                phone: values.phone || null,
-                email: values.email || null,
-              };
-
-              await editBasicInfo({
-                salonUid: salonuid as string,
-                salonData: payload,
-              }).unwrap();
-
-              Swal.fire({
-                icon: "success",
-                iconColor: "#037375",
-                title: "Updated",
-                html: `Contact information updated successfully`,
-                background: resolvedTheme === "dark" ? "#0f1724" : undefined,
-                color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
-                confirmButtonColor: "#037375",
-              });
-
-              toast.success("Contacts updated");
-              onClose();
-            } catch (err) {
-              console.error(err);
-              toast.error("Failed to update contacts. Please try again.");
-            } finally {
-              setSubmitting(false);
-            }
-          }}
+          onSubmit={handleSubmit}
         >
-          {({ values, setFieldValue }: FormikProps<ContactValues>) => (
+          {(): React.ReactNode => (
             <FormikForm>
               <div className="grid gap-4">
                 <div>
