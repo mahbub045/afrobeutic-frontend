@@ -46,24 +46,35 @@ const ContactsCard: React.FC<DashboardTabProps> = ({
   return (
     <Card className="shadow-md dark:shadow-gray-600">
       <CardHeader className="flex items-start justify-between gap-4 px-6 py-1">
-        <div>
-          <CardTitle className="text-sm">Contacts</CardTitle>
-          <CardDescription className="text-muted-foreground mt-1 text-xs">
-            Website, phone and email for this salon
-          </CardDescription>
-        </div>
+        {isLoading ? (
+          <div className="flex flex-col">
+            <Skeleton className="h-6 w-20" />
+            <Skeleton className="mt-1 h-4 w-48" />
+          </div>
+        ) : (
+          <div>
+            <CardTitle className="text-sm">Contacts</CardTitle>
+            <CardDescription className="text-muted-foreground mt-1 text-xs">
+              Website, phone and email for this salon
+            </CardDescription>
+          </div>
+        )}
 
         <CardAction>
-          <Button
-            variant="outline"
-            size="sm"
-            className="shadow-md dark:shadow-gray-600"
-            aria-label="Edit basic information"
-            onClick={handleOpenContactInfoDialog}
-          >
-            <PenSquare className="size-4" />
-            Edit
-          </Button>
+          {isLoading ? (
+            <Skeleton className="h-8 w-16 rounded-md" />
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              className="shadow-md dark:shadow-gray-600"
+              aria-label="Edit basic information"
+              onClick={handleOpenContactInfoDialog}
+            >
+              <PenSquare className="size-4" />
+              Edit
+            </Button>
+          )}
         </CardAction>
       </CardHeader>
 

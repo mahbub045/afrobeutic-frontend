@@ -15,7 +15,7 @@ import {
   FieldProps,
   Formik,
   Form as FormikForm,
-  FormikProps,
+  FormikHelpers
 } from "formik";
 import { useTheme } from "next-themes";
 import { useParams } from "next/navigation";
@@ -25,7 +25,7 @@ import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
 
-interface ContactValues {
+export interface ContactValues {
   phone: string;
   email: string;
   website: string;
@@ -41,6 +41,43 @@ const EditContactInfoDialog: React.FC<EditDashboardProps> = ({
 
   // RTK hooks
   const [editBasicInfo, { isLoading }] = useEditSingleSalonMutation();
+
+  const handleSubmit = async (
+    values: ContactValues,
+    { setSubmitting }: FormikHelpers<ContactValues>,
+  ) => {
+    setSubmitting(true);
+    try {
+      const payload: Partial<Record<string, unknown>> = {
+        website: values.website || null,
+        phone: values.phone || null,
+        email: values.email || null,
+      };
+
+      await editBasicInfo({
+        salonUid: salonuid as string,
+        salonData: payload,
+      }).unwrap();
+
+      Swal.fire({
+        icon: "success",
+        iconColor: "#037375",
+        title: "Updated",
+        html: `Contact information updated successfully`,
+        background: resolvedTheme === "dark" ? "#0f1724" : undefined,
+        color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
+        confirmButtonColor: "#037375",
+      });
+
+      toast.success("Contacts updated");
+      onClose();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update contacts. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const schema = Yup.object().shape({
     website: Yup.string().url("Invalid URL").nullable(),
@@ -66,41 +103,9 @@ const EditContactInfoDialog: React.FC<EditDashboardProps> = ({
             email: singleSalonData?.email || "",
           }}
           validationSchema={schema}
-          onSubmit={async (values, { setSubmitting }) => {
-            setSubmitting(true);
-            try {
-              const payload: Partial<Record<string, unknown>> = {
-                website: values.website || null,
-                phone: values.phone || null,
-                email: values.email || null,
-              };
-
-              await editBasicInfo({
-                salonUid: salonuid as string,
-                salonData: payload,
-              }).unwrap();
-
-              Swal.fire({
-                icon: "success",
-                iconColor: "#037375",
-                title: "Updated",
-                html: `Contact information updated successfully`,
-                background: resolvedTheme === "dark" ? "#0f1724" : undefined,
-                color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
-                confirmButtonColor: "#037375",
-              });
-
-              toast.success("Contacts updated");
-              onClose();
-            } catch (err) {
-              console.error(err);
-              toast.error("Failed to update contacts. Please try again.");
-            } finally {
-              setSubmitting(false);
-            }
-          }}
+          onSubmit={handleSubmit}
         >
-          {({ values, setFieldValue }: FormikProps<ContactValues>) => (
+          {(): React.ReactNode => (
             <FormikForm>
               <div className="grid gap-4">
                 <div>
@@ -146,7 +151,7 @@ const EditContactInfoDialog: React.FC<EditDashboardProps> = ({
                           searchPlaceholder="Search"
                           enableSearch
                           inputClass="!w-full !h-auto px-3 py-2 rounded-md !bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100"
-                          buttonClass="!bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100 !border-1 dark:!border-gray-700 dark:hover:!bg-gray-700"
+                          buttonClass="!bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100 !border-1 dark:!border-gray-700"
                           dropdownClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100 !px-2"
                           searchClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100"
                         />

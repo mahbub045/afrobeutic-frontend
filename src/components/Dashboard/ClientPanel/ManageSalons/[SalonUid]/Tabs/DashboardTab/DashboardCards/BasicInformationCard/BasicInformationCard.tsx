@@ -41,8 +41,8 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
             </div>
 
             <div className="flex items-center gap-3">
-              <Skeleton className="h-6 w-20 rounded" />
-              <Skeleton className="h-8 w-20 rounded" />
+              <Skeleton className="h-6 w-16 rounded" />
+              <Skeleton className="h-8 w-16 rounded" />
             </div>
           </>
         ) : (
@@ -99,13 +99,17 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
 
       <Separator />
 
-      <CardContent className="grid grid-cols-1 gap-4 px-6 pb-6 sm:grid-cols-2">
+      <CardContent className="grid grid-cols-1 gap-4 px-6 sm:grid-cols-2">
         {/* Address details span full width on small screens; stays in grid on larger */}
         <div className="col-span-1 mt-2 sm:col-span-2">
-          <p className="text-muted-foreground flex items-center gap-1 text-xs font-semibold tracking-wide">
-            <MapPin className="text-muted-foreground size-4" />
-            ADDRESS
-          </p>
+          {isLoading ? (
+            <Skeleton className="h-4 w-26" />
+          ) : (
+            <p className="text-muted-foreground flex items-center gap-1 text-xs font-semibold tracking-wide uppercase">
+              <MapPin className="text-muted-foreground size-4" />
+              Address
+            </p>
+          )}
 
           {isLoading ? (
             <div className="mt-2 grid grid-cols-2 gap-6">
@@ -121,6 +125,16 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
 
               <div className="flex flex-col">
                 <Skeleton className="h-4 w-28" />
+                <Skeleton className="mt-2 h-4 w-full" />
+              </div>
+
+              <div className="flex flex-col">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="mt-2 h-4 w-full" />
+              </div>
+
+              <div className="flex flex-col">
+                <Skeleton className="h-4 w-20" />
                 <Skeleton className="mt-2 h-4 w-full" />
               </div>
 
@@ -179,6 +193,22 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
                     // Otherwise return the stored value (possibly full name)
                     return stored;
                   })()}
+                </p>
+              </div>
+              <div className="flex flex-col">
+                <p className="text-muted-foreground text-xs uppercase">
+                  Latitude
+                </p>
+                <p className="text-foreground mt-1 text-sm">
+                  {singleSalonData?.latitude}
+                </p>
+              </div>
+              <div className="flex flex-col">
+                <p className="text-muted-foreground text-xs uppercase">
+                  Longitude
+                </p>
+                <p className="text-foreground mt-1 text-sm">
+                  {singleSalonData?.longitude}
                 </p>
               </div>
             </div>

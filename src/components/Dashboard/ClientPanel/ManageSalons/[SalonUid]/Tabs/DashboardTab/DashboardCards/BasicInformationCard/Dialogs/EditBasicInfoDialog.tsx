@@ -20,6 +20,7 @@ import {
   Field,
   Formik,
   Form as FormikForm,
+  FormikHelpers,
   FormikProps,
 } from "formik";
 import { Scissors } from "lucide-react";
@@ -48,9 +49,69 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
     city: Yup.string().required("City is required"),
     postal_code: Yup.string().required("Postal code is required"),
     country: Yup.string().required("Country is required"),
+    latitude: Yup.number().required("Latitude is required"),
+    longitude: Yup.number().required("Longitude is required"),
   });
 
   // Note: we'll send logo as multipart/form-data when a file is present
+
+  const handleSubmit = async (
+    values: BasicInfoFormValues,
+    { setSubmitting }: FormikHelpers<BasicInfoFormValues>,
+  ) => {
+    setSubmitting(true);
+    try {
+      if (values.logoFile) {
+        const formData = new FormData();
+        formData.append("logo", values.logoFile);
+        formData.append("name", values.name);
+        formData.append("salon_type", values.salon_type);
+        formData.append("street", values.street);
+        formData.append("city", values.city);
+        formData.append("postal_code", values.postal_code);
+        formData.append("country", values.country);
+        formData.append("latitude", String(Number(values.latitude)));
+        formData.append("longitude", String(Number(values.longitude)));
+
+        await editBasicInfo({
+          salonUid: salonuid as string,
+          salonData: formData,
+        }).unwrap();
+      } else {
+        const payload: Partial<SalonProps> = {
+          name: values.name,
+          salon_type: values.salon_type,
+          street: values.street,
+          city: values.city,
+          postal_code: values.postal_code,
+          country: values.country,
+          latitude: Number(values.latitude),
+          longitude: Number(values.longitude),
+        };
+
+        await editBasicInfo({
+          salonUid: salonuid as string,
+          salonData: payload,
+        }).unwrap();
+      }
+
+      Swal.fire({
+        icon: "success",
+        iconColor: "#037375",
+        title: "Updated",
+        html: `Successfully updated <b class="text-primary">${values.name}</b>`,
+        background: resolvedTheme === "dark" ? "#0f1724" : undefined,
+        color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
+        confirmButtonColor: "#037375",
+      });
+      onClose();
+    } catch (error) {
+      console.error("Failed to update salon", error);
+      toast.error("Failed to update salon. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -75,60 +136,11 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
             city: singleSalonData?.city || "",
             postal_code: singleSalonData?.postal_code || "",
             country: singleSalonData?.country || "",
+            latitude: singleSalonData?.latitude ?? 0,
+            longitude: singleSalonData?.longitude ?? 0,
           }}
           validationSchema={basicSchema}
-          onSubmit={async (values, { setSubmitting }) => {
-            setSubmitting(true);
-            try {
-              if (values.logoFile) {
-                const formData = new FormData();
-                formData.append("logo", values.logoFile);
-                formData.append("name", values.name);
-                formData.append("salon_type", values.salon_type);
-                formData.append("street", values.street);
-                formData.append("city", values.city);
-                formData.append("postal_code", values.postal_code);
-                formData.append("country", values.country);
-
-                await editBasicInfo({
-                  salonUid: salonuid as string,
-                  salonData: formData,
-                }).unwrap();
-              } else {
-                const payload: Partial<SalonProps> = {
-                  name: values.name,
-                  salon_type: values.salon_type,
-                  street: values.street,
-                  city: values.city,
-                  postal_code: values.postal_code,
-                  country: values.country,
-                };
-
-                await editBasicInfo({
-                  salonUid: salonuid as string,
-                  salonData: payload,
-                }).unwrap();
-              }
-
-              Swal.fire({
-                icon: "success",
-                iconColor: "#037375",
-                title: "Updated",
-                html: `Successfully updated <b class="text-primary">${values.name}</b>`,
-                background: resolvedTheme === "dark" ? "#0f1724" : undefined,
-                color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
-                confirmButtonColor: "#037375",
-              });
-
-              toast.success("Salon updated");
-              onClose();
-            } catch (error) {
-              console.error("Failed to update salon", error);
-              toast.error("Failed to update salon. Please try again.");
-            } finally {
-              setSubmitting(false);
-            }
-          }}
+          onSubmit={handleSubmit}
         >
           {({ values, setFieldValue }: FormikProps<BasicInfoFormValues>) => (
             <FormikForm>
@@ -263,6 +275,40 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
                     </Field>
                     <ErrorMessage
                       name="country"
+                      component="div"
+                      className="text-danger mt-1 text-xs"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
+                    <Label htmlFor="latitude" className="mb-2">
+                      Latitude
+                    </Label>
+                    <Field
+                      id="latitude"
+                      name="latitude"
+                      type="number"
+                      as="input"
+                    />
+                    <ErrorMessage
+                      name="latitude"
+                      component="div"
+                      className="text-danger mt-1 text-xs"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="longitude" className="mb-2">
+                      Longitude
+                    </Label>
+                    <Field
+                      id="longitude"
+                      name="longitude"
+                      type="number"
+                      as="input"
+                    />
+                    <ErrorMessage
+                      name="longitude"
                       component="div"
                       className="text-danger mt-1 text-xs"
                     />
