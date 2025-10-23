@@ -14,7 +14,7 @@ export const SingleSalonApi = baseApi.injectEndpoints({
     editSingleSalon: builder.mutation({
       query: ({ salonUid, salonData }) => ({
         url: `/salons/${salonUid}`,
-        method: "PUT",
+        method: "PATCH",
         body: salonData,
       }),
       invalidatesTags: ["SingleSalon"],

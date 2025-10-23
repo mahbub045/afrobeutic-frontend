@@ -76,3 +76,21 @@ export interface DashboardTabProps {
   isLoading: boolean;
   isError: boolean;
 }
+
+export interface BasicInfoFormValues {
+  logoFile: File | null;
+  logoPreview: string;
+  name: string;
+  salon_type: string;
+  street: string;
+  city: string;
+  postal_code: string;
+  country: string;
+}
+
+export interface EditBasicInfoDialogProps {
+  // Define any props if needed
+  singleSalonData: SalonProps | null;
+  isOpen: boolean;
+  onClose: () => void;
+}
