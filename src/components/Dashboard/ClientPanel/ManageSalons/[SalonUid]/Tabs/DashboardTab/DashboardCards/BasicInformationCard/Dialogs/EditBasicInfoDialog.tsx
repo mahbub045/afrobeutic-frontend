@@ -48,6 +48,8 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
     city: Yup.string().required("City is required"),
     postal_code: Yup.string().required("Postal code is required"),
     country: Yup.string().required("Country is required"),
+    latitude: Yup.number().required("Latitude is required"),
+    longitude: Yup.number().required("Longitude is required"),
   });
 
   // Note: we'll send logo as multipart/form-data when a file is present
@@ -75,6 +77,9 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
             city: singleSalonData?.city || "",
             postal_code: singleSalonData?.postal_code || "",
             country: singleSalonData?.country || "",
+            // Ensure these are numbers to match BasicInfoFormValues (number)
+            latitude: singleSalonData?.latitude ?? 0,
+            longitude: singleSalonData?.longitude ?? 0,
           }}
           validationSchema={basicSchema}
           onSubmit={async (values, { setSubmitting }) => {
@@ -89,6 +94,9 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
                 formData.append("city", values.city);
                 formData.append("postal_code", values.postal_code);
                 formData.append("country", values.country);
+                // FormData.append expects string | Blob — ensure numbers are converted to strings
+                formData.append("latitude", String(Number(values.latitude)));
+                formData.append("longitude", String(Number(values.longitude)));
 
                 await editBasicInfo({
                   salonUid: salonuid as string,
@@ -102,6 +110,8 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
                   city: values.city,
                   postal_code: values.postal_code,
                   country: values.country,
+                  latitude: Number(values.latitude),
+                  longitude: Number(values.longitude),
                 };
 
                 await editBasicInfo({
@@ -119,8 +129,6 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
                 color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
                 confirmButtonColor: "#037375",
               });
-
-              toast.success("Salon updated");
               onClose();
             } catch (error) {
               console.error("Failed to update salon", error);
@@ -263,6 +271,40 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
                     </Field>
                     <ErrorMessage
                       name="country"
+                      component="div"
+                      className="text-danger mt-1 text-xs"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
+                    <Label htmlFor="latitude" className="mb-2">
+                      Latitude
+                    </Label>
+                    <Field
+                      id="latitude"
+                      name="latitude"
+                      type="number"
+                      as="input"
+                    />
+                    <ErrorMessage
+                      name="latitude"
+                      component="div"
+                      className="text-danger mt-1 text-xs"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="longitude" className="mb-2">
+                      Longitude
+                    </Label>
+                    <Field
+                      id="longitude"
+                      name="longitude"
+                      type="number"
+                      as="input"
+                    />
+                    <ErrorMessage
+                      name="longitude"
                       component="div"
                       className="text-danger mt-1 text-xs"
                     />

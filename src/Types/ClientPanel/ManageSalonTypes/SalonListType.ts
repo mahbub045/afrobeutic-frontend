@@ -93,6 +93,8 @@ export interface BasicInfoFormValues {
   city: string;
   postal_code: string;
   country: string;
+  latitude: number;
+  longitude: number;
 }
 
 export interface ContactInfoFormValues {
