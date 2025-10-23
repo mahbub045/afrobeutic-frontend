@@ -256,3 +256,31 @@ button,
 .btn-full {
   @apply w-full px-3 py-3 text-sm;
 }
+
+/* React Telephone Input Customization */
+.react-tel-input .country-list .country:hover,
+.react-tel-input .country-list .country.highlight,
+.react-tel-input .country-list .country.active {
+  background: var(--muted) !important;
+  color: var(--card-foreground) !important;
+}
+.react-tel-input .country-list .country:hover .dial-code,
+.react-tel-input .country-list .country.highlight .dial-code,
+.react-tel-input .country-list .country.active .dial-code {
+  color: var(--card-foreground) !important;
+}
+.react-tel-input .flag-dropdown,
+.react-tel-input .selected-flag,
+.react-tel-input .flag-dropdown .arrow {
+  color: var(--foreground) !important;
+  background: var(--input) !important;
+}
+/* Ensure dropdown scrollbar visible in dark */
+.react-tel-input .country-list::-webkit-scrollbar {
+  width: 10px;
+}
+.react-tel-input .country-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 6px;
+}
+/* React Telephone Input Customization end */

@@ -25,7 +25,7 @@ import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
 
-interface ContactValues {
+export interface ContactValues {
   phone: string;
   email: string;
   website: string;
@@ -146,7 +146,7 @@ const EditContactInfoDialog: React.FC<EditDashboardProps> = ({
                           searchPlaceholder="Search"
                           enableSearch
                           inputClass="!w-full !h-auto px-3 py-2 rounded-md !bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100"
-                          buttonClass="!bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100 !border-1 dark:!border-gray-700 dark:hover:!bg-gray-700"
+                          buttonClass="!bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100 !border-1 dark:!border-gray-700"
                           dropdownClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100 !px-2"
                           searchClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100"
                         />
