@@ -92,7 +92,7 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
               {session.user.email}
             </p>
             {session.user.role && (
-              <Badge variant="secondary" className="w-fit text-xs text-white">
+              <Badge variant="secondary" className="w-fit text-xs">
                 {session.user.role
                   .split("_")
                   .map((part: string) =>

@@ -4,6 +4,7 @@ import {
   Card,
   CardAction,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -54,10 +55,19 @@ const EmployeesCard: React.FC = () => {
 
   return (
     <Card className="shadow-md dark:shadow-gray-600">
-      <CardHeader className="flex items-center justify-between px-6 py-4">
-        <CardTitle className="text-sm">Employees</CardTitle>
+      <CardHeader className="flex items-center justify-between px-6 py-1">
+        <div>
+          <CardTitle className="text-sm">Employees</CardTitle>
+          <CardDescription className="text-muted-foreground mt-1 text-xs">
+            Overview of your salon Employee
+          </CardDescription>
+        </div>
         <CardAction>
-          <Button variant="outline" size="sm">
+          <Button
+            variant="outline"
+            size="sm"
+            className="shadow-md dark:shadow-gray-600"
+          >
             View all
           </Button>
         </CardAction>

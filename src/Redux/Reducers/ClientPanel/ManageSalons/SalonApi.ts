@@ -4,7 +4,7 @@ import {
   SalonListResponse,
 } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
 
-export const SalonListApi = baseApi.injectEndpoints({
+export const SalonApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getSalonList: builder.query<SalonListResponse, SalonListQueryParams | void>(
       {
@@ -28,7 +28,15 @@ export const SalonListApi = baseApi.injectEndpoints({
         providesTags: ["SalonList"],
       },
     ),
+    addSalon: builder.mutation({
+      query: (salonData) => ({
+        url: `/salons`,
+        method: "POST",
+        body: salonData,
+      }),
+      invalidatesTags: ["SalonList"],
+    }),
   }),
 });
 
-export const { useGetSalonListQuery } = SalonListApi;
+export const { useGetSalonListQuery, useAddSalonMutation } = SalonApi;

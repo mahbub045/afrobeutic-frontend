@@ -9,7 +9,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useGetSalonListQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonList/SalonListApi";
 import { SalonProps } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
 import {
   ArrowRight,
@@ -20,20 +19,23 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import * as React from "react";
+// import * as React from "react";
+import { useGetSalonListQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonApi";
+import type { OpeningHour } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
+import { useEffect, useState } from "react";
 import Breadcrumbs from "../../CommonComponents/Breadcrumbs";
+import AddSalonDialog from "./Dialogs/AddSalonDialog";
 
 const ManageSalonsContainer: React.FC = () => {
-  const [currentPage, setCurrentPage] = React.useState(1);
-  const [searchTerm, setSearchTerm] = React.useState("");
-  const [debouncedSearch, setDebouncedSearch] = React.useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   // Track which salon logos failed to load (by uid)
-  const [failedLogos, setFailedLogos] = React.useState<Record<string, boolean>>(
-    {},
-  );
+  const [failedLogos, setFailedLogos] = useState<Record<string, boolean>>({});
+  const [isAddSalonDialogOpen, setIsAddSalonDialogOpen] = useState(false);
 
   // Debounce search input
-  React.useEffect(() => {
+  useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchTerm);
       setCurrentPage(1); // Reset to first page on new search
@@ -52,6 +54,10 @@ const ManageSalonsContainer: React.FC = () => {
     search: debouncedSearch || undefined,
   });
 
+  const handleOpenAddSalonDialog = () => {
+    setIsAddSalonDialogOpen(true);
+  };
+
   const handlePreviousPage = () => {
     if (salonListData?.previous) {
       setCurrentPage((prev) => prev - 1);
@@ -67,6 +73,47 @@ const ManageSalonsContainer: React.FC = () => {
   const totalPages = salonListData?.count
     ? Math.ceil(salonListData.count / (salonListData.results?.length || 1))
     : 0;
+
+  // Helper: Determine if salon is open today based on opening_hours array
+  const isSalonOpenToday = (opening_hours?: OpeningHour[]) => {
+    if (!opening_hours || opening_hours.length === 0) return false;
+
+    // Map days to numeric index similar to JS Date.getDay() -> 0 (Sunday) to 6 (Saturday)
+    const dayMap: Record<string, number> = {
+      SUNDAY: 0,
+      MONDAY: 1,
+      TUESDAY: 2,
+      WEDNESDAY: 3,
+      THURSDAY: 4,
+      FRIDAY: 5,
+      SATURDAY: 6,
+    };
+
+    const todayIndex = new Date().getDay();
+
+    // Find entry for today
+    const todaysEntry = opening_hours.find((oh) => {
+      const idx = dayMap[String(oh.day).toUpperCase()];
+      return idx === todayIndex;
+    });
+
+    if (!todaysEntry) return false;
+
+    // If is_closed flag is present and true -> closed
+    if (typeof todaysEntry.is_closed === "boolean") {
+      return !todaysEntry.is_closed;
+    }
+
+    // Fallback: if opening and closing times are both 00:00:00 treat as closed
+    if (
+      todaysEntry.opening_start_time === "00:00:00" &&
+      todaysEntry.opening_end_time === "00:00:00"
+    ) {
+      return false;
+    }
+
+    return true;
+  };
 
   return (
     <div className="container mx-auto space-y-6 px-4 py-6 md:px-6 lg:px-8">
@@ -98,7 +145,12 @@ const ManageSalonsContainer: React.FC = () => {
         </div> */}
 
         <div className="flex flex-col items-end gap-2">
-          <Button variant="default" size="sm" className="text-white">
+          <Button
+            variant="default"
+            size="sm"
+            className="text-white"
+            onClick={handleOpenAddSalonDialog}
+          >
             <Plus className="h-4 w-4" />
             Add new Salon
           </Button>
@@ -118,7 +170,7 @@ const ManageSalonsContainer: React.FC = () => {
       {/* Content */}
       <div className="mt-6">
         {isLoading ? (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {[...Array(12)].map((_, idx) => (
               <Card
                 key={`salon-skeleton-${idx}`}
@@ -126,7 +178,7 @@ const ManageSalonsContainer: React.FC = () => {
               >
                 <CardHeader className="pt-6 pb-4">
                   <div className="mb-4 flex justify-center">
-                    <Skeleton className="h-16 w-16 rounded-2xl" />
+                    <Skeleton className="h-16 w-16 rounded-full" />
                   </div>
                   <Skeleton className="mx-auto h-6 w-3/4" />
                 </CardHeader>
@@ -153,16 +205,16 @@ const ManageSalonsContainer: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {salonListData.results.map((s: SalonProps) => (
               <Card
                 key={s.uid}
                 className="group hover:shadow-primary/10 relative overflow-hidden border border-gray-200/60 bg-white/80 shadow-md backdrop-blur-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl dark:border-gray-700/60 dark:bg-gray-900/80 dark:shadow-gray-600 dark:hover:shadow-gray-600/30"
               >
                 {/* Animated border gradient */}
-                <div className="from-primary/20 to-primary/20 absolute inset-0 rounded-lg bg-gradient-to-r via-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                <div className="absolute inset-[1px] rounded-lg bg-white dark:bg-gray-900" />
+                <div className="from-primary/10 dark:from-primary/20 dark:to-primary/20 to-primary/10 absolute inset-0 rounded-lg bg-gradient-to-r via-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
+                <div className="absolute inset-[1px] rounded-lg" />
                 {/* Content */}
                 <div className="relative z-10">
                   <CardHeader className="pt-6 pb-4">
@@ -200,28 +252,48 @@ const ManageSalonsContainer: React.FC = () => {
                   <CardContent className="px-6 pb-6">
                     <p className="text-muted-foreground text-center text-sm leading-6">
                       {s.description ||
-                        `${s.city || "Location"} - ${s.salon_type || "Salon"}`}
+                        `${s.city || "Location"} - ${
+                          s.salon_type
+                            ?.split("_")
+                            .map((part: string) =>
+                              part
+                                .split("")
+                                .map((char: string, idx: number) =>
+                                  idx === 0
+                                    ? char.toUpperCase()
+                                    : char.toLowerCase(),
+                                )
+                                .join(""),
+                            )
+                            .join(" ") || "Salon"
+                        }`}
                     </p>
 
                     {/* Stats or features */}
                     <div className="text-muted-foreground mt-4 flex items-center justify-center gap-4 text-xs">
                       <div className="flex items-center gap-1">
-                        <div
-                          className={`h-2 w-2 rounded-full ${
-                            s.status === "OPEN"
-                              ? "animate-pulse bg-green-500"
-                              : "bg-red-500"
-                          }`}
-                        ></div>
-                        <span>{s.status || "Active"}</span>
-                      </div>
-                      {s.salon_type && (
-                        <div className="flex items-center gap-1">
-                          <span className="text-xs font-medium">
-                            {s.salon_type}
-                          </span>
+                        <div className="relative">
+                          <span
+                            className={`absolute inline-flex h-3 w-3 rounded-full ${
+                              isSalonOpenToday(s.opening_hours)
+                                ? "animate-ping bg-green-400 opacity-75"
+                                : "animate-ping bg-red-400 opacity-75"
+                            }`}
+                          />
+                          <span
+                            className={`relative inline-flex h-3 w-3 rounded-full ${
+                              isSalonOpenToday(s.opening_hours)
+                                ? "bg-green-600"
+                                : "bg-red-600"
+                            } border-2 border-white`}
+                          />
                         </div>
-                      )}
+                        <span className="ml-1">
+                          {isSalonOpenToday(s.opening_hours)
+                            ? "Open"
+                            : "Closed"}
+                        </span>
+                      </div>
                     </div>
                   </CardContent>
 
@@ -289,6 +361,11 @@ const ManageSalonsContainer: React.FC = () => {
             )}
         </div>
       </div>
+      {/* Dialogs */}
+      <AddSalonDialog
+        isOpen={isAddSalonDialogOpen}
+        onClose={() => setIsAddSalonDialogOpen(false)}
+      />
     </div>
   );
 };

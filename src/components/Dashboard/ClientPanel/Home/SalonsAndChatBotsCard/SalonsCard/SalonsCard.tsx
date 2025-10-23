@@ -3,23 +3,29 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useGetSalonListQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonList/SalonListApi";
+import { useGetSalonListQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonApi";
 import { AlertCircle, Plus, Scissors } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
+import AddSalonDialog from "../../../ManageSalons/Dialogs/AddSalonDialog";
 
 const SalonsCard: React.FC = () => {
   const { data: salonsData, isLoading, isError } = useGetSalonListQuery();
+  const [isAddSalonDialogOpen, setIsAddSalonDialogOpen] = useState(false);
 
-  const handleAddSalon = () => {
-    // TODO: Implement add salon functionality
-    console.log("Add Salon clicked");
+  const handleOpenAddSalonDialog = () => {
+    setIsAddSalonDialogOpen(true);
   };
 
   return (
     <Card className="h-full shadow-md dark:shadow-gray-600">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <CardTitle className="text-xl font-semibold">My Salons</CardTitle>
-        <Button onClick={handleAddSalon} size="sm" className="gap-1 text-white">
+        <Button
+          onClick={handleOpenAddSalonDialog}
+          size="sm"
+          className="gap-1 text-white"
+        >
           <Plus className="h-4 w-4" />
           Add salon
         </Button>
@@ -91,6 +97,11 @@ const SalonsCard: React.FC = () => {
           </div>
         )}
       </CardContent>
+      {/* Dialogs */}
+      <AddSalonDialog
+        isOpen={isAddSalonDialogOpen}
+        onClose={() => setIsAddSalonDialogOpen(false)}
+      />
     </Card>
   );
 };

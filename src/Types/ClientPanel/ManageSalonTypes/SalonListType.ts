@@ -9,13 +9,13 @@ export type WeekDay =
   | string;
 
 export interface OpeningHour {
-  id: number;
-  uid: string;
+  id?: number;
+  uid?: string;
   day: WeekDay;
-  opening_start_time: string | null;
-  opening_end_time: string | null;
-  break_start_time: string | null;
-  break_end_time: string | null;
+  opening_start_time: string;
+  opening_end_time: string;
+  break_start_time?: string;
+  break_end_time?: string;
   is_closed: boolean;
 }
 
@@ -35,7 +35,7 @@ export interface SalonProps {
   latitude?: number;
   longitude?: number;
   status?: string;
-  opening_hours?: OpeningHour[];
+  opening_hours: OpeningHour[];
 }
 export interface SalonListResponse {
   count: number;
@@ -47,4 +47,58 @@ export interface SalonListResponse {
 export interface SalonListQueryParams {
   page?: number;
   search?: string;
+}
+
+export interface AddSalonDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export interface FormValues {
+  name: string;
+  salon_type: string;
+  email: string;
+  phone: string;
+  country_dial_code?: string;
+  website: string;
+  street: string;
+  city: string;
+  postal_code: string;
+  country: string;
+  latitude: number | string;
+  longitude: number | string;
+  status: string;
+  opening_hours: OpeningHour[];
+}
+
+export interface DashboardTabProps {
+  singleSalonData: SalonProps;
+  isLoading: boolean;
+  isError: boolean;
+}
+
+export interface EditDashboardProps {
+  // Define any props if needed
+  singleSalonData: SalonProps | null;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export interface BasicInfoFormValues {
+  logoFile: File | null;
+  logoPreview: string;
+  name: string;
+  salon_type: string;
+  street: string;
+  city: string;
+  postal_code: string;
+  country: string;
+  latitude: number;
+  longitude: number;
+}
+
+export interface ContactInfoFormValues {
+  website: string;
+  phone: string;
+  email: string;
 }
