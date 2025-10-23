@@ -12,9 +12,9 @@ export const SingleSalonApi = baseApi.injectEndpoints({
       providesTags: ["SingleSalon"],
     }),
     editSingleSalon: builder.mutation({
-      query: (salonData) => ({
-        url: `/salons/${salonData.salonUid}`,
-        method: "PUT",
+      query: ({ salonUid, salonData }) => ({
+        url: `/salons/${salonUid}`,
+        method: "PATCH",
         body: salonData,
       }),
       invalidatesTags: ["SingleSalon"],
