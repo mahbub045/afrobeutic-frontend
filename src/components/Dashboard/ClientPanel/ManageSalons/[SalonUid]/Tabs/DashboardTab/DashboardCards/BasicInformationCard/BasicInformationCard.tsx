@@ -13,12 +13,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { countries } from "@/data/countries";
 import { DashboardTabProps } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
 import { MapPin, PenSquare, Scissors } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
+import EditBasicInfoDialog from "./Dialogs/EditBasicInfoDialog";
 
 const BasicInformationCard: React.FC<DashboardTabProps> = ({
   singleSalonData,
   isLoading,
 }) => {
+  const [openBasicInfoEditDialog, setOpenBasicInfoEditDialog] = useState(false);
+
+  const handleOpenBasicInfoEditDialog = () => {
+    setOpenBasicInfoEditDialog(true);
+  };
+
   return (
     <Card className="shadow-md dark:shadow-gray-600">
       <CardHeader className="flex items-start justify-between gap-4 px-6">
@@ -80,6 +87,7 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
                 size="sm"
                 aria-label="Edit basic information"
                 className="shadow-md dark:shadow-gray-600"
+                onClick={handleOpenBasicInfoEditDialog}
               >
                 <PenSquare className="size-3" />
                 Edit
@@ -177,6 +185,11 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
           )}
         </div>
       </CardContent>
+      <EditBasicInfoDialog
+        singleSalonData={singleSalonData}
+        isOpen={openBasicInfoEditDialog}
+        onClose={() => setOpenBasicInfoEditDialog(false)}
+      />
     </Card>
   );
 };
