@@ -14,15 +14,22 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { DashboardTabProps } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
 import { Check, Copy, ExternalLink, PenSquare } from "lucide-react";
 import React, { useState } from "react";
+import EditContactInfoDialog from "./Dialogs/EditContactInfoDialog";
 
 const ContactsCard: React.FC<DashboardTabProps> = ({
   singleSalonData,
   isLoading,
 }) => {
+  const [openContactInfoDialog, setOpenContactInfoDialog] = useState(false);
+
+  const handleOpenContactInfoDialog = () => {
+    setOpenContactInfoDialog(true);
+  };
+
   // Replace these with props or data from store
-  const website = "https://chh.com";
-  const phone = "0876";
-  const email = "hlh@hg.com";
+  const website = singleSalonData?.website || "";
+  const phone = singleSalonData?.phone || "";
+  const email = singleSalonData?.email || "";
 
   const [copied, setCopied] = useState<string | null>(null);
 
@@ -52,6 +59,7 @@ const ContactsCard: React.FC<DashboardTabProps> = ({
             size="sm"
             className="shadow-md dark:shadow-gray-600"
             aria-label="Edit basic information"
+            onClick={handleOpenContactInfoDialog}
           >
             <PenSquare className="size-4" />
             Edit
@@ -193,6 +201,11 @@ const ContactsCard: React.FC<DashboardTabProps> = ({
           </div>
         )}
       </CardContent>
+      <EditContactInfoDialog
+        singleSalonData={singleSalonData}
+        isOpen={openContactInfoDialog}
+        onClose={() => setOpenContactInfoDialog(false)}
+      />
     </Card>
   );
 };

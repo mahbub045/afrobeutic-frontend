@@ -77,6 +77,13 @@ export interface DashboardTabProps {
   isError: boolean;
 }
 
+export interface EditDashboardProps {
+  // Define any props if needed
+  singleSalonData: SalonProps | null;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
 export interface BasicInfoFormValues {
   logoFile: File | null;
   logoPreview: string;
@@ -88,9 +95,8 @@ export interface BasicInfoFormValues {
   country: string;
 }
 
-export interface EditBasicInfoDialogProps {
-  // Define any props if needed
-  singleSalonData: SalonProps | null;
-  isOpen: boolean;
-  onClose: () => void;
+export interface ContactInfoFormValues {
+  website: string;
+  phone: string;
+  email: string;
 }

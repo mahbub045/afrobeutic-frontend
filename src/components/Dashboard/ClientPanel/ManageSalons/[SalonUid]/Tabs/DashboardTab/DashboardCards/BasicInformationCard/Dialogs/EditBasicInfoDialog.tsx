@@ -12,7 +12,7 @@ import { countries } from "@/data/countries";
 import { useEditSingleSalonMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/SingleSalon/SingleSalonApi";
 import {
   BasicInfoFormValues,
-  EditBasicInfoDialogProps,
+  EditDashboardProps,
   SalonProps,
 } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
 import {
@@ -30,16 +30,16 @@ import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
 
-const EditBasicInfoDialog: React.FC<EditBasicInfoDialogProps> = ({
+const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
   singleSalonData,
   isOpen,
   onClose,
 }) => {
   const { salonuid } = useParams();
+  const { resolvedTheme } = useTheme();
 
   // RTK hooks
   const [editBasicInfo, { isLoading }] = useEditSingleSalonMutation();
-  const { resolvedTheme } = useTheme();
 
   const basicSchema = Yup.object().shape({
     name: Yup.string().required("Salon name is required"),
