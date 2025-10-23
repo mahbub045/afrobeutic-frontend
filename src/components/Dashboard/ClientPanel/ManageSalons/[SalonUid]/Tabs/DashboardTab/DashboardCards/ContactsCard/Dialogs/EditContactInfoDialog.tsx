@@ -15,7 +15,7 @@ import {
   FieldProps,
   Formik,
   Form as FormikForm,
-  FormikHelpers
+  FormikHelpers,
 } from "formik";
 import { useTheme } from "next-themes";
 import { useParams } from "next/navigation";
@@ -68,8 +68,6 @@ const EditContactInfoDialog: React.FC<EditDashboardProps> = ({
         color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
         confirmButtonColor: "#037375",
       });
-
-      toast.success("Contacts updated");
       onClose();
     } catch (err) {
       console.error(err);

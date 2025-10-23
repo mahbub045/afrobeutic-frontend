@@ -54,7 +54,7 @@ export default function AlreadyVerifiedPage() {
 
         <div className="flex flex-col gap-3">
           <Button asChild>
-            <Link href="/auth/login" className="w-full text-center text-white">
+            <Link href="/auth/login" className="w-full text-center">
               Go to Log in
             </Link>
           </Button>

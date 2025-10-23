@@ -103,7 +103,7 @@ const AccountList: React.FC = () => {
                           ? "default"
                           : "secondary"
                       }
-                      className="w-fit text-xs text-white"
+                      className="w-fit text-xs"
                     >
                       {account.role &&
                         account.role
@@ -124,7 +124,7 @@ const AccountList: React.FC = () => {
 
                   {activeAccountId === account.uid && (
                     <div className="absolute top-2 left-2 z-30">
-                      <Badge variant="secondary" className="text-xs text-white">
+                      <Badge variant="secondary" className="text-xs">
                         Active
                       </Badge>
                     </div>

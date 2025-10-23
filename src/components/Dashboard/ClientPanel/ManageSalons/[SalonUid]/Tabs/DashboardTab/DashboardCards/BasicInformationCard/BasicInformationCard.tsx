@@ -69,7 +69,7 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
             </div>
 
             <div className="flex items-center gap-3">
-              <Badge variant="secondary" className="text-white">
+              <Badge variant="secondary">
                 {singleSalonData?.salon_type
                   ?.split("_")
                   .map((part: string) =>
