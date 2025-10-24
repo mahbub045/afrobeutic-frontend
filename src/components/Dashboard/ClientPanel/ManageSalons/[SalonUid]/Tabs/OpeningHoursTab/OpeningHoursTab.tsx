@@ -73,9 +73,8 @@ const OpeningHoursTab: React.FC = () => {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <div className="h-6 w-48 animate-pulse rounded-md bg-gray-100" />
         <div className="flex flex-col gap-4">
-          {Array.from({ length: 6 }).map((_, i) => (
+          {Array.from({ length: 7 }).map((_, i) => (
             <Card key={i} className="animate-pulse">
               <CardHeader>
                 <CardTitle>
@@ -83,13 +82,19 @@ const OpeningHoursTab: React.FC = () => {
                 </CardTitle>
                 <div />
               </CardHeader>
-              <CardContent>
-                <div className="mb-2">
-                  <Skeleton className="h-3 w-3/4" />
-                </div>
-                <div>
+              <CardContent className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                <Card className="flex gap-2 px-4 py-3">
+                  <Skeleton className="h-3 w-4/12" />
                   <Skeleton className="h-3 w-1/2" />
-                </div>
+                </Card>
+                <Card className="flex gap-2 px-4 py-3">
+                  <Skeleton className="h-3 w-4/12" />
+                  <Skeleton className="h-3 w-1/2" />
+                </Card>
+                <Card className="flex gap-2 px-4 py-3">
+                  <Skeleton className="h-3 w-4/12" />
+                  <Skeleton className="h-3 w-1/2" />
+                </Card>
               </CardContent>
             </Card>
           ))}
