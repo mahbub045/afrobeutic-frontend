@@ -251,7 +251,7 @@ const EditAllOpeningHoursDialog: React.FC<EditDashboardProps> = ({
           validationSchema={schema}
           onSubmit={handleSubmit}
         >
-          {({ values }) => (
+          {({}) => (
             <FormikForm>
               <div className="space-y-3">
                 {/* Header row */}

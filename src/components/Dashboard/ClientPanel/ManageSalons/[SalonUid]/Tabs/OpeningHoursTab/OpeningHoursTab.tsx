@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetSingleSalonDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SingleSalon/SingleSalonApi";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import React, { useState } from "react";
 import EditAllOpeningHoursDialog from "./Dialogs/EditAllOpeningHoursDialog";
 import EditSingleOpeningHoursDialog from "./Dialogs/EditSingleOpeningHoursDialog";
@@ -32,7 +32,6 @@ function formatTimeShort(time?: string | null) {
 
 const OpeningHoursTab: React.FC = () => {
   const { salonuid } = useParams();
-  const router = useRouter();
 
   // RTK Hook - single salon data (which includes opening_hours)
   const {
@@ -134,7 +133,7 @@ const OpeningHoursTab: React.FC = () => {
 
       <div className="flex flex-col gap-4">
         {sorted.map((entry: OpeningEntry) => (
-          <Card key={entry.uid}>
+          <Card key={entry.uid} className="py-2">
             <CardHeader className="flex items-center justify-between">
               <CardTitle className="relative">
                 {entry.day}
@@ -147,7 +146,7 @@ const OpeningHoursTab: React.FC = () => {
               </CardTitle>
               <div className="flex items-center gap-2">
                 <Button
-                  size="sm"
+                  size="xs"
                   variant="outline"
                   className="shadow-md dark:shadow-gray-600"
                   onClick={() => onOpenEditSingle(entry)}

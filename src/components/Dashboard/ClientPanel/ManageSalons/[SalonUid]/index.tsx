@@ -77,7 +77,6 @@ const SingleSalonContainer: React.FC = () => {
   }, [pathname, salonNavMenus]);
 
   // Demo data for tabs (typed)
-  type Service = { id: string; name: string; price: string };
   type Product = { id: string; name: string; stock: number };
   type Chair = { id: string; name: string };
   type Booking = { id: string; customer: string };
