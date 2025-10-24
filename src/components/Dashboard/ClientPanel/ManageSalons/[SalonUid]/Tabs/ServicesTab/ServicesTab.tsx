@@ -11,16 +11,47 @@ import {
 } from "@/components/ui/table";
 import { useGetServicesDataQuery } from "@/Redux/Reducers/ClientPanel/Services/ServicesApi";
 import { ServiceProps } from "@/Types/ClientPanel/ServicesTypes/ServicesType";
-import { Eye, Search, Trash2 } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  Plus,
+  Search,
+  Trash2,
+} from "lucide-react";
 import { useParams } from "next/navigation";
 import * as React from "react";
 
 const ServicesTab: React.FC = () => {
   const { salonuid } = useParams();
-  // RTK Hook
-  const { data: servicesData, isLoading } = useGetServicesDataQuery({
-    salonUid: salonuid,
+  // useParams can return string | string[] | undefined — normalize to a string for the query
+  const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
+  // Pagination state
+  const [currentPage, setCurrentPage] = React.useState<number>(1);
+  // Search state (debounced)
+  const [searchTerm, setSearchTerm] = React.useState<string>("");
+  const [debouncedSearch, setDebouncedSearch] = React.useState<string>("");
+
+  // Debounce the search input and reset page on new search
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setCurrentPage(1);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  const {
+    data: servicesData,
+    isLoading,
+    isFetching,
+  } = useGetServicesDataQuery({
+    salonUid: salonUid,
+    page: currentPage,
+    search: debouncedSearch || undefined,
   });
+
   const extractedServices: ServiceProps[] = servicesData?.results ?? [];
 
   const formatPrice = (p?: string) => {
@@ -40,6 +71,22 @@ const ServicesTab: React.FC = () => {
     }
   };
 
+  const handlePreviousPage = () => {
+    if (servicesData?.previous) {
+      setCurrentPage((p) => Math.max(1, p - 1));
+    }
+  };
+
+  const handleNextPage = () => {
+    if (servicesData?.next) {
+      setCurrentPage((p) => p + 1);
+    }
+  };
+
+  const totalPages = servicesData?.count
+    ? Math.ceil(servicesData.count / (servicesData.results?.length || 1))
+    : 0;
+
   return (
     <>
       <div className="flex justify-between">
@@ -50,17 +97,22 @@ const ServicesTab: React.FC = () => {
             className="text-muted-foreground pointer-events-none absolute top-[10px] left-2"
           />
           <Input
-            className="focus:!border-primary pl-7 focus:!ring-0"
+            className="focus:!border-primary pl-7 shadow-md focus:!ring-0 dark:shadow-gray-600"
             placeholder="Search services..."
+            value={searchTerm}
+            onChange={(e) =>
+              setSearchTerm((e.target as HTMLInputElement).value)
+            }
           />
         </div>
         <Button size="sm" variant="default">
+          <Plus className="h-4 w-4" />
           Add New Service
         </Button>
       </div>
 
       <Table>
-        <TableHeader>
+        <TableHeader className="text-xs">
           <TableRow>
             <TableHead>Name</TableHead>
             <TableHead>Category</TableHead>
@@ -126,8 +178,48 @@ const ServicesTab: React.FC = () => {
         </TableBody>
       </Table>
       <div className="flex justify-between px-2 py-4">
-        <div>Total: {extractedServices.length} services</div>
-        <div>dfd</div>
+        <div>
+          {servicesData && servicesData.count > 0 && (
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Total: {servicesData.count} service
+              {servicesData.count !== 1 ? "s" : ""}
+            </div>
+          )}
+        </div>
+        <div>
+          {/* Pagination Controls */}
+          {servicesData && servicesData.count > servicesData.results.length && (
+            <div className="flex items-center justify-center gap-4 pt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePreviousPage}
+                disabled={!servicesData.previous || isFetching}
+                className="flex items-center gap-2"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Previous
+              </Button>
+
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-gray-600 dark:text-gray-400">
+                  Page {currentPage} of {totalPages}
+                </span>
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleNextPage}
+                disabled={!servicesData.next || isFetching}
+                className="flex items-center gap-2"
+              >
+                Next
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
     </>
   );
