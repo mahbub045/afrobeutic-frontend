@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetSingleSalonDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SingleSalon/SingleSalonApi";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import React, { useState } from "react";
 import EditAllOpeningHoursDialog from "./Dialogs/EditAllOpeningHoursDialog";
 import EditSingleOpeningHoursDialog from "./Dialogs/EditSingleOpeningHoursDialog";
@@ -32,7 +32,6 @@ function formatTimeShort(time?: string | null) {
 
 const OpeningHoursTab: React.FC = () => {
   const { salonuid } = useParams();
-  const router = useRouter();
 
   // RTK Hook - single salon data (which includes opening_hours)
   const {

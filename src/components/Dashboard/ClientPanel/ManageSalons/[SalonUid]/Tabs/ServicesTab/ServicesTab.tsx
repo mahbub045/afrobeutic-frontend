@@ -53,23 +53,6 @@ const ServicesTab: React.FC = () => {
 
   const extractedServices: ServiceProps[] = servicesData?.results ?? [];
 
-  const formatPrice = (p?: string) => {
-    if (!p) return "—";
-    const n = Number(p);
-    if (!Number.isFinite(n)) return p;
-    // Format as US Dollar
-    try {
-      return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-        maximumFractionDigits: 2,
-      }).format(n);
-    } catch (e) {
-      // Fallback to a simple dollar format
-      return `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    }
-  };
-
   const handlePreviousPage = () => {
     if (servicesData?.previous) {
       setCurrentPage((p) => Math.max(1, p - 1));
@@ -154,7 +137,7 @@ const ServicesTab: React.FC = () => {
               <TableRow key={service.uid}>
                 <TableCell className="font-medium">{service.name}</TableCell>
                 <TableCell>{service.category}</TableCell>
-                <TableCell>{formatPrice(service.price)}</TableCell>
+                <TableCell>${service.price}</TableCell>
                 <TableCell>
                   {new Date(service?.created_at ?? "").toLocaleString()}
                 </TableCell>

@@ -11,10 +11,11 @@ import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Field, Formik, type FormikHelpers } from "formik";
-import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
+import { useState } from "react";
 import { toast } from "react-toastify";
-import * as Yup from "yup";
 import Swal from "sweetalert2";
+import * as Yup from "yup";
 
 export interface AddServiceDialogProps {
   isOpen: boolean;
@@ -37,8 +38,9 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
   onClose,
 }) => {
   const { salonuid } = useParams();
-  const [addService, { isLoading, isSuccess, isError }] =
-    useAddServicesMutation();
+  const { resolvedTheme } = useTheme();
+  // keep the full mutation result so we can call reset() after success
+  const [addService, { isLoading }] = useAddServicesMutation();
 
   type FormValues = {
     name: string;
@@ -50,10 +52,6 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fileError, setFileError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (isSuccess) onClose();
-  }, [isSuccess, onClose]);
 
   async function handleAddService(
     values: FormValues,
@@ -84,9 +82,15 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
         salonUid: salonuid as string,
         serviceData: form as unknown as object,
       }).unwrap();
+      onClose();
       Swal.fire({
         icon: "success",
-        title: "Service Added",
+        iconColor: "#037375",
+        title: "Added successfully",
+        html: `Successfully added <b class="text-primary">${values.name}</b> service`,
+        background: resolvedTheme === "dark" ? "#0f1724" : undefined,
+        color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
+        confirmButtonColor: "#037375",
       });
       helpers.resetForm();
       setSelectedFiles([]);
@@ -111,7 +115,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
           validationSchema={ServiceSchema}
           onSubmit={handleAddService}
         >
-          {({ values, handleSubmit, errors, touched, setFieldValue }) => (
+          {({ handleSubmit, errors, touched, setFieldValue }) => (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="name" className="mb-2">
@@ -172,7 +176,6 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                   id="description"
                   name="description"
                   as="textarea"
-                  type="textarea"
                   placeholder="Short description (optional)"
                 />
                 {touched.description && errors.description ? (
@@ -222,12 +225,6 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                   </ul>
                 ) : null}
               </div>
-
-              {isError ? (
-                <p className="text-destructive text-sm">
-                  Failed to add service.
-                </p>
-              ) : null}
 
               <div className="flex items-center justify-end gap-2">
                 <Button
