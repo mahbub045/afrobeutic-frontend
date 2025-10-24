@@ -20,20 +20,19 @@ import {
   Trash2,
 } from "lucide-react";
 import { useParams } from "next/navigation";
-import * as React from "react";
+import { useEffect, useState } from "react";
+import AddServiceDialog from "./Dialogs/AddServiceDialog";
 
 const ServicesTab: React.FC = () => {
   const { salonuid } = useParams();
-  // useParams can return string | string[] | undefined — normalize to a string for the query
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
-  // Pagination state
-  const [currentPage, setCurrentPage] = React.useState<number>(1);
-  // Search state (debounced)
-  const [searchTerm, setSearchTerm] = React.useState<string>("");
-  const [debouncedSearch, setDebouncedSearch] = React.useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [debouncedSearch, setDebouncedSearch] = useState<string>("");
+  const [isOpenAddServiceDialog, setIsOpenAddServiceDialog] = useState(false);
 
   // Debounce the search input and reset page on new search
-  React.useEffect(() => {
+  useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchTerm);
       setCurrentPage(1);
@@ -87,6 +86,10 @@ const ServicesTab: React.FC = () => {
     ? Math.ceil(servicesData.count / (servicesData.results?.length || 1))
     : 0;
 
+  const handleIsOpenAddServiceDialog = () => {
+    setIsOpenAddServiceDialog(!isOpenAddServiceDialog);
+  };
+
   return (
     <>
       <div className="flex justify-between">
@@ -105,7 +108,11 @@ const ServicesTab: React.FC = () => {
             }
           />
         </div>
-        <Button size="sm" variant="default">
+        <Button
+          size="sm"
+          variant="default"
+          onClick={handleIsOpenAddServiceDialog}
+        >
           <Plus className="h-4 w-4" />
           Add New Service
         </Button>
@@ -221,6 +228,10 @@ const ServicesTab: React.FC = () => {
           )}
         </div>
       </div>
+      <AddServiceDialog
+        isOpen={isOpenAddServiceDialog}
+        onClose={handleIsOpenAddServiceDialog}
+      />
     </>
   );
 };
