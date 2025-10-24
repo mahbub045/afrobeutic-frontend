@@ -37,8 +37,8 @@ export const baseApi = createApi({
     "AccountAccesser",
     "SalonList",
     "SingleSalon",
-    "ServicesList",
-    "ProductsList",
+    "Services",
+    "Products",
   ],
   endpoints: () => ({}),
 });

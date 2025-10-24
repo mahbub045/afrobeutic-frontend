@@ -86,13 +86,6 @@ const SingleSalonContainer: React.FC = () => {
 
   const demo = React.useMemo(
     () => ({
-      services: {
-        title: "Services",
-        items: [
-          { id: "s1", name: "Haircut", price: "$15" },
-          { id: "s2", name: "Shave", price: "$10" },
-        ] as Service[],
-      },
       products: {
         title: "Products",
         items: [
@@ -166,9 +159,7 @@ const SingleSalonContainer: React.FC = () => {
       <section className="mt-6">
         {activeTab === "dashboard" && <DashboardTab />}
         {activeTab === "opening-hours" && <OpeningHoursTab />}
-        {activeTab === "services" && (
-          <ServicesTab items={demo.services.items} />
-        )}
+        {activeTab === "services" && <ServicesTab />}
         {activeTab === "products" && (
           <ProductsTab items={demo.products.items} />
         )}
