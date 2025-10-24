@@ -9,7 +9,9 @@ import {
 } from "@/components/ui/card";
 import { useGetSingleSalonDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SingleSalon/SingleSalonApi";
 import { useParams, useRouter } from "next/navigation";
-import React from "react";
+import React, { useState } from "react";
+import EditAllOpeningHoursDialog from "./Dialogs/EditAllOpeningHoursDialog";
+import EditSingleOpeningHoursDialog from "./Dialogs/EditSingleOpeningHoursDialog";
 
 const DAY_ORDER = [
   "MONDAY",
@@ -58,12 +60,13 @@ const OpeningHoursTab: React.FC = () => {
     return ia - ib;
   });
 
-  const onEdit = (entryUid?: string) => {
-    if (!salonuid) return;
-    // Navigate to a reasonable edit path. Adjust if your app uses a different route.
-    router.push(
-      `/dashboard/manage-salons/${salonuid}/opening-hours/edit/${entryUid}`,
-    );
+  const [isEditAllOpen, setIsEditAllOpen] = useState(false);
+  const [isEditSingleOpen, setIsEditSingleOpen] = useState(false);
+  const [selectedEntry, setSelectedEntry] = useState<OpeningEntry | null>(null);
+
+  const onOpenEditSingle = (entry: OpeningEntry) => {
+    setSelectedEntry(entry);
+    setIsEditSingleOpen(true);
   };
 
   if (isLoading) {
@@ -107,14 +110,9 @@ const OpeningHoursTab: React.FC = () => {
         <h2 className="text-xl font-semibold">Opening Hours</h2>
         <div className="flex items-center gap-2">
           <Button
-            size="xs"
+            size="sm"
             variant="secondary"
-            className="shadow-md dark:shadow-gray-600"
-            onClick={() =>
-              router.push(
-                `/dashboard/manage-salons/${salonuid}/opening-hours/edit`,
-              )
-            }
+            onClick={() => setIsEditAllOpen(true)}
           >
             Edit All
           </Button>
@@ -134,10 +132,9 @@ const OpeningHoursTab: React.FC = () => {
                   {entry.is_closed ? "Closed" : "Open"}
                 </Badge>
                 <Button
-                  size="xs"
-                  variant="outline"
-                  className="shadow-md dark:shadow-gray-600"
-                  onClick={() => onEdit(entry.uid)}
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => onOpenEditSingle(entry)}
                 >
                   Edit
                 </Button>
@@ -178,7 +175,7 @@ const OpeningHoursTab: React.FC = () => {
                   </Card>
                 </div>
               ) : (
-                <Card className="text-warning/70 py-4 text-sm text-center shadow-md dark:shadow-gray-600">
+                <Card className="text-warning/70 py-4 text-center text-sm shadow-md dark:shadow-gray-600">
                   This day is marked as closed.
                 </Card>
               )}
@@ -189,6 +186,18 @@ const OpeningHoursTab: React.FC = () => {
           </Card>
         ))}
       </div>
+
+      <EditAllOpeningHoursDialog
+        singleSalonData={salonData || null}
+        isOpen={isEditAllOpen}
+        onClose={() => setIsEditAllOpen(false)}
+      />
+      <EditSingleOpeningHoursDialog
+        singleSalonData={salonData || null}
+        selectedOpening={selectedEntry}
+        isOpen={isEditSingleOpen}
+        onClose={() => setIsEditSingleOpen(false)}
+      />
     </div>
   );
 };
