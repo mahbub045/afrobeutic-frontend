@@ -178,7 +178,7 @@ const OpeningHoursTab: React.FC = () => {
                   </Card>
                 </div>
               ) : (
-                <Card className="text-warning/70 py-5 text-sm text-center shadow-md dark:shadow-gray-600">
+                <Card className="text-warning/70 py-4 text-sm text-center shadow-md dark:shadow-gray-600">
                   This day is marked as closed.
                 </Card>
               )}
