@@ -117,7 +117,7 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-h-[80vh] !max-w-2xl overflow-y-auto shadow-md dark:shadow-gray-600">
         <DialogHeader>
-          <DialogTitle className="text-primary text-2xl">
+          <DialogTitle className="text-primary">
             Edit Basic Info
           </DialogTitle>
           <DialogDescription className="text-xs">
