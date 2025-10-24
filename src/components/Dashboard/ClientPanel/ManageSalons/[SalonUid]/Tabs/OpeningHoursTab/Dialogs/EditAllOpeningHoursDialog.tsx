@@ -23,6 +23,7 @@ import { useTheme } from "next-themes";
 import { useParams } from "next/navigation";
 import React from "react";
 import { toast } from "react-toastify";
+
 import Swal from "sweetalert2";
 import * as Yup from "yup";
 
@@ -166,9 +167,12 @@ const EditAllOpeningHoursDialog: React.FC<EditDashboardProps> = ({
       singleSalonData?.opening_hours && singleSalonData.opening_hours.length > 0
         ? singleSalonData?.opening_hours.map((oh) => ({
             day: oh.day,
-            opening_start_time: formatTimeForInput(oh.opening_start_time) || "08:00",
-            opening_end_time: formatTimeForInput(oh.opening_end_time) || "22:00",
-            break_start_time: formatTimeForInput(oh.break_start_time) || "14:00",
+            opening_start_time:
+              formatTimeForInput(oh.opening_start_time) || "08:00",
+            opening_end_time:
+              formatTimeForInput(oh.opening_end_time) || "22:00",
+            break_start_time:
+              formatTimeForInput(oh.break_start_time) || "14:00",
             break_end_time: formatTimeForInput(oh.break_end_time) || "16:00",
             is_closed: oh.is_closed || false,
           }))

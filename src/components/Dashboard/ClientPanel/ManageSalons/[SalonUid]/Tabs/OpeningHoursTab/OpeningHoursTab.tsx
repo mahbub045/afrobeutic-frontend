@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useGetSingleSalonDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SingleSalon/SingleSalonApi";
 import { useParams, useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -77,12 +78,18 @@ const OpeningHoursTab: React.FC = () => {
           {Array.from({ length: 6 }).map((_, i) => (
             <Card key={i} className="animate-pulse">
               <CardHeader>
-                <CardTitle className="h-4 w-32 rounded bg-gray-200" />
+                <CardTitle>
+                  <Skeleton className="h-4 w-32" />
+                </CardTitle>
                 <div />
               </CardHeader>
               <CardContent>
-                <div className="mb-2 h-3 w-3/4 rounded bg-gray-200" />
-                <div className="h-3 w-1/2 rounded bg-gray-200" />
+                <div className="mb-2">
+                  <Skeleton className="h-3 w-3/4" />
+                </div>
+                <div>
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -111,7 +118,8 @@ const OpeningHoursTab: React.FC = () => {
         <div className="flex items-center gap-2">
           <Button
             size="sm"
-            variant="secondary"
+            variant="outline"
+            className="shadow-md dark:shadow-gray-600"
             onClick={() => setIsEditAllOpen(true)}
           >
             Edit All
@@ -123,17 +131,20 @@ const OpeningHoursTab: React.FC = () => {
         {sorted.map((entry: OpeningEntry) => (
           <Card key={entry.uid}>
             <CardHeader className="flex items-center justify-between">
-              <CardTitle>{entry.day}</CardTitle>
-              <div className="flex items-center gap-2">
+              <CardTitle className="relative">
+                {entry.day}
                 <Badge
-                  className="shadow-md dark:shadow-gray-600"
-                  variant={entry.is_closed ? "outline" : "default"}
+                  className="absolute -top-1 px-1 text-[10px] shadow-md dark:shadow-gray-600"
+                  variant={entry.is_closed ? "warning" : "default"}
                 >
                   {entry.is_closed ? "Closed" : "Open"}
                 </Badge>
+              </CardTitle>
+              <div className="flex items-center gap-2">
                 <Button
                   size="sm"
-                  variant="secondary"
+                  variant="outline"
+                  className="shadow-md dark:shadow-gray-600"
                   onClick={() => onOpenEditSingle(entry)}
                 >
                   Edit
