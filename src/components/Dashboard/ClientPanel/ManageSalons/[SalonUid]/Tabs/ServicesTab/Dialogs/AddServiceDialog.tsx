@@ -10,17 +10,16 @@ import { useParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import {
+  AddServiceDialogProps,
+  ServiceFormValues,
+} from "@/Types/ClientPanel/ServicesTypes/ServicesType";
 import { Field, Formik, type FormikHelpers } from "formik";
 import { useTheme } from "next-themes";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
-
-export interface AddServiceDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
 
 const ServiceSchema = Yup.object().shape({
   name: Yup.string().trim().required("Name is required"),
@@ -42,20 +41,12 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
   // keep the full mutation result so we can call reset() after success
   const [addService, { isLoading }] = useAddServicesMutation();
 
-  type FormValues = {
-    name: string;
-    category: string;
-    price: string;
-    description: string;
-    uploaded_images?: string;
-  };
-
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fileError, setFileError] = useState<string | null>(null);
 
   async function handleAddService(
-    values: FormValues,
-    helpers: FormikHelpers<FormValues>,
+    values: ServiceFormValues,
+    helpers: FormikHelpers<ServiceFormValues>,
   ) {
     if (!salonuid) return;
 
@@ -110,7 +101,12 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
 
         <Formik
           initialValues={
-            { name: "", category: "", price: "", description: "" } as FormValues
+            {
+              name: "",
+              category: "",
+              price: "",
+              description: "",
+            } as ServiceFormValues
           }
           validationSchema={ServiceSchema}
           onSubmit={handleAddService}
