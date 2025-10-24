@@ -5,6 +5,7 @@ import {
   BarChart2,
   Box,
   Calendar,
+  Clock,
   Home,
   Image,
   Scissors,
@@ -19,6 +20,7 @@ import ChairsTab from "./Tabs/ChairsTab/ChairsTab";
 import DashboardTab from "./Tabs/DashboardTab/DashboardTab";
 import EmployeesTab from "./Tabs/EmployeesTab/EmployeesTab";
 import LookbookTab from "./Tabs/LookbookTab/LookbookTab";
+import OpeningHoursTab from "./Tabs/OpeningHoursTab/OpeningHoursTab";
 import ProductsTab from "./Tabs/ProductsTab/ProductsTab";
 import ReportTab from "./Tabs/ReportTab/ReportTab";
 import ServicesTab from "./Tabs/ServicesTab/ServicesTab";
@@ -36,6 +38,7 @@ const SingleSalonContainer: React.FC = () => {
   const salonNavMenus: MenuItemProps[] = React.useMemo(
     () => [
       { label: "Dashboard", href: `dashboard`, Icon: Home },
+      { label: "Opening Hours", href: `opening-hours`, Icon: Clock },
       { label: "Services", href: `services`, Icon: Scissors },
       { label: "Products", href: `products`, Icon: Box },
       { label: "Chairs", href: `chairs`, Icon: ShoppingCart },
@@ -146,7 +149,7 @@ const SingleSalonContainer: React.FC = () => {
             <a
               key={menu.href}
               href={menu.href ? `#${menu.href}` : undefined}
-              className={`inline-flex items-center gap-2 rounded-md border px-3 py-1 text-sm shadow-md dark:shadow-gray-600 ${
+              className={`inline-flex items-center gap-2 rounded-md border px-2 py-1 text-sm shadow-md dark:shadow-gray-600 ${
                 isActive
                   ? "bg-primary border-primary text-white"
                   : "border-primary/40 bg-primary/5 text-primary hover:bg-primary/10"
@@ -162,6 +165,7 @@ const SingleSalonContainer: React.FC = () => {
       {/* Tab content area */}
       <section className="mt-6">
         {activeTab === "dashboard" && <DashboardTab />}
+        {activeTab === "opening-hours" && <OpeningHoursTab />}
         {activeTab === "services" && (
           <ServicesTab items={demo.services.items} />
         )}
