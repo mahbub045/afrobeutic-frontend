@@ -79,8 +79,6 @@ const ServicesTab: React.FC = () => {
   };
 
   const handleIsOpenDeleteDialog = (service?: ServiceProps | null) => {
-    // If a service is provided, open the dialog for that service.
-    // If no service (or null) is provided, close the dialog.
     if (service) {
       setSelectedService(service);
     } else {
