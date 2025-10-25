@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { useGetServicesDataQuery } from "@/Redux/Reducers/ClientPanel/Services/ServicesApi";
 import { ServiceProps } from "@/Types/ClientPanel/ServicesTypes/ServicesType";
 import {
@@ -93,22 +93,6 @@ const ServicesTab: React.FC = () => {
 
   return (
     <Tabs value={viewTab} onValueChange={(v) => setViewTab(v)}>
-      <div className="flex items-center justify-between">
-        <h2 className="mb-4 text-lg font-semibold">Services</h2>
-        <TabsList className="shadow-md dark:shadow-gray-600">
-          <TabsTrigger value="list" className="px-3">
-            List
-          </TabsTrigger>
-          <TabsTrigger
-            value="details"
-            className="px-3"
-            disabled={!selectedServiceToView}
-          >
-            Details
-          </TabsTrigger>
-        </TabsList>
-      </div>
-
       <TabsContent value="list">
         <div className="flex justify-between">
           <h2 className="mb-4 text-lg font-semibold">Services</h2>
