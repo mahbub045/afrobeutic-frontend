@@ -93,13 +93,12 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
           {/* Left: narrow image strip */}
           <div className="bg-muted relative col-span-4 flex flex-col">
             {mainImage ? (
-              <div className="relative min-h-[420px] w-full flex-1 overflow-hidden">
+              <div className="relative h-[600px] w-full overflow-hidden">
                 <Image
                   src={mainImage}
                   alt={`${selectedService.name}-main`}
-                  width={450}
-                  height={600}
-                  className="h-full w-full object-cover"
+                  fill
+                  className=" object-cover transition-transform duration-500 ease-in-out hover:scale-110"
                   onLoadingComplete={() => setIsImageLoading(false)}
                 />
 
