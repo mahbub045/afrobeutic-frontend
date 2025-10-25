@@ -15,6 +15,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Eye,
+  LoaderPinwheel,
   Plus,
   Search,
   Trash2,
@@ -22,14 +23,18 @@ import {
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import AddServiceDialog from "./Dialogs/AddServiceDialog";
+import DeleteServiceDialog from "./Dialogs/DeleteServiceDialog";
 
 const ServicesTab: React.FC = () => {
   const { salonuid } = useParams();
-  const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
+  const salonUid = Array.isArray(salonuid) ? salonuid[0] : salonuid ?? "";
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [isOpenAddServiceDialog, setIsOpenAddServiceDialog] = useState(false);
+  const [selectedService, setSelectedService] = useState<ServiceProps | null>(
+    null,
+  );
 
   // Debounce the search input and reset page on new search
   useEffect(() => {
@@ -71,6 +76,14 @@ const ServicesTab: React.FC = () => {
 
   const handleIsOpenAddServiceDialog = () => {
     setIsOpenAddServiceDialog(!isOpenAddServiceDialog);
+  };
+
+  const handleIsOpenDeleteDialog = (service?: ServiceProps | null) => {
+    if (service) {
+      setSelectedService(service);
+    } else {
+      setSelectedService(null);
+    }
   };
 
   return (
@@ -116,11 +129,10 @@ const ServicesTab: React.FC = () => {
         <TableBody>
           {isLoading ? (
             <TableRow>
-              <TableCell
-                colSpan={6}
-                className="text-muted-foreground py-6 text-center text-sm"
-              >
-                Loading services...
+              <TableCell colSpan={6} className="py-6">
+                <div className="flex items-center justify-center">
+                  <LoaderPinwheel className="h-6 w-6 animate-spin" />
+                </div>
               </TableCell>
             </TableRow>
           ) : extractedServices.length === 0 ? (
@@ -158,6 +170,7 @@ const ServicesTab: React.FC = () => {
                     variant="ghost"
                     className="text-danger/80 hover:text-danger dark:shadow-gray-600"
                     color="red"
+                    onClick={() => handleIsOpenDeleteDialog(service)}
                   >
                     <Trash2 />
                   </Button>
@@ -211,10 +224,18 @@ const ServicesTab: React.FC = () => {
           )}
         </div>
       </div>
+      {/* Dialogs */}
       <AddServiceDialog
         isOpen={isOpenAddServiceDialog}
         onClose={handleIsOpenAddServiceDialog}
       />
+      {selectedService && (
+        <DeleteServiceDialog
+          selectedService={selectedService}
+          isOpen={!!selectedService}
+          onClose={() => handleIsOpenDeleteDialog()}
+        />
+      )}
     </>
   );
 };
