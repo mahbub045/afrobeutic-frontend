@@ -146,7 +146,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                 {/* Loading spinner */}
                 {isImageLoading && (
                   <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/10">
-                    <LoaderPinwheel className="h-10 w-10 animate-spin text-primary" />
+                    <LoaderPinwheel className="text-primary h-10 w-10 animate-spin" />
                   </div>
                 )}
 
