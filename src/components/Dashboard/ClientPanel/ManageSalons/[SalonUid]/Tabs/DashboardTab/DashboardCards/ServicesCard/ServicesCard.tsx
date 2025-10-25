@@ -40,13 +40,15 @@ const ServicesCard: React.FC = () => {
           </CardDescription>
         </div>
         <CardAction>
-          <Button
-            variant="outline"
-            size="sm"
-            className="shadow-md dark:shadow-gray-600"
-          >
-            View all
-          </Button>
+          <a href="#services" aria-label="View all services">
+            <Button
+              variant="outline"
+              size="sm"
+              className="shadow-md dark:shadow-gray-600"
+            >
+              View all
+            </Button>
+          </a>
         </CardAction>
       </CardHeader>
 
