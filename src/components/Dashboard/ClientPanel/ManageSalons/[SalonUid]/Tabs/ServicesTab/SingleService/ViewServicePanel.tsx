@@ -9,11 +9,13 @@ import {
   ChevronRight,
   Edit,
   LoaderPinwheel,
+  Maximize2,
 } from "lucide-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import EditServiceBasicInfoDialog from "./Dialogs/EditServiceBasicInfoDialog";
+import FullScreenImageViewer from "./FullScreenImageViewer";
 
 export interface ViewServicePanelProps {
   selectedService: ServiceProps;
@@ -29,6 +31,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
 
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const [isImageLoading, setIsImageLoading] = useState<boolean>(false);
+  const [isFullScreenOpen, setIsFullScreenOpen] = useState<boolean>(false);
   const [
     isOpenEditServiceBasicInfoDialog,
     setIsOpenEditServiceBasicInfoDialog,
@@ -71,6 +74,10 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
     // Refetch services to get the latest data
     refetch();
   };
+
+  const handleOpenFullScreen = useCallback(() => {
+    setIsFullScreenOpen(true);
+  }, []);
 
   const imagesToShow: string[] = useMemo(() => {
     const rawImages =
@@ -133,7 +140,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
           {/* Left: Image section (on mobile it shows first) */}
           <div className="bg-muted relative col-span-12 flex flex-col md:col-span-4">
             {mainImage ? (
-              <div className="relative h-[300px] w-full overflow-hidden md:h-[600px]">
+              <div className="group relative h-[300px] w-full cursor-pointer overflow-hidden md:h-[600px]">
                 <Image
                   src={mainImage}
                   alt={`${displayedService.name}-main`}
@@ -141,7 +148,20 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                   width={300}
                   className="h-full w-full object-cover transition-transform duration-500 ease-in-out hover:scale-110"
                   onLoadingComplete={() => setIsImageLoading(false)}
+                  onClick={handleOpenFullScreen}
                 />
+
+                {/* Fullscreen hint overlay */}
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/0 transition-colors duration-200 group-hover:bg-black/20">
+                  <button
+                    type="button"
+                    aria-label="Open image in fullscreen"
+                    onClick={handleOpenFullScreen}
+                    className="absolute top-2 right-2 z-20 rounded-full bg-white/30 p-2 text-white opacity-100 hover:bg-white/40 focus:outline-none"
+                  >
+                    <Maximize2 size={20} />
+                  </button>
+                </div>
 
                 {/* Loading spinner */}
                 {isImageLoading && (
@@ -367,6 +387,14 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
         isOpen={isOpenEditServiceBasicInfoDialog}
         onClose={() => setIsOpenEditServiceBasicInfoDialog(false)}
         onEditSuccess={handleEditSuccess}
+      />
+      <FullScreenImageViewer
+        isOpen={isFullScreenOpen}
+        images={imagesToShow}
+        currentImageIndex={selectedImageIndex}
+        onClose={() => setIsFullScreenOpen(false)}
+        onImageChange={setSelectedImageIndex}
+        serviceName={displayedService.name}
       />
     </>
   );
