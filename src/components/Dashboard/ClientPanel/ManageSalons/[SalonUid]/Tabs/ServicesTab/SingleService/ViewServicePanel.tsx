@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import React, { useEffect, useMemo, useState } from "react";
+import EditServiceBasicInfoDialog from "./Dialogs/EditServiceBasicInfoDialog";
 
 export interface ViewServicePanelProps {
   selectedService: ServiceProps;
@@ -23,6 +24,14 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
 }) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const [isImageLoading, setIsImageLoading] = useState<boolean>(false);
+  const [
+    isOpenEditServiceBasicInfoDialog,
+    setIsOpenEditServiceBasicInfoDialog,
+  ] = useState(false);
+
+  const handleEditServiceBasicInfo = () => {
+    setIsOpenEditServiceBasicInfoDialog(true);
+  };
 
   const imagesToShow: string[] = useMemo(() => {
     const rawImages =
@@ -82,17 +91,17 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
 
       <Card className="bg-card overflow-hidden rounded-md p-0 shadow-md dark:shadow-gray-600">
         {/* ✅ Responsive layout */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-0">
+        <div className="grid grid-cols-1 gap-0 md:grid-cols-12">
           {/* Left: Image section (on mobile it shows first) */}
-          <div className="relative col-span-12 md:col-span-4 bg-muted flex flex-col">
+          <div className="bg-muted relative col-span-12 flex flex-col md:col-span-4">
             {mainImage ? (
-              <div className="relative h-[300px] md:h-[600px] w-full overflow-hidden">
+              <div className="relative h-[300px] w-full overflow-hidden md:h-[600px]">
                 <Image
                   src={mainImage}
                   alt={`${selectedService.name}-main`}
                   height={600}
                   width={300}
-                  className="object-cover h-full w-full transition-transform duration-500 ease-in-out hover:scale-110"
+                  className="h-full w-full object-cover transition-transform duration-500 ease-in-out hover:scale-110"
                   onLoadingComplete={() => setIsImageLoading(false)}
                 />
 
@@ -133,17 +142,19 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                 )}
               </div>
             ) : (
-              <div className="text-muted-foreground flex min-h-[200px] md:min-h-[420px] w-full flex-1 items-center justify-center">
+              <div className="text-muted-foreground flex min-h-[200px] w-full flex-1 items-center justify-center md:min-h-[420px]">
                 No image
               </div>
             )}
           </div>
 
           {/* Right: Details section (on mobile it comes below image) */}
-          <div className="col-span-12 md:col-span-8 p-4 md:p-6">
-            <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div className="col-span-12 p-4 md:col-span-8 md:p-6">
+            <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
-                <div className="text-muted-foreground text-sm">Service details</div>
+                <div className="text-muted-foreground text-sm">
+                  Service details
+                </div>
                 <a className="text-primary text-lg font-medium hover:underline">
                   {selectedService.name}
                 </a>
@@ -164,12 +175,13 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                 variant="outline"
                 size="sm"
                 className="shadow-md dark:shadow-gray-600"
+                onClick={handleEditServiceBasicInfo}
               >
                 <Edit size={16} />
               </Button>
             </div>
 
-            <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
               <div>
                 <div className="text-muted-foreground text-xs uppercase">
                   Service name
@@ -187,7 +199,9 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                 </div>
               </div>
               <div>
-                <div className="text-muted-foreground text-xs uppercase">Price $</div>
+                <div className="text-muted-foreground text-xs uppercase">
+                  Price $
+                </div>
                 <div className="text-sm font-medium">
                   {safe(selectedService.price)}
                 </div>
@@ -218,7 +232,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
               <div>
                 <div className="text-muted-foreground text-xs uppercase">
                   Available time slots
@@ -264,7 +278,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
             </div>
 
             {/* Assigned employee and timestamps */}
-            <div className="mt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="mt-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <div className="text-muted-foreground text-xs uppercase">
                   Assigned employee
@@ -280,11 +294,15 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                 </div>
               </div>
 
-              <div className="text-left md:text-right text-xs">
+              <div className="text-left text-xs md:text-right">
                 <div className="text-muted-foreground">Created At</div>
-                <div className="font-medium">{safe(selectedService.created_at)}</div>
+                <div className="font-medium">
+                  {safe(selectedService.created_at)}
+                </div>
                 <div className="text-muted-foreground mt-2">Updated At</div>
-                <div className="font-medium">{safe(selectedService.updated_at)}</div>
+                <div className="font-medium">
+                  {safe(selectedService.updated_at)}
+                </div>
               </div>
             </div>
 
@@ -295,7 +313,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                   size="sm"
                   variant="outline"
                   onClick={onClose}
-                  className="shadow-md dark:shadow-gray-600 flex items-center gap-1"
+                  className="flex items-center gap-1 shadow-md dark:shadow-gray-600"
                 >
                   <ArrowLeft size={16} />
                   Back
@@ -305,6 +323,12 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
           </div>
         </div>
       </Card>
+      {/* Dialogs */}
+      <EditServiceBasicInfoDialog
+        selectedService={selectedService}
+        isOpen={isOpenEditServiceBasicInfoDialog}
+        onClose={() => setIsOpenEditServiceBasicInfoDialog(false)}
+      />
     </>
   );
 };

@@ -26,3 +26,9 @@ export interface ServiceFormValues {
   description: string;
   uploaded_images?: string;
 }
+
+export interface EditServiceBasicInfoDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  selectedService: ServiceProps ;
+}
