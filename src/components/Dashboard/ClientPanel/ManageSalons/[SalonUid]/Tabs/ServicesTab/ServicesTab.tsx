@@ -94,9 +94,8 @@ const ServicesTab: React.FC = () => {
   return (
     <Tabs value={viewTab} onValueChange={(v) => setViewTab(v)}>
       <TabsContent value="list">
-        <div className="flex justify-between">
-          <h2 className="mb-4 text-lg font-semibold">Services</h2>
-
+        <div className="flex flex-col md:flex-row md:justify-between gap-4 mb-4">
+          <h2 className="text-lg font-semibold">Services</h2>
           <div className="relative">
             <Search
               size={18}

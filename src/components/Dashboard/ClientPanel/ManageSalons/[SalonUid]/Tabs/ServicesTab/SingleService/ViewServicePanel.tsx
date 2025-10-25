@@ -14,7 +14,7 @@ import React, { useEffect, useMemo, useState } from "react";
 
 export interface ViewServicePanelProps {
   selectedService: ServiceProps;
-  onClose?: () => void; // optional handler to go back to list
+  onClose?: () => void;
 }
 
 const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
@@ -24,27 +24,24 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const [isImageLoading, setIsImageLoading] = useState<boolean>(false);
 
-  // Normalize images so component can handle both string[] and object[] shapes from the API.
   const imagesToShow: string[] = useMemo(() => {
     const rawImages =
       (selectedService as unknown as { images?: unknown[] })?.images ?? [];
     if (!Array.isArray(rawImages)) return [];
-    const items = rawImages as unknown[];
-    if (items.length === 0) return [];
-    if (typeof items[0] === "string") return items as string[];
+    if (typeof rawImages[0] === "string") return rawImages as string[];
     type ImageObj = { image?: string; order?: number; is_primary?: boolean };
-    const objs = items as ImageObj[];
+    const objs = rawImages as ImageObj[];
     const sorted = [...objs].sort((a, b) => {
       const aPrimary = !!a?.is_primary;
       const bPrimary = !!b?.is_primary;
       if (aPrimary === bPrimary) {
-        const ao = typeof a?.order === "number" ? a.order : 0;
-        const bo = typeof b?.order === "number" ? b.order : 0;
+        const ao = a?.order ?? 0;
+        const bo = b?.order ?? 0;
         return ao - bo;
       }
       return aPrimary ? -1 : 1;
     });
-    return sorted.map((i) => i?.image ?? "");
+    return sorted.map((i) => i.image ?? "");
   }, [selectedService]);
 
   const mainImage =
@@ -52,14 +49,8 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
       ? imagesToShow[Math.min(selectedImageIndex, imagesToShow.length - 1)]
       : undefined;
 
-  // When the selected image index changes, show the loading spinner until
-  // next/image reports the image finished loading via onLoadingComplete.
   useEffect(() => {
-    if (imagesToShow.length > 0) {
-      setIsImageLoading(true);
-    } else {
-      setIsImageLoading(false);
-    }
+    setIsImageLoading(imagesToShow.length > 0);
   }, [selectedImageIndex, imagesToShow.length]);
 
   if (!selectedService) return null;
@@ -70,7 +61,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
     if (typeof v === "number" || typeof v === "boolean") return String(v);
     try {
       return JSON.stringify(v);
-    } catch (e) {
+    } catch {
       return String(v);
     }
   };
@@ -88,30 +79,34 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
           </TabsTrigger>
         </TabsList>
       </div>
+
       <Card className="bg-card overflow-hidden rounded-md p-0 shadow-md dark:shadow-gray-600">
-        <div className="grid grid-cols-12 gap-0">
-          {/* Left: narrow image strip */}
-          <div className="bg-muted relative col-span-4 flex flex-col">
+        {/* ✅ Responsive layout */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-0">
+          {/* Left: Image section (on mobile it shows first) */}
+          <div className="relative col-span-12 md:col-span-4 bg-muted flex flex-col">
             {mainImage ? (
-              <div className="relative h-[600px] w-full overflow-hidden">
+              <div className="relative h-[300px] md:h-[600px] w-full overflow-hidden">
                 <Image
                   src={mainImage}
                   alt={`${selectedService.name}-main`}
-                  fill
-                  className=" object-cover transition-transform duration-500 ease-in-out hover:scale-110"
+                  height={600}
+                  width={300}
+                  className="object-cover h-full w-full transition-transform duration-500 ease-in-out hover:scale-110"
                   onLoadingComplete={() => setIsImageLoading(false)}
                 />
 
-                {/* spinner while image loads */}
-                {isImageLoading ? (
+                {/* Loading spinner */}
+                {isImageLoading && (
                   <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/10">
                     <LoaderPinwheel className="h-10 w-10 animate-spin" />
                   </div>
-                ) : null}
+                )}
 
-                {imagesToShow.length > 1 ? (
+                {/* Navigation buttons */}
+                {imagesToShow.length > 1 && (
                   <>
-                    {selectedImageIndex > 0 ? (
+                    {selectedImageIndex > 0 && (
                       <button
                         type="button"
                         aria-label="Previous image"
@@ -122,9 +117,9 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                       >
                         <ChevronLeft size={20} />
                       </button>
-                    ) : null}
-                    {/* hide Next button when on last image */}
-                    {selectedImageIndex < imagesToShow.length - 1 ? (
+                    )}
+
+                    {selectedImageIndex < imagesToShow.length - 1 && (
                       <button
                         type="button"
                         aria-label="Next image"
@@ -133,30 +128,28 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                       >
                         <ChevronRight size={20} />
                       </button>
-                    ) : null}
+                    )}
                   </>
-                ) : null}
+                )}
               </div>
             ) : (
-              <div className="text-muted-foreground flex min-h-[420px] w-full flex-1 items-center justify-center">
+              <div className="text-muted-foreground flex min-h-[200px] md:min-h-[420px] w-full flex-1 items-center justify-center">
                 No image
               </div>
             )}
           </div>
 
-          {/* Middle: details column (narrow) */}
-          <div className="col-span-8 p-6">
-            <div className="mb-4 flex items-center justify-between">
+          {/* Right: Details section (on mobile it comes below image) */}
+          <div className="col-span-12 md:col-span-8 p-4 md:p-6">
+            <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
               <div>
-                <div className="text-muted-foreground text-sm">
-                  Service details
-                </div>
+                <div className="text-muted-foreground text-sm">Service details</div>
                 <a className="text-primary text-lg font-medium hover:underline">
                   {selectedService.name}
                 </a>
               </div>
 
-              <div className="text-right">
+              <div className="text-left md:text-right">
                 <div className="text-muted-foreground text-sm">Price</div>
                 <div className="text-lg font-semibold">
                   ${safe(selectedService.price)}
@@ -176,7 +169,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
               </Button>
             </div>
 
-            <div className="mb-6 grid grid-cols-3 gap-6">
+            <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               <div>
                 <div className="text-muted-foreground text-xs uppercase">
                   Service name
@@ -187,24 +180,22 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
               </div>
               <div>
                 <div className="text-muted-foreground text-xs uppercase">
-                  Service category
+                  Category
                 </div>
                 <div className="text-sm font-medium">
                   {safe(selectedService.category)}
                 </div>
               </div>
               <div>
-                <div className="text-muted-foreground text-xs uppercase">
-                  Price $
-                </div>
+                <div className="text-muted-foreground text-xs uppercase">Price $</div>
                 <div className="text-sm font-medium">
                   {safe(selectedService.price)}
                 </div>
               </div>
             </div>
 
-            {/* Description (full width) */}
-            {selectedService.description ? (
+            {/* Description */}
+            {selectedService.description && (
               <div className="mb-6">
                 <div className="text-muted-foreground text-xs uppercase">
                   Description
@@ -213,7 +204,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                   {selectedService.description}
                 </div>
               </div>
-            ) : null}
+            )}
 
             {/* More info */}
             <div className="mb-3 flex items-center justify-between">
@@ -227,8 +218,8 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
               </Button>
             </div>
 
-            <div className="grid grid-cols-3 items-start gap-6">
-              <div className="col-span-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <div>
                 <div className="text-muted-foreground text-xs uppercase">
                   Available time slots
                 </div>
@@ -264,7 +255,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
               </div>
               <div>
                 <div className="text-muted-foreground text-xs uppercase">
-                  Discount (percentage %)
+                  Discount (%)
                 </div>
                 <div className="mt-1 text-sm font-medium">
                   {safe(selectedService.discount)}
@@ -273,7 +264,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
             </div>
 
             {/* Assigned employee and timestamps */}
-            <div className="mt-6 flex items-center justify-between">
+            <div className="mt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
                 <div className="text-muted-foreground text-xs uppercase">
                   Assigned employee
@@ -289,32 +280,27 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                 </div>
               </div>
 
-              <div className="text-right">
-                <div className="text-muted-foreground text-xs">Created At</div>
-                <div className="text-xs font-medium">
-                  {safe(selectedService.created_at)}
-                </div>
-                <div className="text-muted-foreground mt-2 text-xs">
-                  Updated At
-                </div>
-                <div className="text-xs font-medium">
-                  {safe(selectedService.updated_at)}
-                </div>
+              <div className="text-left md:text-right text-xs">
+                <div className="text-muted-foreground">Created At</div>
+                <div className="font-medium">{safe(selectedService.created_at)}</div>
+                <div className="text-muted-foreground mt-2">Updated At</div>
+                <div className="font-medium">{safe(selectedService.updated_at)}</div>
               </div>
             </div>
 
+            {/* Back button */}
             <div className="mt-6 flex justify-end">
-              {onClose ? (
+              {onClose && (
                 <Button
                   size="sm"
                   variant="outline"
                   onClick={onClose}
-                  className="shadow-d dark:shadow-gray-600"
+                  className="shadow-md dark:shadow-gray-600 flex items-center gap-1"
                 >
-                  <ArrowLeft />
+                  <ArrowLeft size={16} />
                   Back
                 </Button>
-              ) : null}
+              )}
             </div>
           </div>
         </div>
