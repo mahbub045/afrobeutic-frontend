@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useGetServicesDataQuery } from "@/Redux/Reducers/ClientPanel/Services/ServicesApi";
 import { ServiceProps } from "@/Types/ClientPanel/ServicesTypes/ServicesType";
 import {
   ArrowLeft,
@@ -10,6 +11,7 @@ import {
   LoaderPinwheel,
 } from "lucide-react";
 import Image from "next/image";
+import { useParams } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
 import EditServiceBasicInfoDialog from "./Dialogs/EditServiceBasicInfoDialog";
 
@@ -22,20 +24,57 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
   selectedService,
   onClose,
 }) => {
+  const { salonuid } = useParams();
+  const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
+
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const [isImageLoading, setIsImageLoading] = useState<boolean>(false);
   const [
     isOpenEditServiceBasicInfoDialog,
     setIsOpenEditServiceBasicInfoDialog,
   ] = useState(false);
+  const [displayedService, setDisplayedService] =
+    useState<ServiceProps>(selectedService);
+
+  // Re-fetch services data to get updated service
+  const { data: servicesData, refetch } = useGetServicesDataQuery(
+    {
+      salonUid,
+      page: 1,
+      page_size: 1000, // Fetch enough to find our service
+    },
+    { skip: !salonUid },
+  );
+
+  // Update displayed service when selectedService prop changes
+  useEffect(() => {
+    setDisplayedService(selectedService);
+  }, [selectedService]);
+
+  // Update displayed service when services data refetches (after edit)
+  useEffect(() => {
+    if (servicesData?.results && Array.isArray(servicesData.results)) {
+      const updatedService = (servicesData.results as ServiceProps[]).find(
+        (s) => s.uid === selectedService.uid,
+      );
+      if (updatedService) {
+        setDisplayedService(updatedService);
+      }
+    }
+  }, [servicesData, selectedService.uid]);
 
   const handleEditServiceBasicInfo = () => {
     setIsOpenEditServiceBasicInfoDialog(true);
   };
 
+  const handleEditSuccess = () => {
+    // Refetch services to get the latest data
+    refetch();
+  };
+
   const imagesToShow: string[] = useMemo(() => {
     const rawImages =
-      (selectedService as unknown as { images?: unknown[] })?.images ?? [];
+      (displayedService as unknown as { images?: unknown[] })?.images ?? [];
     if (!Array.isArray(rawImages)) return [];
     if (typeof rawImages[0] === "string") return rawImages as string[];
     type ImageObj = { image?: string; order?: number; is_primary?: boolean };
@@ -51,7 +90,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
       return aPrimary ? -1 : 1;
     });
     return sorted.map((i) => i.image ?? "");
-  }, [selectedService]);
+  }, [displayedService]);
 
   const mainImage =
     imagesToShow.length > 0
@@ -62,7 +101,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
     setIsImageLoading(imagesToShow.length > 0);
   }, [selectedImageIndex, imagesToShow.length]);
 
-  if (!selectedService) return null;
+  if (!displayedService) return null;
 
   const safe = (v: unknown): string => {
     if (v === undefined || v === null || v === "") return "-";
@@ -90,7 +129,6 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
       </div>
 
       <Card className="bg-card overflow-hidden rounded-md p-0 shadow-md dark:shadow-gray-600">
-        {/* ✅ Responsive layout */}
         <div className="grid grid-cols-1 gap-0 md:grid-cols-12">
           {/* Left: Image section (on mobile it shows first) */}
           <div className="bg-muted relative col-span-12 flex flex-col md:col-span-4">
@@ -98,7 +136,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
               <div className="relative h-[300px] w-full overflow-hidden md:h-[600px]">
                 <Image
                   src={mainImage}
-                  alt={`${selectedService.name}-main`}
+                  alt={`${displayedService.name}-main`}
                   height={600}
                   width={300}
                   className="h-full w-full object-cover transition-transform duration-500 ease-in-out hover:scale-110"
@@ -108,7 +146,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                 {/* Loading spinner */}
                 {isImageLoading && (
                   <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/10">
-                    <LoaderPinwheel className="h-10 w-10 animate-spin" />
+                    <LoaderPinwheel className="h-10 w-10 animate-spin text-primary" />
                   </div>
                 )}
 
@@ -156,14 +194,14 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                   Service details
                 </div>
                 <a className="text-primary text-lg font-medium hover:underline">
-                  {selectedService.name}
+                  {displayedService.name}
                 </a>
               </div>
 
               <div className="text-left md:text-right">
                 <div className="text-muted-foreground text-sm">Price</div>
                 <div className="text-lg font-semibold">
-                  ${safe(selectedService.price)}
+                  ${safe(displayedService.price)}
                 </div>
               </div>
             </div>
@@ -187,7 +225,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                   Service name
                 </div>
                 <div className="text-sm font-medium">
-                  {safe(selectedService.name)}
+                  {safe(displayedService.name)}
                 </div>
               </div>
               <div>
@@ -195,7 +233,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                   Category
                 </div>
                 <div className="text-sm font-medium">
-                  {safe(selectedService.category)}
+                  {safe(displayedService.category)}
                 </div>
               </div>
               <div>
@@ -203,19 +241,19 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                   Price $
                 </div>
                 <div className="text-sm font-medium">
-                  {safe(selectedService.price)}
+                  {safe(displayedService.price)}
                 </div>
               </div>
             </div>
 
             {/* Description */}
-            {selectedService.description && (
+            {displayedService.description && (
               <div className="mb-6">
                 <div className="text-muted-foreground text-xs uppercase">
                   Description
                 </div>
                 <div className="mt-1 text-sm whitespace-pre-wrap">
-                  {selectedService.description}
+                  {displayedService.description}
                 </div>
               </div>
             )}
@@ -238,9 +276,9 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                   Available time slots
                 </div>
                 <div className="mt-1 text-sm font-medium">
-                  {Array.isArray(selectedService.available_time_slots)
-                    ? JSON.stringify(selectedService.available_time_slots)
-                    : safe(selectedService.available_time_slots)}
+                  {Array.isArray(displayedService.available_time_slots)
+                    ? JSON.stringify(displayedService.available_time_slots)
+                    : safe(displayedService.available_time_slots)}
                 </div>
               </div>
               <div>
@@ -248,7 +286,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                   Booking lead time
                 </div>
                 <div className="mt-1 text-sm font-medium">
-                  {safe(selectedService.booking_lead_time)}
+                  {safe(displayedService.booking_lead_time)}
                 </div>
               </div>
               <div>
@@ -256,7 +294,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                   Cancellation policy
                 </div>
                 <div className="mt-1 text-sm font-medium">
-                  {safe(selectedService.cancellation_policy ? "yes" : "no")}
+                  {safe(displayedService.cancellation_policy ? "yes" : "no")}
                 </div>
               </div>
               <div>
@@ -264,7 +302,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                   Gender specific
                 </div>
                 <div className="mt-1 text-sm font-medium">
-                  {safe(selectedService.gender_specific)}
+                  {safe(displayedService.gender_specific)}
                 </div>
               </div>
               <div>
@@ -272,7 +310,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                   Discount (%)
                 </div>
                 <div className="mt-1 text-sm font-medium">
-                  {safe(selectedService.discount)}
+                  {safe(displayedService.discount)}
                 </div>
               </div>
             </div>
@@ -284,9 +322,9 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                   Assigned employee
                 </div>
                 <div className="mt-2">
-                  {selectedService.assigned_employee ? (
+                  {displayedService.assigned_employee ? (
                     <span className="bg-muted inline-block rounded px-2 py-1 text-sm">
-                      {selectedService.assigned_employee}
+                      {displayedService.assigned_employee}
                     </span>
                   ) : (
                     <span className="text-sm">-</span>
@@ -297,11 +335,11 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
               <div className="text-left text-xs md:text-right">
                 <div className="text-muted-foreground">Created At</div>
                 <div className="font-medium">
-                  {safe(selectedService.created_at)}
+                  {safe(displayedService.created_at)}
                 </div>
                 <div className="text-muted-foreground mt-2">Updated At</div>
                 <div className="font-medium">
-                  {safe(selectedService.updated_at)}
+                  {safe(displayedService.updated_at)}
                 </div>
               </div>
             </div>
@@ -325,9 +363,10 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
       </Card>
       {/* Dialogs */}
       <EditServiceBasicInfoDialog
-        selectedService={selectedService}
+        selectedService={displayedService}
         isOpen={isOpenEditServiceBasicInfoDialog}
         onClose={() => setIsOpenEditServiceBasicInfoDialog(false)}
+        onEditSuccess={handleEditSuccess}
       />
     </>
   );

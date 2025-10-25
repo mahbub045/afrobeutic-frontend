@@ -29,6 +29,7 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
   isOpen,
   onClose,
   selectedService,
+  onEditSuccess,
 }) => {
   const { salonuid } = useParams();
   //   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
@@ -85,6 +86,7 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
         color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
         confirmButtonColor: "#037375",
       });
+      onEditSuccess?.();
       onClose();
     } catch (error) {
       toast.error("Failed to update service.");

@@ -30,5 +30,6 @@ export interface ServiceFormValues {
 export interface EditServiceBasicInfoDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  selectedService: ServiceProps ;
+  selectedService: ServiceProps;
+  onEditSuccess?: () => void;
 }
