@@ -15,6 +15,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Eye,
+  LoaderPinwheel,
   Plus,
   Search,
   Trash2,
@@ -116,11 +117,10 @@ const ServicesTab: React.FC = () => {
         <TableBody>
           {isLoading ? (
             <TableRow>
-              <TableCell
-                colSpan={6}
-                className="text-muted-foreground py-6 text-center text-sm"
-              >
-                Loading services...
+              <TableCell colSpan={6} className="py-6">
+                <div className="flex items-center justify-center">
+                  <LoaderPinwheel className="h-6 w-6 animate-spin" />
+                </div>
               </TableCell>
             </TableRow>
           ) : extractedServices.length === 0 ? (
