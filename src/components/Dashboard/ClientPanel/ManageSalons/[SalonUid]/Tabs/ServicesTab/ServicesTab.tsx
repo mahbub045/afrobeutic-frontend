@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -30,6 +31,7 @@ import ViewServicePanel from "./SingleService/ViewServicePanel";
 const ServicesTab: React.FC = () => {
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
+
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
@@ -41,13 +43,11 @@ const ServicesTab: React.FC = () => {
     useState<ServiceProps | null>(null);
   const [viewTab, setViewTab] = useState<string>("list");
 
-  // Debounce the search input and reset page on new search
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchTerm);
       setCurrentPage(1);
     }, 500);
-
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
@@ -56,7 +56,7 @@ const ServicesTab: React.FC = () => {
     isLoading,
     isFetching,
   } = useGetServicesDataQuery({
-    salonUid: salonUid,
+    salonUid,
     page: currentPage,
     search: debouncedSearch || undefined,
   });
@@ -64,35 +64,25 @@ const ServicesTab: React.FC = () => {
   const extractedServices: ServiceProps[] = servicesData?.results ?? [];
 
   const handlePreviousPage = () => {
-    if (servicesData?.previous) {
-      setCurrentPage((p) => Math.max(1, p - 1));
-    }
+    if (servicesData?.previous) setCurrentPage((p) => Math.max(1, p - 1));
   };
 
   const handleNextPage = () => {
-    if (servicesData?.next) {
-      setCurrentPage((p) => p + 1);
-    }
+    if (servicesData?.next) setCurrentPage((p) => p + 1);
   };
 
   const totalPages = servicesData?.count
     ? Math.ceil(servicesData.count / (servicesData.results?.length || 1))
     : 0;
 
-  const handleIsOpenAddServiceDialog = () => {
-    setIsOpenAddServiceDialog(!isOpenAddServiceDialog);
-  };
+  const handleIsOpenAddServiceDialog = () =>
+    setIsOpenAddServiceDialog((v) => !v);
 
   const handleIsOpenDeleteDialog = (service?: ServiceProps | null) => {
-    if (service) {
-      setSelectedService(service);
-    } else {
-      setSelectedService(null);
-    }
+    setSelectedService(service ?? null);
   };
 
   const handleIsOpenSingleServiceTab = (service?: ServiceProps | null) => {
-    // open/close the view dialog; keep delete selection separate
     if (service) {
       setSelectedServiceToView(service);
       setViewTab("details");
@@ -122,6 +112,7 @@ const ServicesTab: React.FC = () => {
       <TabsContent value="list">
         <div className="flex justify-between">
           <h2 className="mb-4 text-lg font-semibold">Services</h2>
+
           <div className="relative">
             <Search
               size={18}
@@ -136,6 +127,7 @@ const ServicesTab: React.FC = () => {
               }
             />
           </div>
+
           <Button
             size="sm"
             variant="default"
@@ -182,12 +174,8 @@ const ServicesTab: React.FC = () => {
                   <TableCell className="font-medium">{service.name}</TableCell>
                   <TableCell>{service.category}</TableCell>
                   <TableCell>${service.price}</TableCell>
-                  <TableCell>
-                    {new Date(service?.created_at ?? "").toLocaleString()}
-                  </TableCell>
-                  <TableCell>
-                    {new Date(service.updated_at ?? "").toLocaleString()}
-                  </TableCell>
+                  <TableCell>{service?.created_at ?? "Not Found"}</TableCell>
+                  <TableCell>{service?.updated_at ?? "Not Found"}</TableCell>
 
                   <TableCell className="flex justify-center gap-2">
                     <Button
@@ -223,10 +211,11 @@ const ServicesTab: React.FC = () => {
               </div>
             )}
           </div>
+
           <div>
             {/* Pagination Controls */}
             {servicesData &&
-              servicesData.count > servicesData.results.length && (
+              servicesData.count > (servicesData.results?.length ?? 0) && (
                 <div className="flex items-center justify-center gap-4 pt-4">
                   <Button
                     variant="outline"
@@ -273,6 +262,7 @@ const ServicesTab: React.FC = () => {
           </div>
         )}
       </TabsContent>
+
       {/* Dialogs */}
       <AddServiceDialog
         isOpen={isOpenAddServiceDialog}
@@ -285,8 +275,6 @@ const ServicesTab: React.FC = () => {
           onClose={() => handleIsOpenDeleteDialog()}
         />
       )}
-
-      {/* note: view now uses inline Tabs; keep dialogs for add/delete */}
     </Tabs>
   );
 };

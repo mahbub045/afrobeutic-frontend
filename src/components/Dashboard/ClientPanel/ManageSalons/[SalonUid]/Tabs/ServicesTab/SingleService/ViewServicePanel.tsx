@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { ServiceProps } from "@/Types/ClientPanel/ServicesTypes/ServicesType";
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
@@ -43,7 +44,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
   })();
 
   return (
-    <div className="bg-card space-y-4 rounded-md p-4 shadow-sm dark:shadow-gray-700">
+    <Card className="bg-card space-y-4 rounded-md p-4 shadow-md dark:shadow-gray-600">
       <div className="flex items-start justify-between">
         <div>
           <h3 className="text-lg font-semibold">{selectedService.name}</h3>
@@ -93,14 +94,14 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
       <div className="grid grid-cols-2 gap-4">
         <div>
           <h4 className="text-muted-foreground text-sm">Created At</h4>
-          <div className="font-medium">
-            {new Date(selectedService.created_at ?? "").toLocaleString()}
+          <div className="text-xs font-medium">
+            {selectedService.created_at ?? "Not Found"}
           </div>
         </div>
         <div>
           <h4 className="text-muted-foreground text-sm">Updated At</h4>
-          <div className="font-medium">
-            {new Date(selectedService.updated_at ?? "").toLocaleString()}
+          <div className="text-xs font-medium">
+            {selectedService.updated_at ?? "Not Found"}
           </div>
         </div>
       </div>
@@ -108,7 +109,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
       <div className="flex justify-end">
         {onClose ? (
           <Button
-            size="sm"
+            size="xs"
             variant="outline"
             onClick={onClose}
             className="shadow-d dark:shadow-gray-600"
@@ -118,7 +119,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
           </Button>
         ) : null}
       </div>
-    </div>
+    </Card>
   );
 };
 
