@@ -27,7 +27,7 @@ import DeleteServiceDialog from "./Dialogs/DeleteServiceDialog";
 
 const ServicesTab: React.FC = () => {
   const { salonuid } = useParams();
-  const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
+  const salonUid = Array.isArray(salonuid) ? salonuid[0] : salonuid ?? "";
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
