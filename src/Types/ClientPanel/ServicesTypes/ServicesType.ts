@@ -7,6 +7,12 @@ export interface ServiceProps {
   images?: string[];
   created_at: string;
   updated_at: string;
+  available_time_slots?: string[];
+  booking_lead_time?: string;
+  cancellation_policy?: boolean;
+  gender_specific?: boolean;
+  discount?: number;
+  assigned_employee?: string;
 }
 
 export interface AddServiceDialogProps {
@@ -19,4 +25,11 @@ export interface ServiceFormValues {
   price: string;
   description: string;
   uploaded_images?: string;
+}
+
+export interface EditServiceBasicInfoDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  selectedService: ServiceProps;
+  onEditSuccess?: () => void;
 }
