@@ -2,8 +2,15 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ServiceProps } from "@/Types/ClientPanel/ServicesTypes/ServicesType";
-import { ArrowLeft, Edit } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Edit,
+  LoaderPinwheel,
+} from "lucide-react";
 import Image from "next/image";
+import React, { useEffect, useMemo, useState } from "react";
 
 export interface ViewServicePanelProps {
   selectedService: ServiceProps;
@@ -14,12 +21,13 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
   selectedService,
   onClose,
 }) => {
-  if (!selectedService) return null;
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
+  const [isImageLoading, setIsImageLoading] = useState<boolean>(false);
 
   // Normalize images so component can handle both string[] and object[] shapes from the API.
-  const rawImages = selectedService.images ?? [];
-
-  const imagesToShow: string[] = (() => {
+  const imagesToShow: string[] = useMemo(() => {
+    const rawImages =
+      (selectedService as unknown as { images?: unknown[] })?.images ?? [];
     if (!Array.isArray(rawImages)) return [];
     const items = rawImages as unknown[];
     if (items.length === 0) return [];
@@ -37,9 +45,24 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
       return aPrimary ? -1 : 1;
     });
     return sorted.map((i) => i?.image ?? "");
-  })();
+  }, [selectedService]);
 
-  const mainImage = imagesToShow.length > 0 ? imagesToShow[0] : undefined;
+  const mainImage =
+    imagesToShow.length > 0
+      ? imagesToShow[Math.min(selectedImageIndex, imagesToShow.length - 1)]
+      : undefined;
+
+  // When the selected image index changes, show the loading spinner until
+  // next/image reports the image finished loading via onLoadingComplete.
+  useEffect(() => {
+    if (imagesToShow.length > 0) {
+      setIsImageLoading(true);
+    } else {
+      setIsImageLoading(false);
+    }
+  }, [selectedImageIndex, imagesToShow.length]);
+
+  if (!selectedService) return null;
 
   const safe = (v: unknown): string => {
     if (v === undefined || v === null || v === "") return "-";
@@ -55,7 +78,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
   return (
     <>
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Selected Service</h2>
+        <h2 className="text-lg font-semibold">Service details</h2>
         <TabsList className="shadow-md dark:shadow-gray-600">
           <TabsTrigger value="list" className="px-3">
             List
@@ -68,19 +91,55 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
       <Card className="bg-card overflow-hidden rounded-md p-0 shadow-md dark:shadow-gray-600">
         <div className="grid grid-cols-12 gap-0">
           {/* Left: narrow image strip */}
-          <div className="bg-muted col-span-4">
+          <div className="bg-muted relative col-span-4 flex flex-col">
             {mainImage ? (
-              <div className="relative h-full min-h-[600px] w-full overflow-hidden">
+              <div className="relative min-h-[420px] w-full flex-1 overflow-hidden">
                 <Image
                   src={mainImage}
                   alt={`${selectedService.name}-main`}
                   width={450}
                   height={600}
                   className="h-full w-full object-cover"
+                  onLoadingComplete={() => setIsImageLoading(false)}
                 />
+
+                {/* spinner while image loads */}
+                {isImageLoading ? (
+                  <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/10">
+                    <LoaderPinwheel className="h-10 w-10 animate-spin" />
+                  </div>
+                ) : null}
+
+                {imagesToShow.length > 1 ? (
+                  <>
+                    {selectedImageIndex > 0 ? (
+                      <button
+                        type="button"
+                        aria-label="Previous image"
+                        onClick={() =>
+                          setSelectedImageIndex((i) => Math.max(0, i - 1))
+                        }
+                        className="absolute top-1/2 left-2 z-20 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white hover:bg-black/50 focus:outline-none"
+                      >
+                        <ChevronLeft size={20} />
+                      </button>
+                    ) : null}
+                    {/* hide Next button when on last image */}
+                    {selectedImageIndex < imagesToShow.length - 1 ? (
+                      <button
+                        type="button"
+                        aria-label="Next image"
+                        onClick={() => setSelectedImageIndex((i) => i + 1)}
+                        className="absolute top-1/2 right-2 z-20 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white hover:bg-black/50 focus:outline-none"
+                      >
+                        <ChevronRight size={20} />
+                      </button>
+                    ) : null}
+                  </>
+                ) : null}
               </div>
             ) : (
-              <div className="text-muted-foreground flex h-full min-h-[600px] w-full items-center justify-center">
+              <div className="text-muted-foreground flex min-h-[420px] w-full flex-1 items-center justify-center">
                 No image
               </div>
             )}
