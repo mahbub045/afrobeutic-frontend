@@ -90,6 +90,7 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
       onClose();
     } catch (error) {
       toast.error("Failed to update service.");
+      console.error("Edit Service Error:", error);
     }
   };
 
