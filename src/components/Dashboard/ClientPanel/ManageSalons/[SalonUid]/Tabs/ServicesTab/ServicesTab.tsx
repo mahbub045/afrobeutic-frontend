@@ -23,6 +23,7 @@ import {
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import AddServiceDialog from "./Dialogs/AddServiceDialog";
+import DeleteServiceDialog from "./Dialogs/DeleteServiceDialog";
 
 const ServicesTab: React.FC = () => {
   const { salonuid } = useParams();
@@ -31,6 +32,9 @@ const ServicesTab: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [isOpenAddServiceDialog, setIsOpenAddServiceDialog] = useState(false);
+  const [selectedService, setSelectedService] = useState<ServiceProps | null>(
+    null,
+  );
 
   // Debounce the search input and reset page on new search
   useEffect(() => {
@@ -72,6 +76,16 @@ const ServicesTab: React.FC = () => {
 
   const handleIsOpenAddServiceDialog = () => {
     setIsOpenAddServiceDialog(!isOpenAddServiceDialog);
+  };
+
+  const handleIsOpenDeleteDialog = (service?: ServiceProps | null) => {
+    // If a service is provided, open the dialog for that service.
+    // If no service (or null) is provided, close the dialog.
+    if (service) {
+      setSelectedService(service);
+    } else {
+      setSelectedService(null);
+    }
   };
 
   return (
@@ -158,6 +172,7 @@ const ServicesTab: React.FC = () => {
                     variant="ghost"
                     className="text-danger/80 hover:text-danger dark:shadow-gray-600"
                     color="red"
+                    onClick={() => handleIsOpenDeleteDialog(service)}
                   >
                     <Trash2 />
                   </Button>
@@ -211,10 +226,18 @@ const ServicesTab: React.FC = () => {
           )}
         </div>
       </div>
+      {/* Dialogs */}
       <AddServiceDialog
         isOpen={isOpenAddServiceDialog}
         onClose={handleIsOpenAddServiceDialog}
       />
+      {selectedService && (
+        <DeleteServiceDialog
+          selectedService={selectedService}
+          isOpen={!!selectedService}
+          onClose={() => handleIsOpenDeleteDialog()}
+        />
+      )}
     </>
   );
 };
