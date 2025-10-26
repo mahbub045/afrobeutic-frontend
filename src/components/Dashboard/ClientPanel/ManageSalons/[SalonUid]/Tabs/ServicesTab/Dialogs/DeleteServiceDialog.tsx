@@ -1,18 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { useDeleteServiceMutation } from "@/Redux/Reducers/ClientPanel/Services/ServicesApi";
-import { ServiceProps } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
+import { DeleteServiceDialogProps } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { useTheme } from "next-themes";
 import { useParams } from "next/navigation";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
-
-export interface DeleteServiceDialogProps {
-  selectedService: ServiceProps;
-  isOpen: boolean;
-  onClose: () => void;
-}
 
 const DeleteServiceDialog: React.FC<DeleteServiceDialogProps> = ({
   selectedService,

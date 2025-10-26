@@ -32,7 +32,6 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
   onEditSuccess,
 }) => {
   const { salonuid } = useParams();
-  //   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
   const { resolvedTheme } = useTheme();
   const [editService, { isLoading: isEditingService }] =
     useEditServiceMutation();

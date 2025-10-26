@@ -2,17 +2,15 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGetEmployeesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Employees/EmployeesApi";
-import { EmployeeProps } from "@/Types/ClientPanel/ManageSalonTypes/EmployeesTypes/EmployeesType";
+import {
+  EmployeeProps,
+  ViewEmployeePanelProps,
+} from "@/Types/ClientPanel/ManageSalonTypes/EmployeesTypes/EmployeesType";
 import { ArrowLeft, Edit, LoaderPinwheel } from "lucide-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import EditEmployeeBasicInfoDialog from "./Dialogs/EditEmployeeBasicInfoDialog";
-
-export interface ViewEmployeePanelProps {
-  selectedEmployee: EmployeeProps;
-  onClose?: () => void;
-}
 
 const ViewEmployeePanel: React.FC<ViewEmployeePanelProps> = ({
   selectedEmployee,

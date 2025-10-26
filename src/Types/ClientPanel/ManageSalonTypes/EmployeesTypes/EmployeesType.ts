@@ -27,3 +27,14 @@ export interface EditEmployeeBasicInfoDialogProps {
   selectedEmployee: EmployeeProps;
   onEditSuccess?: () => void;
 }
+
+export interface DeleteEmployeeDialogProps {
+  selectedEmployee: EmployeeProps;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export interface ViewEmployeePanelProps {
+  selectedEmployee: EmployeeProps;
+  onClose?: () => void;
+}

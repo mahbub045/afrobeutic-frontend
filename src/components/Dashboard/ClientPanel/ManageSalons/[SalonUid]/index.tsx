@@ -81,7 +81,6 @@ const SingleSalonContainer: React.FC = () => {
   type Chair = { id: string; name: string };
   type Booking = { id: string; customer: string };
   type LookBook = { id: string; title: string };
-  type Employee = { id: string; name: string };
 
   const demo = React.useMemo(
     () => ({

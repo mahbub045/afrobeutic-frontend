@@ -1,18 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { useDeleteEmployeeMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Employees/EmployeesApi";
-import { EmployeeProps } from "@/Types/ClientPanel/ManageSalonTypes/EmployeesTypes/EmployeesType";
+import { DeleteEmployeeDialogProps } from "@/Types/ClientPanel/ManageSalonTypes/EmployeesTypes/EmployeesType";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { useTheme } from "next-themes";
 import { useParams } from "next/navigation";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
-
-export interface DeleteEmployeeDialogProps {
-  selectedEmployee: EmployeeProps;
-  isOpen: boolean;
-  onClose: () => void;
-}
 
 const DeleteEmployeeDialog: React.FC<DeleteEmployeeDialogProps> = ({
   selectedEmployee,

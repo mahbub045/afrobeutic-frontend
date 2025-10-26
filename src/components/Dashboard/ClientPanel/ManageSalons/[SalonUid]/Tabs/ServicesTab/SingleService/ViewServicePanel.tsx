@@ -2,7 +2,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGetServicesDataQuery } from "@/Redux/Reducers/ClientPanel/Services/ServicesApi";
-import { ServiceProps } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
+import {
+  ServiceProps,
+  ViewServicePanelProps,
+} from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import {
   ArrowLeft,
   ChevronLeft,
@@ -16,11 +19,6 @@ import { useParams } from "next/navigation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import EditServiceBasicInfoDialog from "./Dialogs/EditServiceBasicInfoDialog";
 import FullScreenImageViewer from "./FullScreenImageViewer";
-
-export interface ViewServicePanelProps {
-  selectedService: ServiceProps;
-  onClose?: () => void;
-}
 
 const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
   selectedService,
