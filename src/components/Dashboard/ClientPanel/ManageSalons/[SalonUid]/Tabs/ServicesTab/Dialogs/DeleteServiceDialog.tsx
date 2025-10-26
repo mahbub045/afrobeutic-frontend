@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
-import { useDeleteServiceMutation } from "@/Redux/Reducers/ClientPanel/Services/ServicesApi";
+import { useDeleteServiceMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
 import { DeleteServiceDialogProps } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { useTheme } from "next-themes";

@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { formatDateTime, safe } from "@/lib/utils";
 import { useGetEmployeesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Employees/EmployeesApi";
 import {
   EmployeeProps,
@@ -11,7 +12,6 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import EditEmployeeBasicInfoDialog from "./Dialogs/EditEmployeeBasicInfoDialog";
-import { formatDateTime } from "@/lib/utils";
 
 const ViewEmployeePanel: React.FC<ViewEmployeePanelProps> = ({
   selectedEmployee,
@@ -63,17 +63,6 @@ const ViewEmployeePanel: React.FC<ViewEmployeePanelProps> = ({
   };
 
   if (!displayedEmployee) return null;
-
-  const safe = (v: unknown): string => {
-    if (v === undefined || v === null || v === "") return "-";
-    if (typeof v === "string") return v;
-    if (typeof v === "number" || typeof v === "boolean") return String(v);
-    try {
-      return JSON.stringify(v);
-    } catch {
-      return String(v);
-    }
-  };
 
   return (
     <>

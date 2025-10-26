@@ -8,9 +8,9 @@ import {
   Clock,
   Home,
   Image,
+  RockingChair,
   Scissors,
   Settings,
-  ShoppingCart,
   Users,
 } from "lucide-react";
 import { useParams, usePathname } from "next/navigation";
@@ -41,7 +41,7 @@ const SingleSalonContainer: React.FC = () => {
       { label: "Opening Hours", href: `opening-hours`, Icon: Clock },
       { label: "Services", href: `services`, Icon: Scissors },
       { label: "Products", href: `products`, Icon: Box },
-      { label: "Chairs", href: `chairs`, Icon: ShoppingCart },
+      { label: "Chairs", href: `chairs`, Icon: RockingChair },
       { label: "Bookings", href: `bookings`, Icon: Calendar },
       { label: "LookBook", href: `lookbook`, Icon: Image },
       { label: "Employees", href: `employees`, Icon: Users },

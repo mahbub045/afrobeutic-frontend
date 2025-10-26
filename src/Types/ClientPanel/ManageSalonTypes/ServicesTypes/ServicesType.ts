@@ -5,14 +5,23 @@ export interface ServiceProps {
   price: string;
   description?: string;
   images?: string[];
-  created_at: string;
-  updated_at: string;
   available_time_slots?: string[];
-  booking_lead_time?: string;
+  service_duration?: string;
   cancellation_policy?: boolean;
   gender_specific?: boolean;
-  discount?: number;
-  assigned_employee?: string;
+  discount_percentage?: number;
+  assigned_employees?: Employee[] | string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Employee {
+  uid?: string;
+  employee_id?: string;
+  name?: string;
+  phone?: string;
+  designation?: string;
+  image?: string;
 }
 
 export interface AddServiceDialogProps {

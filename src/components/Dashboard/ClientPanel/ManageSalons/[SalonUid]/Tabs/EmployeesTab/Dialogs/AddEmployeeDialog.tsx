@@ -20,10 +20,14 @@ import {
   FieldProps,
   Formik,
   FormikProps,
+  type FormikErrors,
   type FormikHelpers,
+  type FormikTouched,
 } from "formik";
+import { X } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useState } from "react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 import PhoneInput from "react-phone-input-2";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
@@ -48,6 +52,19 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        try {
+          URL.revokeObjectURL(previewUrl);
+        } catch {
+          /* ignore */
+        }
+      }
+    };
+  }, [previewUrl]);
 
   async function handleAddEmployee(
     values: EmployeeFormValues,
@@ -84,9 +101,76 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
         confirmButtonColor: "#037375",
       });
       helpers.resetForm();
+      // clear selected file and preview
+      if (previewUrl) {
+        try {
+          URL.revokeObjectURL(previewUrl);
+        } catch {
+          /* ignore */
+        }
+      }
       setSelectedFile(null);
-    } catch (err) {
+      setPreviewUrl(null);
+    } catch (err: unknown) {
       console.error(err);
+
+      // Try to extract server-side validation errors and show them on the form
+      // Common API shapes: { employee_id: ["..."] } or { errors: { ... } } or err.data
+      let payload: unknown = null;
+      if (typeof err === "object" && err !== null) {
+        const e = err as Record<string, unknown>;
+        payload = e.data ?? e.errors ?? e;
+      } else {
+        payload = err;
+      }
+
+      if (payload && typeof payload === "object") {
+        // If the API returns { errors: { field: [msg] } }
+        let maybeErrors: unknown = payload;
+        if (typeof payload === "object" && payload !== null) {
+          const p = payload as Record<string, unknown>;
+          maybeErrors = p.errors ?? payload;
+        }
+        if (maybeErrors && typeof maybeErrors === "object") {
+          const fieldErrors: Record<string, string> = {};
+          for (const [key, val] of Object.entries(
+            maybeErrors as Record<string, unknown>,
+          )) {
+            if (Array.isArray(val)) {
+              fieldErrors[key] = (val as string[]).join(" ");
+            } else if (typeof val === "string") {
+              fieldErrors[key] = val as string;
+            } else if (typeof val === "object" && val !== null) {
+              // nested object -> try to find message arrays or strings
+              const nestedMsgs: string[] = [];
+              for (const nestedVal of Object.values(
+                val as Record<string, unknown>,
+              )) {
+                if (Array.isArray(nestedVal))
+                  nestedMsgs.push((nestedVal as string[]).join(" "));
+                else if (typeof nestedVal === "string")
+                  nestedMsgs.push(nestedVal as string);
+              }
+              fieldErrors[key] = nestedMsgs.join(" ") || JSON.stringify(val);
+            } else {
+              fieldErrors[key] = String(val);
+            }
+          }
+
+          // Set Formik errors so field-level messages appear under inputs
+          helpers.setErrors(
+            fieldErrors as unknown as FormikErrors<EmployeeFormValues>,
+          );
+          const touchedObj: Record<string, boolean> = {};
+          Object.keys(fieldErrors).forEach((k) => (touchedObj[k] = true));
+          helpers.setTouched(
+            touchedObj as unknown as FormikTouched<EmployeeFormValues>,
+          );
+          return;
+        }
+      }
+
+      // Fallback generic message
       toast.error("Failed to add employee. Please try again.");
     }
   }
@@ -233,8 +317,22 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
                     const file = e.currentTarget.files?.[0];
                     if (file) {
                       setFileError(null);
+                      // revoke previous preview if any
+                      if (previewUrl) {
+                        try {
+                          URL.revokeObjectURL(previewUrl);
+                        } catch {
+                          /* ignore */
+                        }
+                      }
                       setSelectedFile(file);
                       setFieldValue("image", file.name);
+                      try {
+                        const url = URL.createObjectURL(file);
+                        setPreviewUrl(url);
+                      } catch {
+                        setPreviewUrl(null);
+                      }
                     }
                   }}
                 />
@@ -242,10 +340,39 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
                   <p className="text-destructive text-sm">{fileError}</p>
                 ) : null}
                 {selectedFile ? (
-                  <p className="text-muted-foreground mt-2 text-sm">
-                    Selected: {selectedFile.name} (
-                    {Math.round(selectedFile.size / 1024)} KB)
-                  </p>
+                  <div className="mt-2 flex items-center gap-3">
+                    {previewUrl ? (
+                      <div className="relative h-20 w-20 overflow-hidden rounded-md border">
+                        <Image
+                          src={previewUrl}
+                          alt="Selected preview"
+                          fill
+                          sizes="64px"
+                          className="object-cover"
+                          unoptimized
+                        />
+                        <button
+                          type="button"
+                          aria-label="Remove image"
+                          className="text-danger hover:bg-danger absolute -top-1 right-0 z-10 inline-flex h-6 w-6 items-center justify-center rounded-full bg-gray-800/50 hover:!text-white"
+                          onClick={() => {
+                            if (previewUrl) {
+                              try {
+                                URL.revokeObjectURL(previewUrl);
+                              } catch {
+                                /* ignore */
+                              }
+                            }
+                            setSelectedFile(null);
+                            setPreviewUrl(null);
+                            setFieldValue("image", "");
+                          }}
+                        >
+                          <X size={18} />
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
                 ) : null}
               </div>
 

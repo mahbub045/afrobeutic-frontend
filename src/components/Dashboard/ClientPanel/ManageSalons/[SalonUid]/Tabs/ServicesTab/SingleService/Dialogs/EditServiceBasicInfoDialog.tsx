@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useEditServiceMutation } from "@/Redux/Reducers/ClientPanel/Services/ServicesApi";
+import { useEditServiceMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
 import {
   EditServiceBasicInfoDialogProps,
   ServiceProps,
