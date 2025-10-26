@@ -321,7 +321,8 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                   Service Duration
                 </div>
                 <div className="mt-1 text-sm font-medium">
-                  {safe(displayedService.service_duration)}
+                  {safe(displayedService.service_duration)}{" "}
+                  <span className="text-muted-foreground text-xs">(Hours)</span>
                 </div>
               </div>
               <div>

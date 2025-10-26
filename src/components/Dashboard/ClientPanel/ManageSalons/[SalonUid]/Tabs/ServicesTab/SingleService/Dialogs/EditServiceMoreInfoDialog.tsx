@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { formatUnderscoredLabel } from "@/lib/utils";
@@ -86,8 +87,13 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
     assign_employees: string[];
   }
 
+  // duration format: HH:MM or HH:MM:SS (allow single-digit hours)
+  const durationRegex = /^([0-9]{1,2}):[0-5][0-9](:[0-5][0-9])?$/;
+
   const validationSchema = Yup.object().shape({
-    service_duration: Yup.string().required("Service duration is required"),
+    service_duration: Yup.string()
+      .matches(durationRegex, "Duration must be in HH:MM or HH:MM:SS format")
+      .required("Service duration is required"),
     available_time_slots: Yup.array().of(Yup.string()),
     gender_specific: Yup.string().oneOf(GENDER_OPTIONS),
     discount_percentage: Yup.number()
@@ -164,13 +170,15 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
                 <Label htmlFor="service-duration" className="mb-2">
                   Service Duration
                 </Label>
-                {/* use time input to capture HH:MM:SS (seconds enabled by step) */}
+                {/* duration input (HH:MM or HH:MM:SS) */}
                 <Field
                   as="input"
                   id="service-duration"
                   name="service_duration"
-                  type="time"
-                  step={1}
+                  type="text"
+                  placeholder="e.g. 00:30:00 or 0:30"
+                  pattern="^([0-9]{1,2}):[0-5][0-9](:[0-5][0-9])?$"
+                  title="Duration format HH:MM or HH:MM:SS"
                 />
                 <ErrorMessage
                   name="service_duration"
@@ -256,7 +264,7 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
 
               <div>
                 <Label className="mb-2">Assign Employees</Label>
-                <div className="flex max-h-40 flex-col gap-2 overflow-y-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2  max-h-40 flex-col gap-2 overflow-y-auto">
                   {isLoadingEmployees ? (
                     <div>Loading employees...</div>
                   ) : (
