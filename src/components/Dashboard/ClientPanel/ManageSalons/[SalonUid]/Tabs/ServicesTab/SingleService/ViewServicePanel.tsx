@@ -1,6 +1,8 @@
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { formatDateTime, formatUnderscoredLabel, safe } from "@/lib/utils";
 import { useGetServicesDataQuery } from "@/Redux/Reducers/ClientPanel/Services/ServicesApi";
 import {
   ServiceProps,
@@ -19,7 +21,6 @@ import { useParams } from "next/navigation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import EditServiceBasicInfoDialog from "./Dialogs/EditServiceBasicInfoDialog";
 import FullScreenImageViewer from "./FullScreenImageViewer";
-import { formatDateTime } from "@/lib/utils";
 
 const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
   selectedService,
@@ -108,17 +109,6 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
   }, [selectedImageIndex, imagesToShow.length]);
 
   if (!displayedService) return null;
-
-  const safe = (v: unknown): string => {
-    if (v === undefined || v === null || v === "") return "-";
-    if (typeof v === "string") return v;
-    if (typeof v === "number" || typeof v === "boolean") return String(v);
-    try {
-      return JSON.stringify(v);
-    } catch {
-      return String(v);
-    }
-  };
 
   return (
     <>
@@ -295,25 +285,32 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                   Available time slots
                 </div>
                 <div className="mt-1 text-sm font-medium">
-                  {Array.isArray(displayedService.available_time_slots)
-                    ? JSON.stringify(displayedService.available_time_slots)
-                    : safe(displayedService.available_time_slots)}
+                  {Array.isArray(displayedService.available_time_slots) ? (
+                    <div className="flex flex-wrap gap-2">
+                      {(displayedService.available_time_slots as unknown[])
+                        .length === 0 ? (
+                        <span className="text-sm">-</span>
+                      ) : (
+                        (
+                          displayedService.available_time_slots as unknown[]
+                        ).map((slot, idx) => (
+                          <Badge key={idx} variant="secondary">
+                            {formatUnderscoredLabel(slot)}
+                          </Badge>
+                        ))
+                      )}
+                    </div>
+                  ) : (
+                    safe(displayedService.available_time_slots)
+                  )}
                 </div>
               </div>
               <div>
                 <div className="text-muted-foreground text-xs uppercase">
-                  Booking lead time
+                  Service Duration
                 </div>
                 <div className="mt-1 text-sm font-medium">
-                  {safe(displayedService.booking_lead_time)}
-                </div>
-              </div>
-              <div>
-                <div className="text-muted-foreground text-xs uppercase">
-                  Cancellation policy
-                </div>
-                <div className="mt-1 text-sm font-medium">
-                  {safe(displayedService.cancellation_policy ? "yes" : "no")}
+                  {safe(displayedService.service_duration)}
                 </div>
               </div>
               <div>
@@ -321,7 +318,9 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                   Gender specific
                 </div>
                 <div className="mt-1 text-sm font-medium">
-                  {safe(displayedService.gender_specific)}
+                  <Badge variant="secondary">
+                    {formatUnderscoredLabel(displayedService.gender_specific)}
+                  </Badge>
                 </div>
               </div>
               <div>
@@ -329,36 +328,40 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                   Discount (%)
                 </div>
                 <div className="mt-1 text-sm font-medium">
-                  {safe(displayedService.discount)}
+                  {safe(displayedService.discount_percentage)}
+                </div>
+              </div>
+              <div>
+                <div className="text-muted-foreground text-xs uppercase">
+                  Created At
+                </div>
+                <div className="mt-1 text-sm font-medium">
+                  {safe(formatDateTime(displayedService.created_at))}
+                </div>
+              </div>
+              <div>
+                <div className="text-muted-foreground text-xs uppercase">
+                  Updated At
+                </div>
+                <div className="mt-1 text-sm font-medium">
+                  {safe(formatDateTime(displayedService.updated_at))}
                 </div>
               </div>
             </div>
-
             {/* Assigned employee and timestamps */}
-            <div className="mt-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="mt-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-start">
               <div>
                 <div className="text-muted-foreground text-xs uppercase">
                   Assigned employee
                 </div>
                 <div className="mt-2">
-                  {displayedService.assigned_employee ? (
+                  {displayedService.assigned_employees ? (
                     <span className="bg-muted inline-block rounded px-2 py-1 text-sm">
-                      {displayedService.assigned_employee}
+                      {displayedService.assigned_employees}
                     </span>
                   ) : (
                     <span className="text-sm">-</span>
                   )}
-                </div>
-              </div>
-
-              <div className="text-left text-xs md:text-right">
-                <div className="text-muted-foreground">Created At</div>
-                <div className="font-medium">
-                  {safe(formatDateTime(displayedService.created_at))}
-                </div>
-                <div className="text-muted-foreground mt-2">Updated At</div>
-                <div className="font-medium">
-                  {safe(formatDateTime(displayedService.updated_at))}
                 </div>
               </div>
             </div>
