@@ -10,7 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { formatUnderscoredLabel } from "@/lib/utils";
@@ -264,7 +263,14 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
 
               <div>
                 <Label className="mb-2">Assign Employees</Label>
-                <div className="grid grid-cols-1 md:grid-cols-2  max-h-40 flex-col gap-2 overflow-y-auto">
+                {employeesData.results.length === 0 ? (
+                  <div className="grid grid-cols-none">
+                    <p className="text-muted-foreground text-center text-xs">
+                      No employees found. Please add employees to assign.
+                    </p>
+                  </div>
+                ) : null}
+                <div className="grid max-h-40 grid-cols-1 flex-col gap-2 overflow-y-auto md:grid-cols-2">
                   {isLoadingEmployees ? (
                     <div>Loading employees...</div>
                   ) : (
