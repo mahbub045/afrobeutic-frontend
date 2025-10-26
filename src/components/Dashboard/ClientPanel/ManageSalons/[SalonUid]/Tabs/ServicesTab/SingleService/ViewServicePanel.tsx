@@ -146,7 +146,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                   alt={`${displayedService.name}-main`}
                   height={600}
                   width={300}
-                  className="h-full w-full object-cover transition-transform duration-500 ease-in-out hover:scale-110"
+                  className="h-full w-full object-cover"
                   onLoadingComplete={() => setIsImageLoading(false)}
                   onClick={handleOpenFullScreen}
                 />
