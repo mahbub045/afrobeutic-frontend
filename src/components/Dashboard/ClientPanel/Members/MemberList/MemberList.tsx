@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetMembersQuery } from "@/Redux/Reducers/ClientPanel/Members/MembersApi";
-import { MemberProps } from "@/Types/ClientPanel/MemberTypes/MemberType";
+import { MemberProps } from "@/Types/ClientPanel/ManageSalonTypes/MemberTypes/MemberType";
 import {
   ChevronLeft,
   ChevronRight,

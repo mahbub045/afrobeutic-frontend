@@ -14,7 +14,7 @@ import { useEditServicesMutation } from "@/Redux/Reducers/ClientPanel/Services/S
 import {
   EditServiceBasicInfoDialogProps,
   ServiceProps,
-} from "@/Types/ClientPanel/ServicesTypes/ServicesType";
+} from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import { X } from "lucide-react";
 import { useTheme } from "next-themes";

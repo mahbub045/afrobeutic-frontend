@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import {
   AddServiceDialogProps,
   ServiceFormValues,
-} from "@/Types/ClientPanel/ServicesTypes/ServicesType";
+} from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import { Field, Formik, type FormikHelpers } from "formik";
 import { useTheme } from "next-themes";
 import { useState } from "react";
