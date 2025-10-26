@@ -21,6 +21,7 @@ import { useParams } from "next/navigation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import EditServiceBasicInfoDialog from "./Dialogs/EditServiceBasicInfoDialog";
 import FullScreenImageViewer from "./FullScreenImageViewer";
+import EditServiceMoreInfoDialog from "./Dialogs/EditServiceMoreInfoDialog";
 
 const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
   selectedService,
@@ -36,6 +37,9 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
     isOpenEditServiceBasicInfoDialog,
     setIsOpenEditServiceBasicInfoDialog,
   ] = useState(false);
+  const [isOpenEditServiceMoreInfoDialog, setIsOpenEditServiceMoreInfoDialog] =
+    useState(false);
+
   const [displayedService, setDisplayedService] =
     useState<ServiceProps>(selectedService);
 
@@ -68,6 +72,10 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
 
   const handleEditServiceBasicInfo = () => {
     setIsOpenEditServiceBasicInfoDialog(true);
+  };
+
+  const handleEditServiceMoreInfo = () => {
+    setIsOpenEditServiceMoreInfoDialog(true);
   };
 
   const handleEditSuccess = () => {
@@ -107,6 +115,28 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
   useEffect(() => {
     setIsImageLoading(imagesToShow.length > 0);
   }, [selectedImageIndex, imagesToShow.length]);
+
+  // typed local helpers for assigned employees to avoid `any` usage in JSX
+  // support both `assigned_employees` and `assign_employees` keys from API
+  const assignedEmployeesRaw =
+    (
+      displayedService as unknown as {
+        assigned_employees?: unknown;
+        assign_employees?: unknown;
+      }
+    )?.assigned_employees ??
+    (displayedService as unknown as { assign_employees?: unknown })
+      ?.assign_employees;
+  const assignedEmployees = Array.isArray(assignedEmployeesRaw)
+    ? (assignedEmployeesRaw as {
+        uid?: string;
+        employee_id?: string;
+        name?: string;
+        phone?: string;
+        designation?: string;
+        image?: string;
+      }[])
+    : undefined;
 
   if (!displayedService) return null;
 
@@ -228,7 +258,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
               </Button>
             </div>
 
-            <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+            <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
               <div>
                 <div className="text-muted-foreground text-xs uppercase">
                   Service name
@@ -253,10 +283,6 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                   {safe(displayedService.price)}
                 </div>
               </div>
-            </div>
-
-            {/* Description */}
-            {displayedService.description && (
               <div className="mb-6">
                 <div className="text-muted-foreground text-xs uppercase">
                   Description
@@ -265,7 +291,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                   {displayedService.description}
                 </div>
               </div>
-            )}
+            </div>
 
             {/* More info */}
             <div className="mb-3 flex items-center justify-between">
@@ -274,6 +300,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                 variant="outline"
                 size="sm"
                 className="shadow-md dark:shadow-gray-600"
+                onClick={handleEditServiceMoreInfo}
               >
                 <Edit size={16} />
               </Button>
@@ -349,36 +376,60 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
               </div>
             </div>
             {/* Assigned employee and timestamps */}
-            <div className="mt-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-start">
+            <div className="mt-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <div className="text-muted-foreground text-xs uppercase">
                   Assigned employee
                 </div>
                 <div className="mt-2">
-                  {displayedService.assigned_employees ? (
+                  {Array.isArray(assignedEmployeesRaw) ? (
+                    assignedEmployees && assignedEmployees.length === 0 ? (
+                      <span className="text-sm">-</span>
+                    ) : (
+                      // limit height so it scrolls when there are many employees
+                      <Card className="flex max-h-32 gap-1 overflow-y-auto px-2 py-2">
+                        {assignedEmployees!.map((emp, idx) => (
+                          <div
+                            key={emp?.uid ?? idx}
+                            className="bg-muted flex items-center justify-between gap-10 rounded px-3 py-1"
+                          >
+                            <div className="flex flex-col">
+                              <span className="text-sm font-medium">
+                                {safe(emp?.name ?? "-")}
+                              </span>
+                              <span className="text-muted-foreground text-xs">
+                                {safe(emp?.employee_id ?? "")}
+                              </span>
+                            </div>
+                            <div className="text-muted-foreground text-right text-xs">
+                              {safe(emp?.designation ?? "")}
+                            </div>
+                          </div>
+                        ))}
+                      </Card>
+                    )
+                  ) : assignedEmployeesRaw ? (
                     <span className="bg-muted inline-block rounded px-2 py-1 text-sm">
-                      {displayedService.assigned_employees}
+                      {String(assignedEmployeesRaw)}
                     </span>
                   ) : (
                     <span className="text-sm">-</span>
                   )}
                 </div>
               </div>
-            </div>
-
-            {/* Back button */}
-            <div className="mt-6 flex justify-end">
-              {onClose && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={onClose}
-                  className="flex items-center gap-1 shadow-md dark:shadow-gray-600"
-                >
-                  <ArrowLeft size={16} />
-                  Back
-                </Button>
-              )}
+              <div className="mt-6">
+                {onClose && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={onClose}
+                    className="flex items-center gap-1 shadow-md dark:shadow-gray-600"
+                  >
+                    <ArrowLeft size={16} />
+                    Back
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -388,6 +439,12 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
         selectedService={displayedService}
         isOpen={isOpenEditServiceBasicInfoDialog}
         onClose={() => setIsOpenEditServiceBasicInfoDialog(false)}
+        onEditSuccess={handleEditSuccess}
+      />
+      <EditServiceMoreInfoDialog
+        selectedService={displayedService}
+        isOpen={isOpenEditServiceMoreInfoDialog}
+        onClose={() => setIsOpenEditServiceMoreInfoDialog(false)}
         onEditSuccess={handleEditSuccess}
       />
       <FullScreenImageViewer
