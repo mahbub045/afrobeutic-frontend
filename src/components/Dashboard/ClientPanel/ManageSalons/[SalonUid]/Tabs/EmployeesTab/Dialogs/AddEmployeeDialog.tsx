@@ -24,8 +24,10 @@ import {
   type FormikHelpers,
   type FormikTouched,
 } from "formik";
+import { X } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useState } from "react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 import PhoneInput from "react-phone-input-2";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
@@ -50,6 +52,19 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        try {
+          URL.revokeObjectURL(previewUrl);
+        } catch (e) {
+          /* ignore */
+        }
+      }
+    };
+  }, [previewUrl]);
 
   async function handleAddEmployee(
     values: EmployeeFormValues,
@@ -86,7 +101,16 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
         confirmButtonColor: "#037375",
       });
       helpers.resetForm();
+      // clear selected file and preview
+      if (previewUrl) {
+        try {
+          URL.revokeObjectURL(previewUrl);
+        } catch (e) {
+          /* ignore */
+        }
+      }
       setSelectedFile(null);
+      setPreviewUrl(null);
     } catch (err: unknown) {
       console.error(err);
 
@@ -293,8 +317,22 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
                     const file = e.currentTarget.files?.[0];
                     if (file) {
                       setFileError(null);
+                      // revoke previous preview if any
+                      if (previewUrl) {
+                        try {
+                          URL.revokeObjectURL(previewUrl);
+                        } catch (err) {
+                          /* ignore */
+                        }
+                      }
                       setSelectedFile(file);
                       setFieldValue("image", file.name);
+                      try {
+                        const url = URL.createObjectURL(file);
+                        setPreviewUrl(url);
+                      } catch (err) {
+                        setPreviewUrl(null);
+                      }
                     }
                   }}
                 />
@@ -302,10 +340,39 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
                   <p className="text-destructive text-sm">{fileError}</p>
                 ) : null}
                 {selectedFile ? (
-                  <p className="text-muted-foreground mt-2 text-sm">
-                    Selected: {selectedFile.name} (
-                    {Math.round(selectedFile.size / 1024)} KB)
-                  </p>
+                  <div className="mt-2 flex items-center gap-3">
+                    {previewUrl ? (
+                      <div className="relative h-20 w-20 overflow-hidden rounded-md border">
+                        <Image
+                          src={previewUrl}
+                          alt="Selected preview"
+                          fill
+                          sizes="64px"
+                          className="object-cover"
+                          unoptimized
+                        />
+                        <button
+                          type="button"
+                          aria-label="Remove image"
+                          className="text-danger absolute -top-1 right-0 z-10 inline-flex h-6 w-6 items-center justify-center rounded-full bg-gray-800/50 hover:!text-white hover:bg-danger"
+                          onClick={() => {
+                            if (previewUrl) {
+                              try {
+                                URL.revokeObjectURL(previewUrl);
+                              } catch (e) {
+                                /* ignore */
+                              }
+                            }
+                            setSelectedFile(null);
+                            setPreviewUrl(null);
+                            setFieldValue("image", "");
+                          }}
+                        >
+                          <X size={18} />
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
                 ) : null}
               </div>
 

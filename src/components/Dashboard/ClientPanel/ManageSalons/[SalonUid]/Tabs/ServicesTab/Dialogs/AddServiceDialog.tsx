@@ -13,9 +13,11 @@ import {
   ServiceFormValues,
 } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import { Field, Formik, type FormikHelpers } from "formik";
+import { X } from "lucide-react";
 import { useTheme } from "next-themes";
+import Image from "next/image";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
@@ -42,6 +44,21 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fileError, setFileError] = useState<string | null>(null);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+
+  useEffect(() => {
+    return () => {
+      // revoke any object URLs on unmount
+      previewUrls.forEach((u) => {
+        try {
+          URL.revokeObjectURL(u);
+        } catch (e) {
+          /* ignore */
+        }
+      });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleAddService(
     values: ServiceFormValues,
@@ -194,16 +211,39 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                     const files = e.currentTarget.files
                       ? Array.from(e.currentTarget.files)
                       : [];
+
+                    // revoke previous previews
+                    if (previewUrls.length > 0) {
+                      previewUrls.forEach((u) => {
+                        try {
+                          URL.revokeObjectURL(u);
+                        } catch (err) {
+                          /* ignore */
+                        }
+                      });
+                    }
+
+                    let sel = files;
                     if (files.length > 2) {
                       setFileError("You can select up to 2 images.");
-                      setSelectedFiles(files.slice(0, 2));
+                      sel = files.slice(0, 2);
                     } else {
                       setFileError(null);
-                      setSelectedFiles(files);
                     }
+
+                    const urls = sel.map((f) => {
+                      try {
+                        return URL.createObjectURL(f);
+                      } catch (err) {
+                        return "";
+                      }
+                    });
+
+                    setSelectedFiles(sel);
+                    setPreviewUrls(urls);
                     setFieldValue(
                       "uploaded_images",
-                      files.map((f) => f.name).join(", "),
+                      sel.map((f) => f.name).join(", "),
                     );
                   }}
                 />
@@ -211,13 +251,55 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                   <p className="text-destructive text-sm">{fileError}</p>
                 ) : null}
                 {selectedFiles.length > 0 ? (
-                  <ul className="mt-2 text-sm">
-                    {selectedFiles.map((f) => (
-                      <li key={f.name}>
-                        {f.name} ({Math.round(f.size / 1024)} KB)
-                      </li>
+                  <div className="mt-2 flex items-center gap-3">
+                    {selectedFiles.map((f, i) => (
+                      <div
+                        key={`${f.name}-${i}`}
+                        className="relative h-20 w-20 overflow-hidden rounded-md border"
+                      >
+                        {previewUrls[i] ? (
+                          <Image
+                            src={previewUrls[i]}
+                            alt={f.name}
+                            fill
+                            sizes="80px"
+                            className="object-cover"
+                            unoptimized
+                          />
+                        ) : null}
+                        <button
+                          type="button"
+                          aria-label={`Remove ${f.name}`}
+                          className="text-danger hover:bg-danger absolute -top-1 right-0 z-10 inline-flex h-6 w-6 items-center justify-center rounded-full bg-gray-800/50 hover:!text-white"
+                          onClick={() => {
+                            // revoke this preview url
+                            const url = previewUrls[i];
+                            if (url) {
+                              try {
+                                URL.revokeObjectURL(url);
+                              } catch (e) {
+                                /* ignore */
+                              }
+                            }
+                            const newFiles = selectedFiles.filter(
+                              (_, idx) => idx !== i,
+                            );
+                            const newUrls = previewUrls.filter(
+                              (_, idx) => idx !== i,
+                            );
+                            setSelectedFiles(newFiles);
+                            setPreviewUrls(newUrls);
+                            setFieldValue(
+                              "uploaded_images",
+                              newFiles.map((nf) => nf.name).join(", "),
+                            );
+                          }}
+                        >
+                          <X size={18} />
+                        </button>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 ) : null}
               </div>
 
