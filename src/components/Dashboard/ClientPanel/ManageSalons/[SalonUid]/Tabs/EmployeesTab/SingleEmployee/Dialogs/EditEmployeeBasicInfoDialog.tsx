@@ -14,12 +14,20 @@ import {
   EditEmployeeBasicInfoDialogProps,
   EmployeeProps,
 } from "@/Types/ClientPanel/ManageSalonTypes/EmployeesTypes/EmployeesType";
-import { ErrorMessage, Field, Form, Formik } from "formik";
+import {
+  ErrorMessage,
+  Field,
+  FieldProps,
+  Form,
+  Formik,
+  FormikProps,
+} from "formik";
 import { X } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useState } from "react";
+import PhoneInput from "react-phone-input-2";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
@@ -187,18 +195,51 @@ const EditEmployeeBasicInfoDialog: React.FC<
                 <Label htmlFor="employee-phone" className="mb-2">
                   Phone
                 </Label>
-                <Field
-                  as="input"
-                  id="employee-phone"
-                  name="phone"
-                  type="tel"
-                  placeholder="Enter phone"
-                />
-                <ErrorMessage
-                  name="phone"
-                  component="p"
-                  className="mt-1 text-sm text-red-500"
-                />
+                <Field name="phone">
+                  {({
+                    field,
+                    form,
+                  }: FieldProps<string, FormikProps<EmployeeProps>>) => (
+                    <div>
+                      <PhoneInput
+                        country={"gb"}
+                        value={field.value}
+                        onChange={(
+                          val: string,
+                          data?: { dialCode?: string },
+                        ) => {
+                          const dial = data?.dialCode
+                            ? `+${data.dialCode}`
+                            : "";
+                          const numeric = (val || "").replace(/[^0-9]/g, "");
+                          let newVal = numeric;
+                          if (dial) {
+                            if (!numeric.startsWith(dial.replace(/\D/g, ""))) {
+                              newVal = `${dial}${numeric}`;
+                            } else {
+                              newVal = `+${numeric}`;
+                            }
+                          } else if (numeric) {
+                            newVal = `+${numeric}`;
+                          }
+                          form.setFieldValue(field.name, newVal);
+                        }}
+                        inputProps={{ name: field.name }}
+                        searchPlaceholder="Search"
+                        enableSearch
+                        inputClass="!w-full !h-auto px-3 py-2 rounded-md !bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100"
+                        buttonClass="!bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100 !border-1 dark:!border-gray-700"
+                        dropdownClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100 !px-2"
+                        searchClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100"
+                      />
+                      <ErrorMessage
+                        name="phone"
+                        component="div"
+                        className="text-danger mt-1 text-xs"
+                      />
+                    </div>
+                  )}
+                </Field>
               </div>
 
               <div>
