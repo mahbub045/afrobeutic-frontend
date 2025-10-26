@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { formatDateTime } from "@/lib/utils";
 import { useGetServicesDataQuery } from "@/Redux/Reducers/ClientPanel/Services/ServicesApi";
 import { ServiceProps } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import {
@@ -157,8 +158,12 @@ const ServicesTab: React.FC = () => {
                   <TableCell className="font-medium">{service.name}</TableCell>
                   <TableCell>{service.category}</TableCell>
                   <TableCell>${service.price}</TableCell>
-                  <TableCell>{service?.created_at ?? "Not Found"}</TableCell>
-                  <TableCell>{service?.updated_at ?? "Not Found"}</TableCell>
+                  <TableCell>
+                    {formatDateTime(service?.created_at ?? null)}
+                  </TableCell>
+                  <TableCell>
+                    {formatDateTime(service?.updated_at ?? null)}
+                  </TableCell>
 
                   <TableCell className="flex justify-center gap-2">
                     <Button

@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { formatDateTime } from "@/lib/utils";
 import { useGetEmployeesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Employees/EmployeesApi";
 import { EmployeeProps } from "@/Types/ClientPanel/ManageSalonTypes/EmployeesTypes/EmployeesType";
 import {
@@ -158,8 +159,12 @@ const EmployeesTab: React.FC = () => {
                   <TableCell>{employee.name}</TableCell>
                   <TableCell>{employee.phone}</TableCell>
                   <TableCell>{employee.designation}</TableCell>
-                  <TableCell>{employee?.created_at ?? "Not Found"}</TableCell>
-                  <TableCell>{employee?.updated_at ?? "Not Found"}</TableCell>
+                  <TableCell>
+                    {formatDateTime(employee?.created_at ?? null)}
+                  </TableCell>
+                  <TableCell>
+                    {formatDateTime(employee?.updated_at ?? null)}
+                  </TableCell>
 
                   <TableCell className="flex justify-center gap-2">
                     <Button

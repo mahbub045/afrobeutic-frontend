@@ -11,6 +11,7 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import EditEmployeeBasicInfoDialog from "./Dialogs/EditEmployeeBasicInfoDialog";
+import { formatDateTime } from "@/lib/utils";
 
 const ViewEmployeePanel: React.FC<ViewEmployeePanelProps> = ({
   selectedEmployee,
@@ -180,7 +181,7 @@ const ViewEmployeePanel: React.FC<ViewEmployeePanelProps> = ({
                   Created At
                 </div>
                 <div className="text-sm font-medium">
-                  {safe(displayedEmployee.created_at)}
+                  {safe(formatDateTime(displayedEmployee.created_at))}
                 </div>
               </div>
               <div>
@@ -188,7 +189,7 @@ const ViewEmployeePanel: React.FC<ViewEmployeePanelProps> = ({
                   Updated At
                 </div>
                 <div className="text-sm font-medium">
-                  {safe(displayedEmployee.updated_at)}
+                  {safe(formatDateTime(displayedEmployee.updated_at))}
                 </div>
               </div>
             </div>
