@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useEditServicesMutation } from "@/Redux/Reducers/ClientPanel/Services/ServicesApi";
+import { useEditServiceMutation } from "@/Redux/Reducers/ClientPanel/Services/ServicesApi";
 import {
   EditServiceBasicInfoDialogProps,
   ServiceProps,
@@ -34,8 +34,8 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
   const { salonuid } = useParams();
   //   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
   const { resolvedTheme } = useTheme();
-  const [editServices, { isLoading: isEditingService }] =
-    useEditServicesMutation();
+  const [editService, { isLoading: isEditingService }] =
+    useEditServiceMutation();
 
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
 
@@ -72,7 +72,7 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
         formData.append("uploaded_images", file),
       );
 
-      await editServices({
+      await editService({
         salonUid: salonuid as string,
         serviceUid: selectedService?.uid,
         serviceData: formData,

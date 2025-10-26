@@ -5,7 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useAddServicesMutation } from "@/Redux/Reducers/ClientPanel/Services/ServicesApi";
+import { useAddServiceMutation } from "@/Redux/Reducers/ClientPanel/Services/ServicesApi";
 import { useParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -39,7 +39,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
   const { salonuid } = useParams();
   const { resolvedTheme } = useTheme();
   // keep the full mutation result so we can call reset() after success
-  const [addService, { isLoading }] = useAddServicesMutation();
+  const [addService, { isLoading }] = useAddServiceMutation();
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fileError, setFileError] = useState<string | null>(null);
