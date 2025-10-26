@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -5,16 +6,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useAddServiceMutation } from "@/Redux/Reducers/ClientPanel/Services/ServicesApi";
-import { useParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { useAddServiceMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
 import {
   AddServiceDialogProps,
   ServiceFormValues,
 } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import { Field, Formik, type FormikHelpers } from "formik";
 import { useTheme } from "next-themes";
+import { useParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
