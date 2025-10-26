@@ -26,6 +26,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import ViewEmployeePanel from "./SingleEmployee/ViewEmployeePanel";
 import AddEmployeeDialog from "./SingleEmployee/Dialogs/AddEmployeeDialog";
+import DeleteEmployeeDialog from "./SingleEmployee/Dialogs/DeleteEmloyeeDialog";
 
 const EmployeesTab: React.FC = () => {
   const { salonuid } = useParams();
@@ -249,13 +250,13 @@ const EmployeesTab: React.FC = () => {
         isOpen={isOpenAddEmployeeDialog}
         onClose={handleIsOpenAddEmployeeDialog}
       />
-      {/* {selectedEmployee && (
+      {selectedEmployee && (
         <DeleteEmployeeDialog
           selectedEmployee={selectedEmployee}
           isOpen={!!selectedEmployee}
           onClose={() => handleIsOpenDeleteDialog()}
         />
-      )} */}
+      )}
     </Tabs>
   );
 };
