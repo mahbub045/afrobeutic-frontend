@@ -24,9 +24,9 @@ import {
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import AddEmployeeDialog from "./Dialogs/AddEmployeeDialog";
+import DeleteEmployeeDialog from "./Dialogs/DeleteEmloyeeDialog";
 import ViewEmployeePanel from "./SingleEmployee/ViewEmployeePanel";
-import AddEmployeeDialog from "./SingleEmployee/Dialogs/AddEmployeeDialog";
-import DeleteEmployeeDialog from "./SingleEmployee/Dialogs/DeleteEmloyeeDialog";
 
 const EmployeesTab: React.FC = () => {
   const { salonuid } = useParams();
@@ -123,6 +123,7 @@ const EmployeesTab: React.FC = () => {
         <Table>
           <TableHeader className="text-xs">
             <TableRow>
+              <TableHead>Employee ID</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Phone</TableHead>
               <TableHead>Designation</TableHead>
@@ -153,7 +154,8 @@ const EmployeesTab: React.FC = () => {
             ) : (
               extractedEmployees.map((employee: EmployeeProps) => (
                 <TableRow key={employee.uid}>
-                  <TableCell className="font-medium">{employee.name}</TableCell>
+                  <TableCell>{employee.employee_id}</TableCell>
+                  <TableCell>{employee.name}</TableCell>
                   <TableCell>{employee.phone}</TableCell>
                   <TableCell>{employee.designation}</TableCell>
                   <TableCell>{employee?.created_at ?? "Not Found"}</TableCell>

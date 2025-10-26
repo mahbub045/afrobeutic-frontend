@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useGetServicesDataQuery } from "@/Redux/Reducers/ClientPanel/Services/ServicesApi";
+import { useGetEmployeesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Employees/EmployeesApi";
 import { EmployeeProps } from "@/Types/ClientPanel/ManageSalonTypes/EmployeesTypes/EmployeesType";
 import { ArrowLeft, Edit, LoaderPinwheel } from "lucide-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import EditEmployeeBasicInfoDialog from "./Dialogs/EditEmployeeBasicInfoDialog";
 
 export interface ViewEmployeePanelProps {
   selectedEmployee: EmployeeProps;
@@ -20,29 +21,46 @@ const ViewEmployeePanel: React.FC<ViewEmployeePanelProps> = ({
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
 
-  const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const [isImageLoading, setIsImageLoading] = useState<boolean>(false);
-  const [
-    isOpenEditEmployeeBasicInfoDialog,
-    setIsOpenEditEmployeeBasicInfoDialog,
-  ] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false);
+
+  // Re-fetch employees data to get updated employee
+  const { data: employeesData, refetch } = useGetEmployeesDataQuery(
+    {
+      salonUid,
+      page: 1,
+      page_size: 1000, // Fetch enough to find our employee
+    },
+    { skip: !salonUid },
+  );
+
   const [displayedEmployee, setDisplayedEmployee] =
     useState<EmployeeProps>(selectedEmployee);
-
-
 
   // Update displayed employee when selectedEmployee prop changes
   useEffect(() => {
     setDisplayedEmployee(selectedEmployee);
   }, [selectedEmployee]);
 
+  // Update displayed service when services data refetches (after edit)
+  useEffect(() => {
+    if (employeesData?.results && Array.isArray(employeesData.results)) {
+      const updatedEmployee = (employeesData.results as EmployeeProps[]).find(
+        (s) => s.uid === selectedEmployee.uid,
+      );
+      if (updatedEmployee) {
+        setDisplayedEmployee(updatedEmployee);
+      }
+    }
+  }, [employeesData, selectedEmployee.uid]);
+
   const handleEditEmployeeBasicInfo = () => {
-    setIsOpenEditEmployeeBasicInfoDialog(true);
+    setIsEditDialogOpen(true);
   };
 
   const handleEditSuccess = () => {
     // Refetch employees to get the latest data
-    // refetch();
+    refetch();
   };
 
   if (!displayedEmployee) return null;
@@ -114,9 +132,9 @@ const ViewEmployeePanel: React.FC<ViewEmployeePanelProps> = ({
               </div>
 
               <div className="text-left md:text-right">
-                <div className="text-muted-foreground text-sm">Phone</div>
+                <div className="text-muted-foreground text-sm">Employee ID</div>
                 <div className="text-lg font-semibold">
-                  {safe(displayedEmployee.phone)}
+                  {safe(displayedEmployee.employee_id)}
                 </div>
               </div>
             </div>
@@ -194,6 +212,12 @@ const ViewEmployeePanel: React.FC<ViewEmployeePanelProps> = ({
           </div>
         </div>
       </Card>
+      <EditEmployeeBasicInfoDialog
+        isOpen={isEditDialogOpen}
+        onClose={() => setIsEditDialogOpen(false)}
+        selectedEmployee={displayedEmployee}
+        onEditSuccess={handleEditSuccess}
+      />
     </>
   );
 };
