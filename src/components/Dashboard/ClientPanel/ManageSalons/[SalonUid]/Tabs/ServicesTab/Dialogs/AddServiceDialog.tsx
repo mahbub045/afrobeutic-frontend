@@ -52,7 +52,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
       previewUrls.forEach((u) => {
         try {
           URL.revokeObjectURL(u);
-        } catch (e) {
+        } catch {
           /* ignore */
         }
       });
@@ -217,7 +217,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                       previewUrls.forEach((u) => {
                         try {
                           URL.revokeObjectURL(u);
-                        } catch (err) {
+                        } catch {
                           /* ignore */
                         }
                       });
@@ -234,7 +234,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                     const urls = sel.map((f) => {
                       try {
                         return URL.createObjectURL(f);
-                      } catch (err) {
+                      } catch {
                         return "";
                       }
                     });
@@ -277,7 +277,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                             if (url) {
                               try {
                                 URL.revokeObjectURL(url);
-                              } catch (e) {
+                              } catch {
                                 /* ignore */
                               }
                             }

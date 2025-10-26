@@ -59,7 +59,7 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
       if (previewUrl) {
         try {
           URL.revokeObjectURL(previewUrl);
-        } catch (e) {
+        } catch {
           /* ignore */
         }
       }
@@ -105,7 +105,7 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
       if (previewUrl) {
         try {
           URL.revokeObjectURL(previewUrl);
-        } catch (e) {
+        } catch {
           /* ignore */
         }
       }
@@ -321,7 +321,7 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
                       if (previewUrl) {
                         try {
                           URL.revokeObjectURL(previewUrl);
-                        } catch (err) {
+                        } catch {
                           /* ignore */
                         }
                       }
@@ -330,7 +330,7 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
                       try {
                         const url = URL.createObjectURL(file);
                         setPreviewUrl(url);
-                      } catch (err) {
+                      } catch {
                         setPreviewUrl(null);
                       }
                     }
@@ -354,12 +354,12 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
                         <button
                           type="button"
                           aria-label="Remove image"
-                          className="text-danger absolute -top-1 right-0 z-10 inline-flex h-6 w-6 items-center justify-center rounded-full bg-gray-800/50 hover:!text-white hover:bg-danger"
+                          className="text-danger hover:bg-danger absolute -top-1 right-0 z-10 inline-flex h-6 w-6 items-center justify-center rounded-full bg-gray-800/50 hover:!text-white"
                           onClick={() => {
                             if (previewUrl) {
                               try {
                                 URL.revokeObjectURL(previewUrl);
-                              } catch (e) {
+                              } catch {
                                 /* ignore */
                               }
                             }
