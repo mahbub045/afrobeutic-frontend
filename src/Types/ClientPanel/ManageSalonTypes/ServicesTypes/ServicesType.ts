@@ -10,9 +10,18 @@ export interface ServiceProps {
   cancellation_policy?: boolean;
   gender_specific?: boolean;
   discount_percentage?: number;
-  assigned_employees?: string[];
+  assigned_employees?: Employee[] | string[];
   created_at: string;
   updated_at: string;
+}
+
+export interface Employee {
+  uid?: string;
+  employee_id?: string;
+  name?: string;
+  phone?: string;
+  designation?: string;
+  image?: string;
 }
 
 export interface AddServiceDialogProps {

@@ -5,6 +5,7 @@ import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDateTime, formatUnderscoredLabel, safe } from "@/lib/utils";
 import { useGetServicesDataQuery } from "@/Redux/Reducers/ClientPanel/Services/ServicesApi";
 import {
+  Employee,
   ServiceProps,
   ViewServicePanelProps,
 } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
@@ -20,8 +21,8 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import EditServiceBasicInfoDialog from "./Dialogs/EditServiceBasicInfoDialog";
-import FullScreenImageViewer from "./FullScreenImageViewer";
 import EditServiceMoreInfoDialog from "./Dialogs/EditServiceMoreInfoDialog";
+import FullScreenImageViewer from "./FullScreenImageViewer";
 
 const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
   selectedService,
@@ -116,27 +117,10 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
     setIsImageLoading(imagesToShow.length > 0);
   }, [selectedImageIndex, imagesToShow.length]);
 
-  // typed local helpers for assigned employees to avoid `any` usage in JSX
-  // support both `assigned_employees` and `assign_employees` keys from API
-  const assignedEmployeesRaw =
-    (
-      displayedService as unknown as {
-        assigned_employees?: unknown;
-        assign_employees?: unknown;
-      }
-    )?.assigned_employees ??
-    (displayedService as unknown as { assign_employees?: unknown })
-      ?.assign_employees;
-  const assignedEmployees = Array.isArray(assignedEmployeesRaw)
-    ? (assignedEmployeesRaw as {
-        uid?: string;
-        employee_id?: string;
-        name?: string;
-        phone?: string;
-        designation?: string;
-        image?: string;
-      }[])
-    : undefined;
+  // typed local helper: use backend's `assign_employees` key directly (no shim)
+  const assignEmployees = (
+    displayedService as unknown as { assign_employees?: Employee[] }
+  )?.assign_employees;
 
   if (!displayedService) return null;
 
@@ -382,13 +366,13 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                   Assigned employee
                 </div>
                 <div className="mt-2">
-                  {Array.isArray(assignedEmployeesRaw) ? (
-                    assignedEmployees && assignedEmployees.length === 0 ? (
+                  {Array.isArray(assignEmployees) ? (
+                    assignEmployees && assignEmployees.length === 0 ? (
                       <span className="text-sm">-</span>
                     ) : (
                       // limit height so it scrolls when there are many employees
                       <Card className="flex max-h-32 gap-1 overflow-y-auto px-2 py-2">
-                        {assignedEmployees!.map((emp, idx) => (
+                        {assignEmployees!.map((emp, idx) => (
                           <div
                             key={emp?.uid ?? idx}
                             className="bg-muted flex items-center justify-between gap-10 rounded px-3 py-1"
@@ -408,9 +392,9 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                         ))}
                       </Card>
                     )
-                  ) : assignedEmployeesRaw ? (
+                  ) : assignEmployees ? (
                     <span className="bg-muted inline-block rounded px-2 py-1 text-sm">
-                      {String(assignedEmployeesRaw)}
+                      {String(assignEmployees)}
                     </span>
                   ) : (
                     <span className="text-sm">-</span>
