@@ -305,7 +305,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                         (
                           displayedService.available_time_slots as unknown[]
                         ).map((slot, idx) => (
-                          <Badge key={idx} variant="secondary">
+                          <Badge key={idx} variant="default">
                             {formatUnderscoredLabel(slot)}
                           </Badge>
                         ))
@@ -329,7 +329,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                   Gender specific
                 </div>
                 <div className="mt-1 text-sm font-medium">
-                  <Badge variant="secondary">
+                  <Badge variant="default">
                     {formatUnderscoredLabel(displayedService.gender_specific)}
                   </Badge>
                 </div>
