@@ -11,8 +11,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { formatDateTime } from "@/lib/utils";
 import { useGetServicesDataQuery } from "@/Redux/Reducers/ClientPanel/Services/ServicesApi";
-import { ServiceProps } from "@/Types/ClientPanel/ServicesTypes/ServicesType";
+import { ServiceProps } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import {
   ChevronLeft,
   ChevronRight,
@@ -94,7 +95,7 @@ const ServicesTab: React.FC = () => {
   return (
     <Tabs value={viewTab} onValueChange={(v) => setViewTab(v)}>
       <TabsContent value="list">
-        <div className="flex flex-col md:flex-row md:justify-between gap-4 mb-4">
+        <div className="mb-4 flex flex-col gap-4 md:flex-row md:justify-between">
           <h2 className="text-lg font-semibold">Services</h2>
           <div className="relative">
             <Search
@@ -157,8 +158,12 @@ const ServicesTab: React.FC = () => {
                   <TableCell className="font-medium">{service.name}</TableCell>
                   <TableCell>{service.category}</TableCell>
                   <TableCell>${service.price}</TableCell>
-                  <TableCell>{service?.created_at ?? "Not Found"}</TableCell>
-                  <TableCell>{service?.updated_at ?? "Not Found"}</TableCell>
+                  <TableCell>
+                    {formatDateTime(service?.created_at ?? null)}
+                  </TableCell>
+                  <TableCell>
+                    {formatDateTime(service?.updated_at ?? null)}
+                  </TableCell>
 
                   <TableCell className="flex justify-center gap-2">
                     <Button

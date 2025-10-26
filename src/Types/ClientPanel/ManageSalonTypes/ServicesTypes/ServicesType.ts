@@ -33,3 +33,23 @@ export interface EditServiceBasicInfoDialogProps {
   selectedService: ServiceProps;
   onEditSuccess?: () => void;
 }
+
+export interface DeleteServiceDialogProps {
+  selectedService: ServiceProps;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export interface ViewServicePanelProps {
+  selectedService: ServiceProps;
+  onClose?: () => void;
+}
+
+export interface FullScreenImageViewerProps {
+  isOpen: boolean;
+  images: string[];
+  currentImageIndex: number;
+  onClose: () => void;
+  onImageChange: (index: number) => void;
+  serviceName?: string;
+}

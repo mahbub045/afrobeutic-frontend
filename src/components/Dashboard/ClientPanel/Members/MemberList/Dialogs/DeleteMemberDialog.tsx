@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useDeleteMemberMutation } from "@/Redux/Reducers/ClientPanel/Members/MembersApi";
-import { DeleteMemberDialogProps } from "@/Types/ClientPanel/MemberTypes/MemberType";
+import { DeleteMemberDialogProps } from "@/Types/ClientPanel/ManageSalonTypes/MemberTypes/MemberType";
 import { useTheme } from "next-themes";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";

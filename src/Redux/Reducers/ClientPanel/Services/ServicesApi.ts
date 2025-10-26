@@ -28,7 +28,7 @@ export const ServicesApi = baseApi.injectEndpoints({
       },
       providesTags: ["Services"],
     }),
-    addServices: builder.mutation({
+    addService: builder.mutation({
       query: ({ salonUid, serviceData }) => ({
         url: `/salons/${salonUid}/services`,
         method: "POST",
@@ -36,7 +36,7 @@ export const ServicesApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Services"],
     }),
-    editServices: builder.mutation({
+    editService: builder.mutation({
       query: ({ salonUid, serviceData, serviceUid }) => ({
         url: `/salons/${salonUid}/services/${serviceUid}`,
         method: "PATCH",
@@ -44,7 +44,7 @@ export const ServicesApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Services"],
     }),
-    deleteServices: builder.mutation({
+    deleteService: builder.mutation({
       query: ({ salonUid, serviceUid }) => ({
         url: `/salons/${salonUid}/services/${serviceUid}`,
         method: "DELETE",
@@ -56,7 +56,7 @@ export const ServicesApi = baseApi.injectEndpoints({
 
 export const {
   useGetServicesDataQuery,
-  useAddServicesMutation,
-  useEditServicesMutation,
-  useDeleteServicesMutation,
+  useAddServiceMutation,
+  useEditServiceMutation,
+  useDeleteServiceMutation,
 } = ServicesApi;

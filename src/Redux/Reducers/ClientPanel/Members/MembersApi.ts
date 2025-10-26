@@ -2,7 +2,7 @@ import { baseApi } from "@/Redux/Api/BaseApi";
 import {
   MembersQueryParams,
   MembersResponse,
-} from "@/Types/ClientPanel/MemberTypes/MemberType";
+} from "@/Types/ClientPanel/ManageSalonTypes/MemberTypes/MemberType";
 
 export const MembersApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({

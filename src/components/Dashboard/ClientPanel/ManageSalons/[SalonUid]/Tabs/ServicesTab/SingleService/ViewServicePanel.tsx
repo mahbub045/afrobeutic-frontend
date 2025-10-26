@@ -2,7 +2,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGetServicesDataQuery } from "@/Redux/Reducers/ClientPanel/Services/ServicesApi";
-import { ServiceProps } from "@/Types/ClientPanel/ServicesTypes/ServicesType";
+import {
+  ServiceProps,
+  ViewServicePanelProps,
+} from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import {
   ArrowLeft,
   ChevronLeft,
@@ -16,11 +19,7 @@ import { useParams } from "next/navigation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import EditServiceBasicInfoDialog from "./Dialogs/EditServiceBasicInfoDialog";
 import FullScreenImageViewer from "./FullScreenImageViewer";
-
-export interface ViewServicePanelProps {
-  selectedService: ServiceProps;
-  onClose?: () => void;
-}
+import { formatDateTime } from "@/lib/utils";
 
 const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
   selectedService,
@@ -355,11 +354,11 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
               <div className="text-left text-xs md:text-right">
                 <div className="text-muted-foreground">Created At</div>
                 <div className="font-medium">
-                  {safe(displayedService.created_at)}
+                  {safe(formatDateTime(displayedService.created_at))}
                 </div>
                 <div className="text-muted-foreground mt-2">Updated At</div>
                 <div className="font-medium">
-                  {safe(displayedService.updated_at)}
+                  {safe(formatDateTime(displayedService.updated_at))}
                 </div>
               </div>
             </div>

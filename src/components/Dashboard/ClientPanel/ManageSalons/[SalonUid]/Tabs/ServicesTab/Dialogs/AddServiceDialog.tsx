@@ -5,15 +5,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useAddServicesMutation } from "@/Redux/Reducers/ClientPanel/Services/ServicesApi";
+import { useAddServiceMutation } from "@/Redux/Reducers/ClientPanel/Services/ServicesApi";
 import { useParams } from "next/navigation";
-
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
   AddServiceDialogProps,
   ServiceFormValues,
-} from "@/Types/ClientPanel/ServicesTypes/ServicesType";
+} from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import { Field, Formik, type FormikHelpers } from "formik";
 import { useTheme } from "next-themes";
 import { useState } from "react";
@@ -39,7 +38,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
   const { salonuid } = useParams();
   const { resolvedTheme } = useTheme();
   // keep the full mutation result so we can call reset() after success
-  const [addService, { isLoading }] = useAddServicesMutation();
+  const [addService, { isLoading }] = useAddServiceMutation();
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fileError, setFileError] = useState<string | null>(null);

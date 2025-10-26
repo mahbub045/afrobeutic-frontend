@@ -1,15 +1,7 @@
+import { FullScreenImageViewerProps } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import { ChevronLeft, ChevronRight, LoaderPinwheel, X } from "lucide-react";
 import Image from "next/image";
 import React, { useEffect } from "react";
-
-export interface FullScreenImageViewerProps {
-  isOpen: boolean;
-  images: string[];
-  currentImageIndex: number;
-  onClose: () => void;
-  onImageChange: (index: number) => void;
-  serviceName?: string;
-}
 
 const FullScreenImageViewer: React.FC<FullScreenImageViewerProps> = ({
   isOpen,
@@ -100,7 +92,7 @@ const FullScreenImageViewer: React.FC<FullScreenImageViewerProps> = ({
             {/* Loading spinner */}
             {isImageLoading && (
               <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/40">
-                <LoaderPinwheel className="h-10 w-10 animate-spin text-primary" />
+                <LoaderPinwheel className="text-primary h-10 w-10 animate-spin" />
               </div>
             )}
 

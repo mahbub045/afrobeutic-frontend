@@ -81,7 +81,6 @@ const SingleSalonContainer: React.FC = () => {
   type Chair = { id: string; name: string };
   type Booking = { id: string; customer: string };
   type LookBook = { id: string; title: string };
-  type Employee = { id: string; name: string };
 
   const demo = React.useMemo(
     () => ({
@@ -103,10 +102,6 @@ const SingleSalonContainer: React.FC = () => {
       lookbook: {
         title: "LookBook",
         items: [{ id: "l1", title: "Summer" }] as LookBook[],
-      },
-      employees: {
-        title: "Employees",
-        items: [{ id: "e1", name: "Jane" }] as Employee[],
       },
       report: { title: "Report", content: "Sales and usage reports." },
       settings: {
@@ -169,9 +164,7 @@ const SingleSalonContainer: React.FC = () => {
         {activeTab === "lookbook" && (
           <LookbookTab items={demo.lookbook.items} />
         )}
-        {activeTab === "employees" && (
-          <EmployeesTab items={demo.employees.items} />
-        )}
+        {activeTab === "employees" && <EmployeesTab />}
         {activeTab === "report" && (
           <ReportTab title={demo.report.title} content={demo.report.content} />
         )}
