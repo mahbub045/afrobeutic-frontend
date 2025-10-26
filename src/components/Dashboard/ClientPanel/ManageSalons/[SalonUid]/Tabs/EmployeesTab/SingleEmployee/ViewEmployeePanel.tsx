@@ -29,15 +29,7 @@ const ViewEmployeePanel: React.FC<ViewEmployeePanelProps> = ({
   const [displayedEmployee, setDisplayedEmployee] =
     useState<EmployeeProps>(selectedEmployee);
 
-  // Re-fetch services data to get updated service
-  const { data: servicesData, refetch } = useGetServicesDataQuery(
-    {
-      salonUid,
-      page: 1,
-      page_size: 1000, // Fetch enough to find our service
-    },
-    { skip: !salonUid },
-  );
+
 
   // Update displayed employee when selectedEmployee prop changes
   useEffect(() => {
@@ -50,7 +42,7 @@ const ViewEmployeePanel: React.FC<ViewEmployeePanelProps> = ({
 
   const handleEditSuccess = () => {
     // Refetch employees to get the latest data
-    refetch();
+    // refetch();
   };
 
   if (!displayedEmployee) return null;
