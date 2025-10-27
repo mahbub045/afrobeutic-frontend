@@ -121,7 +121,7 @@ const ViewProductPanel: React.FC<ViewProductPanelProps> = ({
           {/* Left: Image section (on mobile it shows first) */}
           <div className="bg-muted relative col-span-12 flex flex-col md:col-span-4">
             {mainImage ? (
-              <div className="group relative h-[300px] w-full cursor-pointer overflow-hidden md:h-[600px]">
+              <div className="group relative h-[300px] w-full cursor-pointer overflow-hidden md:h-[450px]">
                 <Image
                   src={mainImage}
                   alt={`${displayedProduct.name}-main`}
@@ -181,7 +181,7 @@ const ViewProductPanel: React.FC<ViewProductPanelProps> = ({
                 )}
               </div>
             ) : (
-              <div className="text-muted-foreground flex min-h-[200px] w-full flex-1 items-center justify-center md:min-h-[420px]">
+              <div className="text-muted-foreground flex min-h-[200px] w-full flex-1 items-center justify-center md:min-h-[450px]">
                 No image
               </div>
             )}
