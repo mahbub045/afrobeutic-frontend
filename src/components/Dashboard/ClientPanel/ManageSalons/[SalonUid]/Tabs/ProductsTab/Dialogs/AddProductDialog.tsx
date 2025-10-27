@@ -7,11 +7,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { useAddServiceMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
+import { useAddProductMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Products/ProductsApi";
 import {
-  AddServiceDialogProps,
-  ServiceFormValues,
-} from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
+  AddProductDialogProps,
+  ProductFormValues,
+} from "@/Types/ClientPanel/ManageSalonTypes/ProductsTypes/ProductsType";
 import { Field, Formik, type FormikHelpers } from "formik";
 import { X } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -22,7 +22,7 @@ import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
 
-const ServiceSchema = Yup.object().shape({
+const ProductSchema = Yup.object().shape({
   name: Yup.string().trim().required("Name is required"),
   category: Yup.string().trim().required("Category is required"),
   price: Yup.number()
@@ -33,14 +33,14 @@ const ServiceSchema = Yup.object().shape({
   uploaded_images: Yup.string().nullable(),
 });
 
-const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
+const AddProductDialog: React.FC<AddProductDialogProps> = ({
   isOpen,
   onClose,
 }) => {
   const { salonuid } = useParams();
   const { resolvedTheme } = useTheme();
   // keep the full mutation result so we can call reset() after success
-  const [addService, { isLoading }] = useAddServiceMutation();
+  const [addProduct, { isLoading }] = useAddProductMutation();
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fileError, setFileError] = useState<string | null>(null);
@@ -60,9 +60,9 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function handleAddService(
-    values: ServiceFormValues,
-    helpers: FormikHelpers<ServiceFormValues>,
+  async function handleAddProduct(
+    values: ProductFormValues,
+    helpers: FormikHelpers<ProductFormValues>,
   ) {
     if (!salonuid) return;
 
@@ -84,17 +84,17 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
         .slice(0, 2)
         .forEach((f) => form.append("uploaded_images", f));
 
-      // send FormData directly as serviceData — baseApi will attach headers
-      await addService({
+      // send FormData directly as productData — baseApi will attach headers
+      await addProduct({
         salonUid: salonuid as string,
-        serviceData: form as unknown as object,
+        productData: form as unknown as object,
       }).unwrap();
       onClose();
       Swal.fire({
         icon: "success",
         iconColor: "#037375",
         title: "Added successfully",
-        html: `Successfully added <b class="text-primary">${values.name}</b> service`,
+        html: `Successfully added <b class="text-primary">${values.name}</b> product`,
         background: resolvedTheme === "dark" ? "#0f1724" : undefined,
         color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
         confirmButtonColor: "#037375",
@@ -104,7 +104,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
       setSelectedFiles([]);
     } catch (err) {
       console.error(err);
-      toast.error("Failed to add service. Please try again.");
+      toast.error("Failed to add product. Please try again.");
     }
   }
 
@@ -112,8 +112,8 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md shadow-md dark:shadow-gray-600">
         <DialogHeader>
-          <DialogTitle>Add New Service</DialogTitle>
-          <DialogDescription>Add a new service to the salon</DialogDescription>
+          <DialogTitle>Add New Product</DialogTitle>
+          <DialogDescription>Add a new product to the salon</DialogDescription>
         </DialogHeader>
 
         <Formik
@@ -123,10 +123,10 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
               category: "",
               price: "",
               description: "",
-            } as ServiceFormValues
+            } as ProductFormValues
           }
-          validationSchema={ServiceSchema}
-          onSubmit={handleAddService}
+          validationSchema={ProductSchema}
+          onSubmit={handleAddProduct}
         >
           {({ handleSubmit, errors, touched, setFieldValue }) => (
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -140,7 +140,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                   as="input"
                   type="text"
                   required
-                  placeholder="Service name"
+                  placeholder="Product name"
                 />
                 {touched.name && errors.name ? (
                   <p className="text-destructive text-sm">{errors.name}</p>
@@ -314,7 +314,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                   Cancel
                 </Button>
                 <Button type="submit" disabled={isLoading || !salonuid}>
-                  {isLoading ? "Adding..." : "Add Service"}
+                  {isLoading ? "Adding..." : "Add Product"}
                 </Button>
               </div>
             </form>
@@ -325,4 +325,4 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
   );
 };
 
-export default AddServiceDialog;
+export default AddProductDialog;

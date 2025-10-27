@@ -45,7 +45,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
     useState<ServiceProps>(selectedService);
 
   // Re-fetch services data to get updated service
-  const { data: servicesData, refetch } = useGetServicesDataQuery(
+  const { data: serviceData, refetch } = useGetServicesDataQuery(
     {
       salonUid,
       page: 1,
@@ -61,15 +61,15 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
 
   // Update displayed service when services data refetches (after edit)
   useEffect(() => {
-    if (servicesData?.results && Array.isArray(servicesData.results)) {
-      const updatedService = (servicesData.results as ServiceProps[]).find(
+    if (serviceData?.results && Array.isArray(serviceData.results)) {
+      const updatedService = (serviceData.results as ServiceProps[]).find(
         (s) => s.uid === selectedService.uid,
       );
       if (updatedService) {
         setDisplayedService(updatedService);
       }
     }
-  }, [servicesData, selectedService.uid]);
+  }, [serviceData, selectedService.uid]);
 
   const handleEditServiceBasicInfo = () => {
     setIsOpenEditServiceBasicInfoDialog(true);
@@ -92,20 +92,13 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
     const rawImages =
       (displayedService as unknown as { images?: unknown[] })?.images ?? [];
     if (!Array.isArray(rawImages)) return [];
+    if (rawImages.length === 0) return [];
+    // If images are simple strings, return as-is
     if (typeof rawImages[0] === "string") return rawImages as string[];
-    type ImageObj = { image?: string; order?: number; is_primary?: boolean };
+    // If images are objects, preserve original array order and map to image string
+    type ImageObj = { image?: string };
     const objs = rawImages as ImageObj[];
-    const sorted = [...objs].sort((a, b) => {
-      const aPrimary = !!a?.is_primary;
-      const bPrimary = !!b?.is_primary;
-      if (aPrimary === bPrimary) {
-        const ao = a?.order ?? 0;
-        const bo = b?.order ?? 0;
-        return ao - bo;
-      }
-      return aPrimary ? -1 : 1;
-    });
-    return sorted.map((i) => i.image ?? "");
+    return objs.map((i) => i.image ?? "");
   }, [displayedService]);
 
   const mainImage =

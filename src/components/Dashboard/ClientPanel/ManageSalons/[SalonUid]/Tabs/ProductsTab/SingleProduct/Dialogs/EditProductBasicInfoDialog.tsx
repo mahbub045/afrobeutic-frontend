@@ -10,11 +10,11 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useEditServiceMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
+import { useEditProductMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Products/ProductsApi";
 import {
-  EditServiceBasicInfoDialogProps,
-  ServiceProps,
-} from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
+  EditProductBasicInfoDialogProps,
+  ProductProps,
+} from "@/Types/ClientPanel/ManageSalonTypes/ProductsTypes/ProductsType";
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import { X } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -25,21 +25,21 @@ import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
 
-const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
+const EditProductBasicInfoDialog: React.FC<EditProductBasicInfoDialogProps> = ({
   isOpen,
   onClose,
-  selectedService,
+  selectedProduct,
   onEditSuccess,
 }) => {
   const { salonuid } = useParams();
   const { resolvedTheme } = useTheme();
-  const [editService, { isLoading: isEditingService }] =
-    useEditServiceMutation();
+  const [editProduct, { isLoading: isEditingProduct }] =
+    useEditProductMutation();
 
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
 
   const validationSchema = Yup.object().shape({
-    name: Yup.string().required("Service name is required"),
+    name: Yup.string().required("Product name is required"),
     category: Yup.string().required("Category is required"),
     price: Yup.number()
       .typeError("Price must be a number")
@@ -60,7 +60,7 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
     setUploadedImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = async (values: ServiceProps) => {
+  const handleSubmit = async (values: ProductProps) => {
     try {
       const formData = new FormData();
       formData.append("name", values.name);
@@ -71,16 +71,16 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
         formData.append("uploaded_images", file),
       );
 
-      await editService({
+      await editProduct({
         salonUid: salonuid as string,
-        serviceUid: selectedService?.uid,
-        serviceData: formData,
+        productUid: selectedProduct?.uid,
+        productData: formData,
       }).unwrap();
       Swal.fire({
         icon: "success",
         iconColor: "#037375",
         title: "Updated successfully",
-        html: `Successfully updated <b class="text-primary">${values.name}</b> service`,
+        html: `Successfully updated <b class="text-primary">${values.name}</b> product`,
         background: resolvedTheme === "dark" ? "#0f1724" : undefined,
         color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
         confirmButtonColor: "#037375",
@@ -89,8 +89,8 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
       onEditSuccess?.();
       onClose();
     } catch (error) {
-      toast.error("Failed to update service.");
-      console.error("Edit Service Error:", error);
+      toast.error("Failed to update product.");
+      console.error("Edit Product Error:", error);
     }
   };
 
@@ -99,21 +99,21 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
       <DialogContent className="shadow-md sm:max-w-lg dark:shadow-gray-700">
         <DialogHeader>
           <DialogTitle className="text-primary">
-            Edit Service Basic Info
+            Edit Product Basic Info
           </DialogTitle>
           <DialogDescription>
-            Update your service details and upload up to 2 images.
+            Update your product details and upload up to 2 images.
           </DialogDescription>
         </DialogHeader>
 
         <Formik
           initialValues={
             {
-              name: selectedService?.name || "",
-              category: selectedService?.category || "",
-              price: selectedService?.price || "",
-              description: selectedService?.description || "",
-            } as ServiceProps
+              name: selectedProduct?.name || "",
+              category: selectedProduct?.category || "",
+              price: selectedProduct?.price || "",
+              description: selectedProduct?.description || "",
+            } as ProductProps
           }
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
@@ -121,15 +121,15 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
           {({ handleSubmit, isSubmitting }) => (
             <Form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="service-name" className="mb-2">
-                  Service Name
+                <Label htmlFor="product-name" className="mb-2">
+                  Product Name
                 </Label>
                 <Field
                   as="input"
-                  id="service-name"
+                  id="product-name"
                   name="name"
                   type="text"
-                  placeholder="Enter service name"
+                  placeholder="Enter product name"
                 />
                 <ErrorMessage
                   name="name"
@@ -138,13 +138,13 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
                 />
               </div>
               <div>
-                <Label htmlFor="service-category" className="mb-2">
+                <Label htmlFor="product-category" className="mb-2">
                   Category
                 </Label>
                 <Field
                   as="input"
                   type="text"
-                  id="service-category"
+                  id="product-category"
                   name="category"
                   placeholder="Enter category"
                 />
@@ -155,12 +155,12 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
                 />
               </div>
               <div>
-                <Label htmlFor="service-price" className="mb-2">
+                <Label htmlFor="product-price" className="mb-2">
                   Price
                 </Label>
                 <Field
                   as="input"
-                  id="service-price"
+                  id="product-price"
                   name="price"
                   placeholder="Enter price"
                   type="number"
@@ -172,14 +172,14 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
                 />
               </div>
               <div>
-                <Label htmlFor="service-description" className="mb-2">
+                <Label htmlFor="product-description" className="mb-2">
                   Description
                 </Label>
                 <Field
                   as={Textarea}
-                  id="service-description"
+                  id="product-description"
                   name="description"
-                  placeholder="Enter service description"
+                  placeholder="Enter product description"
                 />
                 <ErrorMessage
                   name="description"
@@ -188,11 +188,11 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
                 />
               </div>
               <div>
-                <Label htmlFor="service-images" className="mb-2">
+                <Label htmlFor="product-images" className="mb-2">
                   Upload Images<span className="text-warning">(max 2)</span>
                 </Label>
                 <input
-                  id="service-images"
+                  id="product-images"
                   type="file"
                   accept="image/*"
                   multiple
@@ -228,15 +228,15 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
                   type="button"
                   variant="outline"
                   onClick={onClose}
-                  disabled={isEditingService}
+                  disabled={isEditingProduct}
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
-                  disabled={isEditingService || isSubmitting}
+                  disabled={isEditingProduct || isSubmitting}
                 >
-                  {isEditingService ? "Saving..." : "Save Changes"}
+                  {isEditingProduct ? "Saving..." : "Save Changes"}
                 </Button>
               </div>
             </Form>
@@ -247,4 +247,4 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
   );
 };
 
-export default EditServiceBasicInfoDialog;
+export default EditProductBasicInfoDialog;
