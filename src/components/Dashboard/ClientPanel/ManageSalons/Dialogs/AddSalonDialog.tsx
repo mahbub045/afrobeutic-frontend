@@ -430,28 +430,6 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="status" className="mb-2">
-                        Status
-                      </Label>
-                      <Field id="status" name="status" as="select" required>
-                        <option value="" disabled>
-                          Select a status
-                        </option>
-                        {slonStatus.map((s) => (
-                          <option key={s.value} value={s.value}>
-                            {s.label}
-                          </option>
-                        ))}
-                      </Field>
-                      <ErrorMessage
-                        name="status"
-                        component="div"
-                        className="text-danger mt-1 text-xs"
-                      />
-                    </div>
-                  </div>
-                  <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div>
                       <Label htmlFor="salon_type" className="mb-2">
                         Salon Type<span className="text-danger">*</span>
                       </Label>
@@ -476,23 +454,57 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                         className="text-danger mt-1 text-xs"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="email" className="mb-2">
-                        Email<span className="text-danger">*</span>
-                      </Label>
-                      <Field
-                        name="email"
-                        id="email"
-                        as="input"
-                        type="email"
-                        placeholder="Email"
-                      />
-                      <ErrorMessage
-                        name="email"
-                        component="div"
-                        className="text-danger mt-1 text-xs"
-                      />
-                    </div>
+                  </div>
+                  {/* Navigation buttons for first tab */}
+                  <div className="mt-6 flex justify-end gap-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={onClose}
+                      disabled={isLoading}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={async () => {
+                        const isValid = await validateBasicInfo(values);
+                        if (isValid) {
+                          setActiveTab("contacts");
+                        } else {
+                          // Mark all basic info fields as touched to show validation errors
+                          const basicFields = ["name", "salon_type"];
+                          basicFields.forEach((field) =>
+                            setFieldTouched(field, true),
+                          );
+                          toast.error(
+                            "Please fill in all required fields before proceeding",
+                          );
+                        }
+                      }}
+                      className="w-32 text-white"
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </TabsContent>
+                <TabsContent value="contacts" className="space-y-4">
+                  <div>
+                    <Label htmlFor="email" className="mb-2">
+                      Email<span className="text-danger">*</span>
+                    </Label>
+                    <Field
+                      name="email"
+                      id="email"
+                      as="input"
+                      type="email"
+                      placeholder="Email"
+                    />
+                    <ErrorMessage
+                      name="email"
+                      component="div"
+                      className="text-danger mt-1 text-xs"
+                    />
                   </div>
                   <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
@@ -597,6 +609,40 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                       />
                     </div>
                   </div>
+                  {/* Navigation buttons for 2nd tab */}
+                  <div className="mt-6 flex justify-end gap-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={onClose}
+                      disabled={isLoading}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={async () => {
+                        const isValid = await validateBasicInfo(values);
+                        if (isValid) {
+                          setActiveTab("address");
+                        } else {
+                          // Mark all basic info fields as touched to show validation errors
+                          const basicFields = ["email", "phone", "website"];
+                          basicFields.forEach((field) =>
+                            setFieldTouched(field, true),
+                          );
+                          toast.error(
+                            "Please fill in all required fields before proceeding",
+                          );
+                        }
+                      }}
+                      className="w-32 text-white"
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </TabsContent>
+                <TabsContent value="address" className="space-y-4">
                   <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
                       <Label htmlFor="street" className="mb-2">
@@ -708,7 +754,6 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                       />
                     </div>
                   </div>
-
                   {/* Navigation buttons for first tab */}
                   <div className="mt-6 flex justify-end gap-3">
                     <Button
@@ -728,12 +773,6 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                         } else {
                           // Mark all basic info fields as touched to show validation errors
                           const basicFields = [
-                            "name",
-                            "salon_type",
-                            "email",
-                            "phone",
-                            "website",
-                            "status",
                             "street",
                             "city",
                             "postal_code",
