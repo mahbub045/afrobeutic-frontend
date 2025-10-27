@@ -66,7 +66,8 @@ const addressValidationSchema = Yup.object().shape({
   postal_code: Yup.string().required("Postal code is required"),
   country: Yup.string().required("Country is required"),
   // Combined optional address string (not required)
-  address: Yup.string().notRequired(),
+  // accepts only a valid URL when provided
+  address: Yup.string().url("Invalid URL").notRequired(),
 });
 
 // Full validation schema for form submission
@@ -81,7 +82,8 @@ const validationSchema = Yup.object().shape({
   postal_code: Yup.string().required("Postal code is required"),
   country: Yup.string().required("Country is required"),
   // latitude/longitude removed from form validation — optional address added
-  address: Yup.string().notRequired(),
+  // address must be a valid URL if provided
+  address: Yup.string().url("Invalid URL").notRequired(),
   opening_hours: Yup.array().of(
     Yup.object().shape({
       day: Yup.string().required("Day is required"),
@@ -741,14 +743,14 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                   </div>
                   <div className="mb-4">
                     <Label htmlFor="address" className="mb-2">
-                      Address (optional)
+                      Google Location Link (optional)
                     </Label>
                     <Field
                       name="address"
                       id="address"
                       as="input"
                       type="text"
-                      placeholder="Full address (optional)"
+                      placeholder="https://maps.google.com/..."
                     />
                     <ErrorMessage
                       name="address"
