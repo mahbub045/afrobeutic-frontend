@@ -25,6 +25,7 @@ import {
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import AddProductDialog from "./Dialogs/AddProductDialog";
+import DeleteProductDialog from "./Dialogs/DeleteProductDialog";
 
 const ProductsTab: React.FC = () => {
   const { salonuid } = useParams();
@@ -255,13 +256,13 @@ const ProductsTab: React.FC = () => {
         isOpen={isOpenAddProductDialog}
         onClose={handleIsOpenAddProductDialog}
       />
-      {/* {selectedProduct && (
+      {selectedProduct && (
         <DeleteProductDialog
           selectedProduct={selectedProduct}
           isOpen={!!selectedProduct}
           onClose={() => handleIsOpenDeleteDialog()}
         />
-      )} */}
+      )}
     </Tabs>
   );
 };

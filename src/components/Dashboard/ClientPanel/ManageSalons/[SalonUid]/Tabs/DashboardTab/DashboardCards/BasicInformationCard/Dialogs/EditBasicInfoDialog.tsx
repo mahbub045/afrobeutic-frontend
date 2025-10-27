@@ -103,6 +103,7 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
         background: resolvedTheme === "dark" ? "#0f1724" : undefined,
         color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
         confirmButtonColor: "#037375",
+        timer: 3000,
       });
       onClose();
     } catch (error) {
@@ -117,9 +118,7 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-h-[80vh] !max-w-2xl overflow-y-auto shadow-md dark:shadow-gray-600">
         <DialogHeader>
-          <DialogTitle className="text-primary">
-            Edit Basic Info
-          </DialogTitle>
+          <DialogTitle className="text-primary">Edit Basic Info</DialogTitle>
           <DialogDescription className="text-xs">
             Update salon basic information.
           </DialogDescription>
