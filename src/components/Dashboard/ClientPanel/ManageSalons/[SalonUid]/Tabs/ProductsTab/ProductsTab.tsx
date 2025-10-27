@@ -26,6 +26,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import AddProductDialog from "./Dialogs/AddProductDialog";
 import DeleteProductDialog from "./Dialogs/DeleteProductDialog";
+import ViewProductPanel from "./SingleProduct/ViewProductPanel";
 
 const ProductsTab: React.FC = () => {
   const { salonuid } = useParams();
@@ -237,7 +238,7 @@ const ProductsTab: React.FC = () => {
           </div>
         </div>
       </TabsContent>
-      {/* 
+
       <TabsContent value="details">
         {selectedProductToView ? (
           <ViewProductPanel
@@ -249,7 +250,7 @@ const ProductsTab: React.FC = () => {
             No product selected.
           </div>
         )}
-      </TabsContent> */}
+      </TabsContent>
 
       {/* Dialogs */}
       <AddProductDialog

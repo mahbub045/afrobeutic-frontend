@@ -45,7 +45,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
     useState<ServiceProps>(selectedService);
 
   // Re-fetch services data to get updated service
-  const { data: servicesData, refetch } = useGetServicesDataQuery(
+  const { data: serviceData, refetch } = useGetServicesDataQuery(
     {
       salonUid,
       page: 1,
@@ -61,15 +61,15 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
 
   // Update displayed service when services data refetches (after edit)
   useEffect(() => {
-    if (servicesData?.results && Array.isArray(servicesData.results)) {
-      const updatedService = (servicesData.results as ServiceProps[]).find(
+    if (serviceData?.results && Array.isArray(serviceData.results)) {
+      const updatedService = (serviceData.results as ServiceProps[]).find(
         (s) => s.uid === selectedService.uid,
       );
       if (updatedService) {
         setDisplayedService(updatedService);
       }
     }
-  }, [servicesData, selectedService.uid]);
+  }, [serviceData, selectedService.uid]);
 
   const handleEditServiceBasicInfo = () => {
     setIsOpenEditServiceBasicInfoDialog(true);
