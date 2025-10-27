@@ -1,4 +1,4 @@
-import { FullScreenImageViewerProps } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
+import { FullScreenImageViewerProps } from "@/Types/ClientPanel/ManageSalonTypes/ProductsTypes/ProductsType";
 import { ChevronLeft, ChevronRight, LoaderPinwheel, X } from "lucide-react";
 import Image from "next/image";
 import React, { useEffect } from "react";
@@ -9,7 +9,7 @@ const FullScreenImageViewer: React.FC<FullScreenImageViewerProps> = ({
   currentImageIndex,
   onClose,
   onImageChange,
-  serviceName = "Service",
+  productName = "Product",
 }) => {
   const [isImageLoading, setIsImageLoading] = React.useState(false);
 
@@ -81,7 +81,7 @@ const FullScreenImageViewer: React.FC<FullScreenImageViewerProps> = ({
           <div className="relative h-full w-full">
             <Image
               src={currentImage}
-              alt={`${serviceName}-fullscreen-${currentImageIndex}`}
+              alt={`${productName}-fullscreen-${currentImageIndex}`}
               fill
               className="h-full w-full object-contain"
               onLoadingComplete={() => setIsImageLoading(false)}

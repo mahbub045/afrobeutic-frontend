@@ -18,6 +18,8 @@ import {
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import EditProductBasicInfoDialog from "./Dialogs/EditProductBasicInfoDialog";
+import FullScreenImageViewer from "./FullScreenImageViewer";
 
 const ViewProductPanel: React.FC<ViewProductPanelProps> = ({
   selectedProduct,
@@ -33,9 +35,6 @@ const ViewProductPanel: React.FC<ViewProductPanelProps> = ({
     isOpenEditProductBasicInfoDialog,
     setIsOpenEditProductBasicInfoDialog,
   ] = useState(false);
-  const [isOpenEditProductMoreInfoDialog, setIsOpenEditProductMoreInfoDialog] =
-    useState(false);
-
   const [displayedProduct, setDisplayedProduct] =
     useState<ProductProps>(selectedProduct);
 
@@ -68,10 +67,6 @@ const ViewProductPanel: React.FC<ViewProductPanelProps> = ({
 
   const handleEditProductBasicInfo = () => {
     setIsOpenEditProductBasicInfoDialog(true);
-  };
-
-  const handleEditProductMoreInfo = () => {
-    setIsOpenEditProductMoreInfoDialog(true);
   };
 
   const handleEditSuccess = () => {
@@ -278,21 +273,21 @@ const ViewProductPanel: React.FC<ViewProductPanelProps> = ({
         </div>
       </Card>
       {/* Dialogs */}
-      {/* <EditProductBasicInfoDialog
+      <EditProductBasicInfoDialog
         selectedProduct={displayedProduct}
         isOpen={isOpenEditProductBasicInfoDialog}
         onClose={() => setIsOpenEditProductBasicInfoDialog(false)}
         onEditSuccess={handleEditSuccess}
-      /> */}
+      />
 
-      {/* <FullScreenImageViewer
+      <FullScreenImageViewer
         isOpen={isFullScreenOpen}
         images={imagesToShow}
         currentImageIndex={selectedImageIndex}
         onClose={() => setIsFullScreenOpen(false)}
         onImageChange={setSelectedImageIndex}
         productName={displayedProduct.name}
-      /> */}
+      />
     </>
   );
 };
