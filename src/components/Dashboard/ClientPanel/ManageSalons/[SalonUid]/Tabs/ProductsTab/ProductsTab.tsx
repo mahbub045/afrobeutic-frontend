@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import AddProductDialog from "./Dialogs/AddProductDialog";
 
 const ProductsTab: React.FC = () => {
   const { salonuid } = useParams();
@@ -250,11 +251,11 @@ const ProductsTab: React.FC = () => {
       </TabsContent> */}
 
       {/* Dialogs */}
-      {/* <AddProductDialog
+      <AddProductDialog
         isOpen={isOpenAddProductDialog}
         onClose={handleIsOpenAddProductDialog}
       />
-      {selectedProduct && (
+      {/* {selectedProduct && (
         <DeleteProductDialog
           selectedProduct={selectedProduct}
           isOpen={!!selectedProduct}

@@ -28,7 +28,7 @@ export const ProductsApi = baseApi.injectEndpoints({
       },
       providesTags: ["Products"],
     }),
-    addService: builder.mutation({
+    addProduct: builder.mutation({
       query: ({ salonUid, productData }) => ({
         url: `/salons/${salonUid}/products`,
         method: "POST",
@@ -36,7 +36,7 @@ export const ProductsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Products"],
     }),
-    editService: builder.mutation({
+    editProduct: builder.mutation({
       query: ({ salonUid, productData, productUid }) => ({
         url: `/salons/${salonUid}/products/${productUid}`,
         method: "PATCH",
@@ -44,7 +44,7 @@ export const ProductsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Products"],
     }),
-    deleteService: builder.mutation({
+    deleteProduct: builder.mutation({
       query: ({ salonUid, productUid }) => ({
         url: `/salons/${salonUid}/products/${productUid}`,
         method: "DELETE",
@@ -56,7 +56,7 @@ export const ProductsApi = baseApi.injectEndpoints({
 
 export const {
   useGetProductsDataQuery,
-  useAddServiceMutation,
-  useEditServiceMutation,
-  useDeleteServiceMutation,
+  useAddProductMutation,
+  useEditProductMutation,
+  useDeleteProductMutation,
 } = ProductsApi;
