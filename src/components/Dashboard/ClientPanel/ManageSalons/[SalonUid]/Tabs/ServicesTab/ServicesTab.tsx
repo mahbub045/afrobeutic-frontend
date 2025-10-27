@@ -1,5 +1,4 @@
 "use client";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -53,7 +52,7 @@ const ServicesTab: React.FC = () => {
   }, [searchTerm]);
 
   const {
-    data: servicesData,
+    data: serviceData,
     isLoading,
     isFetching,
   } = useGetServicesDataQuery({
@@ -62,18 +61,18 @@ const ServicesTab: React.FC = () => {
     search: debouncedSearch || undefined,
   });
 
-  const extractedServices: ServiceProps[] = servicesData?.results ?? [];
+  const extractedServices: ServiceProps[] = serviceData?.results ?? [];
 
   const handlePreviousPage = () => {
-    if (servicesData?.previous) setCurrentPage((p) => Math.max(1, p - 1));
+    if (serviceData?.previous) setCurrentPage((p) => Math.max(1, p - 1));
   };
 
   const handleNextPage = () => {
-    if (servicesData?.next) setCurrentPage((p) => p + 1);
+    if (serviceData?.next) setCurrentPage((p) => p + 1);
   };
 
-  const totalPages = servicesData?.count
-    ? Math.ceil(servicesData.count / (servicesData.results?.length || 1))
+  const totalPages = serviceData?.count
+    ? Math.ceil(serviceData.count / (serviceData.results?.length || 1))
     : 0;
 
   const handleIsOpenAddServiceDialog = () =>
@@ -125,7 +124,8 @@ const ServicesTab: React.FC = () => {
         <Table>
           <TableHeader className="text-xs">
             <TableRow>
-              <TableHead>Name</TableHead>
+              <TableHead>#</TableHead>
+              <TableHead>Service Name</TableHead>
               <TableHead>Category</TableHead>
               <TableHead>Price</TableHead>
               <TableHead>Created At</TableHead>
@@ -153,8 +153,9 @@ const ServicesTab: React.FC = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              extractedServices.map((service: ServiceProps) => (
+              extractedServices.map((service: ServiceProps, index) => (
                 <TableRow key={service.uid}>
+                  <TableCell className="font-medium">{index + 1}</TableCell>
                   <TableCell className="font-medium">{service.name}</TableCell>
                   <TableCell>{service.category}</TableCell>
                   <TableCell>${service.price}</TableCell>
@@ -192,24 +193,24 @@ const ServicesTab: React.FC = () => {
 
         <div className="flex justify-between px-2 py-4">
           <div>
-            {servicesData && servicesData.count > 0 && (
+            {serviceData && serviceData.count > 0 && (
               <div className="text-sm text-gray-600 dark:text-gray-400">
-                Total: {servicesData.count} service
-                {servicesData.count !== 1 ? "s" : ""}
+                Total: {serviceData.count} service
+                {serviceData.count !== 1 ? "s" : ""}
               </div>
             )}
           </div>
 
           <div>
             {/* Pagination Controls */}
-            {servicesData &&
-              servicesData.count > (servicesData.results?.length ?? 0) && (
+            {serviceData &&
+              serviceData.count > (serviceData.results?.length ?? 0) && (
                 <div className="flex items-center justify-center gap-4 pt-4">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={handlePreviousPage}
-                    disabled={!servicesData.previous || isFetching}
+                    disabled={!serviceData.previous || isFetching}
                     className="flex items-center gap-2"
                   >
                     <ChevronLeft className="h-4 w-4" />
@@ -226,7 +227,7 @@ const ServicesTab: React.FC = () => {
                     variant="outline"
                     size="sm"
                     onClick={handleNextPage}
-                    disabled={!servicesData.next || isFetching}
+                    disabled={!serviceData.next || isFetching}
                     className="flex items-center gap-2"
                   >
                     Next

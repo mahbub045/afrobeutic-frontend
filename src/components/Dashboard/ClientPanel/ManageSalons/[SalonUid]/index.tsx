@@ -77,20 +77,12 @@ const SingleSalonContainer: React.FC = () => {
   }, [pathname, salonNavMenus]);
 
   // Demo data for tabs (typed)
-  type Product = { id: string; name: string; stock: number };
   type Chair = { id: string; name: string };
   type Booking = { id: string; customer: string };
   type LookBook = { id: string; title: string };
 
   const demo = React.useMemo(
     () => ({
-      products: {
-        title: "Products",
-        items: [
-          { id: "p1", name: "Shampoo", stock: 32 },
-          { id: "p2", name: "Conditioner", stock: 12 },
-        ] as Product[],
-      },
       chairs: {
         title: "Chairs",
         items: [{ id: "c1", name: "Chair 1" }] as Chair[],
@@ -154,9 +146,7 @@ const SingleSalonContainer: React.FC = () => {
         {activeTab === "dashboard" && <DashboardTab />}
         {activeTab === "opening-hours" && <OpeningHoursTab />}
         {activeTab === "services" && <ServicesTab />}
-        {activeTab === "products" && (
-          <ProductsTab items={demo.products.items} />
-        )}
+        {activeTab === "products" && <ProductsTab />}
         {activeTab === "chairs" && <ChairsTab items={demo.chairs.items} />}
         {activeTab === "bookings" && (
           <BookingsTab items={demo.bookings.items} />
