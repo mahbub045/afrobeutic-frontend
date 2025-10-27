@@ -333,8 +333,22 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
   );
   const minutes = ["00", "15", "30", "45"];
 
-  // Functions to validate fields on each tab. Each validates only the fields
-  // that live on that specific tab so the user can move through tabs step-by-step.
+  // Tab list and progress calculation for UI-only display
+  const tabList = [
+    { id: "basic-info", label: "Basic Info" },
+    { id: "contacts", label: "Contacts" },
+    { id: "address", label: "Address" },
+    { id: "opening-hours", label: "Opening Hours" },
+  ];
+  const currentIndex = Math.max(
+    0,
+    tabList.findIndex((t) => t.id === activeTab),
+  );
+
+  const progressPercent = Math.round(
+    tabList.length > 1 ? (currentIndex / (tabList.length - 1)) * 100 : 100,
+  );
+
   const validateBasicInfo = async (values: FormValues): Promise<boolean> => {
     try {
       await basicInfoValidationSchema.validate(
@@ -397,6 +411,34 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
             Fill in the details to add a new salon.
           </DialogDescription>
         </DialogHeader>
+        {/* Step labels and progress bar (view-only) */}
+        <div className="px-4 pt-2">
+          <div className="mb-2 flex items-center justify-center">
+            <div className="flex items-center gap-4">
+              {tabList.map((tab, idx) => (
+                <div
+                  key={tab.id}
+                  className={`text-xs font-medium ${
+                    activeTab === tab.id
+                      ? "bg-primary rounded-md px-2 py-1 text-white"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  {tab.label}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="bg-muted h-2 w-full rounded-full">
+            <div
+              className="bg-primary h-2 rounded-full transition-all"
+              style={{ width: `${progressPercent}%` }}
+              aria-valuenow={progressPercent}
+              aria-valuemin={0}
+              aria-valuemax={100}
+            />
+          </div>
+        </div>
         {/* Formik form for adding a new salon goes here */}
         <Formik<FormValues>
           initialValues={{
@@ -641,35 +683,46 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                     </div>
                   </div>
                   {/* Navigation buttons for 2nd tab */}
-                  <div className="mt-6 flex justify-end gap-3">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={onClose}
-                      disabled={isLoading}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={async () => {
-                        const isValid = await validateContacts(values);
-                        if (isValid) {
-                          setActiveTab("address");
-                        } else {
-                          const basicFields = ["email", "phone", "website"];
-                          basicFields.forEach((field) =>
-                            setFieldTouched(field, true),
-                          );
-                          toast.error(
-                            "Please fill in all required fields before proceeding",
-                          );
-                        }
-                      }}
-                      className="w-32 text-white"
-                    >
-                      Next
-                    </Button>
+                  <div className="mt-6 flex items-center justify-between gap-3">
+                    <div className="">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setActiveTab("basic-info")}
+                      >
+                        Previous
+                      </Button>
+                    </div>
+                    <div className="flex gap-3">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={onClose}
+                        disabled={isLoading}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={async () => {
+                          const isValid = await validateContacts(values);
+                          if (isValid) {
+                            setActiveTab("address");
+                          } else {
+                            const basicFields = ["email", "phone", "website"];
+                            basicFields.forEach((field) =>
+                              setFieldTouched(field, true),
+                            );
+                            toast.error(
+                              "Please fill in all required fields before proceeding",
+                            );
+                          }
+                        }}
+                        className="w-32 text-white"
+                      >
+                        Next
+                      </Button>
+                    </div>
                   </div>
                 </TabsContent>
                 <TabsContent value="address" className="space-y-4">
@@ -784,43 +837,54 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                       />
                     </div>
                   </div>
-                  {/* Navigation buttons for first tab */}
-                  <div className="mt-6 flex justify-end gap-3">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={onClose}
-                      disabled={isLoading}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={async () => {
-                        const isValid = await validateAddress(values);
-                        if (isValid) {
-                          setActiveTab("opening-hours");
-                        } else {
-                          const basicFields = [
-                            "street",
-                            "city",
-                            "postal_code",
-                            "country",
-                            "latitude",
-                            "longitude",
-                          ];
-                          basicFields.forEach((field) =>
-                            setFieldTouched(field, true),
-                          );
-                          toast.error(
-                            "Please fill in all required fields before proceeding",
-                          );
-                        }
-                      }}
-                      className="w-32 text-white"
-                    >
-                      Next
-                    </Button>
+                  {/* Navigation buttons for 3rd tab */}
+                  <div className="mt-6 flex items-center justify-between gap-3">
+                    <div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setActiveTab("contacts")}
+                      >
+                        Previous
+                      </Button>
+                    </div>
+                    <div className="flex gap-3">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={onClose}
+                        disabled={isLoading}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={async () => {
+                          const isValid = await validateAddress(values);
+                          if (isValid) {
+                            setActiveTab("opening-hours");
+                          } else {
+                            const basicFields = [
+                              "street",
+                              "city",
+                              "postal_code",
+                              "country",
+                              "latitude",
+                              "longitude",
+                            ];
+                            basicFields.forEach((field) =>
+                              setFieldTouched(field, true),
+                            );
+                            toast.error(
+                              "Please fill in all required fields before proceeding",
+                            );
+                          }
+                        }}
+                        className="w-32 text-white"
+                      >
+                        Next
+                      </Button>
+                    </div>
                   </div>
                 </TabsContent>
 
@@ -1082,12 +1146,12 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                     </div>
                   </div>
 
-                  {/* Navigation buttons for second tab */}
+                  {/* Navigation buttons for final tab */}
                   <div className="mt-6 flex justify-between gap-3">
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => setActiveTab("basic-info")}
+                      onClick={() => setActiveTab("address")}
                     >
                       Previous
                     </Button>
