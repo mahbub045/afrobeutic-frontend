@@ -13,7 +13,7 @@ import { useInviteMemberMutation } from "@/Redux/Reducers/ClientPanel/Members/Me
 import {
   AddNewMemberDialogProps,
   FormValueProps,
-} from "@/Types/ClientPanel/MemberTypes/MemberType";
+} from "@/Types/ClientPanel/ManageSalonTypes/MemberTypes/MemberType";
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
 import { useTheme } from "next-themes";
 import React from "react";

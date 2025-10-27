@@ -11,7 +11,7 @@ import { useEditMemberMutation } from "@/Redux/Reducers/ClientPanel/Members/Memb
 import {
   EditFormValueProps,
   EditNewMemberDialogProps,
-} from "@/Types/ClientPanel/MemberTypes/MemberType";
+} from "@/Types/ClientPanel/ManageSalonTypes/MemberTypes/MemberType";
 import { ErrorMessage, Field, Formik, Form as FormikForm } from "formik";
 import { useTheme } from "next-themes";
 import { toast } from "react-toastify";

@@ -5,11 +5,12 @@ import {
   BarChart2,
   Box,
   Calendar,
+  Clock,
   Home,
   Image,
+  RockingChair,
   Scissors,
   Settings,
-  ShoppingCart,
   Users,
 } from "lucide-react";
 import { useParams, usePathname } from "next/navigation";
@@ -19,6 +20,7 @@ import ChairsTab from "./Tabs/ChairsTab/ChairsTab";
 import DashboardTab from "./Tabs/DashboardTab/DashboardTab";
 import EmployeesTab from "./Tabs/EmployeesTab/EmployeesTab";
 import LookbookTab from "./Tabs/LookbookTab/LookbookTab";
+import OpeningHoursTab from "./Tabs/OpeningHoursTab/OpeningHoursTab";
 import ProductsTab from "./Tabs/ProductsTab/ProductsTab";
 import ReportTab from "./Tabs/ReportTab/ReportTab";
 import ServicesTab from "./Tabs/ServicesTab/ServicesTab";
@@ -36,9 +38,10 @@ const SingleSalonContainer: React.FC = () => {
   const salonNavMenus: MenuItemProps[] = React.useMemo(
     () => [
       { label: "Dashboard", href: `dashboard`, Icon: Home },
+      { label: "Opening Hours", href: `opening-hours`, Icon: Clock },
       { label: "Services", href: `services`, Icon: Scissors },
       { label: "Products", href: `products`, Icon: Box },
-      { label: "Chairs", href: `chairs`, Icon: ShoppingCart },
+      { label: "Chairs", href: `chairs`, Icon: RockingChair },
       { label: "Bookings", href: `bookings`, Icon: Calendar },
       { label: "LookBook", href: `lookbook`, Icon: Image },
       { label: "Employees", href: `employees`, Icon: Users },
@@ -74,22 +77,13 @@ const SingleSalonContainer: React.FC = () => {
   }, [pathname, salonNavMenus]);
 
   // Demo data for tabs (typed)
-  type Service = { id: string; name: string; price: string };
   type Product = { id: string; name: string; stock: number };
   type Chair = { id: string; name: string };
   type Booking = { id: string; customer: string };
   type LookBook = { id: string; title: string };
-  type Employee = { id: string; name: string };
 
   const demo = React.useMemo(
     () => ({
-      services: {
-        title: "Services",
-        items: [
-          { id: "s1", name: "Haircut", price: "$15" },
-          { id: "s2", name: "Shave", price: "$10" },
-        ] as Service[],
-      },
       products: {
         title: "Products",
         items: [
@@ -108,10 +102,6 @@ const SingleSalonContainer: React.FC = () => {
       lookbook: {
         title: "LookBook",
         items: [{ id: "l1", title: "Summer" }] as LookBook[],
-      },
-      employees: {
-        title: "Employees",
-        items: [{ id: "e1", name: "Jane" }] as Employee[],
       },
       report: { title: "Report", content: "Sales and usage reports." },
       settings: {
@@ -146,7 +136,7 @@ const SingleSalonContainer: React.FC = () => {
             <a
               key={menu.href}
               href={menu.href ? `#${menu.href}` : undefined}
-              className={`inline-flex items-center gap-2 rounded-md border px-3 py-1 text-sm shadow-md dark:shadow-gray-600 ${
+              className={`inline-flex items-center gap-2 rounded-md border px-2 py-1 text-sm shadow-md dark:shadow-gray-600 ${
                 isActive
                   ? "bg-primary border-primary text-white"
                   : "border-primary/40 bg-primary/5 text-primary hover:bg-primary/10"
@@ -162,9 +152,8 @@ const SingleSalonContainer: React.FC = () => {
       {/* Tab content area */}
       <section className="mt-6">
         {activeTab === "dashboard" && <DashboardTab />}
-        {activeTab === "services" && (
-          <ServicesTab items={demo.services.items} />
-        )}
+        {activeTab === "opening-hours" && <OpeningHoursTab />}
+        {activeTab === "services" && <ServicesTab />}
         {activeTab === "products" && (
           <ProductsTab items={demo.products.items} />
         )}
@@ -175,9 +164,7 @@ const SingleSalonContainer: React.FC = () => {
         {activeTab === "lookbook" && (
           <LookbookTab items={demo.lookbook.items} />
         )}
-        {activeTab === "employees" && (
-          <EmployeesTab items={demo.employees.items} />
-        )}
+        {activeTab === "employees" && <EmployeesTab />}
         {activeTab === "report" && (
           <ReportTab title={demo.report.title} content={demo.report.content} />
         )}
