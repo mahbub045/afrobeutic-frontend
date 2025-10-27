@@ -65,30 +65,8 @@ const addressValidationSchema = Yup.object().shape({
   city: Yup.string().required("City is required"),
   postal_code: Yup.string().required("Postal code is required"),
   country: Yup.string().required("Country is required"),
-  latitude: Yup.mixed()
-    .transform((value) => {
-      if (value === "" || value === null || value === undefined)
-        return undefined;
-      return Number(value);
-    })
-    .required("Latitude is required")
-    .test(
-      "is-number",
-      "Latitude must be a number",
-      (val) => typeof val === "number" && !Number.isNaN(val),
-    ),
-  longitude: Yup.mixed()
-    .transform((value) => {
-      if (value === "" || value === null || value === undefined)
-        return undefined;
-      return Number(value);
-    })
-    .required("Longitude is required")
-    .test(
-      "is-number",
-      "Longitude must be a number",
-      (val) => typeof val === "number" && !Number.isNaN(val),
-    ),
+  // Combined optional address string (not required)
+  address: Yup.string().notRequired(),
 });
 
 // Full validation schema for form submission
@@ -98,35 +76,12 @@ const validationSchema = Yup.object().shape({
   email: Yup.string().required("Email is required").email("Invalid email"),
   phone: Yup.string().required("Phone number is required"),
   website: Yup.string().url("Invalid URL"),
-  status: Yup.string().required("Status is required"),
   street: Yup.string().required("Street is required"),
   city: Yup.string().required("City is required"),
   postal_code: Yup.string().required("Postal code is required"),
   country: Yup.string().required("Country is required"),
-  latitude: Yup.mixed()
-    .transform((value) => {
-      if (value === "" || value === null || value === undefined)
-        return undefined;
-      return Number(value);
-    })
-    .required("Latitude is required")
-    .test(
-      "is-number",
-      "Latitude must be a number",
-      (val) => typeof val === "number" && !Number.isNaN(val),
-    ),
-  longitude: Yup.mixed()
-    .transform((value) => {
-      if (value === "" || value === null || value === undefined)
-        return undefined;
-      return Number(value);
-    })
-    .required("Longitude is required")
-    .test(
-      "is-number",
-      "Longitude must be a number",
-      (val) => typeof val === "number" && !Number.isNaN(val),
-    ),
+  // latitude/longitude removed from form validation — optional address added
+  address: Yup.string().notRequired(),
   opening_hours: Yup.array().of(
     Yup.object().shape({
       day: Yup.string().required("Day is required"),
@@ -227,30 +182,19 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
         salon_type: string;
         email: string;
         phone: string;
-        status: string;
         country_dial_code?: string;
       } = {
         name: formData.name,
         salon_type: formData.salon_type,
         email: formData.email,
-        // PhoneInput returns full phone string (includes +countrycode) in the phone field
-        phone: formData.phone, // already includes country dial code when entered via PhoneInput
+        phone: formData.phone,
         country_dial_code: formData.country_dial_code,
         website: formData.website,
         street: formData.street,
         city: formData.city,
         postal_code: formData.postal_code,
         country: formData.country,
-        // coerce latitude/longitude to numbers (they may be strings from inputs)
-        latitude:
-          typeof formData.latitude === "string"
-            ? Number(formData.latitude)
-            : formData.latitude,
-        longitude:
-          typeof formData.longitude === "string"
-            ? Number(formData.longitude)
-            : formData.longitude,
-        status: formData.status,
+        address: formData.address,
         opening_hours: formData.opening_hours.map((oh) => ({
           day: oh.day,
           opening_start_time: convertTimeToAPIFormat(oh.opening_start_time),
@@ -323,10 +267,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
     "SATURDAY",
     "SUNDAY",
   ];
-  const slonStatus = [
-    { value: "ACTIVE", label: "Active" },
-    { value: "INACTIVE", label: "Inactive" },
-  ];
+  // status is no longer part of the add-salon form
 
   const hours = Array.from({ length: 24 }, (_, i) =>
     String(i).padStart(2, "0"),
@@ -388,8 +329,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
           city: values.city,
           postal_code: values.postal_code,
           country: values.country,
-          latitude: values.latitude,
-          longitude: values.longitude,
+          address: values.address,
         },
         { abortEarly: false },
       );
@@ -452,9 +392,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
             city: "",
             postal_code: "",
             country: "",
-            latitude: "",
-            longitude: "",
-            status: "ACTIVE",
+            address: "",
             opening_hours: days.map((d) => ({
               day: d,
               opening_start_time: "08:00",
@@ -801,41 +739,22 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                       />
                     </div>
                   </div>
-                  <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div>
-                      <Label htmlFor="latitude" className="mb-2">
-                        Latitude<span className="text-danger">*</span>
-                      </Label>
-                      <Field
-                        name="latitude"
-                        id="latitude"
-                        as="input"
-                        type="number"
-                        placeholder="Latitude"
-                      />
-                      <ErrorMessage
-                        name="latitude"
-                        component="div"
-                        className="text-danger mt-1 text-xs"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="longitude" className="mb-2">
-                        Longitude<span className="text-danger">*</span>
-                      </Label>
-                      <Field
-                        name="longitude"
-                        id="longitude"
-                        as="input"
-                        type="number"
-                        placeholder="Longitude"
-                      />
-                      <ErrorMessage
-                        name="longitude"
-                        component="div"
-                        className="text-danger mt-1 text-xs"
-                      />
-                    </div>
+                  <div className="mb-4">
+                    <Label htmlFor="address" className="mb-2">
+                      Address (optional)
+                    </Label>
+                    <Field
+                      name="address"
+                      id="address"
+                      as="input"
+                      type="text"
+                      placeholder="Full address (optional)"
+                    />
+                    <ErrorMessage
+                      name="address"
+                      component="div"
+                      className="text-danger mt-1 text-xs"
+                    />
                   </div>
                   {/* Navigation buttons for 3rd tab */}
                   <div className="mt-6 flex items-center justify-between gap-3">
@@ -869,8 +788,6 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                               "city",
                               "postal_code",
                               "country",
-                              "latitude",
-                              "longitude",
                             ];
                             basicFields.forEach((field) =>
                               setFieldTouched(field, true),

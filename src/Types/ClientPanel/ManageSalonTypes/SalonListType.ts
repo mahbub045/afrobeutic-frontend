@@ -35,6 +35,7 @@ export interface SalonProps {
   latitude?: number;
   longitude?: number;
   status?: string;
+  address?: string;
   opening_hours: OpeningHour[];
 }
 export interface SalonListResponse {
@@ -65,9 +66,7 @@ export interface FormValues {
   city: string;
   postal_code: string;
   country: string;
-  latitude: number | string;
-  longitude: number | string;
-  status: string;
+  address?: string;
   opening_hours: OpeningHour[];
 }
 
@@ -93,8 +92,7 @@ export interface BasicInfoFormValues {
   city: string;
   postal_code: string;
   country: string;
-  latitude: number;
-  longitude: number;
+  // latitude/longitude removed from basic info form
 }
 
 export interface ContactInfoFormValues {
