@@ -92,20 +92,13 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
     const rawImages =
       (displayedService as unknown as { images?: unknown[] })?.images ?? [];
     if (!Array.isArray(rawImages)) return [];
+    if (rawImages.length === 0) return [];
+    // If images are simple strings, return as-is
     if (typeof rawImages[0] === "string") return rawImages as string[];
-    type ImageObj = { image?: string; order?: number; is_primary?: boolean };
+    // If images are objects, preserve original array order and map to image string
+    type ImageObj = { image?: string };
     const objs = rawImages as ImageObj[];
-    const sorted = [...objs].sort((a, b) => {
-      const aPrimary = !!a?.is_primary;
-      const bPrimary = !!b?.is_primary;
-      if (aPrimary === bPrimary) {
-        const ao = a?.order ?? 0;
-        const bo = b?.order ?? 0;
-        return ao - bo;
-      }
-      return aPrimary ? -1 : 1;
-    });
-    return sorted.map((i) => i.image ?? "");
+    return objs.map((i) => i.image ?? "");
   }, [displayedService]);
 
   const mainImage =
