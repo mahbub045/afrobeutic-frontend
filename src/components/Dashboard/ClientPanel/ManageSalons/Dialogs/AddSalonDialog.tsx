@@ -46,19 +46,25 @@ const getTimeDifference = (startTime: string, endTime: string): number => {
   return timeToMinutes(endTime) - timeToMinutes(startTime);
 };
 
-// Validation schema for basic information (first tab)
+// Validation schema for basic info tab
 const basicInfoValidationSchema = Yup.object().shape({
   name: Yup.string().required("Salon name is required"),
   salon_type: Yup.string().required("Salon type is required"),
+});
+
+// Validation schema for contacts tab
+const contactsValidationSchema = Yup.object().shape({
   email: Yup.string().required("Email is required").email("Invalid email"),
   phone: Yup.string().required("Phone number is required"),
   website: Yup.string().url("Invalid URL"),
-  status: Yup.string().required("Status is required"),
+});
+
+// Validation schema for address tab
+const addressValidationSchema = Yup.object().shape({
   street: Yup.string().required("Street is required"),
   city: Yup.string().required("City is required"),
   postal_code: Yup.string().required("Postal code is required"),
   country: Yup.string().required("Country is required"),
-  // transform empty string to undefined so required() triggers
   latitude: Yup.mixed()
     .transform((value) => {
       if (value === "" || value === null || value === undefined)
@@ -327,17 +333,43 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
   );
   const minutes = ["00", "15", "30", "45"];
 
-  // Function to validate basic info fields
+  // Functions to validate fields on each tab. Each validates only the fields
+  // that live on that specific tab so the user can move through tabs step-by-step.
   const validateBasicInfo = async (values: FormValues): Promise<boolean> => {
     try {
       await basicInfoValidationSchema.validate(
         {
           name: values.name,
           salon_type: values.salon_type,
+        },
+        { abortEarly: false },
+      );
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const validateContacts = async (values: FormValues): Promise<boolean> => {
+    try {
+      await contactsValidationSchema.validate(
+        {
           email: values.email,
           phone: values.phone,
           website: values.website,
-          status: values.status,
+        },
+        { abortEarly: false },
+      );
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const validateAddress = async (values: FormValues): Promise<boolean> => {
+    try {
+      await addressValidationSchema.validate(
+        {
           street: values.street,
           city: values.city,
           postal_code: values.postal_code,
@@ -472,7 +504,6 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                         if (isValid) {
                           setActiveTab("contacts");
                         } else {
-                          // Mark all basic info fields as touched to show validation errors
                           const basicFields = ["name", "salon_type"];
                           basicFields.forEach((field) =>
                             setFieldTouched(field, true),
@@ -622,11 +653,10 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                     <Button
                       type="button"
                       onClick={async () => {
-                        const isValid = await validateBasicInfo(values);
+                        const isValid = await validateContacts(values);
                         if (isValid) {
                           setActiveTab("address");
                         } else {
-                          // Mark all basic info fields as touched to show validation errors
                           const basicFields = ["email", "phone", "website"];
                           basicFields.forEach((field) =>
                             setFieldTouched(field, true),
@@ -767,11 +797,10 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                     <Button
                       type="button"
                       onClick={async () => {
-                        const isValid = await validateBasicInfo(values);
+                        const isValid = await validateAddress(values);
                         if (isValid) {
                           setActiveTab("opening-hours");
                         } else {
-                          // Mark all basic info fields as touched to show validation errors
                           const basicFields = [
                             "street",
                             "city",
