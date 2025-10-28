@@ -499,7 +499,7 @@ const AcceptInvitationContent: React.FC = () => {
               href="/auth/login"
               className="text-primary font-medium hover:underline"
             >
-              Sign in
+              Log in
             </a>
           </div>
         </div>
