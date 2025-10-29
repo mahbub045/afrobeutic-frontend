@@ -7,6 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { useGetCommonCategoriesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Common/CategoriesApi";
 import { useAddServiceMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
 import {
   AddServiceDialogProps,
@@ -17,6 +18,7 @@ import { X } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import { useParams } from "next/navigation";
+import type { ChangeEvent } from "react";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
@@ -39,8 +41,75 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
 }) => {
   const { salonuid } = useParams();
   const { resolvedTheme } = useTheme();
-  // keep the full mutation result so we can call reset() after success
+  // default category-type filter for suggestions (sent to the API)
+  const CATEGORY_TYPE_FILTER = "SERVICE";
+
+  // rtk hooks
   const [addService, { isLoading }] = useAddServiceMutation();
+  const { data: commonCategoriesData, isLoading: isLoadingCategories } =
+    useGetCommonCategoriesDataQuery({ category_type: CATEGORY_TYPE_FILTER });
+
+  // helpers to safely read category value/label from possible shapes
+  const formatCategoryValue = (c: unknown, idx: number) => {
+    if (typeof c === "string") return c;
+    if (c && typeof c === "object") {
+      const obj = c as Record<string, unknown>;
+      const val =
+        obj.name ?? obj.category ?? obj.title ?? obj.label ?? obj.id ?? idx;
+      return String(val);
+    }
+    return String(c ?? idx);
+  };
+
+  const formatCategoryLabel = (c: unknown, idx: number) => {
+    if (typeof c === "string") return c;
+    if (c && typeof c === "object") {
+      const obj = c as Record<string, unknown>;
+      const lab =
+        obj.name ?? obj.category ?? obj.title ?? obj.label ?? obj.id ?? idx;
+      return String(lab);
+    }
+    return String(c ?? idx);
+  };
+
+  console.log("Cat data", commonCategoriesData);
+
+  // build a deduplicated list of suggestion strings (preserve order)
+  const categorySuggestions: string[] = (() => {
+    const src: unknown[] = Array.isArray(commonCategoriesData)
+      ? commonCategoriesData
+      : Array.isArray(commonCategoriesData?.data)
+        ? commonCategoriesData!.data
+        : [];
+
+    // Helper: determine whether an item should be considered a SERVICE category.
+    // - If it's a string, we conservatively include it (no metadata to filter).
+    // - If it's an object and has a category_type/type/categoryType/kind field, include only when it equals 'SERVICE' (case-insensitive).
+    // - If it's an object but lacks those fields, include it (conservative fallback).
+    const looksLikeService = (c: unknown) => {
+      if (typeof c === "string") return true;
+      if (c && typeof c === "object") {
+        const obj = c as Record<string, unknown>;
+        const ct =
+          obj.category_type ?? obj.type ?? obj.categoryType ?? obj.kind;
+        if (ct === undefined || ct === null) return true;
+        return String(ct).toLowerCase() === CATEGORY_TYPE_FILTER.toLowerCase();
+      }
+      return false;
+    };
+
+    const seen = new Set<string>();
+    const out: string[] = [];
+    src.forEach((c, i) => {
+      if (!looksLikeService(c)) return; // skip non-service categories when metadata present
+      const v = formatCategoryValue(c, i);
+      if (v !== "" && !seen.has(v)) {
+        seen.add(v);
+        out.push(v);
+      }
+    });
+    return out;
+  })();
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fileError, setFileError] = useState<string | null>(null);
@@ -157,8 +226,37 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                   as="input"
                   type="text"
                   required
-                  placeholder="Category"
+                  placeholder={
+                    isLoadingCategories
+                      ? "Loading categories..."
+                      : "Select or type category"
+                  }
+                  list="category-list"
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setFieldValue("category", e.target.value)
+                  }
                 />
+
+                <datalist id="category-list">
+                  {categorySuggestions.length > 0
+                    ? categorySuggestions.map((v) => (
+                        <option key={v} value={v} />
+                      ))
+                    : null}
+                </datalist>
+
+                {isLoadingCategories ? (
+                  <p className="text-muted mt-1 text-sm">
+                    Loading categories...
+                  </p>
+                ) : !commonCategoriesData ||
+                  (Array.isArray(commonCategoriesData) &&
+                    commonCategoriesData.length === 0) ||
+                  (Array.isArray(commonCategoriesData?.data) &&
+                    commonCategoriesData.data.length === 0) ? (
+                  <p className="text-muted mt-1 text-sm">No categories found</p>
+                ) : null}
+
                 {touched.category && errors.category ? (
                   <p className="text-destructive text-sm">{errors.category}</p>
                 ) : null}

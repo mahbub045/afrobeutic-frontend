@@ -265,7 +265,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                   Description
                 </div>
                 <div className="mt-1 text-sm whitespace-pre-wrap">
-                  {displayedService.description}
+                  {safe(displayedService.description)}
                 </div>
               </div>
             </div>
