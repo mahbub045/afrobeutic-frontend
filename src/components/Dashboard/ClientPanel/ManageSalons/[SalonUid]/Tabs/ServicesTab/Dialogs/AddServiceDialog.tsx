@@ -236,7 +236,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                 </div>
 
                 {showValues ? (
-                  <div className="mt-2 max-h-40 overflow-auto rounded border">
+                  <div className="absolute right-0 left-0 z-50 mt-1 max-h-40 overflow-auto rounded border bg-white shadow-lg dark:bg-[#0b1116]">
                     {categorySuggestions.length > 0 ? (
                       <ul className="divide-y p-2">
                         {categorySuggestions.map((v) => (
