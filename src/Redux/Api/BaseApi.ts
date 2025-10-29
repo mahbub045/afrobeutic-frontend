@@ -33,6 +33,7 @@ export const baseApi = createApi({
     //Register tag types here
     "AcceptInvitation",
     //Clients Panel tag types
+    "CommonCategories",
     "Members",
     "AccountAccesser",
     "SalonList",
