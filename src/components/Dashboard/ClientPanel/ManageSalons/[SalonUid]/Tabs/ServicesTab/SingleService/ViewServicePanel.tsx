@@ -205,10 +205,11 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
           {/* Right: Details section (on mobile it comes below image) */}
           <div className="col-span-12 p-4 md:col-span-8 md:p-6">
             <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div></div>
               <div>
-                <div className="text-muted-foreground text-sm">
+                {/* <div className="text-muted-foreground text-sm">
                   Service details
-                </div>
+                </div> */}
                 <a className="text-primary text-lg font-medium hover:underline">
                   {displayedService.name}
                 </a>
@@ -315,7 +316,9 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                 </div>
                 <div className="mt-1 text-sm font-medium">
                   {safe(displayedService.service_duration)}{" "}
-                  <span className="text-muted-foreground text-xs">(Hours)</span>
+                  <span className="text-muted-foreground text-xs">
+                    (HH:MM:SS)
+                  </span>
                 </div>
               </div>
               <div>

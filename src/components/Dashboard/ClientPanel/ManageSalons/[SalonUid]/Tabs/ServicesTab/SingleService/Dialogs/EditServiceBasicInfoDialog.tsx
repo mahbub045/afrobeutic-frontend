@@ -10,13 +10,14 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useGetCommonCategoriesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Common/CategoriesApi";
 import { useEditServiceMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
 import {
   EditServiceBasicInfoDialogProps,
   ServiceProps,
 } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import { ErrorMessage, Field, Form, Formik } from "formik";
-import { X } from "lucide-react";
+import { LucideFilter, LucideFilterX, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import { useParams } from "next/navigation";
@@ -33,10 +34,60 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
 }) => {
   const { salonuid } = useParams();
   const { resolvedTheme } = useTheme();
+  const [showValues, setShowValues] = useState(false);
+  const CATEGORY_TYPE_FILTER = "SERVICE";
+  // RTK Hooks
   const [editService, { isLoading: isEditingService }] =
     useEditServiceMutation();
+  const { data: commonCategoriesData, isLoading: isLoadingCategories } =
+    useGetCommonCategoriesDataQuery({ category_type: CATEGORY_TYPE_FILTER });
 
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
+
+  // helpers to safely read category value/label from possible shapes
+  const formatCategoryValue = (c: unknown, idx: number) => {
+    if (typeof c === "string") return c;
+    if (c && typeof c === "object") {
+      const obj = c as Record<string, unknown>;
+      const val =
+        obj.name ?? obj.category ?? obj.title ?? obj.label ?? obj.id ?? idx;
+      return String(val);
+    }
+    return String(c ?? idx);
+  };
+
+  // build a deduplicated list of suggestion strings (preserve order)
+  const categorySuggestions: string[] = (() => {
+    const src: unknown[] = Array.isArray(commonCategoriesData)
+      ? commonCategoriesData
+      : Array.isArray(commonCategoriesData?.data)
+        ? commonCategoriesData!.data
+        : [];
+
+    const looksLikeService = (c: unknown) => {
+      if (typeof c === "string") return true;
+      if (c && typeof c === "object") {
+        const obj = c as Record<string, unknown>;
+        const ct =
+          obj.category_type ?? obj.type ?? obj.categoryType ?? obj.kind;
+        if (ct === undefined || ct === null) return true;
+        return String(ct).toLowerCase() === CATEGORY_TYPE_FILTER.toLowerCase();
+      }
+      return false;
+    };
+
+    const seen = new Set<string>();
+    const out: string[] = [];
+    src.forEach((c, i) => {
+      if (!looksLikeService(c)) return; // skip non-service categories when metadata present
+      const v = formatCategoryValue(c, i);
+      if (v !== "" && !seen.has(v)) {
+        seen.add(v);
+        out.push(v);
+      }
+    });
+    return out;
+  })();
 
   const validationSchema = Yup.object().shape({
     name: Yup.string().required("Service name is required"),
@@ -118,7 +169,7 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
-          {({ handleSubmit, isSubmitting }) => (
+          {({ handleSubmit, isSubmitting, setFieldValue }) => (
             <Form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="service-name" className="mb-2">
@@ -137,7 +188,7 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
                   className="mt-1 text-sm text-red-500"
                 />
               </div>
-              <div>
+              <div className="relative">
                 <Label htmlFor="service-category" className="mb-2">
                   Category
                 </Label>
@@ -147,7 +198,64 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
                   id="service-category"
                   name="category"
                   placeholder="Enter category"
+                  list="category-list"
+                  // onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  //   setFieldValue("category", e.target.value)
+                  // }
                 />
+                <div className="absolute top-[15px] right-0 mt-2 flex items-center gap-2">
+                  <button
+                    type="button"
+                    className="inline-flex items-center !rounded-l-none border-l bg-[#f6f8fb] p-4 text-sm hover:bg-white dark:bg-[#1f1e1e] hover:dark:bg-[#242222]"
+                    onClick={() => setShowValues((s) => !s)}
+                  >
+                    {showValues ? (
+                      <LucideFilterX size={16} />
+                    ) : (
+                      <LucideFilter size={16} />
+                    )}
+                  </button>
+                </div>
+
+                {showValues ? (
+                  <div className="absolute right-0 left-0 z-50 mt-1 max-h-40 overflow-auto rounded border bg-white shadow-lg dark:bg-[#0b1116]">
+                    {categorySuggestions.length > 0 ? (
+                      <ul className="divide-y p-2">
+                        {categorySuggestions.map((v) => (
+                          <li key={v}>
+                            <button
+                              type="button"
+                              className="my-1 w-full px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-800"
+                              onClick={() => {
+                                setFieldValue("category", v);
+                                setShowValues(false);
+                              }}
+                            >
+                              {v}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div className="text-muted p-2 text-sm">
+                        No categories
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+
+                {isLoadingCategories ? (
+                  <p className="text-muted mt-1 text-sm">
+                    Loading categories...
+                  </p>
+                ) : !commonCategoriesData ||
+                  (Array.isArray(commonCategoriesData) &&
+                    commonCategoriesData.length === 0) ||
+                  (Array.isArray(commonCategoriesData?.data) &&
+                    commonCategoriesData.data.length === 0) ? (
+                  <p className="text-muted mt-1 text-sm">No categories found</p>
+                ) : null}
+
                 <ErrorMessage
                   name="category"
                   component="p"
