@@ -49,8 +49,7 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
     city: Yup.string().required("City is required"),
     postal_code: Yup.string().required("Postal code is required"),
     country: Yup.string().required("Country is required"),
-    latitude: Yup.number().required("Latitude is required"),
-    longitude: Yup.number().required("Longitude is required"),
+    address: Yup.string().required("Address is required"),
   });
 
   // Note: we'll send logo as multipart/form-data when a file is present
@@ -70,8 +69,7 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
         formData.append("city", values.city);
         formData.append("postal_code", values.postal_code);
         formData.append("country", values.country);
-        formData.append("latitude", String(Number(values.latitude)));
-        formData.append("longitude", String(Number(values.longitude)));
+        formData.append("address", values.address || "");
 
         await editBasicInfo({
           salonUid: salonuid as string,
@@ -85,8 +83,6 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
           city: values.city,
           postal_code: values.postal_code,
           country: values.country,
-          latitude: Number(values.latitude),
-          longitude: Number(values.longitude),
         };
 
         await editBasicInfo({
@@ -135,8 +131,7 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
             city: singleSalonData?.city || "",
             postal_code: singleSalonData?.postal_code || "",
             country: singleSalonData?.country || "",
-            latitude: singleSalonData?.latitude ?? 0,
-            longitude: singleSalonData?.longitude ?? 0,
+            address: singleSalonData?.address || "",
           }}
           validationSchema={basicSchema}
           onSubmit={handleSubmit}
@@ -279,39 +274,16 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div>
-                    <Label htmlFor="latitude" className="mb-2">
-                      Latitude
-                    </Label>
-                    <Field
-                      id="latitude"
-                      name="latitude"
-                      type="number"
-                      as="input"
-                    />
-                    <ErrorMessage
-                      name="latitude"
-                      component="div"
-                      className="text-danger mt-1 text-xs"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="longitude" className="mb-2">
-                      Longitude
-                    </Label>
-                    <Field
-                      id="longitude"
-                      name="longitude"
-                      type="number"
-                      as="input"
-                    />
-                    <ErrorMessage
-                      name="longitude"
-                      component="div"
-                      className="text-danger mt-1 text-xs"
-                    />
-                  </div>
+                <div className="grid grid-cols-1">
+                  <Label htmlFor="address" className="mb-2">
+                    Google Location Link
+                  </Label>
+                  <Field id="address" name="address" type="text" as="input" />
+                  <ErrorMessage
+                    name="address"
+                    component="div"
+                    className="text-danger mt-1 text-xs"
+                  />
                 </div>
 
                 <div className="mt-4 flex justify-end gap-3">

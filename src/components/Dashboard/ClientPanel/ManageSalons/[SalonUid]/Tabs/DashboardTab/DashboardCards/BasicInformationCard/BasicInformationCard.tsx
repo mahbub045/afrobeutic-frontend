@@ -197,18 +197,10 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
               </div>
               <div className="flex flex-col">
                 <p className="text-muted-foreground text-xs uppercase">
-                  Latitude
+                  Google Location Link
                 </p>
                 <p className="text-foreground mt-1 text-sm">
-                  {singleSalonData?.latitude}
-                </p>
-              </div>
-              <div className="flex flex-col">
-                <p className="text-muted-foreground text-xs uppercase">
-                  Longitude
-                </p>
-                <p className="text-foreground mt-1 text-sm">
-                  {singleSalonData?.longitude}
+                  {singleSalonData?.address || "-"}
                 </p>
               </div>
             </div>
