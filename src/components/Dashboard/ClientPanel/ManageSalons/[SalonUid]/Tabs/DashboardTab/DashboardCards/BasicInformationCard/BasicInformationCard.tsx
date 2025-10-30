@@ -51,7 +51,9 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
         setTimeout(() => setCopied(false), 2000);
       } catch (e) {
         // ignore; copying failed
+        console.error("Failed to copy address:", e);
       }
+      console.error("Failed to copy address:", err);
     }
   };
 
