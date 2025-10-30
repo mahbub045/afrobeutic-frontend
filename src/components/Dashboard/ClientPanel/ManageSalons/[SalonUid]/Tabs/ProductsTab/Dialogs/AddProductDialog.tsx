@@ -40,16 +40,15 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
 }) => {
   const { salonuid } = useParams();
   const { resolvedTheme } = useTheme();
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [showValues, setShowValues] = useState(false);
   const CATEGORY_TYPE_FILTER = "PRODUCT";
   // RTK hooks
   const [addProduct, { isLoading }] = useAddProductMutation();
   const { data: commonCategoriesData, isLoading: isLoadingCategories } =
     useGetCommonCategoriesDataQuery({ category_type: CATEGORY_TYPE_FILTER });
-
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [fileError, setFileError] = useState<string | null>(null);
-  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-  const [showValues, setShowValues] = useState(false);
 
   // helpers to safely read category value/label from possible shapes
   const formatCategoryValue = (c: unknown, idx: number) => {

@@ -41,6 +41,10 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
 }) => {
   const { salonuid } = useParams();
   const { resolvedTheme } = useTheme();
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [showValues, setShowValues] = useState(false);
   // default category-type filter for suggestions (sent to the API)
   const CATEGORY_TYPE_FILTER = "SERVICE";
 
@@ -93,11 +97,6 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
     });
     return out;
   })();
-
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [fileError, setFileError] = useState<string | null>(null);
-  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-  const [showValues, setShowValues] = useState(false);
 
   useEffect(() => {
     return () => {
