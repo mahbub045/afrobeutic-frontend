@@ -110,10 +110,8 @@ const ViewEmployeePanel: React.FC<ViewEmployeePanelProps> = ({
           {/* Right: Details section (on mobile it comes below image) */}
           <div className="col-span-12 p-4 md:col-span-8 md:p-6">
             <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div></div>
               <div>
-                <div className="text-muted-foreground text-sm">
-                  Employee details
-                </div>
                 <a className="text-primary text-lg font-medium hover:underline">
                   {displayedEmployee.name}
                 </a>

@@ -55,8 +55,11 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
   const CATEGORY_TYPE_FILTER = "EMPLOYEE";
   // RTK Hooks
   const [addEmployee, { isLoading }] = useAddEmployeeMutation();
-  const { data: commonCategoriesData, isLoading: isLoadingCategories } =
-    useGetCommonCategoriesDataQuery({ category_type: CATEGORY_TYPE_FILTER });
+  const {
+    data: commonCategoriesData,
+    isLoading: isLoadingCategories,
+    refetch,
+  } = useGetCommonCategoriesDataQuery({ category_type: CATEGORY_TYPE_FILTER });
 
   // helpers to safely read category value/label from possible shapes
   const formatCategoryValue = (c: unknown, idx: number) => {
@@ -151,6 +154,7 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
         timer: 3000,
       });
       helpers.resetForm();
+      refetch();
       // clear selected file and preview
       if (previewUrl) {
         try {
@@ -346,7 +350,7 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
                   type="text"
                   required
                   placeholder="e.g. Hair Stylist"
-                  list="category-list"
+                  list="designation-list"
                   onChange={(e: ChangeEvent<HTMLInputElement>) =>
                     setFieldValue("designation", e.target.value)
                   }

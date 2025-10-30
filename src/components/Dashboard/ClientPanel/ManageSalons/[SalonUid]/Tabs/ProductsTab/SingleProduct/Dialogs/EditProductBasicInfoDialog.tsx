@@ -40,8 +40,11 @@ const EditProductBasicInfoDialog: React.FC<EditProductBasicInfoDialogProps> = ({
   // RTK Hooks
   const [editProduct, { isLoading: isEditingProduct }] =
     useEditProductMutation();
-  const { data: commonCategoriesData, isLoading: isLoadingCategories } =
-    useGetCommonCategoriesDataQuery({ category_type: CATEGORY_TYPE_FILTER });
+  const {
+    data: commonCategoriesData,
+    isLoading: isLoadingCategories,
+    refetch,
+  } = useGetCommonCategoriesDataQuery({ category_type: CATEGORY_TYPE_FILTER });
 
   // helpers to safely read category value/label from possible shapes
   const formatCategoryValue = (c: unknown, idx: number) => {
@@ -137,6 +140,7 @@ const EditProductBasicInfoDialog: React.FC<EditProductBasicInfoDialogProps> = ({
         timer: 3000,
       });
       onEditSuccess?.();
+      refetch();
       onClose();
     } catch (error) {
       toast.error("Failed to update product.");

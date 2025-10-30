@@ -47,8 +47,11 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
   const CATEGORY_TYPE_FILTER = "PRODUCT";
   // RTK hooks
   const [addProduct, { isLoading }] = useAddProductMutation();
-  const { data: commonCategoriesData, isLoading: isLoadingCategories } =
-    useGetCommonCategoriesDataQuery({ category_type: CATEGORY_TYPE_FILTER });
+  const {
+    data: commonCategoriesData,
+    isLoading: isLoadingCategories,
+    refetch,
+  } = useGetCommonCategoriesDataQuery({ category_type: CATEGORY_TYPE_FILTER });
 
   // helpers to safely read category value/label from possible shapes
   const formatCategoryValue = (c: unknown, idx: number) => {
@@ -150,6 +153,7 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
         timer: 3000,
       });
       helpers.resetForm();
+      refetch();
       setSelectedFiles([]);
     } catch (err) {
       console.error(err);
