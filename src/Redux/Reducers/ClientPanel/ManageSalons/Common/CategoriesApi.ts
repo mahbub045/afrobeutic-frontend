@@ -7,7 +7,6 @@ export const CategoriesApi = baseApi.injectEndpoints({
       query: (params?: Record<string, unknown>) => ({
         url: `/categories`,
         method: "GET",
-        // `fetchBaseQuery` supports `params` which will be serialized into the query string
         params,
       }),
       providesTags: ["CommonCategories"],

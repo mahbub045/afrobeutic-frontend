@@ -41,13 +41,20 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
 }) => {
   const { salonuid } = useParams();
   const { resolvedTheme } = useTheme();
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [showValues, setShowValues] = useState(false);
   // default category-type filter for suggestions (sent to the API)
   const CATEGORY_TYPE_FILTER = "SERVICE";
 
   // rtk hooks
   const [addService, { isLoading }] = useAddServiceMutation();
-  const { data: commonCategoriesData, isLoading: isLoadingCategories } =
-    useGetCommonCategoriesDataQuery({ category_type: CATEGORY_TYPE_FILTER });
+  const {
+    data: commonCategoriesData,
+    isLoading: isLoadingCategories,
+    refetch,
+  } = useGetCommonCategoriesDataQuery({ category_type: CATEGORY_TYPE_FILTER });
 
   // helpers to safely read category value/label from possible shapes
   const formatCategoryValue = (c: unknown, idx: number) => {
@@ -93,11 +100,6 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
     });
     return out;
   })();
-
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [fileError, setFileError] = useState<string | null>(null);
-  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-  const [showValues, setShowValues] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -154,6 +156,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
         timer: 3000,
       });
       helpers.resetForm();
+      refetch();
       setSelectedFiles([]);
     } catch (err) {
       console.error(err);
@@ -287,7 +290,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                   id="price"
                   name="price"
                   as="input"
-                  type="text"
+                  type="number"
                   required
                   placeholder="e.g. 25.00"
                 />

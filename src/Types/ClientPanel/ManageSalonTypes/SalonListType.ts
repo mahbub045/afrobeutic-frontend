@@ -92,7 +92,7 @@ export interface BasicInfoFormValues {
   city: string;
   postal_code: string;
   country: string;
-  // latitude/longitude removed from basic info form
+  address: string;
 }
 
 export interface ContactInfoFormValues {

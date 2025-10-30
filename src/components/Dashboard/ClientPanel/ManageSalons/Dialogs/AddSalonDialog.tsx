@@ -357,7 +357,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
         <div className="px-4 pt-2">
           <div className="mb-2 flex items-center justify-center">
             <div className="flex items-center gap-4">
-              {tabList.map((tab, idx) => (
+              {tabList.map((tab) => (
                 <div
                   key={tab.id}
                   className={`text-xs font-medium ${

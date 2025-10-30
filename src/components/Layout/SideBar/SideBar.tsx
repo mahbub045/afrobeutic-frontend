@@ -118,7 +118,7 @@ const SideBar: React.FC<SideBarProps> = ({
     }
 
     return (
-      <ul className="space-y-1 p-4">
+      <ul className="space-y-1 p-4 bg-white dark:bg-[#171717] h-full shadow-md dark:shadow-gray-600">
         {items.map((item) => {
           const active = item.href === activeHref;
           return (
