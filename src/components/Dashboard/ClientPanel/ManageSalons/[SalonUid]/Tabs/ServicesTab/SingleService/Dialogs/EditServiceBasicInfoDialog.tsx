@@ -34,6 +34,7 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
 }) => {
   const { salonuid } = useParams();
   const { resolvedTheme } = useTheme();
+  const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const [showValues, setShowValues] = useState(false);
   const CATEGORY_TYPE_FILTER = "SERVICE";
   // RTK Hooks
@@ -42,7 +43,6 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
   const { data: commonCategoriesData, isLoading: isLoadingCategories } =
     useGetCommonCategoriesDataQuery({ category_type: CATEGORY_TYPE_FILTER });
 
-  const [uploadedImages, setUploadedImages] = useState<File[]>([]);
 
   // helpers to safely read category value/label from possible shapes
   const formatCategoryValue = (c: unknown, idx: number) => {
@@ -199,9 +199,6 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
                   name="category"
                   placeholder="Enter category"
                   list="category-list"
-                  // onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  //   setFieldValue("category", e.target.value)
-                  // }
                 />
                 <div className="absolute top-[15px] right-0 mt-2 flex items-center gap-2">
                   <button
