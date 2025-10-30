@@ -287,7 +287,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                   id="price"
                   name="price"
                   as="input"
-                  type="text"
+                  type="number"
                   required
                   placeholder="e.g. 25.00"
                 />
