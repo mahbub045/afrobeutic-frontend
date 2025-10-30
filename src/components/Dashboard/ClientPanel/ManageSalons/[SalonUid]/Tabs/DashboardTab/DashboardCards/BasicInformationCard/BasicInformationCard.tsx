@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { countries } from "@/data/countries";
 import { DashboardTabProps } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
-import { MapPin, PenSquare, Scissors } from "lucide-react";
+import { Check, Copy, MapPin, PenSquare, Scissors } from "lucide-react";
 import React, { useState } from "react";
 import EditBasicInfoDialog from "./Dialogs/EditBasicInfoDialog";
 
@@ -21,9 +21,38 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
   isLoading,
 }) => {
   const [openBasicInfoEditDialog, setOpenBasicInfoEditDialog] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const handleOpenBasicInfoEditDialog = () => {
     setOpenBasicInfoEditDialog(true);
+  };
+
+  const handleCopyLocation = async () => {
+    const text = singleSalonData?.address || "";
+    if (!text) return;
+
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      // Fallback for older browsers: use a temporary textarea
+      try {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        // avoid showing the element
+        textarea.style.position = "fixed";
+        textarea.style.left = "-9999px";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (e) {
+        // ignore; copying failed
+      }
+    }
   };
 
   return (
@@ -144,66 +173,92 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
               </div>
             </div>
           ) : (
-            <div className="mt-2 grid grid-cols-2 gap-6">
-              <div className="flex flex-col">
-                <p className="text-muted-foreground text-xs uppercase">
-                  Street
-                </p>
-                <p className="text-foreground mt-1 text-sm">
-                  {singleSalonData?.street}
-                </p>
+            <>
+              <div className="mt-2 grid grid-cols-2 gap-6">
+                <div className="flex flex-col">
+                  <p className="text-muted-foreground text-xs uppercase">
+                    Street
+                  </p>
+                  <p className="text-foreground mt-1 text-sm">
+                    {singleSalonData?.street}
+                  </p>
+                </div>
+
+                <div className="flex flex-col">
+                  <p className="text-muted-foreground text-xs uppercase">
+                    City
+                  </p>
+                  <p className="text-foreground mt-1 text-sm">
+                    {singleSalonData?.city}
+                  </p>
+                </div>
+
+                <div className="flex flex-col">
+                  <p className="text-muted-foreground text-xs uppercase">
+                    Postal Code
+                  </p>
+                  <p className="text-foreground mt-1 text-sm">
+                    {singleSalonData?.postal_code}
+                  </p>
+                </div>
+
+                <div className="flex flex-col">
+                  <p className="text-muted-foreground text-xs uppercase">
+                    Country
+                  </p>
+                  <p className="text-foreground mt-1 text-sm">
+                    {(() => {
+                      // salon may store a 2-letter country code or full name
+                      const stored = singleSalonData?.country;
+                      if (!stored) return "-";
+
+                      // If stored looks like a 2-letter code, try to resolve
+                      const code =
+                        typeof stored === "string" && stored.length === 2
+                          ? stored.toUpperCase()
+                          : null;
+                      if (code) {
+                        const found = countries.find((c) => c.code === code);
+                        if (found) return found.name;
+                      }
+
+                      // Otherwise return the stored value (possibly full name)
+                      return stored;
+                    })()}
+                  </p>
+                </div>
               </div>
-
-              <div className="flex flex-col">
-                <p className="text-muted-foreground text-xs uppercase">City</p>
-                <p className="text-foreground mt-1 text-sm">
-                  {singleSalonData?.city}
-                </p>
-              </div>
-
-              <div className="flex flex-col">
-                <p className="text-muted-foreground text-xs uppercase">
-                  Postal Code
-                </p>
-                <p className="text-foreground mt-1 text-sm">
-                  {singleSalonData?.postal_code}
-                </p>
-              </div>
-
-              <div className="flex flex-col">
-                <p className="text-muted-foreground text-xs uppercase">
-                  Country
-                </p>
-                <p className="text-foreground mt-1 text-sm">
-                  {(() => {
-                    // salon may store a 2-letter country code or full name
-                    const stored = singleSalonData?.country;
-                    if (!stored) return "-";
-
-                    // If stored looks like a 2-letter code, try to resolve
-                    const code =
-                      typeof stored === "string" && stored.length === 2
-                        ? stored.toUpperCase()
-                        : null;
-                    if (code) {
-                      const found = countries.find((c) => c.code === code);
-                      if (found) return found.name;
-                    }
-
-                    // Otherwise return the stored value (possibly full name)
-                    return stored;
-                  })()}
-                </p>
-              </div>
-              <div className="flex flex-col">
-                <p className="text-muted-foreground text-xs uppercase">
-                  Google Location Link
-                </p>
-                <p className="text-foreground mt-1 text-sm">
+              <div className="mt-6">
+                <div className="flex justify-between">
+                  <p className="text-muted-foreground text-xs uppercase">
+                    Google Location Link
+                  </p>
+                  <div className="ml-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleCopyLocation}
+                      aria-label="Copy location link"
+                      disabled={!singleSalonData?.address}
+                      className="flex items-center gap-2"
+                    >
+                      {copied ? (
+                        <>
+                          <Check className="size-4 text-green-500" />
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="size-4" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+                <p className="text-foreground -mt-4 text-sm">
                   {singleSalonData?.address || "-"}
                 </p>
               </div>
-            </div>
+            </>
           )}
         </div>
       </CardContent>
