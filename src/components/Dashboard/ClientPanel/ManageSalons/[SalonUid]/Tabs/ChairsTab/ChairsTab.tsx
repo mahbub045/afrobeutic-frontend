@@ -11,6 +11,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatChoiceFieldValue } from "@/lib/utils";
 import { useGetChairsDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Chairs/ChairsApi";
+import { ChairProps } from "@/Types/ClientPanel/ManageSalonTypes/ChairsTypes/ChairsType";
 import {
   Armchair,
   ChevronLeft,
@@ -21,18 +22,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useParams } from "next/navigation";
-import * as React from "react";
 import { useState } from "react";
-
-type ChairProps = {
-  id: string;
-  name: string;
-  uid?: string;
-  status?: "AVAILABLE" | "OCCUPIED" | "MAINTENANCE";
-  type?: string;
-  created_at?: string;
-  updated_at?: string;
-};
 
 const ChairsTab: React.FC = () => {
   const { salonuid } = useParams();
@@ -84,8 +74,7 @@ const ChairsTab: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold md:text-2xl">Chairs Management</h2>
-        <Button variant="default">
-          {" "}
+        <Button variant="default" size="sm">
           <Plus className="h-4 w-4" /> Add Chair
         </Button>
       </div>
@@ -143,8 +132,8 @@ const ChairsTab: React.FC = () => {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {extractedChairs.map((chair: ChairProps) => (
             <Card
-              key={chair.id || chair.uid}
-              className="group hover:shadow-primary/10 relative overflow-hidden border border-gray-200/60 bg-white/80 shadow-md backdrop-blur-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl dark:border-gray-700/60 dark:bg-gray-900/80 dark:shadow-gray-600 dark:hover:shadow-gray-600/30"
+              key={chair.uid}
+              className="group hover:shadow-primary/10 relative overflow-hidden border border-gray-200/60 bg-white/80 p-2 shadow-md backdrop-blur-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl dark:border-gray-700/60 dark:bg-gray-900/80 dark:shadow-gray-600 dark:hover:shadow-gray-600/30"
             >
               {/* Animated border gradient */}
               <div className="from-primary/10 dark:from-primary/20 dark:to-primary/20 to-primary/10 absolute inset-0 rounded-lg bg-gradient-to-r via-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
@@ -153,7 +142,7 @@ const ChairsTab: React.FC = () => {
 
               {/* Content */}
               <div className="relative z-10">
-                <CardHeader className="pt-0 pb-3">
+                <CardHeader className="px-2 pb-3">
                   <div className="mb-4 flex items-center justify-between gap-2">
                     {chair.type && (
                       <Badge variant="secondary">{chair.type}</Badge>
@@ -164,7 +153,7 @@ const ChairsTab: React.FC = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-8 w-8 p-0"
+                          className="h-8 w-8 p-0 shadow-md dark:shadow-gray-600"
                         >
                           <MoreVertical className="h-4 w-4" />
                         </Button>
