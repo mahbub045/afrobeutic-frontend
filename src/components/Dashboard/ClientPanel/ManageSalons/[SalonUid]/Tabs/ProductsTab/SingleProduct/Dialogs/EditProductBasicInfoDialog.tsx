@@ -66,7 +66,7 @@ const EditProductBasicInfoDialog: React.FC<EditProductBasicInfoDialogProps> = ({
         ? commonCategoriesData!.data
         : [];
 
-    const looksLikeService = (c: unknown) => {
+    const looksLikeProduct = (c: unknown) => {
       if (typeof c === "string") return true;
       if (c && typeof c === "object") {
         const obj = c as Record<string, unknown>;
@@ -81,7 +81,7 @@ const EditProductBasicInfoDialog: React.FC<EditProductBasicInfoDialogProps> = ({
     const seen = new Set<string>();
     const out: string[] = [];
     src.forEach((c, i) => {
-      if (!looksLikeService(c)) return; // skip non-service categories when metadata present
+      if (!looksLikeProduct(c)) return; // skip non-product categories when metadata present
       const v = formatCategoryValue(c, i);
       if (v !== "" && !seen.has(v)) {
         seen.add(v);
