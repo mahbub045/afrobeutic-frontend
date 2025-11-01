@@ -15,6 +15,7 @@ import { DashboardTabProps } from "@/Types/ClientPanel/ManageSalonTypes/SalonLis
 import { Check, Copy, MapPin, PenSquare, Scissors } from "lucide-react";
 import React, { useState } from "react";
 import EditBasicInfoDialog from "./Dialogs/EditBasicInfoDialog";
+import { formatChoiceFieldValue } from "@/lib/utils";
 
 const BasicInformationCard: React.FC<DashboardTabProps> = ({
   singleSalonData,
@@ -102,16 +103,8 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
             <div className="flex items-center gap-3">
               <Badge variant="secondary">
                 {singleSalonData?.salon_type
-                  ?.split("_")
-                  .map((part: string) =>
-                    part
-                      .split("")
-                      .map((char: string, idx: number) =>
-                        idx === 0 ? char.toUpperCase() : char.toLowerCase(),
-                      )
-                      .join(""),
-                  )
-                  .join(" ") || "Not Specified"}
+                  ? formatChoiceFieldValue(singleSalonData.salon_type)
+                  : "Not Specified"}
               </Badge>
               <Button
                 variant="outline"

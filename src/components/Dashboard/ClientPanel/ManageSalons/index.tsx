@@ -20,6 +20,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 // import * as React from "react";
+import { formatChoiceFieldValue } from "@/lib/utils";
 import { useGetSalonListQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonApi";
 import type { OpeningHour } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
 import { useEffect, useState } from "react";
@@ -252,21 +253,7 @@ const ManageSalonsContainer: React.FC = () => {
                   <CardContent className="px-6 pb-6">
                     <p className="text-muted-foreground text-center text-sm leading-6">
                       {s.description ||
-                        `${s.city || "Location"} - ${
-                          s.salon_type
-                            ?.split("_")
-                            .map((part: string) =>
-                              part
-                                .split("")
-                                .map((char: string, idx: number) =>
-                                  idx === 0
-                                    ? char.toUpperCase()
-                                    : char.toLowerCase(),
-                                )
-                                .join(""),
-                            )
-                            .join(" ") || "Salon"
-                        }`}
+                        `${s.city || "Location"} - ${formatChoiceFieldValue(s.salon_type) || "Salon"}`}
                     </p>
 
                     {/* Stats or features */}

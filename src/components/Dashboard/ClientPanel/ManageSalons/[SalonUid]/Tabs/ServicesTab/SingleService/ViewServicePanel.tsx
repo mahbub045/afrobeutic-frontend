@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatDateTime, formatUnderscoredLabel, safe } from "@/lib/utils";
+import { formatChoiceFieldValue, formatDateTime, safe } from "@/lib/utils";
 import { useGetServicesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
 import {
   Employee,
@@ -300,7 +300,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                           displayedService.available_time_slots as unknown[]
                         ).map((slot, idx) => (
                           <Badge key={idx} variant="default">
-                            {formatUnderscoredLabel(slot)}
+                            {formatChoiceFieldValue(slot)}
                           </Badge>
                         ))
                       )}
@@ -327,7 +327,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                 </div>
                 <div className="mt-1 text-sm font-medium">
                   <Badge variant="default">
-                    {formatUnderscoredLabel(displayedService.gender_specific)}
+                    {formatChoiceFieldValue(displayedService.gender_specific || "N/A")}
                   </Badge>
                 </div>
               </div>
