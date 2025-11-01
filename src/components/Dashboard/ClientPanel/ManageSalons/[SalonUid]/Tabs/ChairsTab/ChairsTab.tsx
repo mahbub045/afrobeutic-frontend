@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useGetChairsDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Chairs/ChairsApi";
 import { Armchair, Edit, Trash2 } from "lucide-react";
 import { useParams } from "next/navigation";
@@ -69,7 +70,40 @@ const ChairsTab: React.FC = () => {
         </Button>
       </div>
 
-      {extractedChairs?.length === 0 ? (
+      {isLoading ? (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {[...Array(12)].map((_, idx) => (
+            <Card
+              key={`chair-skeleton-${idx}`}
+              className="relative overflow-hidden border border-gray-200/60 bg-white/80 shadow-md dark:border-gray-700/60 dark:bg-gray-900/80"
+            >
+              <CardHeader className="pt-6 pb-4">
+                <div className="mb-4 flex justify-center">
+                  <Skeleton className="h-18 w-18 rounded-full" />
+                </div>
+                <Skeleton className="mx-auto h-6 w-3/4" />
+              </CardHeader>
+              <CardContent className="px-6 pb-6">
+                <div className="space-y-3">
+                  <div className="flex justify-center">
+                    <Skeleton className="h-6 w-20 rounded-full" />
+                  </div>
+                  <div className="flex justify-center">
+                    <Skeleton className="h-5 w-24" />
+                  </div>
+                  <div className="flex justify-center pt-2">
+                    <Skeleton className="h-6 w-32 rounded-full" />
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="flex gap-2 px-6 pt-0 pb-6">
+                <Skeleton className="h-10 flex-1 rounded-lg" />
+                <Skeleton className="h-10 flex-1 rounded-lg" />
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      ) : extractedChairs?.length === 0 ? (
         <div className="w-full rounded-xl border-2 border-dashed border-gray-400/60 bg-white/80 p-8 text-center dark:border-gray-700/60 dark:bg-gray-900/80">
           <div className="bg-primary/5 mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full">
             <Armchair className="text-primary h-6 w-6" />
