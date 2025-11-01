@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { formatChoiceFieldValue } from "@/lib/utils";
 import { LoaderPinwheel } from "lucide-react";
 import Link from "next/link";
 interface Props {
@@ -93,17 +94,7 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
             </p>
             {session.user.role && (
               <Badge variant="secondary" className="w-fit text-xs">
-                {session.user.role
-                  .split("_")
-                  .map((part: string) =>
-                    part
-                      .split("")
-                      .map((char: string, idx: number) =>
-                        idx === 0 ? char.toUpperCase() : char.toLowerCase(),
-                      )
-                      .join(""),
-                  )
-                  .join(" ")}
+                {formatChoiceFieldValue(session.user.role)}
               </Badge>
             )}
           </div>
