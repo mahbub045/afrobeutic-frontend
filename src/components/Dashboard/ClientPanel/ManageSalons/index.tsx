@@ -263,15 +263,15 @@ const ManageSalonsContainer: React.FC = () => {
                           <span
                             className={`absolute inline-flex h-3 w-3 rounded-full ${
                               isSalonOpenToday(s.opening_hours)
-                                ? "animate-ping bg-green-400 opacity-75"
-                                : "animate-ping bg-red-400 opacity-75"
+                                ? "animate-ping bg-green-400"
+                                : "animate-ping bg-danger"
                             }`}
                           />
                           <span
                             className={`relative inline-flex h-3 w-3 rounded-full ${
                               isSalonOpenToday(s.opening_hours)
                                 ? "bg-green-600"
-                                : "bg-red-600"
+                                : "bg-danger"
                             } border-2 border-white`}
                           />
                         </div>

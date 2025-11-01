@@ -1,18 +1,28 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatChoiceFieldValue } from "@/lib/utils";
 import { useGetChairsDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Chairs/ChairsApi";
-import { Armchair, Edit, Trash2 } from "lucide-react";
+import {
+  Armchair,
+  ChevronLeft,
+  ChevronRight,
+  Edit,
+  MoreVertical,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { useParams } from "next/navigation";
 import * as React from "react";
+import { useState } from "react";
 
 type ChairProps = {
   id: string;
@@ -27,35 +37,44 @@ type ChairProps = {
 const ChairsTab: React.FC = () => {
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
+  const [currentPage, setCurrentPage] = useState(1);
+
   // RTK Hooks
-  const { data: chairsData, isLoading } = useGetChairsDataQuery({
+  const {
+    data: chairsData,
+    isLoading,
+    isFetching,
+  } = useGetChairsDataQuery({
     salonUid: salonUid,
+    page: currentPage,
   });
   const extractedChairs: ChairProps[] = chairsData?.results ?? [];
 
-  // Helper function to get status color
-  const getStatusColor = (status?: string) => {
-    switch (status?.toUpperCase()) {
-      case "AVAILABLE":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-      case "OCCUPIED":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
-      case "MAINTENANCE":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
-      default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200";
+  const handlePreviousPage = () => {
+    if (chairsData?.previous) {
+      setCurrentPage((prev) => prev - 1);
     }
   };
+
+  const handleNextPage = () => {
+    if (chairsData?.next) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  const totalPages = chairsData?.count
+    ? Math.ceil(chairsData.count / (chairsData.results?.length || 1))
+    : 0;
 
   // Helper function to get status indicator color (dot animation)
   const getStatusIndicatorColor = (status?: string) => {
     switch (status?.toUpperCase()) {
       case "AVAILABLE":
         return "bg-green-600";
-      case "OCCUPIED":
-        return "bg-blue-600";
+      case "OUTOFORDER":
+        return "bg-danger";
       case "MAINTENANCE":
-        return "bg-yellow-600";
+        return "bg-warning";
       default:
         return "bg-gray-600";
     }
@@ -66,7 +85,8 @@ const ChairsTab: React.FC = () => {
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold md:text-2xl">Chairs Management</h2>
         <Button variant="default">
-          Add Chair
+          {" "}
+          <Plus className="h-4 w-4" /> Add Chair
         </Button>
       </div>
 
@@ -75,31 +95,35 @@ const ChairsTab: React.FC = () => {
           {[...Array(12)].map((_, idx) => (
             <Card
               key={`chair-skeleton-${idx}`}
-              className="relative overflow-hidden border border-gray-200/60 bg-white/80 shadow-md dark:border-gray-700/60 dark:bg-gray-900/80"
+              className="group relative overflow-hidden border border-gray-200/60 bg-white/80 shadow-md backdrop-blur-sm dark:border-gray-700/60 dark:bg-gray-900/80 dark:shadow-gray-600"
             >
-              <CardHeader className="pt-6 pb-4">
-                <div className="mb-4 flex justify-center">
-                  <Skeleton className="h-18 w-18 rounded-full" />
-                </div>
-                <Skeleton className="mx-auto h-6 w-3/4" />
-              </CardHeader>
-              <CardContent className="px-6 pb-6">
-                <div className="space-y-3">
-                  <div className="flex justify-center">
-                    <Skeleton className="h-6 w-20 rounded-full" />
+              {/* Animated border gradient */}
+              <div className="from-primary/10 dark:from-primary/20 dark:to-primary/20 to-primary/10 absolute inset-0 rounded-lg bg-gradient-to-r via-transparent opacity-0" />
+              <div className="absolute inset-[1px] rounded-lg" />
+
+              {/* Content */}
+              <div className="relative z-10">
+                <CardHeader className="pt-0 pb-3">
+                  <div className="mb-4 flex items-center justify-between gap-2">
+                    <Skeleton className="h-6 w-16 rounded-full" />
+                    <div className="flex-1" />
+                    <Skeleton className="h-8 w-8 rounded-md" />
                   </div>
-                  <div className="flex justify-center">
-                    <Skeleton className="h-5 w-24" />
+                  <div className="mb-4 flex justify-center">
+                    <Skeleton className="h-18 w-18 rounded-full" />
                   </div>
-                  <div className="flex justify-center pt-2">
-                    <Skeleton className="h-6 w-32 rounded-full" />
+                  <Skeleton className="mx-auto h-6 w-3/4" />
+                </CardHeader>
+
+                <CardContent className="px-6 pb-6">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-center gap-2">
+                      <Skeleton className="h-3 w-3 rounded-full" />
+                      <Skeleton className="h-4 w-24" />
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex gap-2 px-6 pt-0 pb-6">
-                <Skeleton className="h-10 flex-1 rounded-lg" />
-                <Skeleton className="h-10 flex-1 rounded-lg" />
-              </CardFooter>
+                </CardContent>
+              </div>
             </Card>
           ))}
         </div>
@@ -129,7 +153,34 @@ const ChairsTab: React.FC = () => {
 
               {/* Content */}
               <div className="relative z-10">
-                <CardHeader className="pt-6 pb-4">
+                <CardHeader className="pt-0 pb-3">
+                  <div className="mb-4 flex items-center justify-between gap-2">
+                    {chair.type && (
+                      <Badge variant="secondary">{chair.type}</Badge>
+                    )}
+                    <div className="flex-1" />
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem>
+                          <Edit className="mr-2 h-4 w-4" />
+                          <span>Edit</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-red-600 dark:text-red-400">
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          <span>Delete</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                   <div className="mb-4 flex justify-center">
                     <div className="relative">
                       <div className="from-primary/10 to-primary/5 ring-primary/20 flex h-18 w-18 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br ring-1 transition-transform duration-300 group-hover:scale-110">
@@ -144,21 +195,9 @@ const ChairsTab: React.FC = () => {
 
                 <CardContent className="px-6 pb-6">
                   <div className="space-y-3">
-                    {/* Type Badge */}
-                    {chair.type && (
-                      <div className="flex justify-center">
-                        <Badge
-                          variant="secondary"
-                          className="rounded-full px-3 py-1"
-                        >
-                          {chair.type}
-                        </Badge>
-                      </div>
-                    )}
-
                     {/* Status Indicator with Animation */}
                     <div className="flex items-center justify-center gap-4">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
                         <div className="relative">
                           <span
                             className={`absolute inline-flex h-3 w-3 rounded-full ${getStatusIndicatorColor(chair.status)} animate-ping opacity-75`}
@@ -168,41 +207,62 @@ const ChairsTab: React.FC = () => {
                           />
                         </div>
                         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          {chair.status || "UNKNOWN"}
+                          {formatChoiceFieldValue(chair.status) || "UNKNOWN"}
                         </span>
                       </div>
                     </div>
-
-                    {/* Status Badge */}
-                    <div className="flex justify-center pt-2">
-                      <Badge
-                        className={`rounded-full px-3 py-1 text-xs font-semibold ${getStatusColor(chair.status)}`}
-                      >
-                        {chair.status || "Unknown"}
-                      </Badge>
-                    </div>
                   </div>
                 </CardContent>
-
-                <CardFooter className="flex gap-2 px-6 pt-0 pb-6">
-                  <Button variant="outline" size="sm" className="flex-1">
-                    <Edit className="mr-2 h-4 w-4" />
-                    Edit
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
-                  </Button>
-                </CardFooter>
               </div>
             </Card>
           ))}
         </div>
       )}
+
+      {/* Total Count and Pagination */}
+      <div className="flex items-center justify-between">
+        <div>
+          {chairsData && chairsData.count > 0 && (
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Total: {chairsData.count} chair{chairsData.count !== 1 ? "s" : ""}
+            </div>
+          )}
+        </div>
+
+        <div>
+          {chairsData && chairsData.count > chairsData.results.length && (
+            <div className="flex items-center justify-center gap-4 pt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePreviousPage}
+                disabled={!chairsData.previous || isFetching}
+                className="flex items-center gap-2"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Previous
+              </Button>
+
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-gray-600 dark:text-gray-400">
+                  Page {currentPage} of {totalPages}
+                </span>
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleNextPage}
+                disabled={!chairsData.next || isFetching}
+                className="flex items-center gap-2"
+              >
+                Next
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

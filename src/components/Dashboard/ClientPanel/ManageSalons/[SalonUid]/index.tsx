@@ -2,16 +2,16 @@
 
 import Breadcrumbs from "@/components/Dashboard/CommonComponents/Breadcrumbs";
 import {
+  Armchair,
   BarChart2,
   Box,
   Calendar,
   Clock,
   Home,
   Image,
-  RockingChair,
   Scissors,
   Settings,
-  Users,
+  Users
 } from "lucide-react";
 import { useParams, usePathname } from "next/navigation";
 import * as React from "react";
@@ -41,7 +41,7 @@ const SingleSalonContainer: React.FC = () => {
       { label: "Opening Hours", href: `opening-hours`, Icon: Clock },
       { label: "Services", href: `services`, Icon: Scissors },
       { label: "Products", href: `products`, Icon: Box },
-      { label: "Chairs", href: `chairs`, Icon: RockingChair },
+      { label: "Chairs", href: `chairs`, Icon: Armchair },
       { label: "Bookings", href: `bookings`, Icon: Calendar },
       { label: "LookBook", href: `lookbook`, Icon: Image },
       { label: "Employees", href: `employees`, Icon: Users },
