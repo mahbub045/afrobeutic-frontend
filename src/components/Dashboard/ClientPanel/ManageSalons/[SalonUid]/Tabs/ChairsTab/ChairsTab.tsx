@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Edit,
+  Eye,
   MoreVertical,
   Plus,
   Trash2,
@@ -159,13 +160,21 @@ const ChairsTab: React.FC = () => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                          <Edit className="mr-2 h-4 w-4" />
+                        <DropdownMenuItem className="cursor-pointer">
+                          <Edit className="mr-1 h-4 w-4" />
                           <span>Edit</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600 dark:text-red-400">
-                          <Trash2 className="mr-2 h-4 w-4" />
+                        <DropdownMenuItem className="text-danger cursor-pointer">
+                          <Trash2 className="text-danger mr-1 h-4 w-4" />
                           <span>Delete</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="cursor-pointer">
+                          <Eye className="mr-1 h-4 w-4" />
+                          <span>View Booking</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="cursor-pointer">
+                          <Plus className="mr-1 h-4 w-4" />
+                          <span>Create Booking</span>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
