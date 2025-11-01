@@ -81,7 +81,7 @@ const ChairsTab: React.FC = () => {
     switch (status?.toUpperCase()) {
       case "AVAILABLE":
         return "bg-green-600";
-      case "OUTOFORDER":
+      case "OUT_OF_ORDER":
         return "bg-danger";
       case "MAINTENANCE":
         return "bg-warning";
