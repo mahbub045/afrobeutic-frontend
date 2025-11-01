@@ -131,7 +131,7 @@ const AddChairDialog: React.FC<ChairDialogsProps> = ({ isOpen, onClose }) => {
           validationSchema={ChairSchema}
           onSubmit={handleAddChair}
         >
-          {({ handleSubmit, errors, touched, setFieldValue }) => (
+          {({ handleSubmit, setFieldValue }) => (
             <Form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="name" className="mb-2">
