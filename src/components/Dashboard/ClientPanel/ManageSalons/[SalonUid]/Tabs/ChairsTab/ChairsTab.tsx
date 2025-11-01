@@ -24,11 +24,17 @@ import {
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
+import AddChairDialogs from "./Dialogs/AddChairDialogs";
 
 const ChairsTab: React.FC = () => {
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
   const [currentPage, setCurrentPage] = useState(1);
+  const [isAddChairDialogOpen, setIsAddChairDialogOpen] = useState(false);
+
+  const handleAddChairDialogOpen = () => {
+    setIsAddChairDialogOpen(true);
+  };
 
   // RTK Hooks
   const {
@@ -75,7 +81,7 @@ const ChairsTab: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold md:text-2xl">Chairs Management</h2>
-        <Button variant="default" size="sm">
+        <Button variant="default" size="sm" onClick={handleAddChairDialogOpen}>
           <Plus className="h-4 w-4" /> Add Chair
         </Button>
       </div>
@@ -261,6 +267,11 @@ const ChairsTab: React.FC = () => {
           )}
         </div>
       </div>
+      {/* Dialogs placeholder */}
+      <AddChairDialogs
+        isOpen={isAddChairDialogOpen}
+        onClose={() => setIsAddChairDialogOpen(false)}
+      />
     </div>
   );
 };

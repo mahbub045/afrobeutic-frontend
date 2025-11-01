@@ -7,3 +7,8 @@ export interface ChairProps  {
   created_at?: string;
   updated_at?: string;
 };
+
+export interface AddChairDialogsProps {
+    isOpen: boolean;
+    onClose: () => void;
+}
