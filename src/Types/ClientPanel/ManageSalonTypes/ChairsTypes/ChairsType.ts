@@ -1,4 +1,4 @@
-export interface ChairProps  {
+export interface ChairProps {
   id: string;
   name: string;
   uid?: string;
@@ -6,9 +6,16 @@ export interface ChairProps  {
   type?: string;
   created_at?: string;
   updated_at?: string;
-};
+}
 
-export interface AddChairDialogsProps {
-    isOpen: boolean;
-    onClose: () => void;
+export interface ChairDialogsProps {
+  isOpen: boolean;
+  onClose: () => void;
+  selectedChairData?: ChairProps;
+}
+
+export interface ChairFormValues {
+  name: string;
+  type: string;
+  status: string;
 }

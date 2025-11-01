@@ -8,7 +8,10 @@ import {
 import { Label } from "@/components/ui/label";
 import { useAddChairMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Chairs/ChairsApi";
 import { useGetCommonCategoriesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Common/CategoriesApi";
-import { AddChairDialogsProps } from "@/Types/ClientPanel/ManageSalonTypes/ChairsTypes/ChairsType";
+import {
+  ChairDialogsProps,
+  ChairFormValues,
+} from "@/Types/ClientPanel/ManageSalonTypes/ChairsTypes/ChairsType";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
 import { LucideFilter, LucideFilterX } from "lucide-react";
@@ -19,22 +22,13 @@ import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
 
-interface ChairFormValues {
-  name: string;
-  type: string;
-  status: string;
-}
-
 const ChairSchema = Yup.object().shape({
   name: Yup.string().required("Chair name is required"),
   type: Yup.string().required("Chair type is required"),
   status: Yup.string().required("Chair status is required"),
 });
 
-const AddChairDialogs: React.FC<AddChairDialogsProps> = ({
-  isOpen,
-  onClose,
-}) => {
+const AddChairDialog: React.FC<ChairDialogsProps> = ({ isOpen, onClose }) => {
   const { salonuid } = useParams();
   const { resolvedTheme } = useTheme();
   const [showValues, setShowValues] = useState(false);
@@ -240,7 +234,7 @@ const AddChairDialogs: React.FC<AddChairDialogsProps> = ({
                   <option value="" label="Select status" />
                   <option value="AVAILABLE" label="Available" />
                   <option value="MAINTENANCE" label="Maintenance" />
-                  <option value="OUTOFORDER" label="Out of Order" />
+                  <option value="OUT_OF_ORDER" label="Out of Order" />
                 </Field>
               </div>
               <div className="flex items-center justify-end gap-2">
@@ -264,4 +258,4 @@ const AddChairDialogs: React.FC<AddChairDialogsProps> = ({
   );
 };
 
-export default AddChairDialogs;
+export default AddChairDialog;

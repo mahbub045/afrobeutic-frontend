@@ -24,16 +24,29 @@ import {
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import AddChairDialogs from "./Dialogs/AddChairDialogs";
+import AddChairDialog from "./Dialogs/AddChairDialog";
+import DeleteChairDialog from "./Dialogs/DeleteChairDialog";
+import EditChairDialog from "./Dialogs/EditChairDialog";
 
 const ChairsTab: React.FC = () => {
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
   const [currentPage, setCurrentPage] = useState(1);
   const [isAddChairDialogOpen, setIsAddChairDialogOpen] = useState(false);
+  const [selectedChair, setSelectedChair] = useState<ChairProps | null>(null);
+  const [isEditChairDialogOpen, setIsEditChairDialogOpen] = useState(false);
+  const [isDeleteChairDialogOpen, setIsDeleteChairDialogOpen] = useState(false);
 
   const handleAddChairDialogOpen = () => {
     setIsAddChairDialogOpen(true);
+  };
+  const handleEditChairDialogOpen = (chair: ChairProps) => {
+    setIsEditChairDialogOpen(true);
+    setSelectedChair(chair);
+  };
+  const handleDeleteChairDialogOpen = (chair: ChairProps) => {
+    setIsDeleteChairDialogOpen(true);
+    setSelectedChair(chair);
   };
 
   // RTK Hooks
@@ -166,11 +179,17 @@ const ChairsTab: React.FC = () => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem className="cursor-pointer">
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={() => handleEditChairDialogOpen(chair)}
+                        >
                           <Edit className="mr-1 h-4 w-4" />
                           <span>Edit</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-danger cursor-pointer">
+                        <DropdownMenuItem
+                          className="text-danger cursor-pointer"
+                          onClick={() => handleDeleteChairDialogOpen(chair)}
+                        >
                           <Trash2 className="text-danger mr-1 h-4 w-4" />
                           <span>Delete</span>
                         </DropdownMenuItem>
@@ -268,9 +287,19 @@ const ChairsTab: React.FC = () => {
         </div>
       </div>
       {/* Dialogs placeholder */}
-      <AddChairDialogs
+      <AddChairDialog
         isOpen={isAddChairDialogOpen}
         onClose={() => setIsAddChairDialogOpen(false)}
+      />
+      <EditChairDialog
+        isOpen={isEditChairDialogOpen}
+        onClose={() => setIsEditChairDialogOpen(false)}
+        selectedChairData={selectedChair || undefined}
+      />
+      <DeleteChairDialog
+        isOpen={isDeleteChairDialogOpen}
+        onClose={() => setIsDeleteChairDialogOpen(false)}
+        selectedChairData={selectedChair || undefined}
       />
     </div>
   );
