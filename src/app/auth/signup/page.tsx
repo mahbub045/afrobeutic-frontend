@@ -9,7 +9,7 @@ import { Eye, EyeOff, LoaderPinwheel, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import * as Yup from "yup";
 
@@ -20,7 +20,14 @@ const validationSchema = Yup.object({
   country: Yup.string(),
   // gender: Yup.string().required("Required"),
   password: Yup.string()
-    .min(6, "Password must be at least 6 characters")
+    .min(8, "Password must be at least 8 characters")
+    .matches(/(?=.*[A-Z])/, "Must contain at least one uppercase letter")
+    .matches(/(?=.*[a-z])/, "Must contain at least one lowercase letter")
+    .matches(/(?=.*[0-9])/, "Must contain at least one number")
+    .matches(
+      /(?=.*[!@#$%^&*(),.?\":{}|<>_\-+=\\/\[\];'`~])/,
+      "Must contain at least one special character",
+    )
     .required("Required"),
   confirmPassword: Yup.string()
     .oneOf([Yup.ref("password"), undefined], "Passwords must match")
@@ -31,6 +38,13 @@ const SignUp: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { theme, setTheme } = useTheme();
+  // avoid rendering client-only dynamic parts on the server to prevent
+  // hydration mismatches (checklist and confirm message can differ between
+  // server and client). We'll only show them after mount.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const router = useRouter();
 
   // API call function using apiClient
@@ -217,168 +231,262 @@ const SignUp: React.FC = () => {
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
               >
-                {({ isSubmitting }) => (
-                  <Form className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
-                    {/* First Name */}
-                    <div>
-                      <label
-                        htmlFor="firstName"
-                        className="mb-2 block text-sm font-medium text-gray-700 dark:text-white/85"
-                      >
-                        First Name<span className="text-danger">*</span>
-                      </label>
-                      <Field
-                        type="text"
-                        name="firstName"
-                        id="firstName"
-                        placeholder="First Name"
-                        required
-                      />
-                      <ErrorMessage
-                        name="firstName"
-                        component="div"
-                        className="text-danger mt-1 text-xs"
-                      />
-                    </div>
-                    {/* Last Name */}
-                    <div>
-                      <label
-                        htmlFor="lastName"
-                        className="mb-2 block text-sm font-medium text-gray-700 dark:text-white/85"
-                      >
-                        Last Name<span className="text-danger">*</span>
-                      </label>
-                      <Field
-                        type="text"
-                        name="lastName"
-                        id="lastName"
-                        placeholder="Last Name"
-                        required
-                      />
-                      <ErrorMessage
-                        name="lastName"
-                        component="div"
-                        className="text-danger mt-1 text-xs"
-                      />
-                    </div>
-                    {/* Country */}
-                    <div>
-                      <label
-                        htmlFor="country"
-                        className="mb-2 block text-sm font-medium text-gray-700 dark:text-white/85"
-                      >
-                        Country<span className="text-danger">*</span>
-                      </label>
-                      <Field as="select" name="country" id="country" required>
-                        <option value="">Select country</option>
-                        {countries.map((country) => (
-                          <option key={country.code} value={country.code}>
-                            {country.name}
-                          </option>
-                        ))}
-                      </Field>
-                      <ErrorMessage
-                        name="country"
-                        component="div"
-                        className="text-danger mt-1 text-xs"
-                      />
-                    </div>
-                    {/* Email */}
-                    <div>
-                      <label
-                        htmlFor="email"
-                        className="mb-2 block text-sm font-medium text-gray-700 dark:text-white/85"
-                      >
-                        Email<span className="text-danger">*</span>
-                      </label>
-                      <div className="relative">
+                {({ isSubmitting, values }) => {
+                  const password = values.password || "";
+                  const confirm = values.confirmPassword || "";
+                  const lengthOk = password.length >= 8;
+                  const upperOk = /[A-Z]/.test(password);
+                  const lowerOk = /[a-z]/.test(password);
+                  const numberOk = /[0-9]/.test(password);
+                  const specialOk =
+                    /[!@#$%^&*(),.?\":{}|<>_\-+=\\/\[\];'`~]/.test(password);
+                  const allPasswordRules =
+                    lengthOk && upperOk && lowerOk && numberOk && specialOk;
+                  const submitDisabled = mounted
+                    ? isSubmitting ||
+                      isLoading ||
+                      !allPasswordRules ||
+                      password !== confirm
+                    : false;
+
+                  return (
+                    <Form className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
+                      {/* First Name */}
+                      <div>
+                        <label
+                          htmlFor="firstName"
+                          className="mb-2 block text-sm font-medium text-gray-700 dark:text-white/85"
+                        >
+                          First Name<span className="text-danger">*</span>
+                        </label>
                         <Field
-                          type="email"
-                          name="email"
-                          id="email"
-                          placeholder="you@company.com"
+                          type="text"
+                          name="firstName"
+                          id="firstName"
+                          placeholder="First Name"
                           required
                         />
+                        <ErrorMessage
+                          name="firstName"
+                          component="div"
+                          className="text-danger mt-1 text-xs"
+                        />
                       </div>
-                      <ErrorMessage
-                        name="email"
-                        component="div"
-                        className="text-danger mt-1 text-xs"
-                      />
-                    </div>
-                    {/* Password */}
-                    <div>
-                      <label
-                        htmlFor="password"
-                        className="mb-2 block text-sm font-medium text-gray-700 dark:text-white/85"
-                      >
-                        Password<span className="text-danger">*</span>
-                      </label>
-                      <div className="relative">
+                      {/* Last Name */}
+                      <div>
+                        <label
+                          htmlFor="lastName"
+                          className="mb-2 block text-sm font-medium text-gray-700 dark:text-white/85"
+                        >
+                          Last Name<span className="text-danger">*</span>
+                        </label>
+                        <Field
+                          type="text"
+                          name="lastName"
+                          id="lastName"
+                          placeholder="Last Name"
+                          required
+                        />
+                        <ErrorMessage
+                          name="lastName"
+                          component="div"
+                          className="text-danger mt-1 text-xs"
+                        />
+                      </div>
+                      {/* Country */}
+                      <div>
+                        <label
+                          htmlFor="country"
+                          className="mb-2 block text-sm font-medium text-gray-700 dark:text-white/85"
+                        >
+                          Country<span className="text-danger">*</span>
+                        </label>
+                        <Field as="select" name="country" id="country" required>
+                          <option value="">Select country</option>
+                          {countries.map((country) => (
+                            <option key={country.code} value={country.code}>
+                              {country.name}
+                            </option>
+                          ))}
+                        </Field>
+                        <ErrorMessage
+                          name="country"
+                          component="div"
+                          className="text-danger mt-1 text-xs"
+                        />
+                      </div>
+                      {/* Email */}
+                      <div>
+                        <label
+                          htmlFor="email"
+                          className="mb-2 block text-sm font-medium text-gray-700 dark:text-white/85"
+                        >
+                          Email<span className="text-danger">*</span>
+                        </label>
+                        <div className="relative">
+                          <Field
+                            type="email"
+                            name="email"
+                            id="email"
+                            placeholder="you@company.com"
+                            required
+                          />
+                        </div>
+                        <ErrorMessage
+                          name="email"
+                          component="div"
+                          className="text-danger mt-1 text-xs"
+                        />
+                      </div>
+                      {/* Password */}
+                      <div>
+                        <label
+                          htmlFor="password"
+                          className="mb-2 block text-sm font-medium text-gray-700 dark:text-white/85"
+                        >
+                          Password<span className="text-danger">*</span>
+                        </label>
+                        <div className="relative">
+                          <Field
+                            type={showPassword ? "text" : "password"}
+                            name="password"
+                            id="password"
+                            placeholder="Choose a secure password"
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword((s) => !s)}
+                            className="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer text-sm text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
+                            aria-label={
+                              showPassword ? "Hide password" : "Show password"
+                            }
+                          >
+                            {showPassword ? <EyeOff /> : <Eye />}
+                          </button>
+                        </div>
+                        <ErrorMessage
+                          name="password"
+                          component="div"
+                          className="text-danger mt-1 text-xs"
+                        />
+                        {/* Live password rule checklist (client-only to avoid hydration mismatch) */}
+                        {mounted && (
+                          <ul className="mt-2 space-y-1 text-xs">
+                            <li className="flex items-center">
+                              <span
+                                className={`mr-2 ${lengthOk ? "text-green-600" : "text-red-500"}`}
+                              >
+                                {lengthOk ? "✔" : "✖"}
+                              </span>
+                              <span
+                                className={`${lengthOk ? "text-green-700" : "text-gray-600 dark:text-white/70"}`}
+                              >
+                                Must be at least 8 characters
+                              </span>
+                            </li>
+                            <li className="flex items-center">
+                              <span
+                                className={`mr-2 ${upperOk ? "text-green-600" : "text-red-500"}`}
+                              >
+                                {upperOk ? "✔" : "✖"}
+                              </span>
+                              <span
+                                className={`${upperOk ? "text-green-700" : "text-gray-600 dark:text-white/70"}`}
+                              >
+                                Must contain at least 1 capital letter
+                              </span>
+                            </li>
+                            <li className="flex items-center">
+                              <span
+                                className={`mr-2 ${lowerOk ? "text-green-600" : "text-red-500"}`}
+                              >
+                                {lowerOk ? "✔" : "✖"}
+                              </span>
+                              <span
+                                className={`${lowerOk ? "text-green-700" : "text-gray-600 dark:text-white/70"}`}
+                              >
+                                Must contain at least 1 small letter
+                              </span>
+                            </li>
+                            <li className="flex items-center">
+                              <span
+                                className={`mr-2 ${numberOk ? "text-green-600" : "text-red-500"}`}
+                              >
+                                {numberOk ? "✔" : "✖"}
+                              </span>
+                              <span
+                                className={`${numberOk ? "text-green-700" : "text-gray-600 dark:text-white/70"}`}
+                              >
+                                Must contain at least 1 number
+                              </span>
+                            </li>
+                            <li className="flex items-center">
+                              <span
+                                className={`mr-2 ${specialOk ? "text-green-600" : "text-red-500"}`}
+                              >
+                                {specialOk ? "✔" : "✖"}
+                              </span>
+                              <span
+                                className={`${specialOk ? "text-green-700" : "text-gray-600 dark:text-white/70"}`}
+                              >
+                                Must contain at least 1 special character
+                              </span>
+                            </li>
+                          </ul>
+                        )}
+                      </div>
+                      {/* Confirm Password */}
+                      <div>
+                        <label
+                          htmlFor="confirmPassword"
+                          className="mb-2 block text-sm font-medium text-gray-700 dark:text-white/85"
+                        >
+                          Confirm Password<span className="text-danger">*</span>
+                        </label>
                         <Field
                           type={showPassword ? "text" : "password"}
-                          name="password"
-                          id="password"
-                          placeholder="Choose a secure password"
+                          name="confirmPassword"
+                          id="confirmPassword"
+                          placeholder="Re-enter password"
                           required
                         />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword((s) => !s)}
-                          className="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer text-sm text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
-                          aria-label={
-                            showPassword ? "Hide password" : "Show password"
-                          }
-                        >
-                          {showPassword ? <EyeOff /> : <Eye />}
-                        </button>
-                      </div>
-                      <ErrorMessage
-                        name="password"
-                        component="div"
-                        className="text-danger mt-1 text-xs"
-                      />
-                    </div>
-                    {/* Confirm Password */}
-                    <div>
-                      <label
-                        htmlFor="confirmPassword"
-                        className="mb-2 block text-sm font-medium text-gray-700 dark:text-white/85"
-                      >
-                        Confirm Password<span className="text-danger">*</span>
-                      </label>
-                      <Field
-                        type={showPassword ? "text" : "password"}
-                        name="confirmPassword"
-                        id="confirmPassword"
-                        placeholder="Re-enter password"
-                        required
-                      />
-                      <ErrorMessage
-                        name="confirmPassword"
-                        component="div"
-                        className="text-danger mt-1 text-xs"
-                      />
-                    </div>
-                    {/* Submit Button */}
-                    <div className="md:col-span-2">
-                      <Button
-                        size="lg"
-                        type="submit"
-                        disabled={isSubmitting || isLoading}
-                        className="btn-full btn-primary"
-                      >
-                        {isSubmitting || isLoading ? (
-                          <>
-                            <LoaderPinwheel className="mr-2 inline animate-spin text-white" />
-                          </>
-                        ) : (
-                          "Sign Up"
+                        <ErrorMessage
+                          name="confirmPassword"
+                          component="div"
+                          className="text-danger mt-1 text-xs"
+                        />
+                        {/* Live confirm password match (client-only) */}
+                        {mounted && confirm.length > 0 && (
+                          <div
+                            className={`mt-1 text-xs ${password === confirm ? "text-green-700" : "text-red-500"}`}
+                          >
+                            {password === confirm
+                              ? "Passwords match"
+                              : "Passwords do not match"}
+                          </div>
                         )}
-                      </Button>
-                    </div>
-                  </Form>
-                )}
+                      </div>
+                      {/* Submit Button */}
+                      <div className="md:col-span-2">
+                        <Button
+                          size="lg"
+                          type="submit"
+                          disabled={submitDisabled}
+                          className="btn-full btn-primary"
+                        >
+                          {isSubmitting || isLoading ? (
+                            <>
+                              <LoaderPinwheel className="mr-2 inline animate-spin text-white" />
+                            </>
+                          ) : (
+                            "Sign Up"
+                          )}
+                        </Button>
+                      </div>
+                    </Form>
+                  );
+                }}
               </Formik>
             </div>
           </div>

@@ -46,43 +46,28 @@ const getTimeDifference = (startTime: string, endTime: string): number => {
   return timeToMinutes(endTime) - timeToMinutes(startTime);
 };
 
-// Validation schema for basic information (first tab)
+// Validation schema for basic info tab
 const basicInfoValidationSchema = Yup.object().shape({
   name: Yup.string().required("Salon name is required"),
   salon_type: Yup.string().required("Salon type is required"),
+});
+
+// Validation schema for contacts tab
+const contactsValidationSchema = Yup.object().shape({
   email: Yup.string().required("Email is required").email("Invalid email"),
   phone: Yup.string().required("Phone number is required"),
   website: Yup.string().url("Invalid URL"),
-  status: Yup.string().required("Status is required"),
+});
+
+// Validation schema for address tab
+const addressValidationSchema = Yup.object().shape({
   street: Yup.string().required("Street is required"),
   city: Yup.string().required("City is required"),
   postal_code: Yup.string().required("Postal code is required"),
   country: Yup.string().required("Country is required"),
-  // transform empty string to undefined so required() triggers
-  latitude: Yup.mixed()
-    .transform((value) => {
-      if (value === "" || value === null || value === undefined)
-        return undefined;
-      return Number(value);
-    })
-    .required("Latitude is required")
-    .test(
-      "is-number",
-      "Latitude must be a number",
-      (val) => typeof val === "number" && !Number.isNaN(val),
-    ),
-  longitude: Yup.mixed()
-    .transform((value) => {
-      if (value === "" || value === null || value === undefined)
-        return undefined;
-      return Number(value);
-    })
-    .required("Longitude is required")
-    .test(
-      "is-number",
-      "Longitude must be a number",
-      (val) => typeof val === "number" && !Number.isNaN(val),
-    ),
+  // Combined optional address string (not required)
+  // accepts only a valid URL when provided
+  address: Yup.string().url("Invalid URL").notRequired(),
 });
 
 // Full validation schema for form submission
@@ -92,35 +77,13 @@ const validationSchema = Yup.object().shape({
   email: Yup.string().required("Email is required").email("Invalid email"),
   phone: Yup.string().required("Phone number is required"),
   website: Yup.string().url("Invalid URL"),
-  status: Yup.string().required("Status is required"),
   street: Yup.string().required("Street is required"),
   city: Yup.string().required("City is required"),
   postal_code: Yup.string().required("Postal code is required"),
   country: Yup.string().required("Country is required"),
-  latitude: Yup.mixed()
-    .transform((value) => {
-      if (value === "" || value === null || value === undefined)
-        return undefined;
-      return Number(value);
-    })
-    .required("Latitude is required")
-    .test(
-      "is-number",
-      "Latitude must be a number",
-      (val) => typeof val === "number" && !Number.isNaN(val),
-    ),
-  longitude: Yup.mixed()
-    .transform((value) => {
-      if (value === "" || value === null || value === undefined)
-        return undefined;
-      return Number(value);
-    })
-    .required("Longitude is required")
-    .test(
-      "is-number",
-      "Longitude must be a number",
-      (val) => typeof val === "number" && !Number.isNaN(val),
-    ),
+  // latitude/longitude removed from form validation — optional address added
+  // address must be a valid URL if provided
+  address: Yup.string().url("Invalid URL").notRequired(),
   opening_hours: Yup.array().of(
     Yup.object().shape({
       day: Yup.string().required("Day is required"),
@@ -221,30 +184,19 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
         salon_type: string;
         email: string;
         phone: string;
-        status: string;
         country_dial_code?: string;
       } = {
         name: formData.name,
         salon_type: formData.salon_type,
         email: formData.email,
-        // PhoneInput returns full phone string (includes +countrycode) in the phone field
-        phone: formData.phone, // already includes country dial code when entered via PhoneInput
+        phone: formData.phone,
         country_dial_code: formData.country_dial_code,
         website: formData.website,
         street: formData.street,
         city: formData.city,
         postal_code: formData.postal_code,
         country: formData.country,
-        // coerce latitude/longitude to numbers (they may be strings from inputs)
-        latitude:
-          typeof formData.latitude === "string"
-            ? Number(formData.latitude)
-            : formData.latitude,
-        longitude:
-          typeof formData.longitude === "string"
-            ? Number(formData.longitude)
-            : formData.longitude,
-        status: formData.status,
+        address: formData.address,
         opening_hours: formData.opening_hours.map((oh) => ({
           day: oh.day,
           opening_start_time: convertTimeToAPIFormat(oh.opening_start_time),
@@ -271,6 +223,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
         background: resolvedTheme === "dark" ? "#0f1724" : undefined,
         color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
         confirmButtonColor: "#037375",
+        timer: 3000,
       });
       return true;
     } catch (error: unknown) {
@@ -316,33 +269,69 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
     "SATURDAY",
     "SUNDAY",
   ];
-  const slonStatus = [
-    { value: "ACTIVE", label: "Active" },
-    { value: "INACTIVE", label: "Inactive" },
-  ];
+  // status is no longer part of the add-salon form
 
   const hours = Array.from({ length: 24 }, (_, i) =>
     String(i).padStart(2, "0"),
   );
   const minutes = ["00", "15", "30", "45"];
 
-  // Function to validate basic info fields
+  // Tab list and progress calculation for UI-only display
+  const tabList = [
+    { id: "basic-info", label: "Basic Info" },
+    { id: "contacts", label: "Contacts" },
+    { id: "address", label: "Address" },
+    { id: "opening-hours", label: "Opening Hours" },
+  ];
+  const currentIndex = Math.max(
+    0,
+    tabList.findIndex((t) => t.id === activeTab),
+  );
+
+  const progressPercent = Math.round(
+    tabList.length > 1 ? (currentIndex / (tabList.length - 1)) * 100 : 100,
+  );
+
   const validateBasicInfo = async (values: FormValues): Promise<boolean> => {
     try {
       await basicInfoValidationSchema.validate(
         {
           name: values.name,
           salon_type: values.salon_type,
+        },
+        { abortEarly: false },
+      );
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const validateContacts = async (values: FormValues): Promise<boolean> => {
+    try {
+      await contactsValidationSchema.validate(
+        {
           email: values.email,
           phone: values.phone,
           website: values.website,
-          status: values.status,
+        },
+        { abortEarly: false },
+      );
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const validateAddress = async (values: FormValues): Promise<boolean> => {
+    try {
+      await addressValidationSchema.validate(
+        {
           street: values.street,
           city: values.city,
           postal_code: values.postal_code,
           country: values.country,
-          latitude: values.latitude,
-          longitude: values.longitude,
+          address: values.address,
         },
         { abortEarly: false },
       );
@@ -364,6 +353,34 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
             Fill in the details to add a new salon.
           </DialogDescription>
         </DialogHeader>
+        {/* Step labels and progress bar (view-only) */}
+        <div className="px-4 pt-2">
+          <div className="mb-2 flex items-center justify-center">
+            <div className="flex items-center gap-4">
+              {tabList.map((tab) => (
+                <div
+                  key={tab.id}
+                  className={`text-xs font-medium ${
+                    activeTab === tab.id
+                      ? "bg-primary rounded-md px-2 py-1 text-white"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  {tab.label}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="bg-muted h-2 w-full rounded-full">
+            <div
+              className="bg-primary h-2 rounded-full transition-all"
+              style={{ width: `${progressPercent}%` }}
+              aria-valuenow={progressPercent}
+              aria-valuemin={0}
+              aria-valuemax={100}
+            />
+          </div>
+        </div>
         {/* Formik form for adding a new salon goes here */}
         <Formik<FormValues>
           initialValues={{
@@ -377,9 +394,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
             city: "",
             postal_code: "",
             country: "",
-            latitude: "",
-            longitude: "",
-            status: "ACTIVE",
+            address: "",
             opening_hours: days.map((d) => ({
               day: d,
               opening_start_time: "08:00",
@@ -429,28 +444,6 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="status" className="mb-2">
-                        Status
-                      </Label>
-                      <Field id="status" name="status" as="select" required>
-                        <option value="" disabled>
-                          Select a status
-                        </option>
-                        {slonStatus.map((s) => (
-                          <option key={s.value} value={s.value}>
-                            {s.label}
-                          </option>
-                        ))}
-                      </Field>
-                      <ErrorMessage
-                        name="status"
-                        component="div"
-                        className="text-danger mt-1 text-xs"
-                      />
-                    </div>
-                  </div>
-                  <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div>
                       <Label htmlFor="salon_type" className="mb-2">
                         Salon Type<span className="text-danger">*</span>
                       </Label>
@@ -475,23 +468,56 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                         className="text-danger mt-1 text-xs"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="email" className="mb-2">
-                        Email<span className="text-danger">*</span>
-                      </Label>
-                      <Field
-                        name="email"
-                        id="email"
-                        as="input"
-                        type="email"
-                        placeholder="Email"
-                      />
-                      <ErrorMessage
-                        name="email"
-                        component="div"
-                        className="text-danger mt-1 text-xs"
-                      />
-                    </div>
+                  </div>
+                  {/* Navigation buttons for first tab */}
+                  <div className="mt-6 flex justify-end gap-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={onClose}
+                      disabled={isLoading}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={async () => {
+                        const isValid = await validateBasicInfo(values);
+                        if (isValid) {
+                          setActiveTab("contacts");
+                        } else {
+                          const basicFields = ["name", "salon_type"];
+                          basicFields.forEach((field) =>
+                            setFieldTouched(field, true),
+                          );
+                          toast.error(
+                            "Please fill in all required fields before proceeding",
+                          );
+                        }
+                      }}
+                      className="w-32 text-white"
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </TabsContent>
+                <TabsContent value="contacts" className="space-y-4">
+                  <div>
+                    <Label htmlFor="email" className="mb-2">
+                      Email<span className="text-danger">*</span>
+                    </Label>
+                    <Field
+                      name="email"
+                      id="email"
+                      as="input"
+                      type="email"
+                      placeholder="Email"
+                    />
+                    <ErrorMessage
+                      name="email"
+                      component="div"
+                      className="text-danger mt-1 text-xs"
+                    />
                   </div>
                   <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
@@ -596,6 +622,50 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                       />
                     </div>
                   </div>
+                  {/* Navigation buttons for 2nd tab */}
+                  <div className="mt-6 flex items-center justify-between gap-3">
+                    <div className="">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setActiveTab("basic-info")}
+                      >
+                        Previous
+                      </Button>
+                    </div>
+                    <div className="flex gap-3">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={onClose}
+                        disabled={isLoading}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={async () => {
+                          const isValid = await validateContacts(values);
+                          if (isValid) {
+                            setActiveTab("address");
+                          } else {
+                            const basicFields = ["email", "phone", "website"];
+                            basicFields.forEach((field) =>
+                              setFieldTouched(field, true),
+                            );
+                            toast.error(
+                              "Please fill in all required fields before proceeding",
+                            );
+                          }
+                        }}
+                        className="w-32 text-white"
+                      >
+                        Next
+                      </Button>
+                    </div>
+                  </div>
+                </TabsContent>
+                <TabsContent value="address" className="space-y-4">
                   <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
                       <Label htmlFor="street" className="mb-2">
@@ -671,87 +741,69 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                       />
                     </div>
                   </div>
-                  <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div>
-                      <Label htmlFor="latitude" className="mb-2">
-                        Latitude<span className="text-danger">*</span>
-                      </Label>
-                      <Field
-                        name="latitude"
-                        id="latitude"
-                        as="input"
-                        type="number"
-                        placeholder="Latitude"
-                      />
-                      <ErrorMessage
-                        name="latitude"
-                        component="div"
-                        className="text-danger mt-1 text-xs"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="longitude" className="mb-2">
-                        Longitude<span className="text-danger">*</span>
-                      </Label>
-                      <Field
-                        name="longitude"
-                        id="longitude"
-                        as="input"
-                        type="number"
-                        placeholder="Longitude"
-                      />
-                      <ErrorMessage
-                        name="longitude"
-                        component="div"
-                        className="text-danger mt-1 text-xs"
-                      />
-                    </div>
+                  <div className="mb-4">
+                    <Label htmlFor="address" className="mb-2">
+                      Google Location Link (optional)
+                    </Label>
+                    <Field
+                      name="address"
+                      id="address"
+                      as="input"
+                      type="text"
+                      placeholder="https://maps.google.com/..."
+                    />
+                    <ErrorMessage
+                      name="address"
+                      component="div"
+                      className="text-danger mt-1 text-xs"
+                    />
                   </div>
-
-                  {/* Navigation buttons for first tab */}
-                  <div className="mt-6 flex justify-end gap-3">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={onClose}
-                      disabled={isLoading}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={async () => {
-                        const isValid = await validateBasicInfo(values);
-                        if (isValid) {
-                          setActiveTab("opening-hours");
-                        } else {
-                          // Mark all basic info fields as touched to show validation errors
-                          const basicFields = [
-                            "name",
-                            "salon_type",
-                            "email",
-                            "phone",
-                            "website",
-                            "status",
-                            "street",
-                            "city",
-                            "postal_code",
-                            "country",
-                            "latitude",
-                            "longitude",
-                          ];
-                          basicFields.forEach((field) =>
-                            setFieldTouched(field, true),
-                          );
-                          toast.error(
-                            "Please fill in all required fields before proceeding",
-                          );
-                        }
-                      }}
-                      className="w-32 text-white"
-                    >
-                      Next
-                    </Button>
+                  {/* Navigation buttons for 3rd tab */}
+                  <div className="mt-6 flex items-center justify-between gap-3">
+                    <div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setActiveTab("contacts")}
+                      >
+                        Previous
+                      </Button>
+                    </div>
+                    <div className="flex gap-3">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={onClose}
+                        disabled={isLoading}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={async () => {
+                          const isValid = await validateAddress(values);
+                          if (isValid) {
+                            setActiveTab("opening-hours");
+                          } else {
+                            const basicFields = [
+                              "street",
+                              "city",
+                              "postal_code",
+                              "country",
+                            ];
+                            basicFields.forEach((field) =>
+                              setFieldTouched(field, true),
+                            );
+                            toast.error(
+                              "Please fill in all required fields before proceeding",
+                            );
+                          }
+                        }}
+                        className="w-32 text-white"
+                      >
+                        Next
+                      </Button>
+                    </div>
                   </div>
                 </TabsContent>
 
@@ -1013,12 +1065,12 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                     </div>
                   </div>
 
-                  {/* Navigation buttons for second tab */}
+                  {/* Navigation buttons for final tab */}
                   <div className="mt-6 flex justify-between gap-3">
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => setActiveTab("basic-info")}
+                      onClick={() => setActiveTab("address")}
                     >
                       Previous
                     </Button>

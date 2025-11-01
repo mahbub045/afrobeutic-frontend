@@ -2,16 +2,16 @@
 
 import Breadcrumbs from "@/components/Dashboard/CommonComponents/Breadcrumbs";
 import {
+  Armchair,
   BarChart2,
   Box,
   Calendar,
   Clock,
   Home,
   Image,
-  RockingChair,
   Scissors,
   Settings,
-  Users,
+  Users
 } from "lucide-react";
 import { useParams, usePathname } from "next/navigation";
 import * as React from "react";
@@ -41,7 +41,7 @@ const SingleSalonContainer: React.FC = () => {
       { label: "Opening Hours", href: `opening-hours`, Icon: Clock },
       { label: "Services", href: `services`, Icon: Scissors },
       { label: "Products", href: `products`, Icon: Box },
-      { label: "Chairs", href: `chairs`, Icon: RockingChair },
+      { label: "Chairs", href: `chairs`, Icon: Armchair },
       { label: "Bookings", href: `bookings`, Icon: Calendar },
       { label: "LookBook", href: `lookbook`, Icon: Image },
       { label: "Employees", href: `employees`, Icon: Users },
@@ -77,24 +77,11 @@ const SingleSalonContainer: React.FC = () => {
   }, [pathname, salonNavMenus]);
 
   // Demo data for tabs (typed)
-  type Product = { id: string; name: string; stock: number };
-  type Chair = { id: string; name: string };
   type Booking = { id: string; customer: string };
   type LookBook = { id: string; title: string };
 
   const demo = React.useMemo(
     () => ({
-      products: {
-        title: "Products",
-        items: [
-          { id: "p1", name: "Shampoo", stock: 32 },
-          { id: "p2", name: "Conditioner", stock: 12 },
-        ] as Product[],
-      },
-      chairs: {
-        title: "Chairs",
-        items: [{ id: "c1", name: "Chair 1" }] as Chair[],
-      },
       bookings: {
         title: "Bookings",
         items: [{ id: "b1", customer: "John Doe" }] as Booking[],
@@ -154,10 +141,8 @@ const SingleSalonContainer: React.FC = () => {
         {activeTab === "dashboard" && <DashboardTab />}
         {activeTab === "opening-hours" && <OpeningHoursTab />}
         {activeTab === "services" && <ServicesTab />}
-        {activeTab === "products" && (
-          <ProductsTab items={demo.products.items} />
-        )}
-        {activeTab === "chairs" && <ChairsTab items={demo.chairs.items} />}
+        {activeTab === "products" && <ProductsTab />}
+        {activeTab === "chairs" && <ChairsTab />}
         {activeTab === "bookings" && (
           <BookingsTab items={demo.bookings.items} />
         )}

@@ -10,6 +10,7 @@ import { useParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { useGetCommonCategoriesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Common/CategoriesApi";
 import {
   AddEmployeeDialogProps,
   EmployeeFormValues,
@@ -24,10 +25,10 @@ import {
   type FormikHelpers,
   type FormikTouched,
 } from "formik";
-import { X } from "lucide-react";
+import { LucideFilter, LucideFilterX, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import PhoneInput from "react-phone-input-2";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
@@ -47,12 +48,63 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
 }) => {
   const { salonuid } = useParams();
   const { resolvedTheme } = useTheme();
-  // keep the full mutation result so we can call reset() after success
-  const [addEmployee, { isLoading }] = useAddEmployeeMutation();
-
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [showValues, setShowValues] = useState(false);
+  const CATEGORY_TYPE_FILTER = "EMPLOYEE";
+  // RTK Hooks
+  const [addEmployee, { isLoading }] = useAddEmployeeMutation();
+  const {
+    data: commonCategoriesData,
+    isLoading: isLoadingCategories,
+    refetch,
+  } = useGetCommonCategoriesDataQuery({ category_type: CATEGORY_TYPE_FILTER });
+
+  // helpers to safely read category value/label from possible shapes
+  const formatCategoryValue = (c: unknown, idx: number) => {
+    if (typeof c === "string") return c;
+    if (c && typeof c === "object") {
+      const obj = c as Record<string, unknown>;
+      const val =
+        obj.name ?? obj.category ?? obj.title ?? obj.label ?? obj.id ?? idx;
+      return String(val);
+    }
+    return String(c ?? idx);
+  };
+
+  // build a deduplicated list of suggestion strings (preserve order)
+  const categorySuggestions: string[] = (() => {
+    const src: unknown[] = Array.isArray(commonCategoriesData)
+      ? commonCategoriesData
+      : Array.isArray(commonCategoriesData?.data)
+        ? commonCategoriesData!.data
+        : [];
+
+    const looksLikeEmployee = (c: unknown) => {
+      if (typeof c === "string") return true;
+      if (c && typeof c === "object") {
+        const obj = c as Record<string, unknown>;
+        const ct =
+          obj.category_type ?? obj.type ?? obj.categoryType ?? obj.kind;
+        if (ct === undefined || ct === null) return true;
+        return String(ct).toLowerCase() === CATEGORY_TYPE_FILTER.toLowerCase();
+      }
+      return false;
+    };
+
+    const seen = new Set<string>();
+    const out: string[] = [];
+    src.forEach((c, i) => {
+      if (!looksLikeEmployee(c)) return; // skip non-employee categories when metadata present
+      const v = formatCategoryValue(c, i);
+      if (v !== "" && !seen.has(v)) {
+        seen.add(v);
+        out.push(v);
+      }
+    });
+    return out;
+  })();
 
   useEffect(() => {
     return () => {
@@ -99,8 +151,10 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
         background: resolvedTheme === "dark" ? "#0f1724" : undefined,
         color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
         confirmButtonColor: "#037375",
+        timer: 3000,
       });
       helpers.resetForm();
+      refetch();
       // clear selected file and preview
       if (previewUrl) {
         try {
@@ -285,7 +339,7 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
                 </Field>
               </div>
 
-              <div>
+              <div className="relative">
                 <Label htmlFor="designation" className="mb-2">
                   Designation<span className="text-danger">*</span>
                 </Label>
@@ -296,7 +350,63 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
                   type="text"
                   required
                   placeholder="e.g. Hair Stylist"
+                  list="designation-list"
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setFieldValue("designation", e.target.value)
+                  }
                 />
+                <div className="absolute top-[15px] right-0 mt-2 flex items-center gap-2">
+                  <button
+                    type="button"
+                    className="inline-flex items-center !rounded-l-none border-l bg-[#f6f8fb] p-4 text-sm hover:bg-white dark:bg-[#1f1e1e] hover:dark:bg-[#242222]"
+                    onClick={() => setShowValues((s) => !s)}
+                  >
+                    {showValues ? (
+                      <LucideFilterX size={16} />
+                    ) : (
+                      <LucideFilter size={16} />
+                    )}
+                  </button>
+                </div>
+
+                {showValues ? (
+                  <div className="absolute right-0 left-0 z-50 mt-1 max-h-40 overflow-auto rounded border bg-white shadow-lg dark:bg-[#0b1116]">
+                    {categorySuggestions.length > 0 ? (
+                      <ul className="divide-y p-2">
+                        {categorySuggestions.map((v) => (
+                          <li key={v}>
+                            <button
+                              type="button"
+                              className="my-1 w-full px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-800"
+                              onClick={() => {
+                                setFieldValue("designation", v);
+                                setShowValues(false);
+                              }}
+                            >
+                              {v}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div className="text-muted p-2 text-sm">
+                        No Designation
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+
+                {isLoadingCategories ? (
+                  <p className="text-muted mt-1 text-sm">
+                    Loading Designations...
+                  </p>
+                ) : !commonCategoriesData ||
+                  (Array.isArray(commonCategoriesData) &&
+                    commonCategoriesData.length === 0) ||
+                  (Array.isArray(commonCategoriesData?.data) &&
+                    commonCategoriesData.data.length === 0) ? (
+                  <p className="text-muted mt-1 text-sm">No categories found</p>
+                ) : null}
                 {touched.designation && errors.designation ? (
                   <p className="text-destructive text-sm">
                     {errors.designation}

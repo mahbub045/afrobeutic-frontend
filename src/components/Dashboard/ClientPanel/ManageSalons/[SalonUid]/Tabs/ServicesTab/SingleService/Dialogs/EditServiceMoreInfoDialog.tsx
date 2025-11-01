@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { formatUnderscoredLabel } from "@/lib/utils";
+import { formatChoiceFieldValue } from "@/lib/utils";
 import { useGetEmployeesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Employees/EmployeesApi";
 import { useEditServiceMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
 import {
@@ -127,6 +127,7 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
         background: resolvedTheme === "dark" ? "#0f1724" : undefined,
         color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
         confirmButtonColor: "#037375",
+        timer: 3000,
       });
 
       onEditSuccess?.();
@@ -214,7 +215,7 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
                         }}
                       />
                       <Badge variant="default">
-                        {formatUnderscoredLabel(slot)}
+                        {formatChoiceFieldValue(slot)}
                       </Badge>
                     </label>
                   ))}
@@ -233,7 +234,7 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
                       <label key={g} className="inline-flex items-center gap-2">
                         <RadioGroupItem value={g} />
                         <span className="text-sm">
-                          {formatUnderscoredLabel(g)}
+                          {formatChoiceFieldValue(g)}
                         </span>
                       </label>
                     ))}

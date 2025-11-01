@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAccountSwitch } from "@/hooks/use-account-switch";
+import { formatChoiceFieldValue } from "@/lib/utils";
 import { useGetAccountAccesserQuery } from "@/Redux/Reducers/ClientPanel/SwitchAccount/SwitchAccountApi";
 import { ArrowRight, LoaderPinwheel, Star } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -87,19 +88,8 @@ const OthersInfo: React.FC = () => {
                 </p>
                 <Badge variant="secondary" className="font-semibold text-white">
                   {(isViewingDifferentAccount && activeAccount
-                    ? activeAccount.role
-                    : session?.user?.role
-                  )
-                    ?.split("_")
-                    .map((part: string) =>
-                      part
-                        .split("")
-                        .map((char: string, idx: number) =>
-                          idx === 0 ? char.toUpperCase() : char.toLowerCase(),
-                        )
-                        .join(""),
-                    )
-                    .join(" ") || "N/A"}
+                    ? formatChoiceFieldValue(activeAccount.role)
+                    : formatChoiceFieldValue(session?.user?.role)) || "N/A"}
                 </Badge>
               </div>
             </>

@@ -1,0 +1,62 @@
+import { baseApi } from "@/Redux/Api/BaseApi";
+
+export const ProductsApi = baseApi.injectEndpoints({
+  endpoints: (builder) => ({
+    getProductsData: builder.query({
+      // Accepts { salonUid, page?, page_size?, search? } and forwards them as query params
+      query: ({
+        salonUid,
+        page,
+        page_size,
+        search,
+      }: {
+        salonUid: string;
+        page?: number;
+        page_size?: number;
+        search?: string;
+      }) => {
+        return {
+          url: `/salons/${salonUid}/products`,
+          method: "GET",
+          // fetchBaseQuery will pick up `params` and serialize them into the URL
+          params: {
+            ...(page ? { page } : {}),
+            ...(page_size ? { page_size } : {}),
+            ...(search ? { search } : {}),
+          },
+        };
+      },
+      providesTags: ["Products"],
+    }),
+    addProduct: builder.mutation({
+      query: ({ salonUid, productData }) => ({
+        url: `/salons/${salonUid}/products`,
+        method: "POST",
+        body: productData,
+      }),
+      invalidatesTags: ["Products"],
+    }),
+    editProduct: builder.mutation({
+      query: ({ salonUid, productData, productUid }) => ({
+        url: `/salons/${salonUid}/products/${productUid}`,
+        method: "PATCH",
+        body: productData,
+      }),
+      invalidatesTags: ["Products"],
+    }),
+    deleteProduct: builder.mutation({
+      query: ({ salonUid, productUid }) => ({
+        url: `/salons/${salonUid}/products/${productUid}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Products"],
+    }),
+  }),
+});
+
+export const {
+  useGetProductsDataQuery,
+  useAddProductMutation,
+  useEditProductMutation,
+  useDeleteProductMutation,
+} = ProductsApi;

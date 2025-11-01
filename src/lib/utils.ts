@@ -40,7 +40,7 @@ export const safe = (v: unknown): string => {
   }
 };
 
-export const formatUnderscoredLabel = (v: unknown): string => {
+export const formatChoiceFieldValue = (v: unknown): string => {
   if (typeof v !== "string") return safe(v);
   return v
     .split("_")

@@ -8,23 +8,22 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useGetCommonCategoriesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Common/CategoriesApi";
-import { useAddServiceMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
+import { useAddProductMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Products/ProductsApi";
 import {
-  AddServiceDialogProps,
-  ServiceFormValues,
-} from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
+  AddProductDialogProps,
+  ProductFormValues,
+} from "@/Types/ClientPanel/ManageSalonTypes/ProductsTypes/ProductsType";
 import { Field, Formik, type FormikHelpers } from "formik";
 import { LucideFilter, LucideFilterX, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import type { ChangeEvent } from "react";
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
 
-const ServiceSchema = Yup.object().shape({
+const ProductSchema = Yup.object().shape({
   name: Yup.string().trim().required("Name is required"),
   category: Yup.string().trim().required("Category is required"),
   price: Yup.number()
@@ -35,7 +34,7 @@ const ServiceSchema = Yup.object().shape({
   uploaded_images: Yup.string().nullable(),
 });
 
-const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
+const AddProductDialog: React.FC<AddProductDialogProps> = ({
   isOpen,
   onClose,
 }) => {
@@ -45,11 +44,9 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
   const [fileError, setFileError] = useState<string | null>(null);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [showValues, setShowValues] = useState(false);
-  // default category-type filter for suggestions (sent to the API)
-  const CATEGORY_TYPE_FILTER = "SERVICE";
-
-  // rtk hooks
-  const [addService, { isLoading }] = useAddServiceMutation();
+  const CATEGORY_TYPE_FILTER = "PRODUCT";
+  // RTK hooks
+  const [addProduct, { isLoading }] = useAddProductMutation();
   const {
     data: commonCategoriesData,
     isLoading: isLoadingCategories,
@@ -76,7 +73,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
         ? commonCategoriesData!.data
         : [];
 
-    const looksLikeService = (c: unknown) => {
+    const looksLikeProduct = (c: unknown) => {
       if (typeof c === "string") return true;
       if (c && typeof c === "object") {
         const obj = c as Record<string, unknown>;
@@ -91,7 +88,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
     const seen = new Set<string>();
     const out: string[] = [];
     src.forEach((c, i) => {
-      if (!looksLikeService(c)) return; // skip non-service categories when metadata present
+      if (!looksLikeProduct(c)) return; // skip non-product categories when metadata present
       const v = formatCategoryValue(c, i);
       if (v !== "" && !seen.has(v)) {
         seen.add(v);
@@ -115,9 +112,9 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function handleAddService(
-    values: ServiceFormValues,
-    helpers: FormikHelpers<ServiceFormValues>,
+  async function handleAddProduct(
+    values: ProductFormValues,
+    helpers: FormikHelpers<ProductFormValues>,
   ) {
     if (!salonuid) return;
 
@@ -139,17 +136,17 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
         .slice(0, 2)
         .forEach((f) => form.append("uploaded_images", f));
 
-      // send FormData directly as serviceData — baseApi will attach headers
-      await addService({
+      // send FormData directly as productData — baseApi will attach headers
+      await addProduct({
         salonUid: salonuid as string,
-        serviceData: form as unknown as object,
+        productData: form as unknown as object,
       }).unwrap();
       onClose();
       Swal.fire({
         icon: "success",
         iconColor: "#037375",
         title: "Added successfully",
-        html: `Successfully added <b class="text-primary">${values.name}</b> service`,
+        html: `Successfully added <b class="text-primary">${values.name}</b> product`,
         background: resolvedTheme === "dark" ? "#0f1724" : undefined,
         color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
         confirmButtonColor: "#037375",
@@ -160,7 +157,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
       setSelectedFiles([]);
     } catch (err) {
       console.error(err);
-      toast.error("Failed to add service. Please try again.");
+      toast.error("Failed to add product. Please try again.");
     }
   }
 
@@ -168,8 +165,8 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md shadow-md dark:shadow-gray-600">
         <DialogHeader>
-          <DialogTitle>Add New Service</DialogTitle>
-          <DialogDescription>Add a new service to the salon</DialogDescription>
+          <DialogTitle>Add New Product</DialogTitle>
+          <DialogDescription>Add a new product to the salon</DialogDescription>
         </DialogHeader>
 
         <Formik
@@ -179,10 +176,10 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
               category: "",
               price: "",
               description: "",
-            } as ServiceFormValues
+            } as ProductFormValues
           }
-          validationSchema={ServiceSchema}
-          onSubmit={handleAddService}
+          validationSchema={ProductSchema}
+          onSubmit={handleAddProduct}
         >
           {({ handleSubmit, errors, touched, setFieldValue }) => (
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -196,7 +193,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                   as="input"
                   type="text"
                   required
-                  placeholder="Service name"
+                  placeholder="Product name"
                 />
                 {touched.name && errors.name ? (
                   <p className="text-destructive text-sm">{errors.name}</p>
@@ -213,17 +210,12 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                   as="input"
                   type="text"
                   required
-                  placeholder={
-                    isLoadingCategories
-                      ? "Loading categories..."
-                      : "Select or type category"
-                  }
+                  placeholder="Category"
                   list="category-list"
                   onChange={(e: ChangeEvent<HTMLInputElement>) =>
                     setFieldValue("category", e.target.value)
                   }
                 />
-
                 <div className="absolute top-[15px] right-0 mt-2 flex items-center gap-2">
                   <button
                     type="button"
@@ -276,7 +268,6 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                     commonCategoriesData.data.length === 0) ? (
                   <p className="text-muted mt-1 text-sm">No categories found</p>
                 ) : null}
-
                 {touched.category && errors.category ? (
                   <p className="text-destructive text-sm">{errors.category}</p>
                 ) : null}
@@ -432,7 +423,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                   Cancel
                 </Button>
                 <Button type="submit" disabled={isLoading || !salonuid}>
-                  {isLoading ? "Adding..." : "Add Service"}
+                  {isLoading ? "Adding..." : "Add Product"}
                 </Button>
               </div>
             </form>
@@ -443,4 +434,4 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
   );
 };
 
-export default AddServiceDialog;
+export default AddProductDialog;

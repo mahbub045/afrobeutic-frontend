@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatChoiceFieldValue } from "@/lib/utils";
 import { useGetMembersQuery } from "@/Redux/Reducers/ClientPanel/Members/MembersApi";
 import { MemberProps } from "@/Types/ClientPanel/ManageSalonTypes/MemberTypes/MemberType";
 import {
@@ -132,81 +133,62 @@ const MemberList: React.FC = () => {
           membersData.results.map((member: MemberProps) => (
             <Card
               key={member.uid}
-              className="group hover:shadow-primary/10 relative flex flex-col items-center gap-2 overflow-hidden border border-gray-200/60 bg-white/80 p-8 text-center shadow-md backdrop-blur-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl dark:border-gray-700/60 dark:bg-gray-900/80 dark:shadow-gray-600 dark:hover:shadow-gray-600/30"
+              className="group hover:shadow-primary/10 gap-2 overflow-hidden border border-gray-200/60 bg-white/80 p-2 text-center shadow-md backdrop-blur-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl dark:border-gray-700/60 dark:bg-gray-900/80 dark:shadow-gray-600 dark:hover:shadow-gray-600/30"
             >
               {/* Animated border gradient */}
               <div className="from-primary/10 dark:from-primary/20 dark:to-primary/20 to-primary/10 absolute inset-0 rounded-lg bg-gradient-to-r via-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
-              {member.role !== "OWNER" && (
-                <div className="absolute top-2 left-2">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger className="rounded-md px-1 dark:shadow-gray-600">
-                      <EllipsisVertical className="cursor-pointer" />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem
-                        className="text-primary cursor-pointer"
-                        onClick={() => handleOpenEditMemberModal(member)}
-                      >
-                        <UserRoundPen className="text-primary" />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-danger cursor-pointer"
-                        onClick={() => handleOpenDeleteMemberModal(member)}
-                      >
-                        <UserX className="text-danger" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Badge variant="secondary" className="text-xs">
+                    {member.role ? formatChoiceFieldValue(member.role) : "N/A"}
+                  </Badge>
                 </div>
-              )}
+                <div>
+                  {member.role !== "OWNER" && (
+                    <div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger className="px-1 shadow-md dark:shadow-gray-600">
+                          <EllipsisVertical className="cursor-pointer text-xs" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuItem
+                            className="text-primary cursor-pointer"
+                            onClick={() => handleOpenEditMemberModal(member)}
+                          >
+                            <UserRoundPen className="text-primary" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-danger cursor-pointer"
+                            onClick={() => handleOpenDeleteMemberModal(member)}
+                          >
+                            <UserX className="text-danger" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  )}
+                </div>
+              </div>
 
-              <Badge
-                variant="secondary"
-                className="absolute top-2 right-2 w-fit text-xs"
-              >
-                {member.role &&
-                  member.role
-                    .split("_")
-                    .map((part: string) =>
-                      part
-                        .split("")
-                        .map((char: string, idx: number) =>
-                          idx === 0 ? char.toUpperCase() : char.toLowerCase(),
-                        )
-                        .join(""),
-                    )
-                    .join(" ")}
-              </Badge>
-              <Image
-                src={member.avatar || "/images/common/user.png"}
-                alt={member.name}
-                width={80}
-                height={80}
-                className="rounded-full object-cover"
-              />
+              <div className="flex flex-col items-center justify-center">
+                <Image
+                  src={member.avatar || "/images/common/user.png"}
+                  alt={member.name}
+                  width={80}
+                  height={80}
+                  className="mb-2 rounded-full object-cover"
+                />
 
-              <h3 className="relative text-xl font-bold md:text-base lg:text-lg xl:text-xl">
-                {member.name}
-                {/* animated status dot (ping + solid) at top-right of the image */}
-                {/* <div className="absolute top-1 -right-3 flex items-center">
-                <span
-                  className={`absolute inline-flex h-3 w-3 rounded-full ${
-                    member.status === "ACTIVE" ? "bg-green-400" : "bg-red-400"
-                  } animate-ping opacity-75`}
-                />
-                <span
-                  className={`relative inline-flex h-3 w-3 rounded-full ${
-                    member.status === "ACTIVE" ? "bg-green-600" : "bg-red-600"
-                  } border-2 border-white`}
-                />
-              </div> */}
-              </h3>
-              <p className="text-sm text-gray-600 md:text-xs lg:text-sm dark:text-gray-400">
-                {member.email}
-              </p>
+                <h3 className="relative text-xl font-bold md:text-base lg:text-lg xl:text-xl">
+                  {member.name}
+                </h3>
+                <p className="text-sm text-gray-600 md:text-xs lg:text-sm dark:text-gray-400">
+                  {member.email}
+                </p>
+              </div>
             </Card>
           ))
         ) : !isLoadingMembers ? (
