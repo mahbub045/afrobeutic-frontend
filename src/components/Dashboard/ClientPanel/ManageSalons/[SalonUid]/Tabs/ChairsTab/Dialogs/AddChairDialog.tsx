@@ -121,7 +121,7 @@ const AddChairDialog: React.FC<ChairDialogsProps> = ({ isOpen, onClose }) => {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add New Chair</DialogTitle>
+          <DialogTitle className="text-primary">Add New Chair</DialogTitle>
           <DialogDescription>
             Please fill in the details for the new chair.
           </DialogDescription>

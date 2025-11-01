@@ -129,7 +129,7 @@ const EditChairDialog: React.FC<ChairDialogsProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit Chair</DialogTitle>
+          <DialogTitle className="text-primary">Edit Chair</DialogTitle>
           <DialogDescription>
             Please fill in the details for the new chair.
           </DialogDescription>
