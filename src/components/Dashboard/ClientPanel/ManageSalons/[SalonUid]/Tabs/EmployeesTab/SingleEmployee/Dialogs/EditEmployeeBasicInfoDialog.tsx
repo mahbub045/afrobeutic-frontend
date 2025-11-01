@@ -70,7 +70,7 @@ const EditEmployeeBasicInfoDialog: React.FC<
         ? commonCategoriesData!.data
         : [];
 
-    const looksLikeService = (c: unknown) => {
+    const looksLikeEmployee = (c: unknown) => {
       if (typeof c === "string") return true;
       if (c && typeof c === "object") {
         const obj = c as Record<string, unknown>;
@@ -85,7 +85,7 @@ const EditEmployeeBasicInfoDialog: React.FC<
     const seen = new Set<string>();
     const out: string[] = [];
     src.forEach((c, i) => {
-      if (!looksLikeService(c)) return; // skip non-service categories when metadata present
+      if (!looksLikeEmployee(c)) return; // skip non-employee categories when metadata present
       const v = formatCategoryValue(c, i);
       if (v !== "" && !seen.has(v)) {
         seen.add(v);
@@ -344,7 +344,7 @@ const EditEmployeeBasicInfoDialog: React.FC<
                       </ul>
                     ) : (
                       <div className="text-muted p-2 text-sm">
-                        No categories
+                        No Designation
                       </div>
                     )}
                   </div>
@@ -352,7 +352,7 @@ const EditEmployeeBasicInfoDialog: React.FC<
 
                 {isLoadingCategories ? (
                   <p className="text-muted mt-1 text-sm">
-                    Loading categories...
+                    Loading Designations...
                   </p>
                 ) : !commonCategoriesData ||
                   (Array.isArray(commonCategoriesData) &&

@@ -201,17 +201,13 @@ const AddChairDialog: React.FC<ChairDialogsProps> = ({ isOpen, onClose }) => {
                         ))}
                       </ul>
                     ) : (
-                      <div className="text-muted p-2 text-sm">
-                        No categories
-                      </div>
+                      <div className="text-muted p-2 text-sm">No Types</div>
                     )}
                   </div>
                 ) : null}
 
                 {isLoadingCategories ? (
-                  <p className="text-muted mt-1 text-sm">
-                    Loading categories...
-                  </p>
+                  <p className="text-muted mt-1 text-sm">Loading Types...</p>
                 ) : !commonCategoriesData ||
                   (Array.isArray(commonCategoriesData) &&
                     commonCategoriesData.length === 0) ||
