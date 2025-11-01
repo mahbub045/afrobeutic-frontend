@@ -193,7 +193,7 @@ const ViewProductPanel: React.FC<ViewProductPanelProps> = ({
               <div></div>
               <div>
                 <a className="text-primary text-lg font-medium hover:underline">
-                  {displayedProduct.name}
+                  {displayedProduct.name || "Unnamed Product"}
                 </a>
               </div>
 
@@ -249,7 +249,7 @@ const ViewProductPanel: React.FC<ViewProductPanelProps> = ({
                 Description
               </div>
               <div className="mt-1 text-sm whitespace-pre-wrap">
-                {displayedProduct.description}
+                {displayedProduct.description || "No description provided."}
               </div>
             </div>
             <div className="flex justify-end">

@@ -327,7 +327,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                 </div>
                 <div className="mt-1 text-sm font-medium">
                   <Badge variant="default">
-                    {formatChoiceFieldValue(displayedService.gender_specific)}
+                    {formatChoiceFieldValue(displayedService.gender_specific || "N/A")}
                   </Badge>
                 </div>
               </div>
