@@ -125,7 +125,11 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
   };
 
   const totalCount = chairsBookingData?.count ?? 0;
-  // const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const totalPages = chairsBookingData?.count
+    ? Math.ceil(
+        chairsBookingData.count / (chairsBookingData.results?.length || 1),
+      )
+    : 0;
 
   const getStatusVariant = (status: string) => {
     switch (status) {
@@ -290,8 +294,10 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
                 <ChevronLeft className="h-4 w-4" /> Previous
               </Button>
 
-              <div className="px-2 text-sm">
-                Total: {chairsBookingData?.count ?? 0}
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-gray-600 dark:text-gray-400">
+                  Page {page} of {totalPages}
+                </span>
               </div>
 
               <Button
