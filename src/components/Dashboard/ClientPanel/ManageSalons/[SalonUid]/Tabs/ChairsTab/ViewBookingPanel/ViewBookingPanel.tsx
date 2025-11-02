@@ -65,13 +65,9 @@ interface BookingData {
 
 interface ViewBookingPanelProps {
   chairUid: string;
-  chairName: string;
 }
 
-const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({
-  chairUid,
-  chairName,
-}) => {
+const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
   const params = useParams();
   const salonUid = Array.isArray(params.salonuid)
     ? params.salonuid[0]

@@ -27,6 +27,7 @@ import {
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import AddChairDialog from "./Dialogs/AddChairDialog";
+import CreateBookingDialog from "./Dialogs/CreateBookingDialog";
 import DeleteChairDialog from "./Dialogs/DeleteChairDialog";
 import EditChairDialog from "./Dialogs/EditChairDialog";
 import ViewBookingPanel from "./ViewBookingPanel/ViewBookingPanel";
@@ -39,6 +40,8 @@ const ChairsTab: React.FC = () => {
   const [selectedChair, setSelectedChair] = useState<ChairProps | null>(null);
   const [isEditChairDialogOpen, setIsEditChairDialogOpen] = useState(false);
   const [isDeleteChairDialogOpen, setIsDeleteChairDialogOpen] = useState(false);
+  const [isCreateBookingDialogOpen, setIsCreateBookingDialogOpen] =
+    useState(false);
   const [activeTab, setActiveTab] = useState<"chairs" | "bookings">("chairs");
   const [selectedChairForBooking, setSelectedChairForBooking] =
     useState<ChairProps | null>(null);
@@ -52,6 +55,10 @@ const ChairsTab: React.FC = () => {
   };
   const handleDeleteChairDialogOpen = (chair: ChairProps) => {
     setIsDeleteChairDialogOpen(true);
+    setSelectedChair(chair);
+  };
+  const handleCreateBookingDialogOpen = (chair: ChairProps) => {
+    setIsCreateBookingDialogOpen(true);
     setSelectedChair(chair);
   };
   const handleViewBooking = (chair: ChairProps) => {
@@ -227,6 +234,20 @@ const ChairsTab: React.FC = () => {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
                             className="cursor-pointer"
+                            onClick={() => handleCreateBookingDialogOpen(chair)}
+                          >
+                            <Plus className="mr-1 h-4 w-4" />
+                            <span>Create Booking</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="cursor-pointer"
+                            onClick={() => handleViewBooking(chair)}
+                          >
+                            <Eye className="mr-1 h-4 w-4" />
+                            <span>View Bookings</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="cursor-pointer"
                             onClick={() => handleEditChairDialogOpen(chair)}
                           >
                             <Edit className="mr-1 h-4 w-4" />
@@ -238,17 +259,6 @@ const ChairsTab: React.FC = () => {
                           >
                             <Trash2 className="text-danger mr-1 h-4 w-4" />
                             <span>Delete Chair</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="cursor-pointer"
-                            onClick={() => handleViewBooking(chair)}
-                          >
-                            <Eye className="mr-1 h-4 w-4" />
-                            <span>View Booking</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="cursor-pointer">
-                            <Plus className="mr-1 h-4 w-4" />
-                            <span>Create Booking</span>
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -340,10 +350,7 @@ const ChairsTab: React.FC = () => {
 
       <TabsContent value="bookings" className="mt-0">
         {selectedChairForBooking && selectedChairForBooking.uid && (
-          <ViewBookingPanel
-            chairUid={selectedChairForBooking.uid}
-            chairName={selectedChairForBooking.name}
-          />
+          <ViewBookingPanel chairUid={selectedChairForBooking.uid} />
         )}
       </TabsContent>
 
@@ -360,6 +367,11 @@ const ChairsTab: React.FC = () => {
       <DeleteChairDialog
         isOpen={isDeleteChairDialogOpen}
         onClose={() => setIsDeleteChairDialogOpen(false)}
+        selectedChairData={selectedChair || undefined}
+      />
+      <CreateBookingDialog
+        isOpen={isCreateBookingDialogOpen}
+        onClose={() => setIsCreateBookingDialogOpen(false)}
         selectedChairData={selectedChair || undefined}
       />
     </Tabs>
