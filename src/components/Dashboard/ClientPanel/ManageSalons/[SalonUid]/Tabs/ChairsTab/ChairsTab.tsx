@@ -131,9 +131,20 @@ const ChairsTab: React.FC = () => {
                 View all bookings for this chair
               </p>
             </div>
-            <Button variant="outline" size="sm" onClick={handleBackToChairs}>
-              <ArrowLeft className="mr-1 h-4 w-4" /> Back to Chairs
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={handleBackToChairs}>
+                <ArrowLeft className="mr-1 h-4 w-4" /> Back to Chairs
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() =>
+                  handleCreateBookingDialogOpen(selectedChairForBooking!)
+                }
+              >
+                <Plus className="mr-1 h-4 w-4" /> Create Booking
+              </Button>
+            </div>
           </>
         ) : (
           <>
