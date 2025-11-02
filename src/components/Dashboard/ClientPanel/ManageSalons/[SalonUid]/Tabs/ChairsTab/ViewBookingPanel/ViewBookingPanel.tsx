@@ -19,61 +19,19 @@ import {
 import { formatChoiceFieldValue } from "@/lib/utils";
 import { useGetChairsBookingDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Chairs/ChairsBookingApi";
 import {
+  BookingData,
+  ViewBookingPanelProps,
+} from "@/Types/ClientPanel/ManageSalonTypes/ChairsTypes/ChairBookingTypes";
+import {
   ChevronLeft,
   ChevronRight,
-  EditIcon,
   EyeIcon,
   LoaderPinwheel,
   Search,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-
-interface BookingData {
-  uid: string;
-  customer: {
-    uid: string;
-    name: string;
-    phone: string;
-    created_at: string;
-    updated_at: string;
-  };
-  booking_id: string;
-  booking_date: string;
-  booking_time: string;
-  status: string;
-  booking_duration: string;
-  notes: string | null;
-  services: Array<{
-    uid: string;
-    name: string;
-    category: number;
-    price: string;
-    description: string | null;
-    service_duration: string;
-    created_at: string;
-    updated_at: string;
-  }>;
-  products: Array<{
-    uid: string;
-    name: string;
-    category: number;
-    price: string;
-    description: string;
-    created_at: string;
-    updated_at: string;
-  }>;
-  employee: {
-    uid: string;
-    name: string;
-  };
-  created_at: string;
-  updated_at: string;
-}
-
-interface ViewBookingPanelProps {
-  chairUid: string;
-}
+import EditChairBookingDialog from "./Dialogs/EditChairBookingDialog";
 
 const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
   const params = useParams();
@@ -87,6 +45,12 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isEditBookingDialogOpen, setIsEditBookingDialogOpen] = useState(false);
+
+  const handleEditBooking = (booking: BookingData) => {
+    setSelectedBooking(booking);
+    setIsEditBookingDialogOpen(true);
+  };
 
   const {
     data: chairsBookingData,
@@ -253,14 +217,15 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
                     onClick={() => handleViewDetails(booking)}
                   >
                     <EyeIcon className="size-4" />
+                    View
                   </Button>
-                  <Button
+                  {/* <Button
                     variant="outline"
                     size="sm"
-                    // onClick={() => handleEditBooking(booking)}
+                    onClick={() => handleEditBooking(booking)}
                   >
                     <EditIcon className="size-4" />
-                  </Button>
+                  </Button> */}
                 </TableCell>
               </TableRow>
             ),
@@ -458,6 +423,13 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
           )}
         </SheetContent>
       </Sheet>
+      {/* Dialogs */}
+      <EditChairBookingDialog
+        isOpen={isEditBookingDialogOpen}
+        onClose={() => setIsEditBookingDialogOpen(false)}
+        selectedChairUid={chairUid}
+        selectedChairBookingData={selectedBooking}
+      />
     </div>
   );
 };

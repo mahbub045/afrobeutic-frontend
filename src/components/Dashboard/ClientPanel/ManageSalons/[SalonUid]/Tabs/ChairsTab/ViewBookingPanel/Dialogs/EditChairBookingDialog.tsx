@@ -6,12 +6,14 @@ import {
   DialogHeader,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { useAddChairBookingMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Chairs/ChairsBookingApi";
+import { useEditChairBookingMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Chairs/ChairsBookingApi";
 import { useGetEmployeesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Employees/EmployeesApi";
 import { useGetProductsDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Products/ProductsApi";
 import { useGetServicesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
-import { BookingFormValues } from "@/Types/ClientPanel/ManageSalonTypes/ChairsTypes/ChairBookingTypes";
-import { ChairDialogsProps } from "@/Types/ClientPanel/ManageSalonTypes/ChairsTypes/ChairsType";
+import {
+  BookingFormValues,
+  EditChairBookingDialogProps,
+} from "@/Types/ClientPanel/ManageSalonTypes/ChairsTypes/ChairBookingTypes";
 import { EmployeeProps } from "@/Types/ClientPanel/ManageSalonTypes/EmployeesTypes/EmployeesType";
 import { ProductProps } from "@/Types/ClientPanel/ManageSalonTypes/ProductsTypes/ProductsType";
 import { ServiceProps } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
@@ -50,10 +52,11 @@ const BookingSchema = Yup.object().shape({
   employee: Yup.string().required("Employee is required"),
 });
 
-const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
+const EditChairBookingDialog: React.FC<EditChairBookingDialogProps> = ({
   isOpen,
   onClose,
-  selectedChairData,
+  selectedChairUid,
+  selectedChairBookingData,
 }) => {
   const { salonuid } = useParams();
   const { resolvedTheme } = useTheme();
@@ -66,8 +69,8 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
     useGetProductsDataQuery({ salonUid: salonUid });
   const { data: employeesData, isLoading: isLoadingEmployees } =
     useGetEmployeesDataQuery({ salonUid: salonUid });
-  const [addChairBooking, { isLoading: isAddingChairBooking }] =
-    useAddChairBookingMutation();
+  const [editChairBooking, { isLoading: isEditingChairBooking }] =
+    useEditChairBookingMutation();
 
   // Format data for dropdowns
   const services = Array.isArray(servicesData?.results)
@@ -93,7 +96,8 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
     helpers: FormikHelpers<BookingFormValues>,
   ) => {
     try {
-      if (!salonuid || !selectedChairData?.uid) return;
+      if (!salonuid || !selectedChairUid || !selectedChairBookingData?.uid)
+        return;
 
       // Format booking_time to ISO timestamp format (HH:MM:SS.SSSZ)
       const formattedTime = values.booking_time.includes(".")
@@ -113,9 +117,10 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
 
       console.log("Booking Payload:", bookingPayload); // Debug log
 
-      const response = await addChairBooking({
+      const response = await editChairBooking({
         salonUid: salonuid,
-        chairUid: selectedChairData.uid,
+        chairUid: selectedChairUid,
+        bookingUid: selectedChairBookingData.uid,
         chairBookingData: bookingPayload,
       }).unwrap();
 
@@ -125,8 +130,8 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
       Swal.fire({
         icon: "success",
         iconColor: "#037375",
-        title: "Booking Created Successfully",
-        html: `Booking for <b class="text-primary">${values.customer.name}</b> has been created.`,
+        title: "Booking Edited Successfully",
+        html: `Booking for <b class="text-primary">${values.customer.name}</b> has been edited.`,
         background: resolvedTheme === "dark" ? "#0f1724" : undefined,
         color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
         confirmButtonColor: "#037375",
@@ -152,9 +157,9 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-h-[80vh] !max-w-4xl overflow-y-auto shadow-md sm:!max-w-4xl md:!max-w-5xl dark:shadow-gray-600">
         <DialogHeader>
-          <DialogTitle className="text-primary">Create Booking</DialogTitle>
+          <DialogTitle className="text-primary">Edit Booking</DialogTitle>
           <DialogDescription>
-            Please fill in the details for the new booking.
+            Please fill in the details for the Edit booking.
           </DialogDescription>
         </DialogHeader>
 
@@ -162,16 +167,25 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
           initialValues={
             {
               customer: {
-                name: "",
-                phone: "",
+                name: selectedChairBookingData?.customer.name || "",
+                phone: selectedChairBookingData?.customer.phone || "",
               },
-              booking_date: new Date().toISOString().split("T")[0],
-              booking_time: new Date().toTimeString().slice(0, 8),
-              status: "",
-              notes: "",
-              services: [],
-              products: [],
-              employee: "",
+              booking_date:
+                selectedChairBookingData?.booking_date ||
+                new Date().toISOString().split("T")[0],
+              booking_time:
+                selectedChairBookingData?.booking_time ||
+                new Date().toTimeString().slice(0, 8),
+              status: selectedChairBookingData?.status || "PLACED",
+              notes: selectedChairBookingData?.notes || "",
+              // ensure services/products are arrays of uids (strings) as expected by BookingFormValues
+              services: Array.isArray(selectedChairBookingData?.services)
+                ? selectedChairBookingData!.services.map((s) => s.uid)
+                : [],
+              products: Array.isArray(selectedChairBookingData?.products)
+                ? selectedChairBookingData!.products.map((p) => p.uid)
+                : [],
+              employee: selectedChairBookingData?.employee?.uid || "",
             } as BookingFormValues
           }
           validationSchema={BookingSchema}
@@ -498,20 +512,20 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
                   type="button"
                   variant="outline"
                   onClick={onClose}
-                  disabled={isAddingChairBooking}
+                  disabled={isEditingChairBooking}
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={
-                    isAddingChairBooking ||
+                    isEditingChairBooking ||
                     !salonuid ||
                     isLoadingServices ||
                     isLoadingEmployees
                   }
                 >
-                  {isAddingChairBooking ? "Creating..." : "Create Booking"}
+                  {isEditingChairBooking ? "Saving..." : "Save Changes"}
                 </Button>
               </div>
             </Form>
@@ -522,4 +536,4 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
   );
 };
 
-export default CreateBookingDialog;
+export default EditChairBookingDialog;

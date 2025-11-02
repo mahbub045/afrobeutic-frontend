@@ -50,13 +50,6 @@ export const ChairsBookingApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["ChairsBooking"],
     }),
-    deleteChairBooking: builder.mutation({
-      query: ({ salonUid, chairUid, bookingUid }) => ({
-        url: `/salons/${salonUid}/chairs/${chairUid}/bookings/${bookingUid}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: ["ChairsBooking"],
-    }),
   }),
 });
 
@@ -64,5 +57,4 @@ export const {
   useGetChairsBookingDataQuery,
   useAddChairBookingMutation,
   useEditChairBookingMutation,
-  useDeleteChairBookingMutation,
 } = ChairsBookingApi;
