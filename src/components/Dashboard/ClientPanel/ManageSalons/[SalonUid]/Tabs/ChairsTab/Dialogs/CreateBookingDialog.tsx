@@ -15,9 +15,10 @@ import { EmployeeProps } from "@/Types/ClientPanel/ManageSalonTypes/EmployeesTyp
 import { ProductProps } from "@/Types/ClientPanel/ManageSalonTypes/ProductsTypes/ProductsType";
 import { ServiceProps } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import { DialogTitle } from "@radix-ui/react-dialog";
-import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
+import { ErrorMessage, Field, FieldProps, Form, Formik, FormikHelpers, FormikProps } from "formik";
 import { useTheme } from "next-themes";
 import { useParams } from "next/navigation";
+import PhoneInput from "react-phone-input-2";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
@@ -210,7 +211,7 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
                     <Label htmlFor="customer.phone" className="mb-2">
                       Customer Phone<span className="text-danger">*</span>
                     </Label>
-                    <Field
+                    {/* <Field
                       id="customer.phone"
                       name="customer.phone"
                       as="input"
@@ -222,7 +223,60 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
                       name="customer.phone"
                       component="p"
                       className="mt-1 text-sm text-red-500"
-                    />
+                    /> */}
+                    <Field name="customer.phone">
+                      {({
+                        field,
+                        form,
+                      }: FieldProps<
+                        string,
+                        FormikProps<BookingFormValues>
+                      >) => (
+                        <div>
+                          <PhoneInput
+                            country={"gb"}
+                            value={field.value}
+                            onChange={(
+                              val: string,
+                              data?: { dialCode?: string },
+                            ) => {
+                              const dial = data?.dialCode
+                                ? `+${data.dialCode}`
+                                : "";
+                              const numeric = (val || "").replace(
+                                /[^0-9]/g,
+                                "",
+                              );
+                              let newVal = numeric;
+                              if (dial) {
+                                if (
+                                  !numeric.startsWith(dial.replace(/\D/g, ""))
+                                ) {
+                                  newVal = `${dial}${numeric}`;
+                                } else {
+                                  newVal = `+${numeric}`;
+                                }
+                              } else if (numeric) {
+                                newVal = `+${numeric}`;
+                              }
+                              form.setFieldValue(field.name, newVal);
+                            }}
+                            inputProps={{ name: field.name }}
+                            searchPlaceholder="Search"
+                            enableSearch
+                            inputClass="!w-full !h-auto px-3 py-2 rounded-md !bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100"
+                            buttonClass="!bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100 !border-1 dark:!border-gray-700"
+                            dropdownClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100 !px-2"
+                            searchClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100"
+                          />
+                          <ErrorMessage
+                            name="phone"
+                            component="div"
+                            className="text-danger mt-1 text-xs"
+                          />
+                        </div>
+                      )}
+                    </Field>
                   </div>
                 </div>
               </div>
