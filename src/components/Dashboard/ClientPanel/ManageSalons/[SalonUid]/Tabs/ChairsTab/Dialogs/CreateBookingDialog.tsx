@@ -29,6 +29,7 @@ export interface BookingFormValues {
   };
   booking_date: string;
   booking_time: string;
+  status: string;
   notes: string;
   services: string[];
   products: string[];
@@ -46,6 +47,7 @@ const BookingSchema = Yup.object().shape({
     .required("Customer information is required"),
   booking_date: Yup.string().required("Booking date is required"),
   booking_time: Yup.string().required("Booking time is required"),
+  status: Yup.string().required("Booking status is required"),
   notes: Yup.string(),
   services: Yup.array().min(1, "At least one service is required"),
   products: Yup.array(),
@@ -106,7 +108,7 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
         customer: values.customer,
         booking_date: values.booking_date,
         booking_time: formattedTime,
-        status: "PLACED" as const,
+        status: values.status || "PLACED",
         notes: values.notes || "",
         services: values.services,
         products: values.products || [],
@@ -169,6 +171,7 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
               },
               booking_date: new Date().toISOString().split("T")[0],
               booking_time: new Date().toTimeString().slice(0, 8),
+              status: "",
               notes: "",
               services: [],
               products: [],
@@ -265,23 +268,40 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
                     />
                   </div>
                 </div>
-
-                <div>
-                  <Label htmlFor="notes" className="mb-2">
-                    Notes
-                  </Label>
-                  <Field
-                    id="notes"
-                    name="notes"
-                    as="textarea"
-                    placeholder="Enter booking notes (optional)"
-                    className="border-input placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-[80px] w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:ring-1 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                  />
-                  <ErrorMessage
-                    name="notes"
-                    component="p"
-                    className="mt-1 text-sm text-red-500"
-                  />
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
+                    <Label htmlFor="status" className="mb-2">
+                      Status<span className="text-danger">*</span>
+                    </Label>
+                    <Field id="status" name="status" as="select" required>
+                      <option value="" disabled>
+                        Select status
+                      </option>
+                      <option value="PLACED">Placed</option>
+                      <option value="INPROGRESS">In-progress</option>
+                      <option value="COMPLETED">Completed</option>
+                      <option value="RESCHEDULED">Rescheduled</option>
+                      <option value="CANCELLED">Cancelled</option>
+                      <option value="ABSENT">Absent</option>
+                    </Field>
+                  </div>
+                  <div>
+                    <Label htmlFor="notes" className="mb-2">
+                      Notes
+                    </Label>
+                    <Field
+                      id="notes"
+                      name="notes"
+                      type="text"
+                      as="input"
+                      placeholder="Enter booking notes (optional)"
+                    />
+                    <ErrorMessage
+                      name="notes"
+                      component="p"
+                      className="mt-1 text-sm text-red-500"
+                    />
+                  </div>
                 </div>
               </div>
 

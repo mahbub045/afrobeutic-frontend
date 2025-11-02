@@ -93,11 +93,15 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
     switch (status) {
       case "PLACED":
         return "default";
-      case "CONFIRMED":
+      case "INPROGRESS":
+        return "warning";
+      case "RESCHEDULED":
         return "secondary";
       case "COMPLETED":
         return "outline";
       case "CANCELLED":
+        return "danger";
+      case "ABSENT":
         return "destructive";
       default:
         return "outline";
