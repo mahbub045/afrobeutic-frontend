@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetContent,
@@ -17,9 +18,16 @@ import {
 } from "@/components/ui/table";
 import { formatChoiceFieldValue } from "@/lib/utils";
 import { useGetChairsBookingDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Chairs/ChairsBookingApi";
-import { EditIcon, EyeIcon, Loader2 } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  EditIcon,
+  EyeIcon,
+  LoaderPinwheel,
+  Search,
+} from "lucide-react";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface BookingData {
   uid: string;
@@ -75,19 +83,49 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
   const [selectedBooking, setSelectedBooking] = useState<BookingData | null>(
     null,
   );
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const {
     data: chairsBookingData,
     isLoading,
     isError,
-  } = useGetChairsBookingDataQuery({ salonUid: salonUid, chairUid: chairUid });
+  } = useGetChairsBookingDataQuery({
+    salonUid: salonUid,
+    chairUid: chairUid,
+    page: page,
+    search: debouncedSearch,
+  });
   const extractingChairBookingData = chairsBookingData?.results || [];
 
   const handleViewDetails = (booking: BookingData) => {
     setSelectedBooking(booking);
     setIsSheetOpen(true);
   };
+
+  // debounce effect for search input
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search.trim()), 500);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  // reset to first page when search or page size changes
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
+
+  const handlePreviousPage = () => {
+    if (page > 1) setPage((p) => p - 1);
+  };
+
+  const handleNextPage = () => {
+    if (chairsBookingData?.next) setPage((p) => p + 1);
+  };
+
+  const totalCount = chairsBookingData?.count ?? 0;
+  // const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   const getStatusVariant = (status: string) => {
     switch (status) {
@@ -138,7 +176,7 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <Loader2 className="text-primary size-8 animate-spin" />
+        <LoaderPinwheel className="text-primary size-8 animate-spin" />
       </div>
     );
   }
@@ -153,16 +191,19 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
     );
   }
 
-  if (extractingChairBookingData.length === 0) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <p className="text-muted-foreground">No bookings found.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="w-full space-y-2">
+      <div className="flex justify-center">
+        <div className="relative flex w-1/4">
+          <Search className="text-muted-foreground absolute top-1/4 left-2 size-4" />
+          <Input
+            placeholder="Search by customer and employee name..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+      </div>
       <Table>
         <TableHeader className="text-xs">
           <TableRow>
@@ -220,8 +261,52 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
               </TableRow>
             ),
           )}
+          {extractingChairBookingData.length === 0 && (
+            <TableRow>
+              <TableCell
+                colSpan={11}
+                className="text-muted-foreground py-8 text-center text-sm"
+              >
+                No bookings found.
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
+
+      {/* Pagination Controls */}
+      <div className="mt-2 flex items-center justify-between">
+        <div className="text-muted-foreground text-sm">Total: {totalCount}</div>
+        <div>
+          {totalCount > extractingChairBookingData.length && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePreviousPage}
+                disabled={page <= 1}
+                className="flex items-center gap-2"
+              >
+                <ChevronLeft className="h-4 w-4" /> Previous
+              </Button>
+
+              <div className="px-2 text-sm">
+                Total: {chairsBookingData?.count ?? 0}
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleNextPage}
+                disabled={!chairsBookingData?.next}
+                className="flex items-center gap-2"
+              >
+                Next <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Booking Details Sheet */}
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>

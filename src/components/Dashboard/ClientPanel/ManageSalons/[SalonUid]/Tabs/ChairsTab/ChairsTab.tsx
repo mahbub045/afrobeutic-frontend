@@ -8,6 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { formatChoiceFieldValue } from "@/lib/utils";
@@ -22,10 +23,11 @@ import {
   Eye,
   MoreVertical,
   Plus,
+  Search,
   Trash2,
 } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AddChairDialog from "./Dialogs/AddChairDialog";
 import CreateBookingDialog from "./Dialogs/CreateBookingDialog";
 import DeleteChairDialog from "./Dialogs/DeleteChairDialog";
@@ -36,6 +38,8 @@ const ChairsTab: React.FC = () => {
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
   const [currentPage, setCurrentPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [isAddChairDialogOpen, setIsAddChairDialogOpen] = useState(false);
   const [selectedChair, setSelectedChair] = useState<ChairProps | null>(null);
   const [isEditChairDialogOpen, setIsEditChairDialogOpen] = useState(false);
@@ -78,6 +82,7 @@ const ChairsTab: React.FC = () => {
   } = useGetChairsDataQuery({
     salonUid: salonUid,
     page: currentPage,
+    search: debouncedSearch,
   });
   const extractedChairs: ChairProps[] = chairsData?.results ?? [];
 
@@ -92,6 +97,17 @@ const ChairsTab: React.FC = () => {
       setCurrentPage((prev) => prev + 1);
     }
   };
+
+  // debounce effect for search input
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search.trim()), 500);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  // reset to first page when search or page size changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch]);
 
   const totalPages = chairsData?.count
     ? Math.ceil(chairsData.count / (chairsData.results?.length || 1))
@@ -151,6 +167,17 @@ const ChairsTab: React.FC = () => {
             <h2 className="text-lg font-semibold md:text-2xl">
               Chairs Management
             </h2>
+            <div className="flex justify-center">
+              <div className="relative flex w-full max-w-sm">
+                <Search className="text-muted-foreground absolute top-1/4 left-2 size-4" />
+                <Input
+                  placeholder="Search by chair name..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-8"
+                />
+              </div>
+            </div>
             <Button
               variant="default"
               size="sm"
