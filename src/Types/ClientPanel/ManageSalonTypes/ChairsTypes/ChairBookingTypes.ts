@@ -1,5 +1,3 @@
-import { ChairProps } from "./ChairsType";
-
 export interface BookingData {
   uid: string;
   customer: {

@@ -47,10 +47,10 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isEditBookingDialogOpen, setIsEditBookingDialogOpen] = useState(false);
 
-  const handleEditBooking = (booking: BookingData) => {
-    setSelectedBooking(booking);
-    setIsEditBookingDialogOpen(true);
-  };
+  // const handleEditBooking = (booking: BookingData) => {
+  //   setSelectedBooking(booking);
+  //   setIsEditBookingDialogOpen(true);
+  // };
 
   const {
     data: chairsBookingData,
