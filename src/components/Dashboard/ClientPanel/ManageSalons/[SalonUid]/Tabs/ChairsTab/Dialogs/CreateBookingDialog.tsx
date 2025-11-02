@@ -6,13 +6,6 @@ import {
   DialogHeader,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useAddChairBookingMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Chairs/ChairsBookingApi";
 import { useGetEmployeesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Employees/EmployeesApi";
 import { useGetProductsDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Products/ProductsApi";
@@ -399,29 +392,41 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
                     Employee<span className="text-danger">*</span>
                   </Label>
                   {isLoadingEmployees ? (
-                    <p className="text-muted text-sm">Loading employees...</p>
-                  ) : (
-                    <Select
-                      value={values.employee}
-                      onValueChange={(val) => setFieldValue("employee", val)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select an employee" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {employees.length > 0 ? (
-                          employees.map((employee: EmployeeProps) => (
-                            <SelectItem key={employee.uid} value={employee.uid}>
+                    <div className="flex items-center justify-center rounded-lg border border-dashed p-6">
+                      <p className="text-muted text-sm">Loading employees...</p>
+                    </div>
+                  ) : employees.length > 0 ? (
+                    <div className="max-h-60 overflow-y-auto rounded-lg border p-3">
+                      <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                        {employees.map((employee: EmployeeProps) => (
+                          <label
+                            key={employee.uid}
+                            className="hover:border-primary hover:bg-primary/5 flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-all"
+                          >
+                            <input
+                              type="radio"
+                              name="employee"
+                              value={employee.uid}
+                              checked={values.employee === employee.uid}
+                              onChange={(e) =>
+                                setFieldValue("employee", e.target.value)
+                              }
+                              className="h-4 w-4 cursor-pointer"
+                              style={{
+                                accentColor: "#027f81",
+                              }}
+                            />
+                            <span className="flex-1 text-sm font-medium">
                               {employee.name}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <div className="p-2 text-sm text-gray-500">
-                            No employees found
-                          </div>
-                        )}
-                      </SelectContent>
-                    </Select>
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center rounded-lg border border-dashed p-6">
+                      <p className="text-muted text-sm">No employees found</p>
+                    </div>
                   )}
                   <ErrorMessage
                     name="employee"
