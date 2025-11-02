@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/table";
 import { formatChoiceFieldValue } from "@/lib/utils";
 import { useGetChairsBookingDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Chairs/ChairsBookingApi";
-import { EyeIcon, Loader2 } from "lucide-react";
+import { EditIcon, EyeIcon, Loader2 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 
@@ -201,14 +201,20 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
                 <TableCell>
                   ${calculateTotalPrice(booking.services, booking.products)}
                 </TableCell>
-                <TableCell className="text-center">
+                <TableCell className="flex items-center justify-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleViewDetails(booking)}
                   >
-                    <EyeIcon className="mr-1 size-4" />
-                    View
+                    <EyeIcon className="size-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    // onClick={() => handleEditBooking(booking)}
+                  >
+                    <EditIcon className="size-4" />
                   </Button>
                 </TableCell>
               </TableRow>
