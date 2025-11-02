@@ -174,7 +174,7 @@ const ChairsTab: React.FC = () => {
                   placeholder="Search by chair name..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-8"
+                  className="focus:!border-primary pl-7 shadow-md focus:!ring-0 dark:shadow-gray-600"
                 />
               </div>
             </div>
