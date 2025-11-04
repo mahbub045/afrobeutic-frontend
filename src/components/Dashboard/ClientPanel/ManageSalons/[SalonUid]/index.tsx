@@ -11,7 +11,7 @@ import {
   Image,
   Scissors,
   Settings,
-  Users
+  Users,
 } from "lucide-react";
 import { useParams, usePathname } from "next/navigation";
 import * as React from "react";
@@ -77,15 +77,10 @@ const SingleSalonContainer: React.FC = () => {
   }, [pathname, salonNavMenus]);
 
   // Demo data for tabs (typed)
-  type Booking = { id: string; customer: string };
   type LookBook = { id: string; title: string };
 
   const demo = React.useMemo(
     () => ({
-      bookings: {
-        title: "Bookings",
-        items: [{ id: "b1", customer: "John Doe" }] as Booking[],
-      },
       lookbook: {
         title: "LookBook",
         items: [{ id: "l1", title: "Summer" }] as LookBook[],
@@ -143,9 +138,7 @@ const SingleSalonContainer: React.FC = () => {
         {activeTab === "services" && <ServicesTab />}
         {activeTab === "products" && <ProductsTab />}
         {activeTab === "chairs" && <ChairsTab />}
-        {activeTab === "bookings" && (
-          <BookingsTab items={demo.bookings.items} />
-        )}
+        {activeTab === "bookings" && <BookingsTab />}
         {activeTab === "lookbook" && (
           <LookbookTab items={demo.lookbook.items} />
         )}
