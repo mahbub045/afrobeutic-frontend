@@ -10,6 +10,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { useGetBookingQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/BookingsApi";
 import {
   Calendar as CalendarIcon,
   ChevronLeft,
@@ -20,6 +21,7 @@ import {
   MoreVertical,
   Settings,
 } from "lucide-react";
+import { useParams } from "next/navigation";
 import { useState } from "react";
 
 interface Appointment {
@@ -42,11 +44,16 @@ interface StaffMember {
 }
 
 const BookingsTab: React.FC = () => {
+  const { salonuid } = useParams();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(2025, 6, 16)); // July 16, 2025
   const [viewMode, setViewMode] = useState<"day" | "week">("day");
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+  // RTK Hooks
+  const { data: bookingsData, isLoading: isBookingsLoading } =
+    useGetBookingQuery({ salonUid: salonuid });
 
   // Sample staff members
   const staffMembers: StaffMember[] = [
