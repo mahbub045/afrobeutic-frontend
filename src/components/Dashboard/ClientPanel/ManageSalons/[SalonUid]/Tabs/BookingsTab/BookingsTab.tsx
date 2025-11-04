@@ -430,7 +430,7 @@ const BookingsTab: React.FC = () => {
             <div className="relative">
               {timeSlots.map((slot, index) => (
                 <div
-                  key={slot.time}
+                  key={index}
                   className="flex min-h-[80px] border-b sm:min-h-[90px] lg:min-h-[100px]"
                 >
                   <div className="bg-muted/50 text-muted-foreground w-10 flex-shrink-0 border-r px-1 py-2 text-[10px] sm:w-12 sm:px-2 sm:text-xs lg:w-16 lg:px-3">
