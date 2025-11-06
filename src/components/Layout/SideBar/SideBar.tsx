@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/sheet";
 import {
   Calendar,
+  ChevronRight,
   HelpCircle,
   Home,
   LifeBuoy,
@@ -20,11 +21,18 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type React from "react";
+import { useState } from "react";
+
+type SubNavItem = {
+  label: string;
+  href: string;
+};
 
 type NavItem = {
   label: string;
-  href: string;
+  href?: string;
   Icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  children?: SubNavItem[];
 };
 
 interface SideBarProps {
@@ -38,11 +46,22 @@ const SideBar: React.FC<SideBarProps> = ({
 }) => {
   const pathname = usePathname();
   const { data: session, status } = useSession();
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
   // Get user role directly from session
   const role: string | null = session?.user?.role
     ? String(session.user.role).toUpperCase()
     : null;
+
+  const toggleExpand = (label: string) => {
+    const newExpanded = new Set(expandedItems);
+    if (newExpanded.has(label)) {
+      newExpanded.delete(label);
+    } else {
+      newExpanded.add(label);
+    }
+    setExpandedItems(newExpanded);
+  };
 
   // Build items based on role
   const buildItems = (): NavItem[] => {
@@ -60,7 +79,14 @@ const SideBar: React.FC<SideBarProps> = ({
           href: "/dashboard/requests",
           Icon: Calendar,
         },
-        { label: "Help", href: "/help", Icon: HelpCircle },
+        {
+          label: "Help",
+          Icon: HelpCircle,
+          children: [
+            { label: "Support", href: "/help/support" },
+            { label: "User Guide", href: "/user-guide" },
+          ],
+        },
       ];
     }
 
@@ -72,8 +98,16 @@ const SideBar: React.FC<SideBarProps> = ({
           href: "/dashboard/client-panel/manage-salons",
           Icon: LifeBuoy,
         },
-        { label: "Chatbots", href: "/dashboard/chatbots", Icon: MessageSquare },
-        { label: "Clients", href: "/dashboard/clients", Icon: Users },
+        {
+          label: "Chatbots",
+          href: "/dashboard/client-panel/chatbots",
+          Icon: MessageSquare,
+        },
+        {
+          label: "Customers",
+          href: "/dashboard/client-panel/customers",
+          Icon: Users,
+        },
         {
           label: "Client Requests",
           href: "/dashboard/requests",
@@ -84,7 +118,14 @@ const SideBar: React.FC<SideBarProps> = ({
           href: "/dashboard/broadcast",
           Icon: Megaphone,
         },
-        { label: "Help", href: "/help", Icon: HelpCircle },
+        {
+          label: "Help",
+          Icon: HelpCircle,
+          children: [
+            { label: "Support", href: "/help/support" },
+            { label: "User Guide", href: "/user-guide" },
+          ],
+        },
       ];
     }
 
@@ -98,9 +139,12 @@ const SideBar: React.FC<SideBarProps> = ({
   const activeHref =
     items
       .filter(
-        (it) => pathname === it.href || pathname?.startsWith(it.href + "/"),
+        (it) =>
+          it.href === pathname ||
+          (it.href && pathname?.startsWith(it.href + "/")),
       )
-      .sort((a, b) => b.href.length - a.href.length)[0]?.href ?? null;
+      .sort((a, b) => (b.href?.length || 0) - (a.href?.length || 0))[0]?.href ??
+    null;
 
   // Render navigation content
   const renderNavContent = () => {
@@ -118,23 +162,71 @@ const SideBar: React.FC<SideBarProps> = ({
     }
 
     return (
-      <ul className="space-y-1 p-4 bg-white dark:bg-[#171717] h-full shadow-md dark:shadow-gray-600">
+      <ul className="h-full space-y-1 bg-white p-4 shadow-md dark:bg-[#171717] dark:shadow-gray-600">
         {items.map((item) => {
+          const isExpanded = expandedItems.has(item.label);
+          const hasChildren = item.children && item.children.length > 0;
           const active = item.href === activeHref;
+
           return (
-            <li key={item.href}>
-              <Link
-                href={item.href}
-                onClick={onMobileClose}
-                className={`flex items-center gap-3 rounded-md px-3 py-2 transition-colors ${
-                  active
-                    ? "bg-accent text-primary shadow-md dark:shadow-gray-600"
-                    : "hover:bg-accent hover:text-accent-foreground"
-                }`}
-              >
-                <item.Icon className="h-5 w-5" />
-                <span className="text-sm">{item.label}</span>
-              </Link>
+            <li key={item.label}>
+              {hasChildren ? (
+                <>
+                  <button
+                    onClick={() => toggleExpand(item.label)}
+                    className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors ${
+                      isExpanded
+                        ? "bg-accent text-primary"
+                        : "hover:bg-accent hover:text-accent-foreground !shadow-none"
+                    }`}
+                  >
+                    <item.Icon className="h-5 w-5" />
+                    <span className="flex-1 text-sm font-normal">
+                      {item.label}
+                    </span>
+                    <ChevronRight
+                      className={`h-4 w-4 transition-transform ${
+                        isExpanded ? "rotate-90" : ""
+                      }`}
+                    />
+                  </button>
+                  {isExpanded && (
+                    <ul className="mt-1 ml-4 space-y-1 border-l border-gray-300 pl-2 dark:border-gray-600">
+                      {item.children?.map((child) => {
+                        const childActive = child.href === pathname;
+                        return (
+                          <li key={child.href}>
+                            <Link
+                              href={child.href}
+                              onClick={onMobileClose}
+                              className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
+                                childActive
+                                  ? "bg-accent text-primary shadow-md dark:shadow-gray-600"
+                                  : "hover:bg-accent hover:text-accent-foreground"
+                              }`}
+                            >
+                              {child.label}
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </>
+              ) : (
+                <Link
+                  href={item.href!}
+                  onClick={onMobileClose}
+                  className={`flex items-center gap-3 rounded-md px-3 py-2 transition-colors ${
+                    active
+                      ? "bg-accent text-primary shadow-md dark:shadow-gray-600"
+                      : "hover:bg-accent hover:text-accent-foreground"
+                  }`}
+                >
+                  <item.Icon className="h-5 w-5" />
+                  <span className="text-sm">{item.label}</span>
+                </Link>
+              )}
             </li>
           );
         })}
