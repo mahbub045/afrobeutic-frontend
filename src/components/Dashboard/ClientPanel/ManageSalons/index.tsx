@@ -264,7 +264,7 @@ const ManageSalonsContainer: React.FC = () => {
                             className={`absolute inline-flex h-3 w-3 rounded-full ${
                               isSalonOpenToday(s.opening_hours)
                                 ? "animate-ping bg-green-400"
-                                : "animate-ping bg-danger"
+                                : "bg-danger animate-ping"
                             }`}
                           />
                           <span
