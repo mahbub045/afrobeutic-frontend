@@ -104,7 +104,7 @@ const SingleSalonContainer: React.FC = () => {
             href: "/dashboard/client-panel/manage-salons",
           },
           {
-            label: "Single Salon",
+            label: "Salon Details",
             href: `/dashboard/client-panel/manage-salons/${salonuid}`,
           },
         ]}
