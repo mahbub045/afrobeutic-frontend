@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatChoiceFieldValue } from "@/lib/utils";
 import {
   ChevronLeft,
   ChevronRight,
@@ -18,6 +19,7 @@ import {
   LoaderPinwheel,
   Search,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 type Booking = {
@@ -41,6 +43,7 @@ type CustomersQueryParams = {
 };
 
 const CustomerList: React.FC = () => {
+  const router = useRouter();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
@@ -101,8 +104,8 @@ const CustomerList: React.FC = () => {
             className="text-muted-foreground pointer-events-none absolute top-[10px] left-2"
           />
           <Input
-            className="focus:!border-primary pl-7 shadow-md focus:!ring-0 dark:shadow-gray-600"
-            placeholder="Search customers by name or phone..."
+            className="focus:!border-primary min-w-xs pl-7 shadow-md focus:!ring-0 md:min-w-md dark:shadow-gray-600"
+            placeholder="Search customers by name, phone or salon name..."
             value={searchTerm}
             onChange={(e) =>
               setSearchTerm((e.target as HTMLInputElement).value)
@@ -118,18 +121,18 @@ const CustomerList: React.FC = () => {
           <TableRow>
             <TableHead>#</TableHead>
             <TableHead>Name</TableHead>
-            <TableHead>Phone</TableHead>
-            <TableHead>Bookings</TableHead>
-            <TableHead>Latest booking</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead className="text-center">Phone</TableHead>
+            <TableHead className="text-center">Bookings</TableHead>
+            <TableHead className="text-center">Recent booking</TableHead>
+            <TableHead className="text-center">Recent booking Status</TableHead>
             <TableHead className="text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>
 
-        <TableBody>
+        <TableBody className="text-center">
           {isLoading ? (
             <TableRow>
-              <TableCell colSpan={6} className="py-8 text-center">
+              <TableCell colSpan={7} className="py-8 text-center">
                 <div className="flex items-center justify-center">
                   <LoaderPinwheel className="h-6 w-6 animate-spin" />
                 </div>
@@ -137,7 +140,7 @@ const CustomerList: React.FC = () => {
             </TableRow>
           ) : customers.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="py-8 text-center">
+              <TableCell colSpan={7} className="py-8 text-center">
                 No customers found.
               </TableCell>
             </TableRow>
@@ -146,8 +149,8 @@ const CustomerList: React.FC = () => {
               const latest = getLatestBooking(c.booking);
               return (
                 <TableRow key={c.uid}>
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell>{c.name}</TableCell>
+                  <TableCell className="text-start">{index + 1}</TableCell>
+                  <TableCell className="text-start">{c.name}</TableCell>
                   <TableCell>{c.phone ?? "—"}</TableCell>
                   <TableCell>{c.booking?.length ?? 0}</TableCell>
                   <TableCell>
@@ -157,9 +160,20 @@ const CustomerList: React.FC = () => {
                         ).toLocaleString()
                       : "—"}
                   </TableCell>
-                  <TableCell>{latest?.status ?? "—"}</TableCell>
+                  <TableCell>
+                    {formatChoiceFieldValue(latest?.status) ?? "—"}
+                  </TableCell>
                   <TableCell className="text-center">
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      className="shadow-md dark:shadow-gray-600"
+                      size="sm"
+                      onClick={() =>
+                        router.push(
+                          `/dashboard/client-panel/customers/${c.uid}`,
+                        )
+                      }
+                    >
                       <Eye />
                       View
                     </Button>
