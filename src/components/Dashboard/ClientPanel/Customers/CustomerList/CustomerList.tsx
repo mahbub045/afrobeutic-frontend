@@ -50,9 +50,11 @@ type Customer = {
 };
 
 type CustomersQueryParams = {
-  salonUid?: string; // kept for symmetry if needed later
+  salon__uid?: string;
   page?: number;
   search?: string;
+  created_at__gte?: string;
+  created_at__lte?: string;
 };
 
 const CustomerList: React.FC = () => {
@@ -62,6 +64,7 @@ const CustomerList: React.FC = () => {
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [fromDate, setFromDate] = useState<string>("");
   const [toDate, setToDate] = useState<string>("");
+  const [selectedSalon, setSelectedSalon] = useState<string>("");
   const [showDateRange, setShowDateRange] = useState<boolean>(false);
 
   useEffect(() => {
@@ -72,6 +75,9 @@ const CustomerList: React.FC = () => {
   const queryParams: CustomersQueryParams = {
     page: currentPage,
     search: debouncedSearch || undefined,
+    salon__uid: selectedSalon || undefined,
+    created_at__gte: fromDate || undefined,
+    created_at__lte: toDate || undefined,
   };
 
   // RTK hook
@@ -116,6 +122,15 @@ const CustomerList: React.FC = () => {
     if (customersData?.next) setCurrentPage((p) => p + 1);
   };
 
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setDebouncedSearch("");
+    setSelectedSalon("");
+    setFromDate("");
+    setToDate("");
+    setCurrentPage(1);
+  };
+
   const totalPages = customersData?.count
     ? Math.ceil(customersData.count / (customersData.results?.length || 1))
     : 0;
@@ -141,9 +156,9 @@ const CustomerList: React.FC = () => {
         </div>
 
         <div className="flex gap-2">
-          <Select>
-            <SelectTrigger className="shadow-md md:w-48 dark:shadow-gray-600">
-              <SelectValue placeholder="Select a salon" />
+          <Select value={selectedSalon} onValueChange={setSelectedSalon}>
+            <SelectTrigger className="text-primary shadow-md md:w-48 dark:shadow-gray-600">
+              <SelectValue placeholder="All salons" />
             </SelectTrigger>
             <SelectContent>
               {salonList.map((salon) => (
@@ -162,7 +177,7 @@ const CustomerList: React.FC = () => {
                 Date Range
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-48 mt-2">
+            <PopoverContent className="mt-2 w-48">
               <div className="space-y-4">
                 <h4 className="text-sm font-medium">Filter by Date Range</h4>
                 <div className="space-y-3">
@@ -192,6 +207,13 @@ const CustomerList: React.FC = () => {
               </div>
             </PopoverContent>
           </Popover>
+          <Button
+            variant="outline"
+            onClick={handleClearFilters}
+            className="shadow-md dark:shadow-gray-600"
+          >
+            Clear Filters
+          </Button>
         </div>
       </div>
 
