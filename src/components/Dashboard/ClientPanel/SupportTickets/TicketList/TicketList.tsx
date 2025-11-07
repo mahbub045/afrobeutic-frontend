@@ -12,14 +12,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatChoiceFieldValue } from "@/lib/utils";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Eye,
-  LoaderPinwheel,
-  Plus,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, LoaderPinwheel } from "lucide-react";
 import React, { useState } from "react";
+import AddTicketDialog from "./Dialogs/AddTicketDialog";
 
 const TicketList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -48,11 +43,8 @@ const TicketList: React.FC = () => {
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Support Tickets</h2>
-        <Button size="sm">
-          <Plus />
-          Create Ticket
-        </Button>
+        <h2 className="text-lg font-semibold"> Support Tickets</h2>
+        <AddTicketDialog />
       </div>
 
       <Table>
