@@ -1,6 +1,10 @@
 "use client";
 
 import { useGetCustomerByIdQuery } from "@/Redux/Reducers/ClientPanel/Customers/CustomersApi";
+import {
+  CustomerDetailData,
+  CustomerDetailProps,
+} from "@/Types/ClientPanel/CustomersTypes/CustomersType";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,82 +24,6 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
-
-interface Service {
-  uid: string;
-  name: string;
-  category: string;
-  price: string;
-  description: string | null;
-  service_duration: string;
-  gender_specific: string;
-  discount_percentage: string;
-}
-
-interface Product {
-  uid: string;
-  name: string;
-  category: string;
-  price: string;
-  description: string | null;
-}
-
-interface Employee {
-  uid: string;
-  employee_id: string;
-  name: string;
-  phone: string;
-  designation: string;
-  image: string | null;
-}
-
-interface Chair {
-  uid: string;
-  name: string;
-  type: string;
-}
-
-interface Salon {
-  uid: string;
-  name: string;
-  salon_type: string;
-  email: string;
-  phone: string;
-  city: string;
-  country: string;
-  status: string;
-}
-
-interface Booking {
-  uid: string;
-  booking_id: string;
-  booking_date: string;
-  booking_time: string;
-  status: string;
-  notes: string | null;
-  booking_duration: string;
-  completed_at: string | null;
-  cancellation_reason: string | null;
-  cancelled_by: string | null;
-  salon: Salon;
-  chair: Chair;
-  employee: Employee;
-  services: Service[];
-  products: Product[];
-}
-
-interface CustomerDetailData {
-  uid: string;
-  name: string;
-  phone: string | null;
-  booking: Booking[];
-  created_at: string;
-  updated_at: string;
-}
-
-interface CustomerDetailProps {
-  uid: string;
-}
 
 const getStatusColor = (status: string) => {
   switch (status.toUpperCase()) {
@@ -369,7 +297,7 @@ const CustomerDetail: React.FC<CustomerDetailProps> = ({ uid }) => {
                         {booking.services.map((service) => (
                           <div
                             key={service.uid}
-                            className="bg-secondary/30 flex items-center justify-between rounded px-2 py-3 text-sm"
+                            className="bg-primary/10 flex items-center justify-between rounded px-2 py-3 text-sm"
                           >
                             <span>{service.name}</span>
                             <span className="font-semibold">
@@ -391,7 +319,7 @@ const CustomerDetail: React.FC<CustomerDetailProps> = ({ uid }) => {
                         {booking.products.map((product) => (
                           <div
                             key={product.uid}
-                            className="bg-secondary/30 flex items-center justify-between rounded px-2 py-3 text-sm"
+                            className="bg-secondary/10 flex items-center justify-between rounded px-2 py-3 text-sm"
                           >
                             <span>{product.name}</span>
                             <span className="font-semibold">
