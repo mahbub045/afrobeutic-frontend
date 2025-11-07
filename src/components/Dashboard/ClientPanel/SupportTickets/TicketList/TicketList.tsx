@@ -1,6 +1,7 @@
 "use client";
 
 import { useGetSupportTicketsQuery } from "@/Redux/Reducers/ClientPanel/SupportTickets/SupportTicketsApi";
+import { TicketProps } from "@/Types/ClientPanel/SupportTicketsTypes/SupportTicketsType";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -20,14 +21,6 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 
-type Ticket = {
-  uid: string;
-  level: string;
-  topic: string;
-  subject: string;
-  queries: string;
-};
-
 const TicketList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
 
@@ -38,7 +31,7 @@ const TicketList: React.FC = () => {
     isFetching,
   } = useGetSupportTicketsQuery({ page: currentPage });
 
-  const tickets: Ticket[] = ticketsData?.results || [];
+  const tickets: TicketProps[] = ticketsData?.results || [];
 
   const handlePreviousPage = () => {
     if (ticketsData?.previous) setCurrentPage((p) => Math.max(1, p - 1));
@@ -114,6 +107,12 @@ const TicketList: React.FC = () => {
                     variant="outline"
                     size="sm"
                     className="flex items-center gap-2"
+                    onClick={() =>
+                      window.open(
+                        `/dashboard/client-panel/support-tickets/${t.uid}`,
+                        "_blank",
+                      )
+                    }
                   >
                     <Eye className="h-4 w-4" />
                     View

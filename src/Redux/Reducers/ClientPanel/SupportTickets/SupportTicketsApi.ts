@@ -19,7 +19,19 @@ export const SupportTicketsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["SupportTickets"],
     }),
+    getSupportTicket: builder.query({
+      query: (uid: string) => ({
+        url: `/support-tickets/${uid}`,
+        method: "GET",
+      }),
+      providesTags: (result, error, uid) => [
+        { type: "SupportTickets", id: uid },
+      ],
+    }),
   }),
 });
-export const { useGetSupportTicketsQuery, useAddSupportTicketMutation } =
-  SupportTicketsApi;
+export const {
+  useGetSupportTicketsQuery,
+  useAddSupportTicketMutation,
+  useGetSupportTicketQuery,
+} = SupportTicketsApi;
