@@ -14,12 +14,12 @@ import {
   ServiceFormValues,
 } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import { Field, Formik, type FormikHelpers } from "formik";
-import { LucideFilter, LucideFilterX, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import type { ChangeEvent } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
@@ -44,7 +44,9 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fileError, setFileError] = useState<string | null>(null);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-  const [showValues, setShowValues] = useState(false);
+  const [showCategories, setShowCategories] = useState(false);
+  const categoryInputRef = useRef<HTMLInputElement>(null);
+  const categoryDropdownRef = useRef<HTMLDivElement>(null);
   // default category-type filter for suggestions (sent to the API)
   const CATEGORY_TYPE_FILTER = "SERVICE";
 
@@ -102,7 +104,21 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
   })();
 
   useEffect(() => {
+    // Handle click outside to close dropdown
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        categoryDropdownRef.current &&
+        !categoryDropdownRef.current.contains(event.target as Node) &&
+        categoryInputRef.current &&
+        !categoryInputRef.current.contains(event.target as Node)
+      ) {
+        setShowCategories(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
       // revoke any object URLs on unmount
       previewUrls.forEach((u) => {
         try {
@@ -208,62 +224,77 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                   Category<span className="text-danger">*</span>
                 </Label>
                 <Field
+                  innerRef={categoryInputRef}
                   id="category"
                   name="category"
                   as="input"
                   type="text"
                   required
-                  placeholder={
-                    isLoadingCategories
-                      ? "Loading categories..."
-                      : "Select or type category"
-                  }
-                  list="category-list"
+                  autoComplete="off"
+                  placeholder='e.g. "Haircut", "Manicure"'
+                  onFocus={() => setShowCategories(true)}
                   onChange={(e: ChangeEvent<HTMLInputElement>) =>
                     setFieldValue("category", e.target.value)
                   }
                 />
 
-                <div className="absolute top-[15px] right-0 mt-2 flex items-center gap-2">
-                  <button
-                    type="button"
-                    className="inline-flex items-center !rounded-l-none border-l bg-[#f6f8fb] p-4 text-sm hover:bg-white dark:bg-[#1f1e1e] hover:dark:bg-[#242222]"
-                    onClick={() => setShowValues((s) => !s)}
+                {showCategories && (
+                  <div
+                    ref={categoryDropdownRef}
+                    className="absolute right-0 left-0 z-50 mt-1 max-h-40 overflow-auto rounded border bg-white shadow-lg dark:bg-[#0b1116]"
                   >
-                    {showValues ? (
-                      <LucideFilterX size={16} />
-                    ) : (
-                      <LucideFilter size={16} />
-                    )}
-                  </button>
-                </div>
+                    {(() => {
+                      const inputValue = categoryInputRef.current?.value || "";
+                      const searchTerm = inputValue.toLowerCase().trim();
 
-                {showValues ? (
-                  <div className="absolute right-0 left-0 z-50 mt-1 max-h-40 overflow-auto rounded border bg-white shadow-lg dark:bg-[#0b1116]">
-                    {categorySuggestions.length > 0 ? (
-                      <ul className="divide-y p-2">
-                        {categorySuggestions.map((v) => (
-                          <li key={v}>
-                            <button
-                              type="button"
-                              className="my-1 w-full px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-800"
-                              onClick={() => {
-                                setFieldValue("category", v);
-                                setShowValues(false);
-                              }}
-                            >
-                              {v}
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <div className="text-muted p-2 text-sm">
-                        No categories
-                      </div>
-                    )}
+                      // Filter and sort categories: matching ones first
+                      const filteredAndSorted = searchTerm
+                        ? categorySuggestions
+                            .map((v) => ({
+                              value: v,
+                              matches: v.toLowerCase().includes(searchTerm),
+                              startsWithMatch: v
+                                .toLowerCase()
+                                .startsWith(searchTerm),
+                            }))
+                            .sort((a, b) => {
+                              // Prioritize: starts with > contains > no match
+                              if (a.startsWithMatch && !b.startsWithMatch)
+                                return -1;
+                              if (!a.startsWithMatch && b.startsWithMatch)
+                                return 1;
+                              if (a.matches && !b.matches) return -1;
+                              if (!a.matches && b.matches) return 1;
+                              return 0;
+                            })
+                            .map((item) => item.value)
+                        : categorySuggestions;
+
+                      return filteredAndSorted.length > 0 ? (
+                        <ul className="divide-y p-2">
+                          {filteredAndSorted.map((v) => (
+                            <li key={v}>
+                              <button
+                                type="button"
+                                className="my-1 w-full px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-800"
+                                onClick={() => {
+                                  setFieldValue("category", v);
+                                  setShowCategories(false);
+                                }}
+                              >
+                                {v}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <div className="text-muted p-2 text-sm">
+                          No categories
+                        </div>
+                      );
+                    })()}
                   </div>
-                ) : null}
+                )}
 
                 {isLoadingCategories ? (
                   <p className="text-muted mt-1 text-sm">

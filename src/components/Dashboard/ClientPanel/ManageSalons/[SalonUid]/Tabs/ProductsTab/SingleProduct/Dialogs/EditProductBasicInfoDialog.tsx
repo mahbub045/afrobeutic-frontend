@@ -17,11 +17,11 @@ import {
   ProductProps,
 } from "@/Types/ClientPanel/ManageSalonTypes/ProductsTypes/ProductsType";
 import { ErrorMessage, Field, Form, Formik } from "formik";
-import { LucideFilter, LucideFilterX, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
@@ -35,7 +35,9 @@ const EditProductBasicInfoDialog: React.FC<EditProductBasicInfoDialogProps> = ({
   const { salonuid } = useParams();
   const { resolvedTheme } = useTheme();
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
-  const [showValues, setShowValues] = useState(false);
+  const [showCategories, setShowCategories] = useState(false);
+  const categoryInputRef = useRef<HTMLInputElement>(null);
+  const categoryDropdownRef = useRef<HTMLDivElement>(null);
   const CATEGORY_TYPE_FILTER = "PRODUCT";
   // RTK Hooks
   const [editProduct, { isLoading: isEditingProduct }] =
@@ -90,6 +92,25 @@ const EditProductBasicInfoDialog: React.FC<EditProductBasicInfoDialogProps> = ({
     });
     return out;
   })();
+
+  useEffect(() => {
+    // Handle click outside to close dropdown
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        categoryDropdownRef.current &&
+        !categoryDropdownRef.current.contains(event.target as Node) &&
+        categoryInputRef.current &&
+        !categoryInputRef.current.contains(event.target as Node)
+      ) {
+        setShowCategories(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const validationSchema = Yup.object().shape({
     name: Yup.string().required("Product name is required"),
@@ -196,53 +217,76 @@ const EditProductBasicInfoDialog: React.FC<EditProductBasicInfoDialogProps> = ({
                   Category
                 </Label>
                 <Field
+                  innerRef={categoryInputRef}
                   as="input"
                   type="text"
+                  autoComplete="off"
                   id="product-category"
                   name="category"
-                  placeholder="Enter category"
-                  list="category-list"
+                  placeholder='e.g. "Shampoo", "Hair Oil"'
+                  onFocus={() => setShowCategories(true)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setFieldValue("category", e.target.value)
+                  }
                 />
-                <div className="absolute top-[15px] right-0 mt-2 flex items-center gap-2">
-                  <button
-                    type="button"
-                    className="inline-flex items-center !rounded-l-none border-l bg-[#f6f8fb] p-4 text-sm hover:bg-white dark:bg-[#1f1e1e] hover:dark:bg-[#242222]"
-                    onClick={() => setShowValues((s) => !s)}
-                  >
-                    {showValues ? (
-                      <LucideFilterX size={16} />
-                    ) : (
-                      <LucideFilter size={16} />
-                    )}
-                  </button>
-                </div>
 
-                {showValues ? (
-                  <div className="absolute right-0 left-0 z-50 mt-1 max-h-40 overflow-auto rounded border bg-white shadow-lg dark:bg-[#0b1116]">
-                    {categorySuggestions.length > 0 ? (
-                      <ul className="divide-y p-2">
-                        {categorySuggestions.map((v) => (
-                          <li key={v}>
-                            <button
-                              type="button"
-                              className="my-1 w-full px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-800"
-                              onClick={() => {
-                                setFieldValue("category", v);
-                                setShowValues(false);
-                              }}
-                            >
-                              {v}
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <div className="text-muted p-2 text-sm">
-                        No categories
-                      </div>
-                    )}
+                {showCategories && (
+                  <div
+                    ref={categoryDropdownRef}
+                    className="absolute right-0 left-0 z-50 mt-1 max-h-40 overflow-auto rounded border bg-white shadow-lg dark:bg-[#0b1116]"
+                  >
+                    {(() => {
+                      const inputValue = categoryInputRef.current?.value || "";
+                      const searchTerm = inputValue.toLowerCase().trim();
+
+                      // Filter and sort categories: matching ones first
+                      const filteredAndSorted = searchTerm
+                        ? categorySuggestions
+                            .map((v) => ({
+                              value: v,
+                              matches: v.toLowerCase().includes(searchTerm),
+                              startsWithMatch: v
+                                .toLowerCase()
+                                .startsWith(searchTerm),
+                            }))
+                            .sort((a, b) => {
+                              // Prioritize: starts with > contains > no match
+                              if (a.startsWithMatch && !b.startsWithMatch)
+                                return -1;
+                              if (!a.startsWithMatch && b.startsWithMatch)
+                                return 1;
+                              if (a.matches && !b.matches) return -1;
+                              if (!a.matches && b.matches) return 1;
+                              return 0;
+                            })
+                            .map((item) => item.value)
+                        : categorySuggestions;
+
+                      return filteredAndSorted.length > 0 ? (
+                        <ul className="divide-y p-2">
+                          {filteredAndSorted.map((v) => (
+                            <li key={v}>
+                              <button
+                                type="button"
+                                className="my-1 w-full px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-800"
+                                onClick={() => {
+                                  setFieldValue("category", v);
+                                  setShowCategories(false);
+                                }}
+                              >
+                                {v}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <div className="text-muted p-2 text-sm">
+                          No categories
+                        </div>
+                      );
+                    })()}
                   </div>
-                ) : null}
+                )}
 
                 {isLoadingCategories ? (
                   <p className="text-muted mt-1 text-sm">
@@ -255,6 +299,7 @@ const EditProductBasicInfoDialog: React.FC<EditProductBasicInfoDialogProps> = ({
                     commonCategoriesData.data.length === 0) ? (
                   <p className="text-muted mt-1 text-sm">No categories found</p>
                 ) : null}
+
                 <ErrorMessage
                   name="category"
                   component="p"
