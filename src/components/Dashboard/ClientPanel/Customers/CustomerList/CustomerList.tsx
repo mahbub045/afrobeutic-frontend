@@ -64,14 +64,11 @@ const CustomerList: React.FC = () => {
   };
 
   // RTK hook
-  const {
-    data: salonListData,
-    isLoading: isLoadingSalons,
-    isFetching: isFetchingSalons,
-  } = useGetSalonListQuery({
-    page: currentPage,
-    search: debouncedSearch || undefined,
-  });
+  const { data: salonListData, isLoading: isLoadingSalons } =
+    useGetSalonListQuery({
+      page: currentPage,
+      search: debouncedSearch || undefined,
+    });
   const salonList = salonListData?.results || [];
   const {
     data: customersData,
@@ -146,7 +143,7 @@ const CustomerList: React.FC = () => {
             <SelectContent>
               {salonList.map((salon) => (
                 <SelectItem key={salon.uid} value={salon.uid}>
-                  {salon.name}
+                  {isLoadingSalons ? "Loading..." : salon.name}
                 </SelectItem>
               ))}
             </SelectContent>
