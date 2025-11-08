@@ -83,13 +83,10 @@ const TicketList: React.FC = () => {
         if (value === "list") setSelectedTicketUid(null);
       }}
     >
-      {selectedTicketUid && (
-        <TabsList className="mb-4">
-          <TabsTrigger value="list">Tickets List</TabsTrigger>
-
-          <TabsTrigger value="detail">Ticket Detail</TabsTrigger>
-        </TabsList>
-      )}
+      <TabsList className={`mb-4 ${!selectedTicketUid ? "hidden" : ""}`}>
+        <TabsTrigger value="list">Tickets List</TabsTrigger>
+        <TabsTrigger value="detail">Ticket Detail</TabsTrigger>
+      </TabsList>
 
       <TabsContent value="list" className="space-y-4">
         <div className="mb-4 flex items-center justify-between">
