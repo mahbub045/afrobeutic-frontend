@@ -35,7 +35,6 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
   const { salonuid } = useParams();
   const { resolvedTheme } = useTheme();
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
-  const [showValues, setShowValues] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
   const categoryInputRef = useRef<HTMLInputElement>(null);
   const categoryDropdownRef = useRef<HTMLDivElement>(null);

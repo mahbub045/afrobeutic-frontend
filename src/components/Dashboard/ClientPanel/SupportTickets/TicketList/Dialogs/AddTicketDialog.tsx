@@ -163,7 +163,7 @@ const AddTicketDialog: React.FC = () => {
           validationSchema={schema}
           onSubmit={handleSubmit}
         >
-          {({ values, handleChange, setFieldValue, isSubmitting }) => (
+          {({ values, handleChange, isSubmitting }) => (
             <Form className="space-y-4">
               <div>
                 <Label htmlFor="subject" className="mb-1">
