@@ -87,7 +87,16 @@ const AddTicketDialog: React.FC = () => {
 
   const handleFilesChange = (files: FileList | null) => {
     if (!files) return;
-    const arr = Array.from(files).slice(0, 3);
+
+    // Reject if more than 3 images are selected
+    if (files.length > 3) {
+      toast.error(
+        "You can only select up to 3 images. Please select 3 or fewer.",
+      );
+      return;
+    }
+
+    const arr = Array.from(files);
     setSelectedFiles(arr);
   };
 
@@ -101,7 +110,6 @@ const AddTicketDialog: React.FC = () => {
       form.append("queries", values.queries);
       form.append("level", values.level);
       form.append("topic", values.topic);
-      // append files as actual File objects; backend should accept multipart form-data
       selectedFiles.slice(0, 3).forEach((f) => {
         // use the same field name for multiple files
         form.append("uploaded_images", f);
