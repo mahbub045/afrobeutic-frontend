@@ -7,8 +7,10 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import {
+  BookOpen,
   Calendar,
   ChevronRight,
+  Headphones,
   HelpCircle,
   Home,
   LifeBuoy,
@@ -26,6 +28,7 @@ import { useState } from "react";
 type SubNavItem = {
   label: string;
   href: string;
+  Icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 };
 
 type NavItem = {
@@ -80,8 +83,9 @@ const SideBar: React.FC<SideBarProps> = ({
             {
               label: "Support",
               href: "/dashboard/admin-panel/support-tickets",
+              Icon: Headphones,
             },
-            { label: "User Guide", href: "/user-guide" },
+            { label: "User Guide", href: "/user-guide", Icon: BookOpen },
           ],
         },
       ];
@@ -122,29 +126,57 @@ const SideBar: React.FC<SideBarProps> = ({
             {
               label: "Support",
               href: "/dashboard/client-panel/support-tickets",
+              Icon: Headphones,
             },
-            { label: "User Guide", href: "/user-guide" },
+            { label: "User Guide", href: "/user-guide", Icon: BookOpen },
           ],
         },
       ];
     }
-
-    // Default: return empty array if no role matches
+    // empty array if no role matches
     return [];
   };
 
   const items = buildItems();
 
-  // Find the most specific matching nav item (longest href) to avoid highlighting both parent and child
+  // Check if any child of an item matches the current pathname
+  const isChildActive = (item: NavItem): boolean => {
+    if (!item.children) return false;
+    return item.children.some((child) => child.href === pathname);
+  };
+
+  // Check if pathname is a child route of any parent with children
+  const isChildRoute = items.some((item) => isChildActive(item));
+
+  // Only match direct items, not parent routes when we're on a child route
   const activeHref =
     items
-      .filter(
-        (it) =>
+      .filter((it) => {
+        // If we're on a child route, don't match parent items
+        if (isChildRoute && it.href && pathname?.startsWith(it.href + "/")) {
+          // Check if this is actually a parent of the child route
+          const hasChildWithPath = items.some((parent) =>
+            parent.children?.some((child) => child.href === pathname),
+          );
+          if (hasChildWithPath) {
+            return false; // Don't highlight this parent item
+          }
+        }
+        return (
           it.href === pathname ||
-          (it.href && pathname?.startsWith(it.href + "/")),
-      )
+          (it.href && pathname?.startsWith(it.href + "/"))
+        );
+      })
       .sort((a, b) => (b.href?.length || 0) - (a.href?.length || 0))[0]?.href ??
     null;
+
+  // Auto-expand parent items if their child is active
+  const autoExpandedItems = new Set(expandedItems);
+  items.forEach((item) => {
+    if (isChildActive(item) && !autoExpandedItems.has(item.label)) {
+      autoExpandedItems.add(item.label);
+    }
+  });
 
   // Render navigation content
   const renderNavContent = () => {
@@ -164,9 +196,10 @@ const SideBar: React.FC<SideBarProps> = ({
     return (
       <ul className="h-full space-y-1 bg-white p-4 shadow-md dark:bg-[#171717] dark:shadow-gray-600">
         {items.map((item) => {
-          const isExpanded = expandedItems.has(item.label);
+          const isExpanded = autoExpandedItems.has(item.label);
           const hasChildren = item.children && item.children.length > 0;
           const active = item.href === activeHref;
+          const childActive = isChildActive(item);
 
           return (
             <li key={item.label}>
@@ -175,7 +208,7 @@ const SideBar: React.FC<SideBarProps> = ({
                   <button
                     onClick={() => toggleExpand(item.label)}
                     className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors ${
-                      isExpanded
+                      childActive || isExpanded
                         ? "bg-accent text-primary"
                         : "hover:bg-accent hover:text-accent-foreground !shadow-none"
                     }`}
@@ -205,6 +238,7 @@ const SideBar: React.FC<SideBarProps> = ({
                                   : "hover:bg-accent hover:text-accent-foreground"
                               }`}
                             >
+                              {child.Icon && <child.Icon className="h-4 w-4" />}
                               {child.label}
                             </Link>
                           </li>

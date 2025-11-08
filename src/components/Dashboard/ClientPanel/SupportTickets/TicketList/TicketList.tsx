@@ -117,7 +117,7 @@ const TicketList: React.FC = () => {
           <TableBody className="text-center">
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={6} className="py-8">
+                <TableCell colSpan={8} className="py-8">
                   <div className="flex items-center justify-center">
                     <LoaderPinwheel className="h-6 w-6 animate-spin" />
                   </div>
@@ -125,13 +125,13 @@ const TicketList: React.FC = () => {
               </TableRow>
             ) : isError ? (
               <TableRow>
-                <TableCell colSpan={6} className="py-8">
+                <TableCell colSpan={8} className="py-8">
                   Something went wrong while loading tickets.
                 </TableCell>
               </TableRow>
             ) : tickets.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="py-8">
+                <TableCell colSpan={8} className="py-8">
                   No support tickets found.
                 </TableCell>
               </TableRow>
