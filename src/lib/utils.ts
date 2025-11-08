@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 
 
 export function formatDateTime(value?: string | null): string {
-  if (value === undefined || value === null || value === "") return "Not Found";
+  if (value === undefined || value === null || value === "") return "-";
 
   const date = new Date(value);
   if (isNaN(date.getTime())) return "Invalid date";

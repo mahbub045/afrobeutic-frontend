@@ -73,17 +73,14 @@ const SideBar: React.FC<SideBarProps> = ({
           href: "/dashboard/admin-panel/manage-salons",
           Icon: LifeBuoy,
         },
-        { label: "Clients", href: "/dashboard/clients", Icon: Users },
-        {
-          label: "Client Requests",
-          href: "/dashboard/requests",
-          Icon: Calendar,
-        },
         {
           label: "Help",
           Icon: HelpCircle,
           children: [
-            { label: "Support", href: "/help/support" },
+            {
+              label: "Support",
+              href: "/dashboard/admin-panel/support-tickets",
+            },
             { label: "User Guide", href: "/user-guide" },
           ],
         },
@@ -122,7 +119,10 @@ const SideBar: React.FC<SideBarProps> = ({
           label: "Help",
           Icon: HelpCircle,
           children: [
-            { label: "Support", href: "/help/support" },
+            {
+              label: "Support",
+              href: "/dashboard/client-panel/support-tickets",
+            },
             { label: "User Guide", href: "/user-guide" },
           ],
         },

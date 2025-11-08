@@ -2,6 +2,11 @@
 
 import { useGetCustomersQuery } from "@/Redux/Reducers/ClientPanel/Customers/CustomersApi";
 import { useGetSalonListQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonApi";
+import {
+  Booking,
+  Customer,
+  CustomersQueryParams,
+} from "@/Types/ClientPanel/CustomersTypes/CustomersType";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -34,28 +39,6 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-
-type Booking = {
-  booking_date: string;
-  booking_time: string;
-  status: string;
-  booking_id?: string;
-};
-
-type Customer = {
-  uid: string;
-  name: string;
-  phone?: string | null;
-  booking: Booking[];
-};
-
-type CustomersQueryParams = {
-  salon__uid?: string;
-  page?: number;
-  search?: string;
-  created_at__gte?: string;
-  created_at__lte?: string;
-};
 
 const CustomerList: React.FC = () => {
   const router = useRouter();
@@ -220,13 +203,17 @@ const CustomerList: React.FC = () => {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>#</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead className="text-center">Phone</TableHead>
-            <TableHead className="text-center">Bookings</TableHead>
-            <TableHead className="text-center">Recent booking</TableHead>
-            <TableHead className="text-center">Recent booking Status</TableHead>
-            <TableHead className="text-center">Actions</TableHead>
+            <TableHead className="text-primary">#</TableHead>
+            <TableHead className="text-primary">Name</TableHead>
+            <TableHead className="text-primary text-center">Phone</TableHead>
+            <TableHead className="text-primary text-center">Bookings</TableHead>
+            <TableHead className="text-primary text-center">
+              Recent booking
+            </TableHead>
+            <TableHead className="text-primary text-center">
+              Recent booking Status
+            </TableHead>
+            <TableHead className="text-primary text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>
 
