@@ -2,6 +2,7 @@
 
 import { useGetSupportTicketsQuery } from "@/Redux/Reducers/ClientPanel/SupportTickets/SupportTicketsApi";
 import { TicketProps } from "@/Types/ClientPanel/SupportTicketsTypes/SupportTicketsType";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -11,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatChoiceFieldValue } from "@/lib/utils";
+import { formatChoiceFieldValue, formatDateTime } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, Eye, LoaderPinwheel } from "lucide-react";
 import React, { useState } from "react";
 import AddTicketDialog from "./Dialogs/AddTicketDialog";
@@ -40,6 +41,36 @@ const TicketList: React.FC = () => {
     ? Math.ceil(ticketsData.count / (ticketsData.results?.length || 1))
     : 0;
 
+  const getColorBasedOnLevel = (level: string) => {
+    switch (level) {
+      case "LOW":
+        return "default";
+      case "MEDIUM":
+        return "secondary";
+      case "HIGH":
+        return "warning";
+      case "URGENT":
+        return "danger";
+      default:
+        return "default";
+    }
+  };
+  const getColorBasedOnStatus = (status: string) => {
+    switch (status) {
+      case "OPEN":
+        return "default";
+      case "IN_PROGRESS":
+        return "secondary";
+      case "RESOLVED":
+        return "warning";
+      case "CLOSED":
+        return "danger";
+      default:
+        return "default";
+    }
+  };
+  
+
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
@@ -54,7 +85,11 @@ const TicketList: React.FC = () => {
             <TableHead className="text-primary">Subject</TableHead>
             <TableHead className="text-primary text-center">Topic</TableHead>
             <TableHead className="text-primary text-center">Level</TableHead>
+            <TableHead className="text-primary text-center">
+              Created At
+            </TableHead>
             <TableHead className="text-primary text-center">Queries</TableHead>
+            <TableHead className="text-primary text-center">Status</TableHead>
             <TableHead className="text-primary text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -89,10 +124,20 @@ const TicketList: React.FC = () => {
                   {formatChoiceFieldValue(t.topic)}
                 </TableCell>
                 <TableCell className="text-center">
-                  {formatChoiceFieldValue(t.level)}
+                  <Badge variant={getColorBasedOnLevel(t.level)}>
+                    {formatChoiceFieldValue(t.level)}
+                  </Badge>
                 </TableCell>
-                <TableCell className="text-center leading-1">
+                <TableCell className="text-center">
+                  {formatDateTime(t.created_at)}
+                </TableCell>
+                <TableCell className="max-w-[200px] truncate text-center">
                   {t.queries}
+                </TableCell>
+                <TableCell className="text-center">
+                  <Badge variant={getColorBasedOnStatus(t.status)}>
+                    {formatChoiceFieldValue(t.status)}
+                  </Badge>
                 </TableCell>
                 <TableCell className="flex justify-center">
                   <Button

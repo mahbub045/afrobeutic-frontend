@@ -4,7 +4,10 @@ export interface TicketProps {
   topic: string;
   subject: string;
   queries: string;
+  status: string;
   images?: SupportTicketImage[];
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface SupportTicketImage {
