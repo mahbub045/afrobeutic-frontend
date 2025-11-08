@@ -465,7 +465,7 @@ const AcceptInvitationContent: React.FC = () => {
                             className={`mt-1 text-xs ${password === confirm ? "text-green-700" : "text-red-500"}`}
                           >
                             {password === confirm
-                              ? "Passwords match"
+                              ? "Passwords matched"
                               : "Passwords do not match"}
                           </div>
                         )}
@@ -513,7 +513,7 @@ const AcceptInvitation: React.FC = () => {
     <Suspense
       fallback={
         <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-white via-slate-50 to-slate-100 dark:from-[#050816] dark:via-[#071020] dark:to-[#000000]">
-          <LoaderPinwheel className="h-12 w-12 animate-spin text-blue-600" />
+          <LoaderPinwheel className="h-12 w-12 animate-spin" />
         </div>
       }
     >
