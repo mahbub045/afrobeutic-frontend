@@ -57,7 +57,7 @@ const TicketList: React.FC = () => {
       case "URGENT":
         return "danger";
       default:
-        return "default";
+        return "outline";
     }
   };
   const getColorBasedOnStatus = (status: string) => {
@@ -71,7 +71,7 @@ const TicketList: React.FC = () => {
       case "CLOSED":
         return "danger";
       default:
-        return "default";
+        return "outline";
     }
   };
 
