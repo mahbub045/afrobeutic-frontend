@@ -462,7 +462,7 @@ const SignUp: React.FC = () => {
                             className={`mt-1 text-xs ${password === confirm ? "text-green-700" : "text-red-500"}`}
                           >
                             {password === confirm
-                              ? "Passwords match"
+                              ? "Passwords matched"
                               : "Passwords do not match"}
                           </div>
                         )}
