@@ -3,17 +3,19 @@ import { baseApi } from "@/Redux/Api/BaseApi";
 export const ServicesApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getServicesData: builder.query({
-      // Accepts { salonUid, page?, page_size?, search? } and forwards them as query params
+      // Accepts { salonUid, page?, page_size?, search?, ordering? } and forwards them as query params
       query: ({
         salonUid,
         page,
         page_size,
         search,
+        ordering,
       }: {
         salonUid: string;
         page?: number;
         page_size?: number;
         search?: string;
+        ordering?: string; // expected values: 'price' | '-price'
       }) => {
         return {
           url: `/salons/${salonUid}/services`,
@@ -23,6 +25,7 @@ export const ServicesApi = baseApi.injectEndpoints({
             ...(page ? { page } : {}),
             ...(page_size ? { page_size } : {}),
             ...(search ? { search } : {}),
+            ...(ordering ? { ordering } : {}),
           },
         };
       },

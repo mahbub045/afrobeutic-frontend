@@ -21,9 +21,7 @@ import {
   FieldProps,
   Formik,
   FormikProps,
-  type FormikErrors,
   type FormikHelpers,
-  type FormikTouched,
 } from "formik";
 import { X } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -155,94 +153,84 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
       }
 
       // send FormData directly as employeeData — baseApi will attach headers
-      await addEmployee({
+      const res = await addEmployee({
         salonUid: salonuid as string,
         employeeData: form as unknown as object,
-      }).unwrap();
-      onClose();
-      Swal.fire({
-        icon: "success",
-        iconColor: "#037375",
-        title: "Added successfully",
-        html: `Successfully added <b class="text-primary">${values.name}</b> employee`,
-        background: resolvedTheme === "dark" ? "#0f1724" : undefined,
-        color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
-        confirmButtonColor: "#037375",
-        timer: 3000,
       });
-      helpers.resetForm();
-      refetch();
-      // clear selected file and preview
-      if (previewUrl) {
-        try {
-          URL.revokeObjectURL(previewUrl);
-        } catch {
-          /* ignore */
-        }
-      }
-      setSelectedFile(null);
-      setPreviewUrl(null);
-    } catch (err: unknown) {
-      console.error(err);
+      if (res.data) {
+        Swal.fire({
+          icon: "success",
+          iconColor: "#037375",
+          title: "Added successfully",
+          html: `Successfully added <b class="text-primary">${values.name}</b> employee`,
+          background: resolvedTheme === "dark" ? "#0f1724" : undefined,
+          color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
+          confirmButtonColor: "#037375",
+          timer: 3000,
+        });
+        onClose();
+        helpers.resetForm();
+        refetch();
+        setSelectedFile(null);
+        setPreviewUrl(null);
+      } else if ("error" in res) {
+        // Try to surface server-side validation errors under the correct fields
+        const errObj: unknown = (res as { error?: unknown }).error;
+        const errData: unknown =
+          errObj && typeof errObj === "object" && "data" in errObj
+            ? (errObj as { data?: unknown }).data
+            : undefined;
 
-      // Try to extract server-side validation errors and show them on the form
-      // Common API shapes: { employee_id: ["..."] } or { errors: { ... } } or err.data
-      let payload: unknown = null;
-      if (typeof err === "object" && err !== null) {
-        const e = err as Record<string, unknown>;
-        payload = e.data ?? e.errors ?? e;
-      } else {
-        payload = err;
-      }
+        // Support both { field: [msgs] } and { errors: { field: [msgs] } }
+        const rawErrors: unknown =
+          errData && typeof errData === "object" && "errors" in errData
+            ? (errData as { errors?: unknown }).errors
+            : errData;
 
-      if (payload && typeof payload === "object") {
-        // If the API returns { errors: { field: [msg] } }
-        let maybeErrors: unknown = payload;
-        if (typeof payload === "object" && payload !== null) {
-          const p = payload as Record<string, unknown>;
-          maybeErrors = p.errors ?? payload;
-        }
-        if (maybeErrors && typeof maybeErrors === "object") {
-          const fieldErrors: Record<string, string> = {};
-          for (const [key, val] of Object.entries(
-            maybeErrors as Record<string, unknown>,
-          )) {
-            if (Array.isArray(val)) {
-              fieldErrors[key] = (val as string[]).join(" ");
-            } else if (typeof val === "string") {
-              fieldErrors[key] = val as string;
-            } else if (typeof val === "object" && val !== null) {
-              // nested object -> try to find message arrays or strings
-              const nestedMsgs: string[] = [];
-              for (const nestedVal of Object.values(
-                val as Record<string, unknown>,
-              )) {
-                if (Array.isArray(nestedVal))
-                  nestedMsgs.push((nestedVal as string[]).join(" "));
-                else if (typeof nestedVal === "string")
-                  nestedMsgs.push(nestedVal as string);
-              }
-              fieldErrors[key] = nestedMsgs.join(" ") || JSON.stringify(val);
-            } else {
-              fieldErrors[key] = String(val);
+        const candidateFields = [
+          "employee_id",
+          "phone",
+          "name",
+          "designation",
+          "image",
+        ] as const;
+
+        let fieldHandled = false;
+        candidateFields.forEach((f) => {
+          const v =
+            rawErrors && typeof rawErrors === "object"
+              ? (rawErrors as Record<string, unknown>)[f]
+              : undefined;
+          if (!v) return;
+          const msg = Array.isArray(v) ? String(v[0]) : String(v);
+          // mark touched so the inline error shows immediately
+          helpers.setFieldTouched(f, true, false);
+          helpers.setFieldError(f, msg);
+          fieldHandled = true;
+        });
+
+        if (!fieldHandled) {
+          const generic = (() => {
+            if (errData && typeof errData === "object") {
+              const obj = errData as Record<string, unknown>;
+              if (typeof obj.detail === "string") return obj.detail;
+              if (typeof obj.message === "string") return obj.message;
             }
-          }
-
-          // Set Formik errors so field-level messages appear under inputs
-          helpers.setErrors(
-            fieldErrors as unknown as FormikErrors<EmployeeFormValues>,
-          );
-          const touchedObj: Record<string, boolean> = {};
-          Object.keys(fieldErrors).forEach((k) => (touchedObj[k] = true));
-          helpers.setTouched(
-            touchedObj as unknown as FormikTouched<EmployeeFormValues>,
-          );
-          return;
+            if (errObj && typeof errObj === "object") {
+              const obj = errObj as Record<string, unknown>;
+              if (typeof obj.error === "string") return obj.error;
+            }
+            return "Failed to add employee. Please try again.";
+          })();
+          toast.error(generic);
         }
+      } else {
+        toast.error("Failed to add employee. Please try again.");
       }
-
-      // Fallback generic message
-      toast.error("Failed to add employee. Please try again.");
+    } catch (err: unknown) {
+      // Network or unexpected error
+      const fallback = err instanceof Error ? err.message : String(err);
+      toast.error(fallback || "Failed to add employee. Please try again.");
     }
   }
 
@@ -413,7 +401,7 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
                             <li key={v}>
                               <button
                                 type="button"
-                                className="my-1 w-full px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-800"
+                                className="my-1 w-full px-3 py-2 text-left hover:bg-gray-50 dark:shadow-gray-600 dark:hover:bg-gray-800"
                                 onClick={() => {
                                   setFieldValue("designation", v);
                                   setShowCategories(false);

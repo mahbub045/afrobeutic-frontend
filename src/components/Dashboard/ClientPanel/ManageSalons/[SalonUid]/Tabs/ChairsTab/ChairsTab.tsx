@@ -129,6 +129,20 @@ const ChairsTab: React.FC = () => {
     }
   };
 
+  // Helper function to get status-based background and border colors
+  const getStatusBackgroundStyles = (status?: string) => {
+    switch (status?.toUpperCase()) {
+      case "AVAILABLE":
+        return "border-green-200/60 dark:border-green-800/60 bg-green-50/80 dark:bg-green-950/80 dark:shadow-green-900/30";
+      case "OUT_OF_ORDER":
+        return "border-red-200/60 dark:border-red-800/60 bg-red-50/80 dark:bg-red-950/80 dark:shadow-red-900/30";
+      case "MAINTENANCE":
+        return "border-yellow-200/60 dark:border-yellow-800/60 bg-yellow-50/80 dark:bg-yellow-950/80 dark:shadow-yellow-900/30";
+      default:
+        return "border-gray-200/60 dark:border-gray-700/60 bg-white/80 dark:bg-gray-900/80 dark:shadow-gray-600";
+    }
+  };
+
   return (
     <Tabs
       value={activeTab}
@@ -251,7 +265,7 @@ const ChairsTab: React.FC = () => {
             {extractedChairs.map((chair: ChairProps) => (
               <Card
                 key={chair.uid}
-                className="group hover:shadow-primary/10 relative overflow-hidden border border-gray-200/60 bg-white/80 p-2 shadow-md backdrop-blur-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl dark:border-gray-700/60 dark:bg-gray-900/80 dark:shadow-gray-600 dark:hover:shadow-gray-600/30"
+                className={`group hover:shadow-primary/10 relative overflow-hidden border p-2 shadow-md backdrop-blur-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl ${getStatusBackgroundStyles(chair.status)}`}
               >
                 {/* Animated border gradient */}
                 <div className="from-primary/10 dark:from-primary/20 dark:to-primary/20 to-primary/10 absolute inset-0 rounded-lg bg-gradient-to-r via-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
@@ -321,7 +335,7 @@ const ChairsTab: React.FC = () => {
                     </div>
                     <div className="mb-4 flex justify-center">
                       <div className="relative">
-                        <div className="from-primary/10 to-primary/5 ring-primary/20 flex h-18 w-18 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br ring-1 transition-transform duration-300 group-hover:scale-110">
+                        <div className="from-primary/10 to-primary/5 ring-primary/80 flex h-18 w-18 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br ring-1 transition-transform duration-300 group-hover:scale-110">
                           <Armchair className="text-primary group-hover:text-primary/80 h-8 w-8 transition-colors duration-300" />
                         </div>
                       </div>

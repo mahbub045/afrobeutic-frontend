@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useGetSalonListQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonApi";
 import { AlertCircle, Plus, Scissors } from "lucide-react";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import AddSalonDialog from "../../../ManageSalons/Dialogs/AddSalonDialog";
@@ -79,7 +80,17 @@ const SalonsCard: React.FC = () => {
               >
                 <div className="bg-card hover:bg-accent/50 mb-3 flex items-start gap-3 rounded-lg border p-4 shadow-md transition-colors dark:shadow-gray-600">
                   <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
-                    <Scissors className="text-primary h-5 w-5" />
+                    {salon?.logo ? (
+                      <Image
+                        src={salon.logo}
+                        alt={salon.name}
+                        width={40}
+                        height={40}
+                        className="h-10 w-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <Scissors className="text-primary h-5 w-5" />
+                    )}
                   </div>
                   <div className="flex-1 space-y-1">
                     <h4 className="text-sm leading-none font-medium">

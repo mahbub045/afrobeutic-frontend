@@ -14,7 +14,8 @@ import {
   Users,
 } from "lucide-react";
 import { useParams, usePathname } from "next/navigation";
-import * as React from "react";
+import { useEffect, useMemo, useState } from "react";
+import AnalyticsTab from "./Tabs/AnalyticsTab/AnalyticsTab";
 import BookingsTab from "./Tabs/BookingsTab/BookingsTab";
 import ChairsTab from "./Tabs/ChairsTab/ChairsTab";
 import DashboardTab from "./Tabs/DashboardTab/DashboardTab";
@@ -22,7 +23,6 @@ import EmployeesTab from "./Tabs/EmployeesTab/EmployeesTab";
 import LookbookTab from "./Tabs/LookbookTab/LookbookTab";
 import OpeningHoursTab from "./Tabs/OpeningHoursTab/OpeningHoursTab";
 import ProductsTab from "./Tabs/ProductsTab/ProductsTab";
-import ReportTab from "./Tabs/ReportTab/ReportTab";
 import ServicesTab from "./Tabs/ServicesTab/ServicesTab";
 import SettingsTab from "./Tabs/SettingsTab/SettingsTab";
 
@@ -35,7 +35,7 @@ const SingleSalonContainer: React.FC = () => {
     Icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   }
 
-  const salonNavMenus: MenuItemProps[] = React.useMemo(
+  const salonNavMenus: MenuItemProps[] = useMemo(
     () => [
       { label: "Dashboard", href: `dashboard`, Icon: Home },
       { label: "Opening Hours", href: `opening-hours`, Icon: Clock },
@@ -45,16 +45,16 @@ const SingleSalonContainer: React.FC = () => {
       { label: "Bookings", href: `bookings`, Icon: Calendar },
       { label: "LookBook", href: `lookbook`, Icon: Image },
       { label: "Employees", href: `employees`, Icon: Users },
-      { label: "Report", href: `report`, Icon: BarChart2 },
+      { label: "Analytics", href: `analytics`, Icon: BarChart2 },
       { label: "Settings", href: `settings`, Icon: Settings },
     ],
     [],
   );
 
   const pathname = usePathname();
-  const [activeTab, setActiveTab] = React.useState<string>("dashboard");
+  const [activeTab, setActiveTab] = useState<string>("dashboard");
 
-  React.useEffect(() => {
+  useEffect(() => {
     // Prefer URL hash (e.g. #services), fallback to last pathname segment
     const update = () => {
       const hash =
@@ -75,24 +75,6 @@ const SingleSalonContainer: React.FC = () => {
     window.addEventListener("hashchange", update);
     return () => window.removeEventListener("hashchange", update);
   }, [pathname, salonNavMenus]);
-
-  // Demo data for tabs (typed)
-  type LookBook = { id: string; title: string };
-
-  const demo = React.useMemo(
-    () => ({
-      lookbook: {
-        title: "LookBook",
-        items: [{ id: "l1", title: "Summer" }] as LookBook[],
-      },
-      report: { title: "Report", content: "Sales and usage reports." },
-      settings: {
-        title: "Settings",
-        content: "Salon settings and preferences.",
-      },
-    }),
-    [] as const,
-  );
 
   return (
     <div className="container mx-auto px-4 py-6 md:px-6 lg:px-8">
@@ -139,19 +121,10 @@ const SingleSalonContainer: React.FC = () => {
         {activeTab === "products" && <ProductsTab />}
         {activeTab === "chairs" && <ChairsTab />}
         {activeTab === "bookings" && <BookingsTab />}
-        {activeTab === "lookbook" && (
-          <LookbookTab items={demo.lookbook.items} />
-        )}
+        {activeTab === "lookbook" && <LookbookTab />}
         {activeTab === "employees" && <EmployeesTab />}
-        {activeTab === "report" && (
-          <ReportTab title={demo.report.title} content={demo.report.content} />
-        )}
-        {activeTab === "settings" && (
-          <SettingsTab
-            title={demo.settings.title}
-            content={demo.settings.content}
-          />
-        )}
+        {activeTab === "analytics" && <AnalyticsTab />}
+        {activeTab === "settings" && <SettingsTab />}
       </section>
     </div>
   );
