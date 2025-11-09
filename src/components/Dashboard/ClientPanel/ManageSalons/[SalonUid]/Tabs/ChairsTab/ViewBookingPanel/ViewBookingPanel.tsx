@@ -165,7 +165,7 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
         <div className="relative flex w-1/4">
           <Search className="text-muted-foreground absolute top-1/4 left-2 size-4" />
           <Input
-            placeholder="Search by customer and employee name..."
+            placeholder="Search Bookings..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="focus:!border-primary pl-7 shadow-md focus:!ring-0 dark:shadow-gray-600"
