@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DashboardTabProps } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
 import { Check, Copy, ExternalLink, PenSquare } from "lucide-react";
+import { useSession } from "next-auth/react";
 import React, { useState } from "react";
 import EditContactInfoDialog from "./Dialogs/EditContactInfoDialog";
 
@@ -20,6 +21,7 @@ const ContactsCard: React.FC<DashboardTabProps> = ({
   singleSalonData,
   isLoading,
 }) => {
+  const { data: session } = useSession();
   const [openContactInfoDialog, setOpenContactInfoDialog] = useState(false);
 
   const handleOpenContactInfoDialog = () => {
@@ -64,16 +66,21 @@ const ContactsCard: React.FC<DashboardTabProps> = ({
           {isLoading ? (
             <Skeleton className="h-8 w-16 rounded-md" />
           ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              className="shadow-md dark:shadow-gray-600"
-              aria-label="Edit basic information"
-              onClick={handleOpenContactInfoDialog}
-            >
-              <PenSquare className="size-4" />
-              Edit
-            </Button>
+            <div>
+              {(session?.user?.role === "OWNER" ||
+                session?.user?.role === "ADMIN") && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="shadow-md dark:shadow-gray-600"
+                  aria-label="Edit basic information"
+                  onClick={handleOpenContactInfoDialog}
+                >
+                  <PenSquare className="size-4" />
+                  Edit
+                </Button>
+              )}
+            </div>
           )}
         </CardAction>
       </CardHeader>

@@ -5,11 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetSalonListQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonApi";
 import { AlertCircle, Plus, Scissors } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useState } from "react";
 import AddSalonDialog from "../../../ManageSalons/Dialogs/AddSalonDialog";
 
 const SalonsCard: React.FC = () => {
+  const { data: session } = useSession();
   const { data: salonsData, isLoading, isError } = useGetSalonListQuery();
   const [isAddSalonDialogOpen, setIsAddSalonDialogOpen] = useState(false);
 
@@ -21,14 +23,17 @@ const SalonsCard: React.FC = () => {
     <Card className="h-full shadow-md dark:shadow-gray-600">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <CardTitle className="text-xl font-semibold">My Salons</CardTitle>
-        <Button
-          onClick={handleOpenAddSalonDialog}
-          size="sm"
-          className="gap-1 text-white"
-        >
-          <Plus className="h-4 w-4" />
-          Add salon
-        </Button>
+        {(session?.user?.role === "OWNER" ||
+          session?.user?.role === "ADMIN") && (
+          <Button
+            onClick={handleOpenAddSalonDialog}
+            size="sm"
+            className="gap-1 text-white"
+          >
+            <Plus className="h-4 w-4" />
+            Add salon
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
         {isLoading ? (

@@ -23,17 +23,25 @@ import Link from "next/link";
 import { formatChoiceFieldValue } from "@/lib/utils";
 import { useGetSalonListQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonApi";
 import type { OpeningHour } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Breadcrumbs from "../../CommonComponents/Breadcrumbs";
 import AddSalonDialog from "./Dialogs/AddSalonDialog";
 
 const ManageSalonsContainer: React.FC = () => {
+  const { data: session } = useSession();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   // Track which salon logos failed to load (by uid)
   const [failedLogos, setFailedLogos] = useState<Record<string, boolean>>({});
   const [isAddSalonDialogOpen, setIsAddSalonDialogOpen] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Mark as hydrated on mount to fix hydration errors
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   // Debounce search input
   useEffect(() => {
@@ -146,15 +154,18 @@ const ManageSalonsContainer: React.FC = () => {
         </div> */}
 
         <div className="flex flex-col items-end gap-2">
-          <Button
-            variant="default"
-            size="sm"
-            className="text-white"
-            onClick={handleOpenAddSalonDialog}
-          >
-            <Plus className="h-4 w-4" />
-            Add new Salon
-          </Button>
+          {(session?.user?.role === "OWNER" ||
+            session?.user?.role === "ADMIN") && (
+            <Button
+              variant="default"
+              size="sm"
+              className="text-white"
+              onClick={handleOpenAddSalonDialog}
+            >
+              <Plus className="h-4 w-4" />
+              Add new Salon
+            </Button>
+          )}
 
           {searchTerm && (
             <Button
@@ -171,6 +182,30 @@ const ManageSalonsContainer: React.FC = () => {
       {/* Content */}
       <div className="mt-6">
         {isLoading ? (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {[...Array(12)].map((_, idx) => (
+              <Card
+                key={`salon-skeleton-${idx}`}
+                className="relative overflow-hidden border border-gray-200/60 bg-white/80 shadow-md dark:border-gray-700/60 dark:bg-gray-900/80"
+              >
+                <CardHeader className="pt-6 pb-4">
+                  <div className="mb-4 flex justify-center">
+                    <Skeleton className="h-16 w-16 rounded-full" />
+                  </div>
+                  <Skeleton className="mx-auto h-6 w-3/4" />
+                </CardHeader>
+                <CardContent className="px-6 pb-6">
+                  <Skeleton className="mx-auto h-4 w-full" />
+                  <Skeleton className="mx-auto mt-2 h-4 w-2/3" />
+                </CardContent>
+                <CardFooter className="px-6 pt-0 pb-6">
+                  <Skeleton className="h-12 w-full rounded-lg" />
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        ) : !isHydrated ? (
+          // Show skeleton while not hydrated
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {[...Array(12)].map((_, idx) => (
               <Card
