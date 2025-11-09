@@ -11,16 +11,18 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { countries } from "@/data/countries";
+import { formatChoiceFieldValue } from "@/lib/utils";
 import { DashboardTabProps } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
 import { Check, Copy, MapPin, PenSquare, Scissors } from "lucide-react";
+import { useSession } from "next-auth/react";
 import React, { useState } from "react";
 import EditBasicInfoDialog from "./Dialogs/EditBasicInfoDialog";
-import { formatChoiceFieldValue } from "@/lib/utils";
 
 const BasicInformationCard: React.FC<DashboardTabProps> = ({
   singleSalonData,
   isLoading,
 }) => {
+  const { data: session } = useSession();
   const [openBasicInfoEditDialog, setOpenBasicInfoEditDialog] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -106,16 +108,19 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
                   ? formatChoiceFieldValue(singleSalonData.salon_type)
                   : "Not Specified"}
               </Badge>
-              <Button
-                variant="outline"
-                size="sm"
-                aria-label="Edit basic information"
-                className="shadow-md dark:shadow-gray-600"
-                onClick={handleOpenBasicInfoEditDialog}
-              >
-                <PenSquare className="size-3" />
-                Edit
-              </Button>
+              {(session?.user?.role === "OWNER" ||
+                session?.user?.role === "ADMIN") && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  aria-label="Edit basic information"
+                  className="shadow-md dark:shadow-gray-600"
+                  onClick={handleOpenBasicInfoEditDialog}
+                >
+                  <PenSquare className="size-3" />
+                  Edit
+                </Button>
+              )}
             </div>
           </>
         )}

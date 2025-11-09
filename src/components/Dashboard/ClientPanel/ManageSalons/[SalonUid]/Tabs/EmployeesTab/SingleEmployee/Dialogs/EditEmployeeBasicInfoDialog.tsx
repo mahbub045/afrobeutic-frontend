@@ -386,24 +386,20 @@ const EditEmployeeBasicInfoDialog: React.FC<
                           ))}
                         </ul>
                       ) : (
-                        <div className="text-muted p-2 text-sm">
-                          No Designation
-                        </div>
+                        <div className="p-2 text-sm">No Designation</div>
                       );
                     })()}
                   </div>
                 )}
 
                 {isLoadingCategories ? (
-                  <p className="text-muted mt-1 text-sm">
-                    Loading Designations...
-                  </p>
+                  <p className="mt-1 text-sm">Loading Designations...</p>
                 ) : !commonCategoriesData ||
                   (Array.isArray(commonCategoriesData) &&
                     commonCategoriesData.length === 0) ||
                   (Array.isArray(commonCategoriesData?.data) &&
                     commonCategoriesData.data.length === 0) ? (
-                  <p className="text-muted mt-1 text-sm">No categories found</p>
+                  <p className="mt-1 text-sm">No categories found</p>
                 ) : null}
                 <ErrorMessage
                   name="designation"

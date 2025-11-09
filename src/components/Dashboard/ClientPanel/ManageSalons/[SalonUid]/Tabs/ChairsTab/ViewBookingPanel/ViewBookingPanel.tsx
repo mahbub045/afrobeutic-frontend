@@ -165,7 +165,7 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
         <div className="relative flex w-1/4">
           <Search className="text-muted-foreground absolute top-1/4 left-2 size-4" />
           <Input
-            placeholder="Search by customer and employee name..."
+            placeholder="Search Bookings..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="focus:!border-primary pl-7 shadow-md focus:!ring-0 dark:shadow-gray-600"
@@ -175,17 +175,17 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
       <Table>
         <TableHeader className="text-xs">
           <TableRow>
-            <TableHead>#</TableHead>
-            <TableHead>Booking ID</TableHead>
-            <TableHead>Customer</TableHead>
-            <TableHead>Phone</TableHead>
-            <TableHead>Employee</TableHead>
-            <TableHead>Date</TableHead>
-            <TableHead>Time</TableHead>
-            <TableHead>Duration</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Total Price</TableHead>
-            <TableHead className="text-center">Actions</TableHead>
+            <TableHead className="text-primary">#</TableHead>
+            <TableHead className="text-primary">Booking ID</TableHead>
+            <TableHead className="text-primary">Customer</TableHead>
+            <TableHead className="text-primary">Phone</TableHead>
+            <TableHead className="text-primary">Employee</TableHead>
+            <TableHead className="text-primary">Date</TableHead>
+            <TableHead className="text-primary">Time</TableHead>
+            <TableHead className="text-primary">Duration</TableHead>
+            <TableHead className="text-primary">Status</TableHead>
+            <TableHead className="text-primary">Total Price</TableHead>
+            <TableHead className="text-primary text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

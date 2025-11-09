@@ -22,6 +22,7 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import AddServiceDialog from "./Dialogs/AddServiceDialog";
@@ -29,6 +30,7 @@ import DeleteServiceDialog from "./Dialogs/DeleteServiceDialog";
 import ViewServicePanel from "./SingleService/ViewServicePanel";
 
 const ServicesTab: React.FC = () => {
+  const { data: session } = useSession();
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
 
@@ -110,27 +112,33 @@ const ServicesTab: React.FC = () => {
               }
             />
           </div>
-
-          <Button
-            size="sm"
-            variant="default"
-            onClick={handleIsOpenAddServiceDialog}
-          >
-            <Plus className="h-4 w-4" />
-            Add New Service
-          </Button>
+          <div>
+            {(session?.user?.role === "OWNER" ||
+              session?.user?.role === "ADMIN") && (
+              <Button
+                size="sm"
+                variant="default"
+                onClick={handleIsOpenAddServiceDialog}
+              >
+                <Plus className="h-4 w-4" />
+                Add New Service
+              </Button>
+            )}
+          </div>
         </div>
 
         <Table>
           <TableHeader className="text-xs">
             <TableRow>
-              <TableHead>#</TableHead>
-              <TableHead>Service Name</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>Created At</TableHead>
-              <TableHead>Updated At</TableHead>
-              <TableHead className="text-center">Actions</TableHead>
+              <TableHead className="text-primary">#</TableHead>
+              <TableHead className="text-primary">Service Name</TableHead>
+              <TableHead className="text-primary">Category</TableHead>
+              <TableHead className="text-primary">Price</TableHead>
+              <TableHead className="text-primary">Created At</TableHead>
+              <TableHead className="text-primary">Updated At</TableHead>
+              <TableHead className="text-primary text-center">
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
 
@@ -167,23 +175,31 @@ const ServicesTab: React.FC = () => {
                   </TableCell>
 
                   <TableCell className="flex justify-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-primary/80 hover:text-primary dark:shadow-gray-600"
-                      onClick={() => handleIsOpenSingleServiceTab(service)}
-                    >
-                      <Eye />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-danger/80 hover:text-danger dark:shadow-gray-600"
-                      color="red"
-                      onClick={() => handleIsOpenDeleteDialog(service)}
-                    >
-                      <Trash2 />
-                    </Button>
+                    <div>
+                      {" "}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-primary/80 hover:text-primary dark:shadow-gray-600"
+                        onClick={() => handleIsOpenSingleServiceTab(service)}
+                      >
+                        <Eye />
+                      </Button>
+                    </div>
+                    <div>
+                      {(session?.user?.role === "OWNER" ||
+                        session?.user?.role === "ADMIN") && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-danger/80 hover:text-danger dark:shadow-gray-600"
+                          color="red"
+                          onClick={() => handleIsOpenDeleteDialog(service)}
+                        >
+                          <Trash2 />
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))

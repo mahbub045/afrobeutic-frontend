@@ -23,6 +23,7 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import AddEmployeeDialog from "./Dialogs/AddEmployeeDialog";
@@ -30,6 +31,7 @@ import DeleteEmployeeDialog from "./Dialogs/DeleteEmloyeeDialog";
 import ViewEmployeePanel from "./SingleEmployee/ViewEmployeePanel";
 
 const EmployeesTab: React.FC = () => {
+  const { data: session } = useSession();
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
 
@@ -110,27 +112,33 @@ const EmployeesTab: React.FC = () => {
               }
             />
           </div>
-
-          <Button
-            size="sm"
-            variant="default"
-            onClick={handleIsOpenAddEmployeeDialog}
-          >
-            <Plus className="h-4 w-4" />
-            Add New Employee
-          </Button>
+          <div>
+            {(session?.user?.role === "OWNER" ||
+              session?.user?.role === "ADMIN") && (
+              <Button
+                size="sm"
+                variant="default"
+                onClick={handleIsOpenAddEmployeeDialog}
+              >
+                <Plus className="h-4 w-4" />
+                Add New Employee
+              </Button>
+            )}
+          </div>
         </div>
 
         <Table>
           <TableHeader className="text-xs">
             <TableRow>
-              <TableHead>Employee ID</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead>Designation</TableHead>
-              <TableHead>Created At</TableHead>
-              <TableHead>Updated At</TableHead>
-              <TableHead className="text-center">Actions</TableHead>
+              <TableHead className="text-primary">Employee ID</TableHead>
+              <TableHead className="text-primary">Name</TableHead>
+              <TableHead className="text-primary">Phone</TableHead>
+              <TableHead className="text-primary">Designation</TableHead>
+              <TableHead className="text-primary">Created At</TableHead>
+              <TableHead className="text-primary">Updated At</TableHead>
+              <TableHead className="text-primary text-center">
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
 
@@ -167,23 +175,30 @@ const EmployeesTab: React.FC = () => {
                   </TableCell>
 
                   <TableCell className="flex justify-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-primary/80 hover:text-primary dark:shadow-gray-600"
-                      onClick={() => handleIsOpenSingleEmployeeTab(employee)}
-                    >
-                      <Eye />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-danger/80 hover:text-danger dark:shadow-gray-600"
-                      color="red"
-                      onClick={() => handleIsOpenDeleteDialog(employee)}
-                    >
-                      <Trash2 />
-                    </Button>
+                    <div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-primary/80 hover:text-primary dark:shadow-gray-600"
+                        onClick={() => handleIsOpenSingleEmployeeTab(employee)}
+                      >
+                        <Eye />
+                      </Button>
+                    </div>
+                    <div>
+                      {(session?.user?.role === "OWNER" ||
+                        session?.user?.role === "ADMIN") && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-danger/80 hover:text-danger dark:shadow-gray-600"
+                          color="red"
+                          onClick={() => handleIsOpenDeleteDialog(employee)}
+                        >
+                          <Trash2 />
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
