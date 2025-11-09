@@ -8,6 +8,7 @@ import {
   ViewEmployeePanelProps,
 } from "@/Types/ClientPanel/ManageSalonTypes/EmployeesTypes/EmployeesType";
 import { ArrowLeft, Edit, LoaderPinwheel } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -17,6 +18,7 @@ const ViewEmployeePanel: React.FC<ViewEmployeePanelProps> = ({
   selectedEmployee,
   onClose,
 }) => {
+  const { data: session } = useSession();
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
 
@@ -128,14 +130,19 @@ const ViewEmployeePanel: React.FC<ViewEmployeePanelProps> = ({
             {/* Basic info */}
             <div className="mb-3 flex items-center justify-between">
               <h4 className="text-base font-semibold">Basic info</h4>
-              <Button
-                variant="outline"
-                size="sm"
-                className="shadow-md dark:shadow-gray-600"
-                onClick={handleEditEmployeeBasicInfo}
-              >
-                <Edit size={16} />
-              </Button>
+              <div>
+                {(session?.user?.role === "OWNER" ||
+                  session?.user?.role === "ADMIN") && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="shadow-md dark:shadow-gray-600"
+                    onClick={handleEditEmployeeBasicInfo}
+                  >
+                    <Edit size={16} />
+                  </Button>
+                )}
+              </div>
             </div>
 
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">

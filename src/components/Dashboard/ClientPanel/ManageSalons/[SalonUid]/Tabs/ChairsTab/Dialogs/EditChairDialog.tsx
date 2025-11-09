@@ -198,7 +198,7 @@ const EditChairDialog: React.FC<ChairDialogsProps> = ({
                   type="text"
                   required
                   autoComplete="off"
-                  placeholder='e.g. "Styling Chair", "Shampoo Chair"'
+                  placeholder='e.g. "Premium Chair", "Basic Chair"'
                   onFocus={() => setShowCategories(true)}
                   onChange={(e: ChangeEvent<HTMLInputElement>) =>
                     setFieldValue("type", e.target.value)
@@ -255,20 +255,20 @@ const EditChairDialog: React.FC<ChairDialogsProps> = ({
                           ))}
                         </ul>
                       ) : (
-                        <div className="text-muted p-2 text-sm">No Types</div>
+                        <div className="p-2 text-sm">No Types</div>
                       );
                     })()}
                   </div>
                 )}
 
                 {isLoadingCategories ? (
-                  <p className="text-muted mt-1 text-sm">Loading Types...</p>
+                  <p className="mt-1 text-sm">Loading Types...</p>
                 ) : !commonCategoriesData ||
                   (Array.isArray(commonCategoriesData) &&
                     commonCategoriesData.length === 0) ||
                   (Array.isArray(commonCategoriesData?.data) &&
                     commonCategoriesData.data.length === 0) ? (
-                  <p className="text-muted mt-1 text-sm">No categories found</p>
+                  <p className="mt-1 text-sm">No categories found</p>
                 ) : null}
                 <ErrorMessage
                   name="type"

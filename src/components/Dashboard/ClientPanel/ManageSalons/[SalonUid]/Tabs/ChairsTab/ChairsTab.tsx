@@ -26,6 +26,7 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import AddChairDialog from "./Dialogs/AddChairDialog";
@@ -35,6 +36,7 @@ import EditChairDialog from "./Dialogs/EditChairDialog";
 import ViewBookingPanel from "./ViewBookingPanel/ViewBookingPanel";
 
 const ChairsTab: React.FC = () => {
+  const { data: session } = useSession();
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
   const [currentPage, setCurrentPage] = useState(1);
@@ -178,13 +180,18 @@ const ChairsTab: React.FC = () => {
                 />
               </div>
             </div>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={handleAddChairDialogOpen}
-            >
-              <Plus className="h-4 w-4" /> Add Chair
-            </Button>
+            <div>
+              {(session?.user?.role === "OWNER" ||
+                session?.user?.role === "ADMIN") && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={handleAddChairDialogOpen}
+                >
+                  <Plus className="h-4 w-4" /> Add Chair
+                </Button>
+              )}
+            </div>
           </>
         )}
       </div>
@@ -284,20 +291,31 @@ const ChairsTab: React.FC = () => {
                             <Eye className="mr-1 h-4 w-4" />
                             <span>View Bookings</span>
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="cursor-pointer"
-                            onClick={() => handleEditChairDialogOpen(chair)}
-                          >
-                            <Edit className="mr-1 h-4 w-4" />
-                            <span>Edit Chair</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-danger cursor-pointer"
-                            onClick={() => handleDeleteChairDialogOpen(chair)}
-                          >
-                            <Trash2 className="text-danger mr-1 h-4 w-4" />
-                            <span>Delete Chair</span>
-                          </DropdownMenuItem>
+                          <div>
+                            {(session?.user?.role === "OWNER" ||
+                              session?.user?.role === "ADMIN") && (
+                              <>
+                                <DropdownMenuItem
+                                  className="cursor-pointer"
+                                  onClick={() =>
+                                    handleEditChairDialogOpen(chair)
+                                  }
+                                >
+                                  <Edit className="mr-1 h-4 w-4" />
+                                  <span>Edit Chair</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="text-danger cursor-pointer"
+                                  onClick={() =>
+                                    handleDeleteChairDialogOpen(chair)
+                                  }
+                                >
+                                  <Trash2 className="text-danger mr-1 h-4 w-4" />
+                                  <span>Delete Chair</span>
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                          </div>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
