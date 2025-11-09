@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetSingleSalonDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SingleSalon/SingleSalonApi";
+import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import React, { useState } from "react";
 import EditAllOpeningHoursDialog from "./Dialogs/EditAllOpeningHoursDialog";
@@ -31,6 +32,7 @@ function formatTimeShort(time?: string | null) {
 }
 
 const OpeningHoursTab: React.FC = () => {
+  const { data: session } = useSession();
   const { salonuid } = useParams();
 
   // RTK Hook - single salon data (which includes opening_hours)
@@ -120,14 +122,17 @@ const OpeningHoursTab: React.FC = () => {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Opening Hours</h2>
         <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            className="shadow-md dark:shadow-gray-600"
-            onClick={() => setIsEditAllOpen(true)}
-          >
-            Edit All
-          </Button>
+          {(session?.user?.role === "OWNER" ||
+            session?.user?.role === "ADMIN") && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="shadow-md dark:shadow-gray-600"
+              onClick={() => setIsEditAllOpen(true)}
+            >
+              Edit All
+            </Button>
+          )}
         </div>
       </div>
 
@@ -145,14 +150,17 @@ const OpeningHoursTab: React.FC = () => {
                 </Badge>
               </CardTitle>
               <div className="flex items-center gap-2">
-                <Button
-                  size="xs"
-                  variant="outline"
-                  className="shadow-md dark:shadow-gray-600"
-                  onClick={() => onOpenEditSingle(entry)}
-                >
-                  Edit
-                </Button>
+                {(session?.user?.role === "OWNER" ||
+                  session?.user?.role === "ADMIN") && (
+                  <Button
+                    size="xs"
+                    variant="outline"
+                    className="shadow-md dark:shadow-gray-600"
+                    onClick={() => onOpenEditSingle(entry)}
+                  >
+                    Edit
+                  </Button>
+                )}
               </div>
             </CardHeader>
             <CardContent>

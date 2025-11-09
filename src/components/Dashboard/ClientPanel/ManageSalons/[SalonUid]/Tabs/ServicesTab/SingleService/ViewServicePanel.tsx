@@ -17,6 +17,7 @@ import {
   LoaderPinwheel,
   Maximize2,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -28,6 +29,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
   selectedService,
   onClose,
 }) => {
+  const { data: session } = useSession();
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
 
@@ -226,14 +228,19 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
             {/* Basic info */}
             <div className="mb-3 flex items-center justify-between">
               <h4 className="text-base font-semibold">Basic info</h4>
-              <Button
-                variant="outline"
-                size="sm"
-                className="shadow-md dark:shadow-gray-600"
-                onClick={handleEditServiceBasicInfo}
-              >
-                <Edit size={16} />
-              </Button>
+              <div>
+                {(session?.user?.role === "OWNER" ||
+                  session?.user?.role === "ADMIN") && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="shadow-md dark:shadow-gray-600"
+                    onClick={handleEditServiceBasicInfo}
+                  >
+                    <Edit size={16} />
+                  </Button>
+                )}
+              </div>
             </div>
 
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
@@ -274,14 +281,19 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
             {/* More info */}
             <div className="mb-3 flex items-center justify-between">
               <h4 className="text-base font-semibold">More info</h4>
-              <Button
-                variant="outline"
-                size="sm"
-                className="shadow-md dark:shadow-gray-600"
-                onClick={handleEditServiceMoreInfo}
-              >
-                <Edit size={16} />
-              </Button>
+              <div>
+                {(session?.user?.role === "OWNER" ||
+                  session?.user?.role === "ADMIN") && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="shadow-md dark:shadow-gray-600"
+                    onClick={handleEditServiceMoreInfo}
+                  >
+                    <Edit size={16} />
+                  </Button>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
@@ -327,7 +339,9 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                 </div>
                 <div className="mt-1 text-sm font-medium">
                   <Badge variant="default">
-                    {formatChoiceFieldValue(displayedService.gender_specific || "N/A")}
+                    {formatChoiceFieldValue(
+                      displayedService.gender_specific || "N/A",
+                    )}
                   </Badge>
                 </div>
               </div>

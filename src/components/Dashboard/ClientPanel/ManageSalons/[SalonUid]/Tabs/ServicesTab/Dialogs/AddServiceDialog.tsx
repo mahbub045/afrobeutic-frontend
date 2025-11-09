@@ -288,24 +288,20 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                           ))}
                         </ul>
                       ) : (
-                        <div className="text-muted p-2 text-sm">
-                          No categories
-                        </div>
+                        <div className="p-2 text-sm">No categories</div>
                       );
                     })()}
                   </div>
                 )}
 
                 {isLoadingCategories ? (
-                  <p className="text-muted mt-1 text-sm">
-                    Loading categories...
-                  </p>
+                  <p className="mt-1 text-sm">Loading categories...</p>
                 ) : !commonCategoriesData ||
                   (Array.isArray(commonCategoriesData) &&
                     commonCategoriesData.length === 0) ||
                   (Array.isArray(commonCategoriesData?.data) &&
                     commonCategoriesData.data.length === 0) ? (
-                  <p className="text-muted mt-1 text-sm">No categories found</p>
+                  <p className="mt-1 text-sm">No categories found</p>
                 ) : null}
 
                 {touched.category && errors.category ? (
