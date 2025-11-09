@@ -22,6 +22,7 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import AddProductDialog from "./Dialogs/AddProductDialog";
@@ -29,6 +30,7 @@ import DeleteProductDialog from "./Dialogs/DeleteProductDialog";
 import ViewProductPanel from "./SingleProduct/ViewProductPanel";
 
 const ProductsTab: React.FC = () => {
+  const { data: session } = useSession();
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
 
@@ -110,15 +112,19 @@ const ProductsTab: React.FC = () => {
               }
             />
           </div>
-
-          <Button
-            size="sm"
-            variant="default"
-            onClick={handleIsOpenAddProductDialog}
-          >
-            <Plus className="h-4 w-4" />
-            Add New Product
-          </Button>
+          <div>
+            {(session?.user?.role === "OWNER" ||
+              session?.user?.role === "ADMIN") && (
+              <Button
+                size="sm"
+                variant="default"
+                onClick={handleIsOpenAddProductDialog}
+              >
+                <Plus className="h-4 w-4" />
+                Add New Product
+              </Button>
+            )}
+          </div>
         </div>
 
         <Table>
@@ -130,7 +136,9 @@ const ProductsTab: React.FC = () => {
               <TableHead className="text-primary">Price</TableHead>
               <TableHead className="text-primary">Created At</TableHead>
               <TableHead className="text-primary">Updated At</TableHead>
-              <TableHead className="text-center text-primary">Actions</TableHead>
+              <TableHead className="text-primary text-center">
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
 
@@ -167,23 +175,31 @@ const ProductsTab: React.FC = () => {
                   </TableCell>
 
                   <TableCell className="flex justify-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-primary/80 hover:text-primary dark:shadow-gray-600"
-                      onClick={() => handleIsOpenSingleProductTab(product)}
-                    >
-                      <Eye />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-danger/80 hover:text-danger dark:shadow-gray-600"
-                      color="red"
-                      onClick={() => handleIsOpenDeleteDialog(product)}
-                    >
-                      <Trash2 />
-                    </Button>
+                    <div>
+                      {" "}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-primary/80 hover:text-primary dark:shadow-gray-600"
+                        onClick={() => handleIsOpenSingleProductTab(product)}
+                      >
+                        <Eye />
+                      </Button>
+                    </div>
+                    <div>
+                      {(session?.user?.role === "OWNER" ||
+                        session?.user?.role === "ADMIN") && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-danger/80 hover:text-danger dark:shadow-gray-600"
+                          color="red"
+                          onClick={() => handleIsOpenDeleteDialog(product)}
+                        >
+                          <Trash2 />
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
