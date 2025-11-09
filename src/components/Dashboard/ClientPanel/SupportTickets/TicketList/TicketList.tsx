@@ -16,8 +16,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatChoiceFieldValue, formatDateTime } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, Eye, LoaderPinwheel } from "lucide-react";
 import React, { useState } from "react";
-import TicketDetail from "../TicketDetail/TicketDetail";
 import AddTicketDialog from "./Dialogs/AddTicketDialog";
+import TicketDetail from "./TicketDetail/TicketDetail";
 
 const TicketList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);

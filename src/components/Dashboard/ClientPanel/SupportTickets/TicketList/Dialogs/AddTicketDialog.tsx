@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ErrorMessage, Field, FieldProps, Form, Formik } from "formik";
 import { Plus } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
@@ -36,6 +37,7 @@ const schema = Yup.object().shape({
 });
 
 const AddTicketDialog: React.FC = () => {
+  const { data: session } = useSession();
   const { resolvedTheme } = useTheme();
   const [open, setOpen] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -136,6 +138,14 @@ const AddTicketDialog: React.FC = () => {
   };
 
   // no-op: we will upload files as multipart/form-data instead of base64
+
+  // Check if user has permission to create tickets
+  const canCreateTicket =
+    session?.user?.role === "OWNER" || session?.user?.role === "ADMIN";
+
+  if (!canCreateTicket) {
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
