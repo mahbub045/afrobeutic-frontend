@@ -14,6 +14,9 @@ import { formatDateTime } from "@/lib/utils";
 import { useGetServicesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
 import { ServiceProps } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
   ChevronLeft,
   ChevronRight,
   Eye,
@@ -44,6 +47,7 @@ const ServicesTab: React.FC = () => {
   const [selectedServiceToView, setSelectedServiceToView] =
     useState<ServiceProps | null>(null);
   const [viewTab, setViewTab] = useState<string>("list");
+  const [ordering, setOrdering] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -53,6 +57,11 @@ const ServicesTab: React.FC = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
+  // Reset to first page whenever ordering changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [ordering]);
+
   const {
     data: serviceData,
     isLoading,
@@ -61,6 +70,7 @@ const ServicesTab: React.FC = () => {
     salonUid,
     page: currentPage,
     search: debouncedSearch || undefined,
+    ordering: ordering || undefined,
   });
 
   const extractedServices: ServiceProps[] = serviceData?.results ?? [];
@@ -133,7 +143,34 @@ const ServicesTab: React.FC = () => {
               <TableHead className="text-primary">#</TableHead>
               <TableHead className="text-primary">Service Name</TableHead>
               <TableHead className="text-primary">Category</TableHead>
-              <TableHead className="text-primary">Price</TableHead>
+              <TableHead className="text-primary">
+                <div className="flex items-center gap-1">
+                  <span>Price</span>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    className="text-primary h-7 w-7"
+                    aria-label="Toggle price ordering"
+                    title={`Toggle price ordering (current: ${ordering === undefined ? "none" : ordering === "price" ? "asc" : "desc"})`}
+                    onClick={() =>
+                      setOrdering((prev) =>
+                        prev === undefined
+                          ? "price"
+                          : prev === "price"
+                            ? "-price"
+                            : undefined,
+                      )
+                    }
+                  >
+                    {ordering === undefined && (
+                      <ArrowUpDown className="h-4 w-4" />
+                    )}
+                    {ordering === "price" && <ArrowDown className="h-4 w-4" />}
+                    {ordering === "-price" && <ArrowUp className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </TableHead>
               <TableHead className="text-primary">Created At</TableHead>
               <TableHead className="text-primary">Updated At</TableHead>
               <TableHead className="text-primary text-center">
