@@ -22,6 +22,7 @@ import {
   Form,
   Formik,
   FormikProps,
+  type FormikHelpers,
 } from "formik";
 import { X } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -132,7 +133,10 @@ const EditEmployeeBasicInfoDialog: React.FC<
 
   const handleRemoveImage = () => setSelectedImage(null);
 
-  const handleSubmit = async (values: EmployeeProps) => {
+  const handleSubmit = async (
+    values: EmployeeProps,
+    formikHelpers: FormikHelpers<EmployeeProps>,
+  ) => {
     try {
       // Build FormData only with changed/non-empty fields (PATCH semantics)
       const formData = new FormData();
@@ -195,8 +199,52 @@ const EditEmployeeBasicInfoDialog: React.FC<
       onEditSuccess?.();
       onClose();
       refetch();
-    } catch (error) {
-      toast.error("Failed to update employee.");
+    } catch (error: unknown) {
+      // Attempt to extract backend validation errors format: { field: [messages] }
+      const errData: unknown =
+        error && typeof error === "object" && "data" in error
+          ? (error as { data?: unknown }).data
+          : undefined;
+      const rawErrors: unknown =
+        errData && typeof errData === "object" && "errors" in errData
+          ? (errData as { errors?: unknown }).errors
+          : errData;
+
+      const candidateFields = [
+        "employee_id",
+        "phone",
+        "name",
+        "designation",
+        "image",
+      ] as const;
+
+      let fieldHandled = false;
+      candidateFields.forEach((f) => {
+        const v =
+          rawErrors && typeof rawErrors === "object"
+            ? (rawErrors as Record<string, unknown>)[f]
+            : undefined;
+        if (!v) return;
+        const msg = Array.isArray(v) ? String(v[0]) : String(v);
+        // Formik generic functions accept string field names
+        formikHelpers.setFieldTouched(f, true, false);
+        formikHelpers.setFieldError(f, msg);
+        fieldHandled = true;
+      });
+
+      if (!fieldHandled) {
+        const generic = (() => {
+          if (errData && typeof errData === "object") {
+            const obj = errData as Record<string, unknown>;
+            if (typeof obj.detail === "string") return obj.detail;
+            if (typeof obj.message === "string") return obj.message;
+          }
+          if (error instanceof Error) return error.message;
+          return "Failed to update employee.";
+        })();
+        toast.error(generic);
+      }
+      // console for debugging
       console.error("Edit Employee Error:", error);
     }
   };
@@ -229,8 +277,14 @@ const EditEmployeeBasicInfoDialog: React.FC<
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
-          {({ handleSubmit, isSubmitting, values, setFieldValue }) => (
-            <Form onSubmit={handleSubmit} className="space-y-4">
+          {({ handleSubmit, isSubmitting, values, setFieldValue, ...rest }) => (
+            <Form
+              onSubmit={(e) => {
+                e.preventDefault();
+                void handleSubmit();
+              }}
+              className="space-y-4"
+            >
               <div>
                 <Label htmlFor="employee-id" className="mb-2">
                   Employee ID
@@ -247,6 +301,7 @@ const EditEmployeeBasicInfoDialog: React.FC<
                   component="p"
                   className="mt-1 text-sm text-red-500"
                 />
+                {/* Server-side uniqueness example message (will appear automatically if setFieldError is called) */}
               </div>
 
               <div>
@@ -374,7 +429,7 @@ const EditEmployeeBasicInfoDialog: React.FC<
                             <li key={v}>
                               <button
                                 type="button"
-                                className="my-1 w-full px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-800"
+                                className="my-1 w-full px-3 py-2 text-left hover:bg-gray-50 dark:shadow-gray-600 dark:hover:bg-gray-800"
                                 onClick={() => {
                                   setFieldValue("designation", v);
                                   setShowCategories(false);
