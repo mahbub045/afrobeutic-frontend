@@ -175,17 +175,17 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
       <Table>
         <TableHeader className="text-xs">
           <TableRow>
-            <TableHead>#</TableHead>
-            <TableHead>Booking ID</TableHead>
-            <TableHead>Customer</TableHead>
-            <TableHead>Phone</TableHead>
-            <TableHead>Employee</TableHead>
-            <TableHead>Date</TableHead>
-            <TableHead>Time</TableHead>
-            <TableHead>Duration</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Total Price</TableHead>
-            <TableHead className="text-center">Actions</TableHead>
+            <TableHead className="text-primary">#</TableHead>
+            <TableHead className="text-primary">Booking ID</TableHead>
+            <TableHead className="text-primary">Customer</TableHead>
+            <TableHead className="text-primary">Phone</TableHead>
+            <TableHead className="text-primary">Employee</TableHead>
+            <TableHead className="text-primary">Date</TableHead>
+            <TableHead className="text-primary">Time</TableHead>
+            <TableHead className="text-primary">Duration</TableHead>
+            <TableHead className="text-primary">Status</TableHead>
+            <TableHead className="text-primary">Total Price</TableHead>
+            <TableHead className="text-primary text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

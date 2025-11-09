@@ -124,13 +124,15 @@ const EmployeesTab: React.FC = () => {
         <Table>
           <TableHeader className="text-xs">
             <TableRow>
-              <TableHead>Employee ID</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead>Designation</TableHead>
-              <TableHead>Created At</TableHead>
-              <TableHead>Updated At</TableHead>
-              <TableHead className="text-center">Actions</TableHead>
+              <TableHead className="text-primary">Employee ID</TableHead>
+              <TableHead className="text-primary">Name</TableHead>
+              <TableHead className="text-primary">Phone</TableHead>
+              <TableHead className="text-primary">Designation</TableHead>
+              <TableHead className="text-primary">Created At</TableHead>
+              <TableHead className="text-primary">Updated At</TableHead>
+              <TableHead className="text-primary text-center">
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
 

@@ -124,13 +124,13 @@ const ProductsTab: React.FC = () => {
         <Table>
           <TableHeader className="text-xs">
             <TableRow>
-              <TableHead>#</TableHead>
-              <TableHead>Product Name</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>Created At</TableHead>
-              <TableHead>Updated At</TableHead>
-              <TableHead className="text-center">Actions</TableHead>
+              <TableHead className="text-primary">#</TableHead>
+              <TableHead className="text-primary">Product Name</TableHead>
+              <TableHead className="text-primary">Category</TableHead>
+              <TableHead className="text-primary">Price</TableHead>
+              <TableHead className="text-primary">Created At</TableHead>
+              <TableHead className="text-primary">Updated At</TableHead>
+              <TableHead className="text-center text-primary">Actions</TableHead>
             </TableRow>
           </TableHeader>
 
