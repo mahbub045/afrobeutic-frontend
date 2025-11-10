@@ -1,6 +1,7 @@
 "use client";
 
 import { useAddSupportTicketMutation } from "@/Redux/Reducers/ClientPanel/SupportTickets/SupportTicketsApi";
+import { TicketProps } from "@/Types/ClientPanel/SupportTicketsTypes/SupportTicketsType";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -21,13 +22,6 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
-
-interface AddTicketFormValues {
-  subject: string;
-  queries: string;
-  level: string;
-  topic: string;
-}
 
 const schema = Yup.object().shape({
   subject: Yup.string().max(255).required("Subject is required"),
@@ -103,7 +97,7 @@ const AddTicketDialog: React.FC = () => {
   };
 
   const handleSubmit = async (
-    values: AddTicketFormValues,
+    values: TicketProps,
     { resetForm }: { resetForm: () => void },
   ) => {
     try {
@@ -137,8 +131,6 @@ const AddTicketDialog: React.FC = () => {
     }
   };
 
-  // no-op: we will upload files as multipart/form-data instead of base64
-
   // Check if user has permission to create tickets
   const canCreateTicket =
     session?.user?.role === "OWNER" || session?.user?.role === "ADMIN";
@@ -158,7 +150,9 @@ const AddTicketDialog: React.FC = () => {
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create Support Ticket</DialogTitle>
+          <DialogTitle className="text-primary">
+            Create Support Ticket
+          </DialogTitle>
         </DialogHeader>
 
         <Formik
@@ -168,7 +162,7 @@ const AddTicketDialog: React.FC = () => {
               queries: "",
               level: "LOW",
               topic: "ACCOUNT",
-            } as AddTicketFormValues
+            } as TicketProps
           }
           validationSchema={schema}
           onSubmit={handleSubmit}
@@ -243,7 +237,7 @@ const AddTicketDialog: React.FC = () => {
 
               <div>
                 <Label htmlFor="uploaded_images" className="mb-1">
-                  Images (max 3)
+                  Images<span className="text-warning">(max 3)</span>
                 </Label>
                 <Field name="uploaded_images">
                   {({ form }: FieldProps) => (
