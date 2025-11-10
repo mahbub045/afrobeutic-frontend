@@ -267,7 +267,7 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
                   as="input"
                   type="text"
                   required
-                  placeholder="e.g. Emp-888"
+                  placeholder="e.g. EMP-888"
                 />
                 {touched.employee_id && errors.employee_id ? (
                   <p className="text-destructive text-sm">

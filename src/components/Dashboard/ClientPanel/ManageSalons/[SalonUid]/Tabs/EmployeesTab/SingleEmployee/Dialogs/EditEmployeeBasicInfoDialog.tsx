@@ -294,7 +294,7 @@ const EditEmployeeBasicInfoDialog: React.FC<
                   id="employee-id"
                   name="employee_id"
                   type="text"
-                  placeholder="Enter employee id"
+                  placeholder="e.g. EMP-888"
                 />
                 <ErrorMessage
                   name="employee_id"
