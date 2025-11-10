@@ -62,14 +62,12 @@ const TicketList: React.FC = () => {
   };
   const getColorBasedOnStatus = (status: string) => {
     switch (status) {
-      case "OPEN":
-        return "default";
-      case "IN_PROGRESS":
-        return "secondary";
-      case "RESOLVED":
-        return "warning";
-      case "CLOSED":
+      case "NEW":
         return "danger";
+      case "IN_REVIEW":
+        return "warning";
+      case "RESOLVED":
+        return "default";
       default:
         return "outline";
     }

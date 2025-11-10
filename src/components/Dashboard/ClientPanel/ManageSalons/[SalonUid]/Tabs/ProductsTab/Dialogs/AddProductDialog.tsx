@@ -181,7 +181,7 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md shadow-md dark:shadow-gray-600">
         <DialogHeader>
-          <DialogTitle>Add New Product</DialogTitle>
+          <DialogTitle className="text-primary">Add New Product</DialogTitle>
           <DialogDescription>Add a new product to the salon</DialogDescription>
         </DialogHeader>
 
