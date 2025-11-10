@@ -47,6 +47,9 @@ export const baseApi = createApi({
     "Employees",
     "Customers",
     "SupportTickets",
+
+    //Admin Panel tag types
+    "AccountsList",
   ],
   endpoints: () => ({}),
 });
