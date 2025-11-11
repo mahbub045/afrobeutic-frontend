@@ -45,7 +45,6 @@ const BookingSchema = Yup.object().shape({
     .required("Customer information is required"),
   booking_date: Yup.string().required("Booking date is required"),
   booking_time: Yup.string().required("Booking time is required"),
-  status: Yup.string().required("Booking status is required"),
   notes: Yup.string(),
   services: Yup.array().min(1, "At least one service is required"),
   products: Yup.array(),
@@ -141,7 +140,6 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
         customer: values.customer,
         booking_date: values.booking_date,
         booking_time: formattedTime,
-        status: values.status || "PLACED",
         notes: values.notes || "",
         services: values.services,
         products: values.products || [],
@@ -204,7 +202,6 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
               },
               booking_date: new Date().toISOString().split("T")[0],
               booking_time: new Date().toTimeString().slice(0, 8),
-              status: "",
               notes: "",
               services: [],
               products: [],
@@ -341,8 +338,8 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div>
+                <div className="grid grid-cols-1 gap-4">
+                  {/* <div>
                     <Label htmlFor="status" className="mb-2">
                       Status<span className="text-danger">*</span>
                     </Label>
@@ -357,7 +354,7 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
                       <option value="CANCELLED">Cancelled</option>
                       <option value="ABSENT">Absent</option>
                     </Field>
-                  </div>
+                  </div> */}
                   <div>
                     <Label htmlFor="notes" className="mb-2">
                       Notes
@@ -365,8 +362,8 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
                     <Field
                       id="notes"
                       name="notes"
-                      type="text"
-                      as="input"
+                      // type="textarea"
+                      as="textarea"
                       placeholder="Enter booking notes (optional)"
                     />
                     <ErrorMessage

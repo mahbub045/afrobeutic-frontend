@@ -367,30 +367,6 @@ const BookingsTab: React.FC = () => {
           <Button variant="outline" size="icon" className="h-8 w-8 sm:hidden">
             <Filter className="h-4 w-4" />
           </Button>
-          <div className="inline-flex rounded-md border">
-            <Button
-              variant={viewMode === "day" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("day")}
-              className={cn(
-                "rounded-r-none px-3 text-xs font-semibold sm:px-6",
-                viewMode === "day" && "bg-primary text-primary-foreground",
-              )}
-            >
-              DAY
-            </Button>
-            <Button
-              variant={viewMode === "week" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("week")}
-              className={cn(
-                "rounded-l-none border-l px-3 text-xs font-semibold sm:px-6",
-                viewMode === "week" && "bg-primary text-primary-foreground",
-              )}
-            >
-              WEEK
-            </Button>
-          </div>
         </div>
       </div>
 

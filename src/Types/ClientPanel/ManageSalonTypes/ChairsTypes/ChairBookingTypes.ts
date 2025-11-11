@@ -47,7 +47,6 @@ export interface BookingFormValues {
   };
   booking_date: string;
   booking_time: string;
-  status: string;
   notes: string;
   services: string[];
   products: string[];
