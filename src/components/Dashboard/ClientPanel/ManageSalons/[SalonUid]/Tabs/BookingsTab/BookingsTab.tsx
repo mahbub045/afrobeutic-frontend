@@ -17,12 +17,12 @@ import {
 } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
 import {
   Calendar as CalendarIcon,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Edit,
   Filter,
-  MessageSquare,
-  MoreVertical,
+  LoaderPinwheel,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
@@ -94,8 +94,8 @@ const BookingsTab: React.FC = () => {
 
         // Assign colors based on status
         const statusColorMap: { [key: string]: string } = {
-          PLACED: "bg-sky-200",
-          INPROGRESS: "bg-secondary/40",
+          PLACED: "bg-blue-200",
+          INPROGRESS: "bg-yellow-200",
           RESCHEDULED: "bg-pink-200",
           COMPLETED: "bg-gray-200",
         };
@@ -240,9 +240,8 @@ const BookingsTab: React.FC = () => {
 
       {isBookingsLoading ? (
         <div className="flex flex-1 items-center justify-center">
-          <div className="text-muted-foreground text-center">
-            <div className="border-primary mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"></div>
-            <p className="text-sm">Loading bookings...</p>
+          <div className="p-10 text-center">
+            <LoaderPinwheel className="animate-spin" />
           </div>
         </div>
       ) : staffMembers.length === 0 ? (
@@ -253,55 +252,11 @@ const BookingsTab: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="grid flex-1 grid-cols-1 gap-0 overflow-hidden lg:grid-cols-[1fr_380px]">
+        <div className="grid flex-1 grid-cols-1 gap-0 overflow-hidden lg:grid-cols-[1fr_320px]">
           {/* Calendar View */}
           <div className="bg-card flex flex-col overflow-hidden lg:border-r">
-            {/* Staff Header */}
-            <div className="bg-muted/50 flex overflow-x-auto border-b">
-              <div className="w-10 flex-shrink-0 border-r sm:w-12 lg:w-16"></div>
-              <div
-                className={cn(
-                  "grid min-w-max flex-1",
-                  staffMembers.length === 1 && "grid-cols-1",
-                  staffMembers.length === 2 && "grid-cols-2",
-                  staffMembers.length === 3 && "grid-cols-3",
-                  staffMembers.length >= 4 && "grid-cols-4",
-                )}
-              >
-                {staffMembers.map((staff, index) => (
-                  <div
-                    key={staff.id}
-                    className={cn(
-                      "flex items-center justify-center gap-1 px-1 py-2 sm:gap-2 sm:px-2 sm:py-3 lg:px-4",
-                      index < staffMembers.length - 1 && "border-r",
-                    )}
-                  >
-                    <Avatar className="border-background h-6 w-6 border-2 shadow-sm sm:h-8 sm:w-8 lg:h-9 lg:w-9">
-                      <AvatarImage src={staff.avatar} />
-                      <AvatarFallback
-                        className={cn(
-                          "text-xs font-medium text-white sm:text-sm",
-                          index === 0 && "bg-orange-400",
-                          index === 1 && "bg-purple-400",
-                          index === 2 && "bg-indigo-400",
-                          index === 3 && "bg-pink-400",
-                          index >= 4 && "bg-cyan-400",
-                        )}
-                      >
-                        {staff.name.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-foreground text-[10px] font-medium whitespace-nowrap sm:text-xs lg:text-sm">
-                      {staff.name}
-                    </span>
-                    <ChevronRight className="text-muted-foreground hidden h-3 w-3 sm:h-4 sm:w-4 lg:block" />
-                  </div>
-                ))}
-              </div>
-            </div>
-
             {/* Time Slots with Appointments */}
-            <div className="flex-1 overflow-auto">
+            <div className="max-h-[700px] flex-1 overflow-auto">
               <div className="relative">
                 {timeSlots.map((slot, index) => (
                   <div
@@ -335,38 +290,71 @@ const BookingsTab: React.FC = () => {
                           <div
                             key={`${staff.id}-${slot.time}`}
                             className={cn(
-                              "hover:bg-muted/30 relative min-w-[120px] p-1 transition-colors sm:min-w-[140px] sm:p-1.5 lg:min-w-0",
+                              "hover:bg-muted/30 relative min-w-[120px] transition-colors sm:min-w-[140px] lg:min-w-0",
                               colIndex < staffMembers.length - 1 && "border-r",
                             )}
                           >
-                            {staffAppointments.map((appointment) => (
-                              <div
-                                key={appointment.id}
-                                className={cn(
-                                  "mb-1 cursor-pointer rounded p-1.5 transition-all hover:opacity-90 sm:mb-1.5 sm:p-2 lg:p-2.5",
-                                  appointment.color,
-                                  selectedAppointment?.id === appointment.id &&
-                                    "ring-primary ring-2",
-                                )}
-                                onClick={() => {
-                                  setSelectedAppointment(appointment);
-                                  // Only open sheet on mobile/tablet (below lg breakpoint)
-                                  if (window.innerWidth < 1024) {
-                                    setIsDetailsOpen(true);
-                                  }
-                                }}
-                              >
-                                <div className="mb-0.5 text-[8px] font-extrabold tracking-wide text-gray-700 uppercase sm:text-[9px] lg:text-[10px] dark:text-gray-800">
-                                  {appointment.service}
-                                </div>
-                                <div className="text-[10px] font-medium text-gray-800 sm:text-xs dark:text-gray-900">
-                                  {appointment.client}
-                                </div>
-                                <div className="mt-0.5 text-[8px] text-gray-600 sm:text-[9px] lg:text-[10px] dark:text-gray-700">
-                                  At {appointment.startTime}
-                                </div>
+                            {/* Staff Header in first row */}
+                            {index === 0 && (
+                              <div className="bg-muted/50 flex items-center justify-center gap-1 border-b px-1 py-2 sm:gap-2 sm:px-2 sm:py-3 lg:px-4">
+                                <Avatar className="border-background h-6 w-6 border-2 shadow-sm sm:h-8 sm:w-8 lg:h-9 lg:w-9">
+                                  <AvatarImage src={staff.avatar} />
+                                  <AvatarFallback
+                                    className={cn(
+                                      "text-xs font-medium text-white sm:text-sm",
+                                      colIndex === 0 && "bg-orange-400",
+                                      colIndex === 1 && "bg-purple-400",
+                                      colIndex === 2 && "bg-indigo-400",
+                                      colIndex === 3 && "bg-pink-400",
+                                      colIndex >= 4 && "bg-cyan-400",
+                                    )}
+                                  >
+                                    {staff.name.charAt(0)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="text-foreground text-[10px] font-medium whitespace-nowrap sm:text-xs lg:text-sm">
+                                  {staff.name}
+                                </span>
+                                <ChevronDown className="text-muted-foreground hidden h-3 w-3 sm:h-4 sm:w-4 lg:block" />
                               </div>
-                            ))}
+                            )}
+
+                            {/* Appointments area */}
+                            <div
+                              className={cn(
+                                "p-1 sm:p-1.5",
+                                index === 0 && "pt-0",
+                              )}
+                            >
+                              {staffAppointments.map((appointment) => (
+                                <div
+                                  key={appointment.id}
+                                  className={cn(
+                                    "mb-1 cursor-pointer rounded p-1.5 transition-all hover:opacity-90 sm:mb-1.5 sm:p-2 lg:p-2.5",
+                                    appointment.color,
+                                    selectedAppointment?.id ===
+                                      appointment.id && "ring-primary ring-2",
+                                  )}
+                                  onClick={() => {
+                                    setSelectedAppointment(appointment);
+                                    // Only open sheet on mobile/tablet (below lg breakpoint)
+                                    if (window.innerWidth < 1024) {
+                                      setIsDetailsOpen(true);
+                                    }
+                                  }}
+                                >
+                                  <div className="mb-0.5 text-[8px] font-extrabold tracking-wide text-gray-700 uppercase sm:text-[9px] lg:text-[10px] dark:text-gray-800">
+                                    {appointment.service}
+                                  </div>
+                                  <div className="text-[10px] font-medium text-gray-800 sm:text-xs dark:text-gray-900">
+                                    {appointment.client}
+                                  </div>
+                                  <div className="mt-0.5 text-[8px] text-gray-600 sm:text-[9px] lg:text-[10px] dark:text-gray-700">
+                                    At {appointment.startTime}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         );
                       })}
@@ -379,7 +367,7 @@ const BookingsTab: React.FC = () => {
 
           {/* Appointment Details Sidebar - Desktop */}
           <div className="bg-card hidden overflow-y-auto lg:block">
-            <div className="border-b px-6 py-4">
+            <div className="border-b px-6 py-3">
               <div className="mb-3 flex items-start justify-between">
                 <h3 className="text-foreground text-base font-semibold">
                   {selectedAppointment
@@ -389,9 +377,9 @@ const BookingsTab: React.FC = () => {
                 <div className="-mt-1 flex items-center gap-1">
                   {selectedAppointment && (
                     <>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      {/* <Button variant="ghost" size="icon" className="h-8 w-8">
                         <MoreVertical className="h-4 w-4" />
-                      </Button>
+                      </Button> */}
                       <Button variant="ghost" size="icon" className="h-8 w-8">
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -471,7 +459,7 @@ const BookingsTab: React.FC = () => {
                     <div className="flex items-start gap-3">
                       <Avatar className="border-background h-12 w-12 border-2 shadow">
                         <AvatarImage src={selectedAppointment.clientAvatar} />
-                        <AvatarFallback className="bg-pink-500 font-semibold text-white">
+                        <AvatarFallback className="bg-primary font-semibold text-white">
                           {selectedAppointment.client.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
@@ -483,14 +471,10 @@ const BookingsTab: React.FC = () => {
                           Client
                         </div>
                       </div>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      {/* <Button variant="ghost" size="icon" className="h-8 w-8">
                         <MessageSquare className="h-4 w-4" />
-                      </Button>
+                      </Button> */}
                     </div>
-
-                    <button className="text-primary text-sm hover:underline">
-                      Show additional client info
-                    </button>
                   </div>
 
                   <Separator />
@@ -556,13 +540,13 @@ const BookingsTab: React.FC = () => {
                       <div className="flex items-center gap-1">
                         {selectedAppointment && (
                           <>
-                            <Button
+                            {/* <Button
                               variant="outline"
                               size="icon"
                               className="h-8 w-8"
                             >
                               <MoreVertical className="h-4 w-4" />
-                            </Button>
+                            </Button> */}
                             <Button
                               variant="outline"
                               size="icon"
@@ -648,7 +632,7 @@ const BookingsTab: React.FC = () => {
                               <AvatarImage
                                 src={selectedAppointment.clientAvatar}
                               />
-                              <AvatarFallback className="bg-pink-500 font-semibold text-white">
+                              <AvatarFallback className="bg-primary font-semibold text-white">
                                 {selectedAppointment.client.charAt(0)}
                               </AvatarFallback>
                             </Avatar>
@@ -660,18 +644,14 @@ const BookingsTab: React.FC = () => {
                                 Client
                               </div>
                             </div>
-                            <Button
+                            {/* <Button
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8"
                             >
                               <MessageSquare className="h-4 w-4" />
-                            </Button>
+                            </Button> */}
                           </div>
-
-                          <button className="text-primary text-sm hover:underline">
-                            Show additional client info
-                          </button>
                         </div>
 
                         <Separator />
