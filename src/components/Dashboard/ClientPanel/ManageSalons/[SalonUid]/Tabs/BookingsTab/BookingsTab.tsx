@@ -2,6 +2,12 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
@@ -55,7 +61,14 @@ const BookingsTab: React.FC = () => {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   // RTK Hooks
-  const dateParam = selectedDate.toISOString().split("T")[0];
+  // Convert selected date to local YYYY-MM-DD to avoid UTC shift (off-by-one)
+  const toLocalYMD = (date: Date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  };
+  const dateParam = toLocalYMD(selectedDate);
   const { data: bookingsData, isLoading: isBookingsLoading } =
     useGetBookingQuery({
       salonUid: salonuid as string,
@@ -228,14 +241,30 @@ const BookingsTab: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <Button
-            variant="outline"
-            size="sm"
-            className="hidden text-xs font-semibold sm:flex"
-          >
-            <CalendarSearch className="h-3 w-3" />
-            Calendar
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs font-semibold"
+              >
+                <CalendarSearch className="mr-1 h-3 w-3" />
+                {selectedDate.toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="p-2">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={(d) => d && setSelectedDate(d)}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 
