@@ -5,7 +5,16 @@ export const BookingsApi = baseApi.injectEndpoints({
     getBooking: builder.query({
       query: ({ salonUid }) => {
         return {
-          url: `/salons/${salonUid}/bookings`,
+          url: `/salons/${salonUid}/booking-calendar`,
+          method: "GET",
+        };
+      },
+      providesTags: ["Bookings"],
+    }),
+    getSingleBooking: builder.query({
+      query: ({ salonUid, bookingUid }) => {
+        return {
+          url: `/salons/${salonUid}/booking-calendar/${bookingUid}`,
           method: "GET",
         };
       },
@@ -14,7 +23,7 @@ export const BookingsApi = baseApi.injectEndpoints({
     editBooking: builder.mutation({
       query: ({ salonUid, bookingUid, data }) => {
         return {
-          url: `/salons/${salonUid}/bookings/${bookingUid}`,
+          url: `/salons/${salonUid}/booking-calendar/${bookingUid}`,
           method: "PATCH",
           body: data,
         };
@@ -24,4 +33,8 @@ export const BookingsApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useGetBookingQuery, useEditBookingMutation } = BookingsApi;
+export const {
+  useGetBookingQuery,
+  useGetSingleBookingQuery,
+  useEditBookingMutation,
+} = BookingsApi;

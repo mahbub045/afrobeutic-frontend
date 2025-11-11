@@ -55,6 +55,8 @@ const BookingsTab: React.FC = () => {
   const { data: bookingsData, isLoading: isBookingsLoading } =
     useGetBookingQuery({ salonUid: salonuid });
 
+  const exetractBookingData = bookingsData?.results || [];
+
   // Sample staff members
   const staffMembers: StaffMember[] = [
     { id: "1", name: "Marcus" },
@@ -270,14 +272,66 @@ const BookingsTab: React.FC = () => {
     },
   ];
 
-  const timeSlots = [
-    { time: "12 PM", label: "12:00 PM" },
-    { time: "1 PM", label: "1:00 PM" },
-    { time: "2 PM", label: "2:00 PM" },
-    { time: "3 PM", label: "3:00 PM" },
-    { time: "4 PM", label: "4:00 PM" },
-    { time: "5 PM", label: "5:00 PM" },
-  ];
+  // Generate time slots programmatically so we can easily change the step (hours)
+  // Produces 24-hour ranges like "10:00-12:00". Times are stored in minutes for precise matching.
+  const generateTimeSlots = (
+    startHour: number,
+    endHour: number,
+    stepHours: number,
+  ) => {
+    const slots: {
+      time: string;
+      label: string;
+      startMinutes: number;
+      endMinutes: number;
+    }[] = [];
+
+    for (let h = startHour; h < endHour; h += stepHours) {
+      const start = h;
+      const end = Math.min(h + stepHours, endHour);
+      const startMinutes = start * 60;
+      const endMinutes = end * 60;
+      const pad = (n: number) => n.toString().padStart(2, "0");
+      const time = `${pad(start)}:00-${pad(end)}:00`;
+      const label = `${pad(start)}:00`;
+      slots.push({ time, label, startMinutes, endMinutes });
+    }
+
+    return slots;
+  };
+
+  // Use 24-hour format, 2-hour intervals from 10:00 to 22:00
+  const timeSlots = generateTimeSlots(10, 22, 2); // 10:00-12:00, 12:00-14:00, ..., 20:00-22:00
+
+  // Parse appointment time strings like "1:45 PM" or "12:00 AM" into minutes since midnight
+  const parseTimeToMinutes = (timeStr: string) => {
+    if (!timeStr) return NaN;
+    // trim and normalize
+    const s = timeStr.trim();
+    // Try to parse formats like "1:45 PM" or "13:00" or "1:00PM"
+    const ampmMatch = s.match(/(\d{1,2})(?::(\d{2}))?\s*([AaPp][Mm])$/);
+    if (ampmMatch) {
+      let hour = parseInt(ampmMatch[1], 10);
+      const minute = ampmMatch[2] ? parseInt(ampmMatch[2], 10) : 0;
+      const ampm = ampmMatch[3].toLowerCase();
+      if (ampm === "pm" && hour !== 12) hour += 12;
+      if (ampm === "am" && hour === 12) hour = 0;
+      return hour * 60 + minute;
+    }
+
+    // Try 24h format like "13:00"
+    const hmatch = s.match(/^(\d{1,2}):(\d{2})$/);
+    if (hmatch) {
+      const hour = parseInt(hmatch[1], 10);
+      const minute = parseInt(hmatch[2], 10);
+      return hour * 60 + minute;
+    }
+
+    // Fallback: try to extract leading hour
+    const lead = parseInt(s, 10);
+    if (!isNaN(lead)) return lead * 60;
+    return NaN;
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -421,11 +475,15 @@ const BookingsTab: React.FC = () => {
                   </div>
                   <div className="grid min-w-max flex-1 grid-cols-4">
                     {staffMembers.map((staff, colIndex) => {
-                      const staffAppointments = appointments.filter(
-                        (apt) =>
-                          apt.staff === staff.name &&
-                          apt.startTime.includes(slot.label.split(":")[0]),
-                      );
+                      const staffAppointments = appointments.filter((apt) => {
+                        if (apt.staff !== staff.name) return false;
+                        const aptStart = parseTimeToMinutes(apt.startTime);
+                        return (
+                          !isNaN(aptStart) &&
+                          aptStart >= slot.startMinutes &&
+                          aptStart < slot.endMinutes
+                        );
+                      });
 
                       return (
                         <div
