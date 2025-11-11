@@ -40,7 +40,7 @@ export const ChairsBookingApi = baseApi.injectEndpoints({
         method: "POST",
         body: chairBookingData,
       }),
-      invalidatesTags: ["ChairsBooking"],
+      invalidatesTags: ["ChairsBooking","Bookings"],
     }),
     editChairBooking: builder.mutation({
       query: ({ salonUid, chairUid, bookingUid, chairBookingData }) => ({

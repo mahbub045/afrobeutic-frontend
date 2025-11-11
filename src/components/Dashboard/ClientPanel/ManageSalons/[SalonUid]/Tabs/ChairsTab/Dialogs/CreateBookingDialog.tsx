@@ -6,6 +6,7 @@ import {
   DialogHeader,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { useGetBookingQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/BookingsApi";
 import { useAddChairBookingMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Chairs/ChairsBookingApi";
 import { useGetEmployeesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Employees/EmployeesApi";
 import { useGetProductsDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Products/ProductsApi";
@@ -75,6 +76,9 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
     useGetProductsDataQuery({ salonUid: salonUid });
   const { data: employeesData, isLoading: isLoadingEmployees } =
     useGetEmployeesDataQuery({ salonUid: salonUid });
+  const { refetch: refetchBookings } = useGetBookingQuery({
+    salonUid: salonuid,
+  });
   const [addChairBooking, { isLoading: isAddingChairBooking }] =
     useAddChairBookingMutation();
 
@@ -134,7 +138,7 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
       // Format booking_time to ISO timestamp format (HH:MM:SS.SSSZ)
       const formattedTime = values.booking_time.includes(".")
         ? values.booking_time
-        : `${values.booking_time}.000Z`;
+        : `${values.booking_time}:00.000Z`;
 
       const bookingPayload = {
         customer: values.customer,
@@ -157,6 +161,10 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
       console.log("Booking Response:", response); // Debug log
 
       onClose();
+
+      // Explicitly refetch bookings to update the calendar
+      refetchBookings();
+
       Swal.fire({
         icon: "success",
         iconColor: "#037375",
@@ -201,7 +209,7 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
                 phone: "",
               },
               booking_date: new Date().toISOString().split("T")[0],
-              booking_time: new Date().toTimeString().slice(0, 8),
+              booking_time: "",
               notes: "",
               services: [],
               products: [],
@@ -240,7 +248,7 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
                     <Label htmlFor="customer.phone" className="mb-2">
                       Customer Phone<span className="text-danger">*</span>
                     </Label>
-                    <Field name="customer.phone">
+                    <Field name="customer.phone" required>
                       {({
                         field,
                         form,
@@ -286,7 +294,7 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
                             searchClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100"
                           />
                           <ErrorMessage
-                            name="phone"
+                            name="customer.phone"
                             component="div"
                             className="text-danger mt-1 text-xs"
                           />
@@ -326,11 +334,24 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
                     <Field
                       id="booking_time"
                       name="booking_time"
-                      as="input"
-                      type="time"
-                      step="1"
+                      as="select"
                       required
-                    />
+                      className="dark:bg-[#181818]"
+                    >
+                      <option value="" disabled>
+                        Select time
+                      </option>
+                      {Array.from({ length: 96 }, (_, i) => {
+                        const hours = Math.floor(i / 4);
+                        const minutes = (i % 4) * 15;
+                        const timeString = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+                        return (
+                          <option key={timeString} value={timeString}>
+                            {timeString}
+                          </option>
+                        );
+                      })}
+                    </Field>
                     <ErrorMessage
                       name="booking_time"
                       component="p"
