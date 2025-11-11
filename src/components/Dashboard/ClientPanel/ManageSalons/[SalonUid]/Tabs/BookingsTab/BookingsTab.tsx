@@ -256,15 +256,19 @@ const BookingsTab: React.FC = () => {
           {/* Calendar View */}
           <div className="bg-card flex flex-col overflow-hidden lg:border-r">
             {/* Time Slots with Appointments */}
-            <div className="max-h-[700px] flex-1 overflow-auto">
+            <div className="max-h-[600px] flex-1 overflow-auto">
               <div className="relative">
                 {timeSlots.map((slot, index) => (
-                  <div
-                    key={index}
-                    className="flex min-h-[80px] border-b sm:min-h-[90px] lg:min-h-[100px]"
-                  >
-                    <div className="bg-muted/50 text-muted-foreground w-10 flex-shrink-0 border-r px-1 py-2 text-[10px] sm:w-12 sm:px-2 sm:text-xs lg:w-16 lg:px-3">
-                      {slot.time}
+                  <div key={index} className="flex border-b">
+                    <div className="bg-muted/50 text-muted-foreground w-10 flex-shrink-0 border-r text-[10px] sm:w-12 sm:text-xs lg:w-16">
+                      {index === 0 && (
+                        <div className="border-b px-1 py-2 sm:px-2 sm:py-[22px] lg:px-3">
+                          &nbsp;
+                        </div>
+                      )}
+                      <div className="min-h-[80px] px-1 py-2 sm:min-h-[90px] sm:px-2 lg:min-h-[100px] lg:px-3">
+                        {slot.time}
+                      </div>
                     </div>
                     <div
                       className={cn(
@@ -290,7 +294,7 @@ const BookingsTab: React.FC = () => {
                           <div
                             key={`${staff.id}-${slot.time}`}
                             className={cn(
-                              "hover:bg-muted/30 relative min-w-[120px] transition-colors sm:min-w-[140px] lg:min-w-0",
+                              "relative min-w-[120px] sm:min-w-[140px] lg:min-w-0",
                               colIndex < staffMembers.length - 1 && "border-r",
                             )}
                           >
@@ -320,12 +324,7 @@ const BookingsTab: React.FC = () => {
                             )}
 
                             {/* Appointments area */}
-                            <div
-                              className={cn(
-                                "p-1 sm:p-1.5",
-                                index === 0 && "pt-0",
-                              )}
-                            >
+                            <div className="hover:bg-muted/30 min-h-[80px] p-1 transition-colors sm:min-h-[90px] sm:p-1.5 lg:min-h-[100px]">
                               {staffAppointments.map((appointment) => (
                                 <div
                                   key={appointment.id}
