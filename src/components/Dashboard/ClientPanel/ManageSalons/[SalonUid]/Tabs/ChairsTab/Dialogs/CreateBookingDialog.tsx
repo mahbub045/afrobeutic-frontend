@@ -77,7 +77,7 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
   const { data: employeesData, isLoading: isLoadingEmployees } =
     useGetEmployeesDataQuery({ salonUid: salonUid });
   const { refetch: refetchBookings } = useGetBookingQuery({
-    salonUid: salonuid,
+    salonUid: salonUid,
   });
   const [addChairBooking, { isLoading: isAddingChairBooking }] =
     useAddChairBookingMutation();

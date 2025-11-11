@@ -17,11 +17,11 @@ import {
 } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
 import {
   Calendar as CalendarIcon,
+  CalendarSearch,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
   Edit,
-  Filter,
   LoaderPinwheel,
 } from "lucide-react";
 import { useParams } from "next/navigation";
@@ -55,8 +55,12 @@ const BookingsTab: React.FC = () => {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   // RTK Hooks
+  const dateParam = selectedDate.toISOString().split("T")[0];
   const { data: bookingsData, isLoading: isBookingsLoading } =
-    useGetBookingQuery({ salonUid: salonuid });
+    useGetBookingQuery({
+      salonUid: salonuid as string,
+      filters: { date: dateParam },
+    });
 
   const extractBookingData = bookingsData?.results || [];
 
@@ -229,11 +233,8 @@ const BookingsTab: React.FC = () => {
             size="sm"
             className="hidden text-xs font-semibold sm:flex"
           >
-            <Filter className="mr-2 h-3 w-3" />
-            FILTERS
-          </Button>
-          <Button variant="outline" size="icon" className="h-8 w-8 sm:hidden">
-            <Filter className="h-4 w-4" />
+            <CalendarSearch className="h-3 w-3" />
+            Calendar
           </Button>
         </div>
       </div>
