@@ -16,7 +16,10 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { useGetBookingQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/BookingsApi";
+import {
+  useGetBookingQuery,
+  useGetSingleBookingQuery,
+} from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/BookingsApi";
 import {
   Booking,
   StaffMemberWithBookings,
@@ -44,6 +47,7 @@ interface Appointment {
   status: "placed" | "in-progress" | "rescheduled" | "completed";
   color: string;
   column: number;
+  fullBookingData?: Booking;
 }
 
 interface StaffMember {
@@ -59,6 +63,9 @@ const BookingsTab: React.FC = () => {
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [selectedBookingUid, setSelectedBookingUid] = useState<string | null>(
+    null,
+  );
 
   // RTK Hooks
   // Convert selected date to local YYYY-MM-DD to avoid UTC shift (off-by-one)
@@ -75,6 +82,18 @@ const BookingsTab: React.FC = () => {
       filters: { date: dateParam },
     });
 
+  // Fetch single booking details when a booking is selected
+  const { data: singleBookingData, isLoading: isSingleBookingLoading } =
+    useGetSingleBookingQuery(
+      {
+        salonUid: salonuid as string,
+        bookingUid: selectedBookingUid!,
+      },
+      {
+        skip: !selectedBookingUid, // Only fetch when a booking is selected
+      },
+    );
+
   const extractBookingData = bookingsData?.results || [];
 
   // Extract staff members from API data
@@ -86,7 +105,7 @@ const BookingsTab: React.FC = () => {
     }),
   );
 
-  // Transform API bookings to appointments
+  // Transform API bookings to appointments and store full booking data
   const appointments: Appointment[] = extractBookingData.flatMap(
     (staff: StaffMemberWithBookings, staffIndex: number) =>
       staff.bookings.map((booking: Booking) => {
@@ -128,6 +147,8 @@ const BookingsTab: React.FC = () => {
           status: statusMap[booking.status] || "pending",
           color: statusColorMap[booking.status] || "bg-gray-200",
           column: staffIndex,
+          // Store full booking data for details view
+          fullBookingData: booking,
         };
       }),
   );
@@ -366,6 +387,7 @@ const BookingsTab: React.FC = () => {
                                   )}
                                   onClick={() => {
                                     setSelectedAppointment(appointment);
+                                    setSelectedBookingUid(appointment.id);
                                     // Only open sheet on mobile/tablet (below lg breakpoint)
                                     if (window.innerWidth < 1024) {
                                       setIsDetailsOpen(true);
@@ -395,8 +417,8 @@ const BookingsTab: React.FC = () => {
           </div>
 
           {/* Appointment Details Sidebar - Desktop */}
-          <div className="bg-card hidden overflow-y-auto lg:block">
-            <div className="border-b px-6 py-3">
+          <div className="bg-card hidden overflow-hidden lg:flex lg:flex-col">
+            <div className="flex-shrink-0 border-b px-6 py-3">
               <div className="mb-3 flex items-start justify-between">
                 <h3 className="text-foreground text-base font-semibold">
                   {selectedAppointment
@@ -459,83 +481,275 @@ const BookingsTab: React.FC = () => {
               )}
             </div>
 
-            <div className="px-6 py-4">
+            <div className="flex-1 overflow-y-auto px-6 py-4">
               {selectedAppointment ? (
-                <div className="space-y-5">
-                  <div className="flex items-start gap-3 text-sm">
-                    <span className="text-muted-foreground mt-0.5 text-xs">
-                      On
-                    </span>
-                    <span className="text-foreground font-medium">
-                      {formatDate(selectedDate, false)}
-                    </span>
+                isSingleBookingLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <LoaderPinwheel className="h-8 w-8 animate-spin" />
                   </div>
+                ) : (
+                  <div className="space-y-5">
+                    <div className="flex items-start gap-3 text-sm">
+                      <span className="text-muted-foreground mt-0.5 text-xs">
+                        On
+                      </span>
+                      <span className="text-foreground font-medium">
+                        {formatDate(selectedDate, false)}
+                      </span>
+                    </div>
 
-                  <div className="flex items-start gap-3 text-sm">
-                    <span className="text-muted-foreground mt-0.5 text-xs">
-                      At
-                    </span>
-                    <div>
-                      <div className="text-foreground font-medium">
-                        {selectedAppointment.startTime}
+                    <div className="flex items-start gap-3 text-sm">
+                      <span className="text-muted-foreground mt-0.5 text-xs">
+                        At
+                      </span>
+                      <div>
+                        <div className="text-foreground font-medium">
+                          {singleBookingData?.booking_time ||
+                            selectedAppointment.startTime}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <Separator />
+                    <Separator />
 
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-3">
-                      <Avatar className="border-background h-12 w-12 border-2 shadow">
-                        <AvatarImage src={selectedAppointment.clientAvatar} />
-                        <AvatarFallback className="bg-primary font-semibold text-white">
-                          {selectedAppointment.client.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="text-foreground text-base font-semibold">
-                          {selectedAppointment.client}
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-3">
+                        <Avatar className="border-background h-12 w-12 border-2 shadow">
+                          <AvatarImage src={selectedAppointment.clientAvatar} />
+                          <AvatarFallback className="bg-primary font-semibold text-white">
+                            {(
+                              singleBookingData?.customer.name ||
+                              selectedAppointment.client
+                            ).charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <div className="text-foreground text-base font-semibold">
+                            {singleBookingData?.customer.name ||
+                              selectedAppointment.client}
+                          </div>
+                          <div className="text-muted-foreground text-xs">
+                            Client
+                          </div>
                         </div>
-                        <div className="text-muted-foreground text-xs">
-                          Client
-                        </div>
-                      </div>
-                      {/* <Button variant="ghost" size="icon" className="h-8 w-8">
+                        {/* <Button variant="ghost" size="icon" className="h-8 w-8">
                         <MessageSquare className="h-4 w-4" />
                       </Button> */}
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    <div className="space-y-3">
+                      <h4 className="text-foreground text-sm font-semibold">
+                        Services (
+                        {singleBookingData?.total_services ||
+                          selectedAppointment.fullBookingData?.total_services ||
+                          0}
+                        )
+                      </h4>
+                      {(
+                        singleBookingData?.services ||
+                        selectedAppointment.fullBookingData?.services ||
+                        []
+                      ).map((service) => (
+                        <div
+                          key={service.uid}
+                          className="space-y-1 rounded-lg border p-3"
+                        >
+                          <div className="flex items-start justify-between">
+                            <span className="text-foreground text-sm font-medium">
+                              {service.name}
+                            </span>
+                            <span className="text-foreground text-sm font-semibold">
+                              ${service.discount_price}
+                            </span>
+                          </div>
+                          <div className="text-muted-foreground text-xs">
+                            Price: ${service.price} • Discount:{" "}
+                            {service.discount_percentage}% • Final: $
+                            {service.discount_price}
+                          </div>
+                          {service.description && (
+                            <p className="text-muted-foreground mt-1 text-xs">
+                              {service.description}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                      <div className="text-muted-foreground flex items-center gap-3 pt-2 text-sm">
+                        <span>with {selectedAppointment.staff}</span>
+                      </div>
+                    </div>
+
+                    {((singleBookingData?.products &&
+                      singleBookingData.products.length > 0) ||
+                      (selectedAppointment.fullBookingData?.products &&
+                        selectedAppointment.fullBookingData.products.length >
+                          0)) && (
+                      <>
+                        <Separator />
+                        <div className="space-y-3">
+                          <h4 className="text-foreground text-sm font-semibold">
+                            Products (
+                            {singleBookingData?.total_products ||
+                              selectedAppointment.fullBookingData
+                                ?.total_products ||
+                              0}
+                            )
+                          </h4>
+                          {(
+                            singleBookingData?.products ||
+                            selectedAppointment.fullBookingData?.products ||
+                            []
+                          ).map((product) => (
+                            <div
+                              key={product.uid}
+                              className="space-y-1 rounded-lg border p-3"
+                            >
+                              <div className="flex items-start justify-between">
+                                <span className="text-foreground text-sm font-medium">
+                                  {product.name}
+                                </span>
+                                <span className="text-foreground text-sm font-semibold">
+                                  ${product.price}
+                                </span>
+                              </div>
+                              {product.description && (
+                                <p className="text-muted-foreground mt-1 text-xs">
+                                  {product.description}
+                                </p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
+
+                    <Separator />
+
+                    <div className="space-y-2">
+                      <h4 className="text-foreground text-sm font-semibold">
+                        Pricing Summary
+                      </h4>
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">
+                            Services Total
+                          </span>
+                          <span className="text-foreground">
+                            $
+                            {(
+                              singleBookingData?.services ||
+                              selectedAppointment.fullBookingData?.services ||
+                              []
+                            )
+                              .reduce(
+                                (sum, s) => sum + parseFloat(s.discount_price),
+                                0,
+                              )
+                              .toFixed(2) || "0.00"}
+                          </span>
+                        </div>
+                        {((singleBookingData?.products &&
+                          singleBookingData.products.length > 0) ||
+                          (selectedAppointment.fullBookingData?.products &&
+                            selectedAppointment.fullBookingData.products
+                              .length > 0)) && (
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-muted-foreground">
+                              Products Total
+                            </span>
+                            <span className="text-foreground">
+                              $
+                              {(
+                                singleBookingData?.products ||
+                                selectedAppointment.fullBookingData?.products ||
+                                []
+                              )
+                                .reduce(
+                                  (sum, p) => sum + parseFloat(p.price),
+                                  0,
+                                )
+                                .toFixed(2)}
+                            </span>
+                          </div>
+                        )}
+                        <div className="mt-1.5 border-t pt-1.5">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-muted-foreground">
+                              Total Price
+                            </span>
+                            <span className="text-foreground font-medium">
+                              $
+                              {(
+                                singleBookingData?.total_price ||
+                                selectedAppointment.fullBookingData
+                                  ?.total_price ||
+                                0
+                              ).toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between text-base">
+                          <span className="text-foreground font-semibold">
+                            Final Price
+                          </span>
+                          <span className="text-foreground font-bold">
+                            $
+                            {(
+                              singleBookingData?.final_price ||
+                              selectedAppointment.fullBookingData
+                                ?.final_price ||
+                              0
+                            ).toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    <div>
+                      <h4 className="text-foreground mb-2 text-sm font-semibold">
+                        Booking Details
+                      </h4>
+                      <div className="space-y-1">
+                        <div className="text-muted-foreground text-sm">
+                          Duration:{" "}
+                          <span className="text-foreground">
+                            {singleBookingData?.booking_duration ||
+                              selectedAppointment.fullBookingData
+                                ?.booking_duration ||
+                              "N/A"}
+                          </span>
+                        </div>
+                        <div className="text-muted-foreground text-sm">
+                          Status:{" "}
+                          <span className="text-foreground capitalize">
+                            {selectedAppointment.status.replace("-", " ")}
+                          </span>
+                        </div>
+                        <div className="text-muted-foreground text-sm">
+                          Booking ID:{" "}
+                          <span className="text-foreground font-mono text-xs">
+                            {selectedAppointment.id}
+                          </span>
+                        </div>
+                        {(singleBookingData?.notes ||
+                          selectedAppointment.fullBookingData?.notes) && (
+                          <div className="text-muted-foreground pt-2 text-sm">
+                            <span className="font-medium">Notes: </span>
+                            <span className="text-foreground">
+                              {singleBookingData?.notes ||
+                                selectedAppointment.fullBookingData?.notes}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-
-                  <Separator />
-
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-foreground text-base font-semibold">
-                        {selectedAppointment.service}
-                      </span>
-                    </div>
-                    <div className="text-muted-foreground flex items-center gap-3 text-sm">
-                      <span>with {selectedAppointment.staff}</span>
-                    </div>
-                    <div className="text-muted-foreground mt-1 text-xs">
-                      at {selectedAppointment.startTime}
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div>
-                    <h4 className="text-foreground mb-2 text-sm font-semibold">
-                      Booking Details
-                    </h4>
-                    <div className="text-muted-foreground text-sm">
-                      Status:{" "}
-                      <span className="capitalize">
-                        {selectedAppointment.status.replace("-", " ")}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                )
               ) : (
                 <div className="text-muted-foreground py-12 text-center">
                   <CalendarIcon className="mx-auto mb-4 h-16 w-16 opacity-30" />
@@ -685,17 +899,149 @@ const BookingsTab: React.FC = () => {
 
                         <Separator />
 
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-foreground text-base font-semibold">
-                              {selectedAppointment.service}
-                            </span>
-                          </div>
-                          <div className="text-muted-foreground flex items-center gap-3 text-sm">
+                        <div className="space-y-3">
+                          <h4 className="text-foreground text-sm font-semibold">
+                            Services (
+                            {selectedAppointment.fullBookingData
+                              ?.total_services || 0}
+                            )
+                          </h4>
+                          {selectedAppointment.fullBookingData?.services.map(
+                            (service) => (
+                              <div
+                                key={service.uid}
+                                className="space-y-1 rounded-lg border p-3"
+                              >
+                                <div className="flex items-start justify-between">
+                                  <span className="text-foreground text-sm font-medium">
+                                    {service.name}
+                                  </span>
+                                  <span className="text-foreground text-sm font-semibold">
+                                    ${service.discount_price}
+                                  </span>
+                                </div>
+                                <div className="text-muted-foreground text-xs">
+                                  Price: ${service.price} • Discount:{" "}
+                                  {service.discount_percentage}% • Final: $
+                                  {service.discount_price}
+                                </div>
+                                {service.description && (
+                                  <p className="text-muted-foreground mt-1 text-xs">
+                                    {service.description}
+                                  </p>
+                                )}
+                              </div>
+                            ),
+                          )}
+                          <div className="text-muted-foreground flex items-center gap-3 pt-2 text-sm">
                             <span>with {selectedAppointment.staff}</span>
                           </div>
-                          <div className="text-muted-foreground mt-1 text-xs">
-                            at {selectedAppointment.startTime}
+                        </div>
+
+                        {selectedAppointment.fullBookingData?.products &&
+                          selectedAppointment.fullBookingData.products.length >
+                            0 && (
+                            <>
+                              <Separator />
+                              <div className="space-y-3">
+                                <h4 className="text-foreground text-sm font-semibold">
+                                  Products (
+                                  {
+                                    selectedAppointment.fullBookingData
+                                      .total_products
+                                  }
+                                  )
+                                </h4>
+                                {selectedAppointment.fullBookingData.products.map(
+                                  (product) => (
+                                    <div
+                                      key={product.uid}
+                                      className="space-y-1 rounded-lg border p-3"
+                                    >
+                                      <div className="flex items-start justify-between">
+                                        <span className="text-foreground text-sm font-medium">
+                                          {product.name}
+                                        </span>
+                                        <span className="text-foreground text-sm font-semibold">
+                                          ${product.price}
+                                        </span>
+                                      </div>
+                                      {product.description && (
+                                        <p className="text-muted-foreground mt-1 text-xs">
+                                          {product.description}
+                                        </p>
+                                      )}
+                                    </div>
+                                  ),
+                                )}
+                              </div>
+                            </>
+                          )}
+
+                        <Separator />
+
+                        <div className="space-y-2">
+                          <h4 className="text-foreground text-sm font-semibold">
+                            Pricing Summary
+                          </h4>
+                          <div className="space-y-1.5">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-muted-foreground">
+                                Services Total
+                              </span>
+                              <span className="text-foreground">
+                                $
+                                {selectedAppointment.fullBookingData?.services
+                                  .reduce(
+                                    (sum, s) =>
+                                      sum + parseFloat(s.discount_price),
+                                    0,
+                                  )
+                                  .toFixed(2) || "0.00"}
+                              </span>
+                            </div>
+                            {selectedAppointment.fullBookingData?.products &&
+                              selectedAppointment.fullBookingData.products
+                                .length > 0 && (
+                                <div className="flex items-center justify-between text-sm">
+                                  <span className="text-muted-foreground">
+                                    Products Total
+                                  </span>
+                                  <span className="text-foreground">
+                                    $
+                                    {selectedAppointment.fullBookingData.products
+                                      .reduce(
+                                        (sum, p) => sum + parseFloat(p.price),
+                                        0,
+                                      )
+                                      .toFixed(2)}
+                                  </span>
+                                </div>
+                              )}
+                            <div className="mt-1.5 border-t pt-1.5">
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-muted-foreground">
+                                  Total Price
+                                </span>
+                                <span className="text-foreground font-medium">
+                                  $
+                                  {selectedAppointment.fullBookingData?.total_price?.toFixed(
+                                    2,
+                                  ) || "0.00"}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between text-base">
+                              <span className="text-foreground font-semibold">
+                                Final Price
+                              </span>
+                              <span className="text-foreground font-bold">
+                                $
+                                {selectedAppointment.fullBookingData?.final_price?.toFixed(
+                                  2,
+                                ) || "0.00"}
+                              </span>
+                            </div>
                           </div>
                         </div>
 
@@ -705,11 +1051,34 @@ const BookingsTab: React.FC = () => {
                           <h4 className="text-foreground mb-2 text-sm font-semibold">
                             Booking Details
                           </h4>
-                          <div className="text-muted-foreground text-sm">
-                            Status:{" "}
-                            <span className="capitalize">
-                              {selectedAppointment.status.replace("-", " ")}
-                            </span>
+                          <div className="space-y-1">
+                            <div className="text-muted-foreground text-sm">
+                              Duration:{" "}
+                              <span className="text-foreground">
+                                {selectedAppointment.fullBookingData
+                                  ?.booking_duration || "N/A"}
+                              </span>
+                            </div>
+                            <div className="text-muted-foreground text-sm">
+                              Status:{" "}
+                              <span className="text-foreground capitalize">
+                                {selectedAppointment.status.replace("-", " ")}
+                              </span>
+                            </div>
+                            <div className="text-muted-foreground text-sm">
+                              Booking ID:{" "}
+                              <span className="text-foreground font-mono text-xs">
+                                {selectedAppointment.id}
+                              </span>
+                            </div>
+                            {selectedAppointment.fullBookingData?.notes && (
+                              <div className="text-muted-foreground pt-2 text-sm">
+                                <span className="font-medium">Notes: </span>
+                                <span className="text-foreground">
+                                  {selectedAppointment.fullBookingData.notes}
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
