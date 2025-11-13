@@ -17,21 +17,12 @@ import {
   Product,
   Service,
 } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
-import {
-  ErrorMessage,
-  Field,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-  FormikProps,
-} from "formik";
+import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
 import { Loader2, Upload, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import PhoneInput from "react-phone-input-2";
 import { toast } from "sonner";
 import Swal from "sweetalert2";
 
@@ -107,14 +98,6 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
       .oneOf(["PLACED", "INPROGRESS", "RESCHEDULED", "COMPLETED"])
       .required("Status is required"),
     notes: Yup.string(),
-    customer: Yup.object()
-      .shape({
-        name: Yup.string().required("Customer name is required"),
-        phone: Yup.string()
-          .required("Customer phone is required")
-          .matches(/^\+?[1-9]\d{1,14}$/, "Please enter a valid phone number"),
-      })
-      .required("Customer information is required"),
     employee: Yup.string().required("Employee is required"),
     services: Yup.array()
       .min(1, "At least one service is required")
@@ -129,10 +112,6 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
     booking_duration: bookingData?.booking_duration || "",
     status: bookingData?.status || "PLACED",
     notes: bookingData?.notes || "",
-    customer: {
-      name: bookingData?.customer?.name || "",
-      phone: bookingData?.customer?.phone || "",
-    },
     employee: bookingData?.employee?.uid || "",
     services: bookingData?.services?.map((s) => s.uid) || [],
     products: bookingData?.products?.map((p) => p.uid) || [],
@@ -150,13 +129,6 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
       formData.append("booking_duration", values.booking_duration);
       formData.append("status", values.status);
       formData.append("notes", values.notes);
-      formData.append(
-        "customer",
-        JSON.stringify({
-          name: values.customer.name,
-          phone: values.customer.phone,
-        }),
-      );
       formData.append("employee", values.employee);
       values.services.forEach((serviceId) => {
         formData.append("services", serviceId);
@@ -178,7 +150,7 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
         icon: "success",
         iconColor: "#037375",
         title: "Booking Updated Successfully",
-        html: `Booking for <b class="text-primary">${values.customer.name}</b> has been updated.`,
+        html: `Booking has been updated.`,
         background: resolvedTheme === "dark" ? "#0f1724" : undefined,
         color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
         confirmButtonColor: "#037375",
@@ -355,100 +327,11 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
                     </div>
                   </div>
 
-                  {/* Customer Information */}
-                  <div className="space-y-4">
-                    <h3 className="text-sm font-semibold">
-                      Customer Information
-                    </h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="customer.name">
-                          Customer Name <span className="text-red-500">*</span>
-                        </Label>
-                        <Field
-                          id="customer.name"
-                          name="customer.name"
-                          as="input"
-                          type="text"
-                          placeholder="John Doe"
-                          required
-                        />
-                        <ErrorMessage
-                          name="customer.name"
-                          component="p"
-                          className="text-xs text-red-500"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="customer.phone">
-                          Phone <span className="text-red-500">*</span>
-                        </Label>
-                        <Field name="customer.phone" required>
-                          {({
-                            field,
-                            form,
-                          }: FieldProps<
-                            string,
-                            FormikProps<typeof initialValues>
-                          >) => (
-                            <div>
-                              <PhoneInput
-                                country={"gb"}
-                                value={field.value}
-                                onChange={(
-                                  val: string,
-                                  data?: { dialCode?: string },
-                                ) => {
-                                  const dial = data?.dialCode
-                                    ? `+${data.dialCode}`
-                                    : "";
-                                  const numeric = (val || "").replace(
-                                    /[^0-9]/g,
-                                    "",
-                                  );
-                                  let newVal = numeric;
-                                  if (dial) {
-                                    if (
-                                      !numeric.startsWith(
-                                        dial.replace(/\D/g, ""),
-                                      )
-                                    ) {
-                                      newVal = `${dial}${numeric}`;
-                                    } else {
-                                      newVal = `+${numeric}`;
-                                    }
-                                  } else if (numeric) {
-                                    newVal = `+${numeric}`;
-                                  }
-                                  form.setFieldValue(field.name, newVal);
-                                }}
-                                inputProps={{ name: field.name }}
-                                searchPlaceholder="Search"
-                                enableSearch
-                                inputClass="!w-full !h-auto px-3 py-2 rounded-md !bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100"
-                                buttonClass="!bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100 !border-1 dark:!border-gray-700"
-                                dropdownClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100 !px-2"
-                                searchClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100"
-                              />
-                              <ErrorMessage
-                                name="customer.phone"
-                                component="div"
-                                className="text-danger mt-1 text-xs text-red-500"
-                              />
-                            </div>
-                          )}
-                        </Field>
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Employee Selection */}
                   <div className="space-y-4">
-                    <h3 className="text-sm font-semibold">Assign Employee</h3>
                     <div>
                       <Label htmlFor="employee" className="mb-2">
-                        Employee <span className="text-red-500">*</span>
+                        Assign Employee <span className="text-red-500">*</span>
                       </Label>
                       {isLoadingEmployees ? (
                         <div className="flex items-center justify-center rounded-lg border border-dashed p-6">
