@@ -40,6 +40,7 @@ import {
   Edit,
   LoaderPinwheel,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import EditBookingDialog from "./Dialogs/EditBookingDialog";
@@ -66,6 +67,7 @@ interface StaffMember {
 
 const BookingsTab: React.FC = () => {
   const { salonuid } = useParams();
+  const { data: session } = useSession();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [viewMode] = useState<"day" | "week">("day");
   const [selectedAppointment, setSelectedAppointment] =
@@ -556,14 +558,19 @@ const BookingsTab: React.FC = () => {
                       {/* <Button variant="ghost" size="icon" className="h-8 w-8">
                         <MoreVertical className="h-4 w-4" />
                       </Button> */}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handleIsEditDialogOpen(true)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
+                      <div>
+                        {(session?.user?.role === "OWNER" ||
+                          session?.user?.role === "ADMIN") && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => handleIsEditDialogOpen(true)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                     </>
                   )}
                 </div>
@@ -891,14 +898,19 @@ const BookingsTab: React.FC = () => {
                             >
                               <MoreVertical className="h-4 w-4" />
                             </Button> */}
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => handleIsEditDialogOpen(true)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
+                            <div>
+                              {(session?.user?.role === "OWNER" ||
+                                session?.user?.role === "ADMIN") && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => handleIsEditDialogOpen(true)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
                           </>
                         )}
                       </div>
