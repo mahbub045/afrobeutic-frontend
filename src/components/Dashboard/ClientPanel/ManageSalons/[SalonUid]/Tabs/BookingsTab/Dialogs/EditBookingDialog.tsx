@@ -95,8 +95,16 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
     booking_time: Yup.string().required("Booking time is required"),
     booking_duration: Yup.string().required("Duration is required"),
     status: Yup.string()
-      .oneOf(["PLACED", "INPROGRESS", "RESCHEDULED", "COMPLETED"])
+      .oneOf(["PLACED", "INPROGRESS", "RESCHEDULED", "COMPLETED", "CANCELLED"])
       .required("Status is required"),
+    cancellation_reason: Yup.string().when("status", {
+      is: "CANCELLED",
+      then: (schema) =>
+        schema.required(
+          "Cancellation reason is required when booking is cancelled.",
+        ),
+      otherwise: (schema) => schema.optional(),
+    }),
     notes: Yup.string(),
     employee: Yup.string().required("Employee is required"),
     services: Yup.array()
@@ -111,6 +119,7 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
     booking_time: bookingData?.booking_time?.slice(0, 5) || "",
     booking_duration: bookingData?.booking_duration || "",
     status: bookingData?.status || "PLACED",
+    cancellation_reason: bookingData?.cancellation_reason || "",
     notes: bookingData?.notes || "",
     employee: bookingData?.employee?.uid || "",
     services: bookingData?.services?.map((s) => s.uid) || [],
@@ -128,6 +137,9 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
       formData.append("booking_time", values.booking_time);
       formData.append("booking_duration", values.booking_duration);
       formData.append("status", values.status);
+      if (values.cancellation_reason) {
+        formData.append("cancellation_reason", values.cancellation_reason);
+      }
       formData.append("notes", values.notes);
       formData.append("employee", values.employee);
       values.services.forEach((serviceId) => {
@@ -317,7 +329,6 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
                         <option value="COMPLETED">Completed</option>
                         <option value="RESCHEDULED">Rescheduled</option>
                         <option value="CANCELLED">Cancelled</option>
-                        <option value="ABSENT">Absent</option>
                       </Field>
                       <ErrorMessage
                         name="status"
@@ -326,6 +337,29 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
                       />
                     </div>
                   </div>
+
+                  {/* Cancellation Reason - Conditional Field */}
+                  {values.status === "CANCELLED" && (
+                    <div className="space-y-2">
+                      <Label htmlFor="cancellation_reason">
+                        Cancellation Reason{" "}
+                        <span className="text-red-500">*</span>
+                      </Label>
+                      <Field
+                        id="cancellation_reason"
+                        name="cancellation_reason"
+                        as="textarea"
+                        placeholder="Please provide the reason for cancellation..."
+                        rows={3}
+                        required
+                      />
+                      <ErrorMessage
+                        name="cancellation_reason"
+                        component="p"
+                        className="text-xs text-red-500"
+                      />
+                    </div>
+                  )}
 
                   {/* Employee Selection */}
                   <div className="space-y-4">

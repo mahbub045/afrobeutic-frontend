@@ -93,6 +93,7 @@ export interface EditBookingDialogProps {
     booking_date: string;
     booking_time: string;
     booking_duration: string;
+    cancellation_reason?: string;
     status: string;
     notes: string;
     customer: { name: string; phone: string };

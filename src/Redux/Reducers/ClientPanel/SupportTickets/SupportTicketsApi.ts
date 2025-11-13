@@ -5,7 +5,7 @@ export const SupportTicketsApi = baseApi.injectEndpoints({
     getSupportTickets: builder.query({
       // Accept optional params (e.g. { page, search }) and forward them as query params
       query: (params) => ({
-        url: `/support-tickets`,
+        url: `/support/account-enquiries`,
         method: "GET",
         params: params || {},
       }),
@@ -13,7 +13,7 @@ export const SupportTicketsApi = baseApi.injectEndpoints({
     }),
     addSupportTicket: builder.mutation({
       query: (newTicket) => ({
-        url: `/support-tickets`,
+        url: `/support/account-enquiries`,
         method: "POST",
         body: newTicket,
       }),
@@ -21,12 +21,10 @@ export const SupportTicketsApi = baseApi.injectEndpoints({
     }),
     getSupportTicket: builder.query({
       query: (uid: string) => ({
-        url: `/support-tickets/${uid}`,
+        url: `/support/account-enquiries/${uid}`,
         method: "GET",
       }),
-      providesTags: (result, error, uid) => [
-        { type: "SupportTickets", id: uid },
-      ],
+      providesTags: (uid) => [{ type: "SupportTickets", id: uid }],
     }),
   }),
 });
