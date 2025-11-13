@@ -22,7 +22,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { cn } from "@/lib/utils";
+import { cn, formatChoiceFieldValue } from "@/lib/utils";
 import {
   useGetBookingQuery,
   useGetSingleBookingQuery,
@@ -373,7 +373,7 @@ const BookingsTab: React.FC = () => {
             <SelectContent align="end">
               <SelectItem value="ALL">All Status</SelectItem>
               <SelectItem value="PLACED">Placed</SelectItem>
-              <SelectItem value="INPROGRESS">In-Progress</SelectItem>
+              <SelectItem value="INPROGRESS">In-progress</SelectItem>
               <SelectItem value="COMPLETED">Completed</SelectItem>
               <SelectItem value="RESCHEDULED">Rescheduled</SelectItem>
               <SelectItem value="CANCELLED">Cancelled</SelectItem>
@@ -512,8 +512,17 @@ const BookingsTab: React.FC = () => {
                                     }
                                   }}
                                 >
-                                  <div className="mb-0.5 text-[8px] font-extrabold tracking-wide text-gray-700 uppercase sm:text-[9px] lg:text-[10px] dark:text-gray-800">
-                                    {appointment.service}
+                                  <div className="mb-0.5 flex items-center justify-between gap-2">
+                                    <div className="truncate text-[8px] font-extrabold tracking-wide text-gray-700 sm:text-[9px] lg:text-[10px] dark:text-gray-800">
+                                      {formatChoiceFieldValue(
+                                        appointment.service,
+                                      )}
+                                    </div>
+                                    <div className="text-[8px] font-extrabold tracking-wide whitespace-nowrap text-gray-700 sm:text-[9px] lg:text-[10px] dark:text-gray-800">
+                                      {formatChoiceFieldValue(
+                                        appointment.status,
+                                      )}
+                                    </div>
                                   </div>
                                   <div className="text-[10px] font-medium text-gray-800 sm:text-xs dark:text-gray-900">
                                     {appointment.client}
