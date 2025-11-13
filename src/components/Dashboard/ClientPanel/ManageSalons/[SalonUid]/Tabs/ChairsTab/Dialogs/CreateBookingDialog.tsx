@@ -372,6 +372,8 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
                       <option value="INPROGRESS">In-progress</option>
                       <option value="COMPLETED">Completed</option>
                       <option value="RESCHEDULED">Rescheduled</option>
+                      <option value="CANCELLED">Cancelled</option>
+                      <option value="ABSENT">Absent</option>
                     </Field>
                   </div> */}
                   <div>
