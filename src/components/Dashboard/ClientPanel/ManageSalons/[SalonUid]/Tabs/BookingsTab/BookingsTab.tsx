@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
+import EditBookingDialog from "./Dialogs/EditBookingDialog";
 
 interface Appointment {
   id: string;
@@ -63,9 +64,14 @@ const BookingsTab: React.FC = () => {
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedBookingUid, setSelectedBookingUid] = useState<string | null>(
     null,
   );
+
+  const handleIsEditDialogOpen = (open: boolean) => {
+    setIsEditDialogOpen(open);
+  };
 
   // RTK Hooks
   // Convert selected date to local YYYY-MM-DD to avoid UTC shift (off-by-one)
@@ -431,7 +437,12 @@ const BookingsTab: React.FC = () => {
                       {/* <Button variant="ghost" size="icon" className="h-8 w-8">
                         <MoreVertical className="h-4 w-4" />
                       </Button> */}
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handleIsEditDialogOpen(true)}
+                      >
                         <Edit className="h-4 w-4" />
                       </Button>
                     </>
@@ -498,15 +509,24 @@ const BookingsTab: React.FC = () => {
                       </span>
                     </div>
 
-                    <div className="flex items-start gap-3 text-sm">
-                      <span className="text-muted-foreground mt-0.5 text-xs">
-                        At
-                      </span>
-                      <div>
-                        <div className="text-foreground font-medium">
-                          {singleBookingData?.booking_time ||
-                            selectedAppointment.startTime}
+                    <div className="item-center flex justify-between">
+                      <div className="flex items-start gap-3 text-xs">
+                        At:
+                        <div>
+                          <div className="text-foreground">
+                            {singleBookingData?.booking_time ||
+                              selectedAppointment.startTime}
+                          </div>
                         </div>
+                      </div>
+                      <div className="text-muted-foreground text-xs">
+                        Duration:{" "}
+                        <span className="text-foreground">
+                          {singleBookingData?.booking_duration ||
+                            selectedAppointment.fullBookingData
+                              ?.booking_duration ||
+                            "N/A"}
+                        </span>
                       </div>
                     </div>
 
@@ -637,18 +657,39 @@ const BookingsTab: React.FC = () => {
                           <span className="text-muted-foreground">
                             Services Total
                           </span>
+                          <del className="text-muted-foreground">
+                            $
+                            {(
+                              singleBookingData?.total_services_price ||
+                              selectedAppointment.fullBookingData
+                                ?.total_services_price ||
+                              (
+                                singleBookingData?.services ||
+                                selectedAppointment.fullBookingData?.services ||
+                                []
+                              ).reduce((sum, s) => sum + parseFloat(s.price), 0)
+                            ).toFixed(2)}
+                          </del>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">
+                            Services Discount
+                          </span>
                           <span className="text-foreground">
                             $
                             {(
-                              singleBookingData?.services ||
-                              selectedAppointment.fullBookingData?.services ||
-                              []
-                            )
-                              .reduce(
+                              singleBookingData?.services_discount_price ||
+                              selectedAppointment.fullBookingData
+                                ?.services_discount_price ||
+                              (
+                                singleBookingData?.services ||
+                                selectedAppointment.fullBookingData?.services ||
+                                []
+                              ).reduce(
                                 (sum, s) => sum + parseFloat(s.discount_price),
                                 0,
                               )
-                              .toFixed(2) || "0.00"}
+                            ).toFixed(2)}
                           </span>
                         </div>
                         {((singleBookingData?.products &&
@@ -663,15 +704,19 @@ const BookingsTab: React.FC = () => {
                             <span className="text-foreground">
                               $
                               {(
-                                singleBookingData?.products ||
-                                selectedAppointment.fullBookingData?.products ||
-                                []
-                              )
-                                .reduce(
+                                singleBookingData?.total_products_price ||
+                                selectedAppointment.fullBookingData
+                                  ?.total_products_price ||
+                                (
+                                  singleBookingData?.products ||
+                                  selectedAppointment.fullBookingData
+                                    ?.products ||
+                                  []
+                                ).reduce(
                                   (sum, p) => sum + parseFloat(p.price),
                                   0,
                                 )
-                                .toFixed(2)}
+                              ).toFixed(2)}
                             </span>
                           </div>
                         )}
@@ -680,7 +725,7 @@ const BookingsTab: React.FC = () => {
                             <span className="text-muted-foreground">
                               Total Price
                             </span>
-                            <span className="text-foreground font-medium">
+                            <del className="text-muted-foreground font-medium">
                               $
                               {(
                                 singleBookingData?.total_price ||
@@ -688,7 +733,7 @@ const BookingsTab: React.FC = () => {
                                   ?.total_price ||
                                 0
                               ).toFixed(2)}
-                            </span>
+                            </del>
                           </div>
                         </div>
                         <div className="flex items-center justify-between text-base">
@@ -712,41 +757,17 @@ const BookingsTab: React.FC = () => {
 
                     <div>
                       <h4 className="text-foreground mb-2 text-sm font-semibold">
-                        Booking Details
+                        Notes:
                       </h4>
-                      <div className="space-y-1">
-                        <div className="text-muted-foreground text-sm">
-                          Duration:{" "}
-                          <span className="text-foreground">
-                            {singleBookingData?.booking_duration ||
-                              selectedAppointment.fullBookingData
-                                ?.booking_duration ||
-                              "N/A"}
-                          </span>
-                        </div>
-                        <div className="text-muted-foreground text-sm">
-                          Status:{" "}
-                          <span className="text-foreground capitalize">
-                            {selectedAppointment.status.replace("-", " ")}
-                          </span>
-                        </div>
-                        <div className="text-muted-foreground text-sm">
-                          Booking ID:{" "}
-                          <span className="text-foreground font-mono text-xs">
-                            {selectedAppointment.id}
-                          </span>
-                        </div>
-                        {(singleBookingData?.notes ||
-                          selectedAppointment.fullBookingData?.notes) && (
-                          <div className="text-muted-foreground pt-2 text-sm">
-                            <span className="font-medium">Notes: </span>
-                            <span className="text-foreground">
-                              {singleBookingData?.notes ||
-                                selectedAppointment.fullBookingData?.notes}
-                            </span>
-                          </div>
-                        )}
-                      </div>
+                      {singleBookingData?.notes ? (
+                        <p className="text-foreground text-xs">
+                          {singleBookingData.notes}
+                        </p>
+                      ) : (
+                        <p className="text-muted-foreground text-xs">
+                          No additional notes for this booking.
+                        </p>
+                      )}
                     </div>
                   </div>
                 )
@@ -794,6 +815,7 @@ const BookingsTab: React.FC = () => {
                               variant="outline"
                               size="icon"
                               className="h-8 w-8"
+                              onClick={() => handleIsEditDialogOpen(true)}
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -861,15 +883,24 @@ const BookingsTab: React.FC = () => {
                             </span>
                           </div>
 
-                          <div className="flex items-start gap-3 text-sm">
-                            <span className="text-muted-foreground mt-0.5 text-xs">
-                              At
-                            </span>
-                            <div>
-                              <div className="text-foreground font-medium">
-                                {singleBookingData?.booking_time ||
-                                  selectedAppointment.startTime}
+                          <div className="item-center flex justify-between">
+                            <div className="flex items-start gap-3 text-xs">
+                              At:
+                              <div>
+                                <div className="text-foreground">
+                                  {singleBookingData?.booking_time ||
+                                    selectedAppointment.startTime}
+                                </div>
                               </div>
+                            </div>
+                            <div className="text-muted-foreground text-xs">
+                              Duration:{" "}
+                              <span className="text-foreground">
+                                {singleBookingData?.booking_duration ||
+                                  selectedAppointment.fullBookingData
+                                    ?.booking_duration ||
+                                  "N/A"}
+                              </span>
                             </div>
                           </div>
 
@@ -1004,20 +1035,45 @@ const BookingsTab: React.FC = () => {
                                 <span className="text-muted-foreground">
                                   Services Total
                                 </span>
+                                <del className="text-muted-foreground">
+                                  $
+                                  {(
+                                    singleBookingData?.total_services_price ||
+                                    selectedAppointment.fullBookingData
+                                      ?.total_services_price ||
+                                    (
+                                      singleBookingData?.services ||
+                                      selectedAppointment.fullBookingData
+                                        ?.services ||
+                                      []
+                                    ).reduce(
+                                      (sum, s) => sum + parseFloat(s.price),
+                                      0,
+                                    )
+                                  ).toFixed(2)}
+                                </del>
+                              </div>
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-muted-foreground">
+                                  Services Discount
+                                </span>
                                 <span className="text-foreground">
                                   $
                                   {(
-                                    singleBookingData?.services ||
+                                    singleBookingData?.services_discount_price ||
                                     selectedAppointment.fullBookingData
-                                      ?.services ||
-                                    []
-                                  )
-                                    .reduce(
+                                      ?.services_discount_price ||
+                                    (
+                                      singleBookingData?.services ||
+                                      selectedAppointment.fullBookingData
+                                        ?.services ||
+                                      []
+                                    ).reduce(
                                       (sum, s) =>
                                         sum + parseFloat(s.discount_price),
                                       0,
                                     )
-                                    .toFixed(2)}
+                                  ).toFixed(2)}
                                 </span>
                               </div>
                               {(
@@ -1032,16 +1088,19 @@ const BookingsTab: React.FC = () => {
                                   <span className="text-foreground">
                                     $
                                     {(
-                                      singleBookingData?.products ||
+                                      singleBookingData?.total_products_price ||
                                       selectedAppointment.fullBookingData
-                                        ?.products ||
-                                      []
-                                    )
-                                      .reduce(
+                                        ?.total_products_price ||
+                                      (
+                                        singleBookingData?.products ||
+                                        selectedAppointment.fullBookingData
+                                          ?.products ||
+                                        []
+                                      ).reduce(
                                         (sum, p) => sum + parseFloat(p.price),
                                         0,
                                       )
-                                      .toFixed(2)}
+                                    ).toFixed(2)}
                                   </span>
                                 </div>
                               )}
@@ -1050,7 +1109,7 @@ const BookingsTab: React.FC = () => {
                                   <span className="text-muted-foreground">
                                     Total Price
                                   </span>
-                                  <span className="text-foreground font-medium">
+                                  <del className="text-muted-foreground font-medium">
                                     $
                                     {(
                                       singleBookingData?.total_price ||
@@ -1058,7 +1117,7 @@ const BookingsTab: React.FC = () => {
                                         ?.total_price ||
                                       0
                                     ).toFixed(2)}
-                                  </span>
+                                  </del>
                                 </div>
                               </div>
                               <div className="flex items-center justify-between text-base">
@@ -1082,42 +1141,17 @@ const BookingsTab: React.FC = () => {
 
                           <div>
                             <h4 className="text-foreground mb-2 text-sm font-semibold">
-                              Booking Details
+                              Notes:
                             </h4>
-                            <div className="space-y-1">
-                              <div className="text-muted-foreground text-sm">
-                                Duration:{" "}
-                                <span className="text-foreground">
-                                  {singleBookingData?.booking_duration ||
-                                    selectedAppointment.fullBookingData
-                                      ?.booking_duration ||
-                                    "N/A"}
-                                </span>
-                              </div>
-                              <div className="text-muted-foreground text-sm">
-                                Status:{" "}
-                                <span className="text-foreground capitalize">
-                                  {selectedAppointment.status.replace("-", " ")}
-                                </span>
-                              </div>
-                              <div className="text-muted-foreground text-sm">
-                                Booking ID:{" "}
-                                <span className="text-foreground font-mono text-xs">
-                                  {selectedAppointment.id}
-                                </span>
-                              </div>
-                              {(singleBookingData?.notes ||
-                                selectedAppointment.fullBookingData?.notes) && (
-                                <div className="text-muted-foreground pt-2 text-sm">
-                                  <span className="font-medium">Notes: </span>
-                                  <span className="text-foreground">
-                                    {singleBookingData?.notes ||
-                                      selectedAppointment.fullBookingData
-                                        ?.notes}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
+                            {singleBookingData?.notes ? (
+                              <p className="text-foreground text-xs">
+                                {singleBookingData.notes}
+                              </p>
+                            ) : (
+                              <p className="text-muted-foreground text-xs">
+                                No additional notes for this booking.
+                              </p>
+                            )}
                           </div>
                         </div>
                       )
@@ -1136,6 +1170,12 @@ const BookingsTab: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Edit Booking Dialog */}
+      <EditBookingDialog
+        isOpen={isEditDialogOpen}
+        onClose={() => handleIsEditDialogOpen(false)}
+      />
     </div>
   );
 };

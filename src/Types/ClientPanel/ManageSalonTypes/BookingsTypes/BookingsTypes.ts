@@ -42,6 +42,9 @@ export interface Booking {
   customer: BookingCustomer;
   services: BookingService[];
   total_services: number;
+  total_services_price: number;
+  services_discount_price: number;
+  total_products_price: number;
   total_price: number;
   final_price: number;
   products: BookingProduct[];
