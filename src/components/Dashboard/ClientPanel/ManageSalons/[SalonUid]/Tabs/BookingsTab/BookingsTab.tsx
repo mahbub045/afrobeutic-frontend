@@ -8,6 +8,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
@@ -60,7 +67,7 @@ interface StaffMember {
 const BookingsTab: React.FC = () => {
   const { salonuid } = useParams();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [viewMode, setViewMode] = useState<"day" | "week">("day");
+  const [viewMode] = useState<"day" | "week">("day");
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -68,6 +75,9 @@ const BookingsTab: React.FC = () => {
   const [selectedBookingUid, setSelectedBookingUid] = useState<string | null>(
     null,
   );
+  const [statusFilter, setStatusFilter] = useState<
+    "ALL" | "PLACED" | "INPROGRESS" | "COMPLETED" | "RESCHEDULED" | "CANCELLED"
+  >("ALL");
 
   const handleIsEditDialogOpen = (open: boolean) => {
     setIsEditDialogOpen(open);
@@ -82,10 +92,14 @@ const BookingsTab: React.FC = () => {
     return `${y}-${m}-${d}`;
   };
   const dateParam = toLocalYMD(selectedDate);
+  const filters: Record<string, string> = { date: dateParam };
+  if (statusFilter !== "ALL") {
+    filters.status = statusFilter;
+  }
   const { data: bookingsData, isLoading: isBookingsLoading } =
     useGetBookingQuery({
       salonUid: salonuid as string,
-      filters: { date: dateParam },
+      filters,
     });
 
   // Fetch single booking details when a booking is selected
@@ -275,6 +289,34 @@ const BookingsTab: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Status Filter */}
+          <Select
+            value={statusFilter}
+            onValueChange={(v) =>
+              setStatusFilter(
+                v as
+                  | "ALL"
+                  | "PLACED"
+                  | "INPROGRESS"
+                  | "COMPLETED"
+                  | "RESCHEDULED"
+                  | "CANCELLED",
+              )
+            }
+          >
+            <SelectTrigger className="h-7 w-[130px] text-xs font-semibold sm:h-8 sm:w-[150px]">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent align="end">
+              <SelectItem value="ALL">All</SelectItem>
+              <SelectItem value="PLACED">Placed</SelectItem>
+              <SelectItem value="INPROGRESS">In-Progress</SelectItem>
+              <SelectItem value="COMPLETED">Completed</SelectItem>
+              <SelectItem value="RESCHEDULED">Rescheduled</SelectItem>
+              <SelectItem value="CANCELLED">Cancelled</SelectItem>
+            </SelectContent>
+          </Select>
+
           <Popover>
             <PopoverTrigger asChild>
               <Button
