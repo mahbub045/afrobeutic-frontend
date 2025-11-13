@@ -77,7 +77,7 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
   const { data: employeesData, isLoading: isLoadingEmployees } =
     useGetEmployeesDataQuery({ salonUid: salonUid });
   const { refetch: refetchBookings } = useGetBookingQuery({
-    salonUid: salonuid,
+    salonUid: salonUid,
   });
   const [addChairBooking, { isLoading: isAddingChairBooking }] =
     useAddChairBookingMutation();
@@ -383,7 +383,6 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
                     <Field
                       id="notes"
                       name="notes"
-                      // type="textarea"
                       as="textarea"
                       placeholder="Enter booking notes (optional)"
                     />
@@ -725,7 +724,7 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
                       <p className="text-muted text-sm">Loading employees...</p>
                     </div>
                   ) : employees.length > 0 ? (
-                    <div className="max-h-60 overflow-y-auto rounded-lg border p-3">
+                    <div className="max-h-52 overflow-y-auto rounded-lg border p-3">
                       <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
                         {employees.map((employee: EmployeeProps) => (
                           <label

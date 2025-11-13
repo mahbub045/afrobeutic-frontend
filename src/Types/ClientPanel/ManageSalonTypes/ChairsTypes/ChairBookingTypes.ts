@@ -47,6 +47,14 @@ export interface BookingFormValues {
   };
   booking_date: string;
   booking_time: string;
+  // Optional status for edit dialog; create flow may omit it
+  status?:
+    | "PLACED"
+    | "INPROGRESS"
+    | "COMPLETED"
+    | "RESCHEDULED"
+    | "CANCELLED"
+    | "ABSENT";
   notes: string;
   services: string[];
   products: string[];

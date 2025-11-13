@@ -2,6 +2,12 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
@@ -10,22 +16,26 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { useGetBookingQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/BookingsApi";
+import {
+  useGetBookingQuery,
+  useGetSingleBookingQuery,
+} from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/BookingsApi";
 import {
   Booking,
   StaffMemberWithBookings,
 } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
 import {
   Calendar as CalendarIcon,
+  CalendarSearch,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Edit,
-  Filter,
-  MessageSquare,
-  MoreVertical,
+  LoaderPinwheel,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
+import EditBookingDialog from "./Dialogs/EditBookingDialog";
 
 interface Appointment {
   id: string;
@@ -38,6 +48,7 @@ interface Appointment {
   status: "placed" | "in-progress" | "rescheduled" | "completed";
   color: string;
   column: number;
+  fullBookingData?: Booking;
 }
 
 interface StaffMember {
@@ -53,10 +64,41 @@ const BookingsTab: React.FC = () => {
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedBookingUid, setSelectedBookingUid] = useState<string | null>(
+    null,
+  );
+
+  const handleIsEditDialogOpen = (open: boolean) => {
+    setIsEditDialogOpen(open);
+  };
 
   // RTK Hooks
+  // Convert selected date to local YYYY-MM-DD to avoid UTC shift (off-by-one)
+  const toLocalYMD = (date: Date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  };
+  const dateParam = toLocalYMD(selectedDate);
   const { data: bookingsData, isLoading: isBookingsLoading } =
-    useGetBookingQuery({ salonUid: salonuid });
+    useGetBookingQuery({
+      salonUid: salonuid as string,
+      filters: { date: dateParam },
+    });
+
+  // Fetch single booking details when a booking is selected
+  const { data: singleBookingData, isLoading: isSingleBookingLoading } =
+    useGetSingleBookingQuery(
+      {
+        salonUid: salonuid as string,
+        bookingUid: selectedBookingUid!,
+      },
+      {
+        skip: !selectedBookingUid, // Only fetch when a booking is selected
+      },
+    );
 
   const extractBookingData = bookingsData?.results || [];
 
@@ -69,7 +111,7 @@ const BookingsTab: React.FC = () => {
     }),
   );
 
-  // Transform API bookings to appointments
+  // Transform API bookings to appointments and store full booking data
   const appointments: Appointment[] = extractBookingData.flatMap(
     (staff: StaffMemberWithBookings, staffIndex: number) =>
       staff.bookings.map((booking: Booking) => {
@@ -94,8 +136,8 @@ const BookingsTab: React.FC = () => {
 
         // Assign colors based on status
         const statusColorMap: { [key: string]: string } = {
-          PLACED: "bg-sky-200",
-          INPROGRESS: "bg-secondary/40",
+          PLACED: "bg-blue-200",
+          INPROGRESS: "bg-yellow-200",
           RESCHEDULED: "bg-pink-200",
           COMPLETED: "bg-gray-200",
         };
@@ -111,6 +153,8 @@ const BookingsTab: React.FC = () => {
           status: statusMap[booking.status] || "pending",
           color: statusColorMap[booking.status] || "bg-gray-200",
           column: staffIndex,
+          // Store full booking data for details view
+          fullBookingData: booking,
         };
       }),
   );
@@ -224,25 +268,37 @@ const BookingsTab: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <Button
-            variant="outline"
-            size="sm"
-            className="hidden text-xs font-semibold sm:flex"
-          >
-            <Filter className="mr-2 h-3 w-3" />
-            FILTERS
-          </Button>
-          <Button variant="outline" size="icon" className="h-8 w-8 sm:hidden">
-            <Filter className="h-4 w-4" />
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs font-semibold"
+              >
+                <CalendarSearch className="mr-1 h-3 w-3" />
+                {selectedDate.toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="p-2">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={(d) => d && setSelectedDate(d)}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 
       {isBookingsLoading ? (
         <div className="flex flex-1 items-center justify-center">
-          <div className="text-muted-foreground text-center">
-            <div className="border-primary mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"></div>
-            <p className="text-sm">Loading bookings...</p>
+          <div className="p-10 text-center">
+            <LoaderPinwheel className="animate-spin" />
           </div>
         </div>
       ) : staffMembers.length === 0 ? (
@@ -253,63 +309,23 @@ const BookingsTab: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="grid flex-1 grid-cols-1 gap-0 overflow-hidden lg:grid-cols-[1fr_380px]">
+        <div className="grid flex-1 grid-cols-1 gap-0 overflow-hidden lg:grid-cols-[1fr_320px]">
           {/* Calendar View */}
           <div className="bg-card flex flex-col overflow-hidden lg:border-r">
-            {/* Staff Header */}
-            <div className="bg-muted/50 flex overflow-x-auto border-b">
-              <div className="w-10 flex-shrink-0 border-r sm:w-12 lg:w-16"></div>
-              <div
-                className={cn(
-                  "grid min-w-max flex-1",
-                  staffMembers.length === 1 && "grid-cols-1",
-                  staffMembers.length === 2 && "grid-cols-2",
-                  staffMembers.length === 3 && "grid-cols-3",
-                  staffMembers.length >= 4 && "grid-cols-4",
-                )}
-              >
-                {staffMembers.map((staff, index) => (
-                  <div
-                    key={staff.id}
-                    className={cn(
-                      "flex items-center justify-center gap-1 px-1 py-2 sm:gap-2 sm:px-2 sm:py-3 lg:px-4",
-                      index < staffMembers.length - 1 && "border-r",
-                    )}
-                  >
-                    <Avatar className="border-background h-6 w-6 border-2 shadow-sm sm:h-8 sm:w-8 lg:h-9 lg:w-9">
-                      <AvatarImage src={staff.avatar} />
-                      <AvatarFallback
-                        className={cn(
-                          "text-xs font-medium text-white sm:text-sm",
-                          index === 0 && "bg-orange-400",
-                          index === 1 && "bg-purple-400",
-                          index === 2 && "bg-indigo-400",
-                          index === 3 && "bg-pink-400",
-                          index >= 4 && "bg-cyan-400",
-                        )}
-                      >
-                        {staff.name.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-foreground text-[10px] font-medium whitespace-nowrap sm:text-xs lg:text-sm">
-                      {staff.name}
-                    </span>
-                    <ChevronRight className="text-muted-foreground hidden h-3 w-3 sm:h-4 sm:w-4 lg:block" />
-                  </div>
-                ))}
-              </div>
-            </div>
-
             {/* Time Slots with Appointments */}
-            <div className="flex-1 overflow-auto">
+            <div className="max-h-[600px] flex-1 overflow-auto">
               <div className="relative">
                 {timeSlots.map((slot, index) => (
-                  <div
-                    key={index}
-                    className="flex min-h-[80px] border-b sm:min-h-[90px] lg:min-h-[100px]"
-                  >
-                    <div className="bg-muted/50 text-muted-foreground w-10 flex-shrink-0 border-r px-1 py-2 text-[10px] sm:w-12 sm:px-2 sm:text-xs lg:w-16 lg:px-3">
-                      {slot.time}
+                  <div key={index} className="flex border-b">
+                    <div className="bg-muted/50 text-muted-foreground w-10 flex-shrink-0 border-r text-[10px] sm:w-12 sm:text-xs lg:w-16">
+                      {index === 0 && (
+                        <div className="border-b px-1 py-2 sm:px-2 sm:py-[22px] lg:px-3">
+                          &nbsp;
+                        </div>
+                      )}
+                      <div className="min-h-[80px] px-1 py-2 sm:min-h-[90px] sm:px-2 lg:min-h-[100px] lg:px-3">
+                        {slot.time}
+                      </div>
                     </div>
                     <div
                       className={cn(
@@ -335,38 +351,67 @@ const BookingsTab: React.FC = () => {
                           <div
                             key={`${staff.id}-${slot.time}`}
                             className={cn(
-                              "hover:bg-muted/30 relative min-w-[120px] p-1 transition-colors sm:min-w-[140px] sm:p-1.5 lg:min-w-0",
+                              "relative min-w-[120px] sm:min-w-[140px] lg:min-w-0",
                               colIndex < staffMembers.length - 1 && "border-r",
                             )}
                           >
-                            {staffAppointments.map((appointment) => (
-                              <div
-                                key={appointment.id}
-                                className={cn(
-                                  "mb-1 cursor-pointer rounded p-1.5 transition-all hover:opacity-90 sm:mb-1.5 sm:p-2 lg:p-2.5",
-                                  appointment.color,
-                                  selectedAppointment?.id === appointment.id &&
-                                    "ring-primary ring-2",
-                                )}
-                                onClick={() => {
-                                  setSelectedAppointment(appointment);
-                                  // Only open sheet on mobile/tablet (below lg breakpoint)
-                                  if (window.innerWidth < 1024) {
-                                    setIsDetailsOpen(true);
-                                  }
-                                }}
-                              >
-                                <div className="mb-0.5 text-[8px] font-extrabold tracking-wide text-gray-700 uppercase sm:text-[9px] lg:text-[10px] dark:text-gray-800">
-                                  {appointment.service}
-                                </div>
-                                <div className="text-[10px] font-medium text-gray-800 sm:text-xs dark:text-gray-900">
-                                  {appointment.client}
-                                </div>
-                                <div className="mt-0.5 text-[8px] text-gray-600 sm:text-[9px] lg:text-[10px] dark:text-gray-700">
-                                  At {appointment.startTime}
-                                </div>
+                            {/* Staff Header in first row */}
+                            {index === 0 && (
+                              <div className="bg-muted/50 flex items-center justify-center gap-1 border-b px-1 py-2 sm:gap-2 sm:px-2 sm:py-3 lg:px-4">
+                                <Avatar className="border-background h-6 w-6 border-2 shadow-sm sm:h-8 sm:w-8 lg:h-9 lg:w-9">
+                                  <AvatarImage src={staff.avatar} />
+                                  <AvatarFallback
+                                    className={cn(
+                                      "text-xs font-medium text-white sm:text-sm",
+                                      colIndex === 0 && "bg-orange-400",
+                                      colIndex === 1 && "bg-purple-400",
+                                      colIndex === 2 && "bg-indigo-400",
+                                      colIndex === 3 && "bg-pink-400",
+                                      colIndex >= 4 && "bg-cyan-400",
+                                    )}
+                                  >
+                                    {staff.name.charAt(0)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="text-foreground text-[10px] font-medium whitespace-nowrap sm:text-xs lg:text-sm">
+                                  {staff.name}
+                                </span>
+                                <ChevronDown className="text-muted-foreground hidden h-3 w-3 sm:h-4 sm:w-4 lg:block" />
                               </div>
-                            ))}
+                            )}
+
+                            {/* Appointments area */}
+                            <div className="hover:bg-muted/30 min-h-[80px] p-1 transition-colors sm:min-h-[90px] sm:p-1.5 lg:min-h-[100px]">
+                              {staffAppointments.map((appointment) => (
+                                <div
+                                  key={appointment.id}
+                                  className={cn(
+                                    "mb-1 cursor-pointer rounded p-1.5 transition-all hover:opacity-90 sm:mb-1.5 sm:p-2 lg:p-2.5",
+                                    appointment.color,
+                                    selectedAppointment?.id ===
+                                      appointment.id && "ring-primary ring-2",
+                                  )}
+                                  onClick={() => {
+                                    setSelectedAppointment(appointment);
+                                    setSelectedBookingUid(appointment.id);
+                                    // Only open sheet on mobile/tablet (below lg breakpoint)
+                                    if (window.innerWidth < 1024) {
+                                      setIsDetailsOpen(true);
+                                    }
+                                  }}
+                                >
+                                  <div className="mb-0.5 text-[8px] font-extrabold tracking-wide text-gray-700 uppercase sm:text-[9px] lg:text-[10px] dark:text-gray-800">
+                                    {appointment.service}
+                                  </div>
+                                  <div className="text-[10px] font-medium text-gray-800 sm:text-xs dark:text-gray-900">
+                                    {appointment.client}
+                                  </div>
+                                  <div className="mt-0.5 text-[8px] text-gray-600 sm:text-[9px] lg:text-[10px] dark:text-gray-700">
+                                    At {appointment.startTime}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         );
                       })}
@@ -378,8 +423,8 @@ const BookingsTab: React.FC = () => {
           </div>
 
           {/* Appointment Details Sidebar - Desktop */}
-          <div className="bg-card hidden overflow-y-auto lg:block">
-            <div className="border-b px-6 py-4">
+          <div className="bg-card hidden max-h-[600px] overflow-hidden lg:flex lg:flex-col">
+            <div className="flex-shrink-0 border-b px-6 py-3">
               <div className="mb-3 flex items-start justify-between">
                 <h3 className="text-foreground text-base font-semibold">
                   {selectedAppointment
@@ -389,10 +434,15 @@ const BookingsTab: React.FC = () => {
                 <div className="-mt-1 flex items-center gap-1">
                   {selectedAppointment && (
                     <>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      {/* <Button variant="ghost" size="icon" className="h-8 w-8">
                         <MoreVertical className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      </Button> */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handleIsEditDialogOpen(true)}
+                      >
                         <Edit className="h-4 w-4" />
                       </Button>
                     </>
@@ -442,87 +492,285 @@ const BookingsTab: React.FC = () => {
               )}
             </div>
 
-            <div className="px-6 py-4">
+            <div className="flex-1 overflow-y-auto px-6 py-4">
               {selectedAppointment ? (
-                <div className="space-y-5">
-                  <div className="flex items-start gap-3 text-sm">
-                    <span className="text-muted-foreground mt-0.5 text-xs">
-                      On
-                    </span>
-                    <span className="text-foreground font-medium">
-                      {formatDate(selectedDate, false)}
-                    </span>
+                isSingleBookingLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <LoaderPinwheel className="h-8 w-8 animate-spin" />
                   </div>
+                ) : (
+                  <div className="space-y-5">
+                    <div className="flex items-start gap-3 text-sm">
+                      <span className="text-muted-foreground mt-0.5 text-xs">
+                        On
+                      </span>
+                      <span className="text-foreground font-medium">
+                        {formatDate(selectedDate, false)}
+                      </span>
+                    </div>
 
-                  <div className="flex items-start gap-3 text-sm">
-                    <span className="text-muted-foreground mt-0.5 text-xs">
-                      At
-                    </span>
-                    <div>
-                      <div className="text-foreground font-medium">
-                        {selectedAppointment.startTime}
+                    <div className="item-center flex justify-between">
+                      <div className="flex items-start gap-3 text-xs">
+                        At:
+                        <div>
+                          <div className="text-foreground">
+                            {singleBookingData?.booking_time ||
+                              selectedAppointment.startTime}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-muted-foreground text-xs">
+                        Duration:{" "}
+                        <span className="text-foreground">
+                          {singleBookingData?.booking_duration ||
+                            selectedAppointment.fullBookingData
+                              ?.booking_duration ||
+                            "N/A"}
+                        </span>
                       </div>
                     </div>
-                  </div>
 
-                  <Separator />
+                    <Separator />
 
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-3">
-                      <Avatar className="border-background h-12 w-12 border-2 shadow">
-                        <AvatarImage src={selectedAppointment.clientAvatar} />
-                        <AvatarFallback className="bg-pink-500 font-semibold text-white">
-                          {selectedAppointment.client.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="text-foreground text-base font-semibold">
-                          {selectedAppointment.client}
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-3">
+                        <Avatar className="border-background h-12 w-12 border-2 shadow">
+                          <AvatarImage src={selectedAppointment.clientAvatar} />
+                          <AvatarFallback className="bg-primary font-semibold text-white">
+                            {(
+                              singleBookingData?.customer.name ||
+                              selectedAppointment.client
+                            ).charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <div className="text-foreground text-base font-semibold">
+                            {singleBookingData?.customer.name ||
+                              selectedAppointment.client}
+                          </div>
+                          <div className="text-muted-foreground text-xs">
+                            Client
+                          </div>
                         </div>
-                        <div className="text-muted-foreground text-xs">
-                          Client
-                        </div>
-                      </div>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        {/* <Button variant="ghost" size="icon" className="h-8 w-8">
                         <MessageSquare className="h-4 w-4" />
-                      </Button>
+                      </Button> */}
+                      </div>
                     </div>
 
-                    <button className="text-primary text-sm hover:underline">
-                      Show additional client info
-                    </button>
+                    <Separator />
+
+                    <div className="space-y-3">
+                      <h4 className="text-foreground text-sm font-semibold">
+                        Services (
+                        {singleBookingData?.total_services ||
+                          selectedAppointment.fullBookingData?.total_services ||
+                          0}
+                        )
+                      </h4>
+                      {(
+                        singleBookingData?.services ||
+                        selectedAppointment.fullBookingData?.services ||
+                        []
+                      ).map((service) => (
+                        <div
+                          key={service.uid}
+                          className="space-y-1 rounded-lg border p-3"
+                        >
+                          <div className="flex items-start justify-between">
+                            <span className="text-foreground text-sm font-medium">
+                              {service.name}
+                            </span>
+                            <span className="text-foreground text-sm font-semibold">
+                              ${service.discount_price}
+                            </span>
+                          </div>
+                          <div className="text-muted-foreground text-xs">
+                            Price: ${service.price} • Discount:{" "}
+                            {service.discount_percentage}% • Final: $
+                            {service.discount_price}
+                          </div>
+                          {service.description && (
+                            <p className="text-muted-foreground mt-1 text-xs">
+                              {service.description}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                      <div className="text-muted-foreground flex items-center gap-3 pt-2 text-sm">
+                        <span>with {selectedAppointment.staff}</span>
+                      </div>
+                    </div>
+
+                    {((singleBookingData?.products &&
+                      singleBookingData.products.length > 0) ||
+                      (selectedAppointment.fullBookingData?.products &&
+                        selectedAppointment.fullBookingData.products.length >
+                          0)) && (
+                      <>
+                        <Separator />
+                        <div className="space-y-3">
+                          <h4 className="text-foreground text-sm font-semibold">
+                            Products (
+                            {singleBookingData?.total_products ||
+                              selectedAppointment.fullBookingData
+                                ?.total_products ||
+                              0}
+                            )
+                          </h4>
+                          {(
+                            singleBookingData?.products ||
+                            selectedAppointment.fullBookingData?.products ||
+                            []
+                          ).map((product) => (
+                            <div
+                              key={product.uid}
+                              className="space-y-1 rounded-lg border p-3"
+                            >
+                              <div className="flex items-start justify-between">
+                                <span className="text-foreground text-sm font-medium">
+                                  {product.name}
+                                </span>
+                                <span className="text-foreground text-sm font-semibold">
+                                  ${product.price}
+                                </span>
+                              </div>
+                              {product.description && (
+                                <p className="text-muted-foreground mt-1 text-xs">
+                                  {product.description}
+                                </p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
+
+                    <Separator />
+
+                    <div className="space-y-2">
+                      <h4 className="text-foreground text-sm font-semibold">
+                        Pricing Summary
+                      </h4>
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">
+                            Services Total
+                          </span>
+                          <del className="text-muted-foreground">
+                            $
+                            {(
+                              singleBookingData?.total_services_price ||
+                              selectedAppointment.fullBookingData
+                                ?.total_services_price ||
+                              (
+                                singleBookingData?.services ||
+                                selectedAppointment.fullBookingData?.services ||
+                                []
+                              ).reduce((sum, s) => sum + parseFloat(s.price), 0)
+                            ).toFixed(2)}
+                          </del>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">
+                            Services Discount
+                          </span>
+                          <span className="text-foreground">
+                            $
+                            {(
+                              singleBookingData?.services_discount_price ||
+                              selectedAppointment.fullBookingData
+                                ?.services_discount_price ||
+                              (
+                                singleBookingData?.services ||
+                                selectedAppointment.fullBookingData?.services ||
+                                []
+                              ).reduce(
+                                (sum, s) => sum + parseFloat(s.discount_price),
+                                0,
+                              )
+                            ).toFixed(2)}
+                          </span>
+                        </div>
+                        {((singleBookingData?.products &&
+                          singleBookingData.products.length > 0) ||
+                          (selectedAppointment.fullBookingData?.products &&
+                            selectedAppointment.fullBookingData.products
+                              .length > 0)) && (
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-muted-foreground">
+                              Products Total
+                            </span>
+                            <span className="text-foreground">
+                              $
+                              {(
+                                singleBookingData?.total_products_price ||
+                                selectedAppointment.fullBookingData
+                                  ?.total_products_price ||
+                                (
+                                  singleBookingData?.products ||
+                                  selectedAppointment.fullBookingData
+                                    ?.products ||
+                                  []
+                                ).reduce(
+                                  (sum, p) => sum + parseFloat(p.price),
+                                  0,
+                                )
+                              ).toFixed(2)}
+                            </span>
+                          </div>
+                        )}
+                        <div className="mt-1.5 border-t pt-1.5">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-muted-foreground">
+                              Total Price
+                            </span>
+                            <del className="text-muted-foreground font-medium">
+                              $
+                              {(
+                                singleBookingData?.total_price ||
+                                selectedAppointment.fullBookingData
+                                  ?.total_price ||
+                                0
+                              ).toFixed(2)}
+                            </del>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between text-base">
+                          <span className="text-foreground font-semibold">
+                            Final Price
+                          </span>
+                          <span className="text-foreground font-bold">
+                            $
+                            {(
+                              singleBookingData?.final_price ||
+                              selectedAppointment.fullBookingData
+                                ?.final_price ||
+                              0
+                            ).toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    <div>
+                      <h4 className="text-foreground mb-2 text-sm font-semibold">
+                        Notes:
+                      </h4>
+                      {singleBookingData?.notes ? (
+                        <p className="text-foreground text-xs">
+                          {singleBookingData.notes}
+                        </p>
+                      ) : (
+                        <p className="text-muted-foreground text-xs">
+                          No additional notes for this booking.
+                        </p>
+                      )}
+                    </div>
                   </div>
-
-                  <Separator />
-
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-foreground text-base font-semibold">
-                        {selectedAppointment.service}
-                      </span>
-                    </div>
-                    <div className="text-muted-foreground flex items-center gap-3 text-sm">
-                      <span>with {selectedAppointment.staff}</span>
-                    </div>
-                    <div className="text-muted-foreground mt-1 text-xs">
-                      at {selectedAppointment.startTime}
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div>
-                    <h4 className="text-foreground mb-2 text-sm font-semibold">
-                      Booking Details
-                    </h4>
-                    <div className="text-muted-foreground text-sm">
-                      Status:{" "}
-                      <span className="capitalize">
-                        {selectedAppointment.status.replace("-", " ")}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                )
               ) : (
                 <div className="text-muted-foreground py-12 text-center">
                   <CalendarIcon className="mx-auto mb-4 h-16 w-16 opacity-30" />
@@ -556,17 +804,18 @@ const BookingsTab: React.FC = () => {
                       <div className="flex items-center gap-1">
                         {selectedAppointment && (
                           <>
-                            <Button
+                            {/* <Button
                               variant="outline"
                               size="icon"
                               className="h-8 w-8"
                             >
                               <MoreVertical className="h-4 w-4" />
-                            </Button>
+                            </Button> */}
                             <Button
                               variant="outline"
                               size="icon"
                               className="h-8 w-8"
+                              onClick={() => handleIsEditDialogOpen(true)}
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -619,91 +868,293 @@ const BookingsTab: React.FC = () => {
 
                   <div className="flex-1 overflow-y-auto px-4 py-4">
                     {selectedAppointment ? (
-                      <div className="space-y-5">
-                        <div className="flex items-start gap-3 text-sm">
-                          <span className="text-muted-foreground mt-0.5 text-xs">
-                            On
-                          </span>
-                          <span className="text-foreground font-medium">
-                            {formatDate(selectedDate, false)}
-                          </span>
+                      isSingleBookingLoading ? (
+                        <div className="flex items-center justify-center py-12">
+                          <LoaderPinwheel className="h-8 w-8 animate-spin" />
                         </div>
+                      ) : (
+                        <div className="space-y-5">
+                          <div className="flex items-start gap-3 text-sm">
+                            <span className="text-muted-foreground mt-0.5 text-xs">
+                              On
+                            </span>
+                            <span className="text-foreground font-medium">
+                              {formatDate(selectedDate, false)}
+                            </span>
+                          </div>
 
-                        <div className="flex items-start gap-3 text-sm">
-                          <span className="text-muted-foreground mt-0.5 text-xs">
-                            At
-                          </span>
-                          <div>
-                            <div className="text-foreground font-medium">
-                              {selectedAppointment.startTime}
+                          <div className="item-center flex justify-between">
+                            <div className="flex items-start gap-3 text-xs">
+                              At:
+                              <div>
+                                <div className="text-foreground">
+                                  {singleBookingData?.booking_time ||
+                                    selectedAppointment.startTime}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-muted-foreground text-xs">
+                              Duration:{" "}
+                              <span className="text-foreground">
+                                {singleBookingData?.booking_duration ||
+                                  selectedAppointment.fullBookingData
+                                    ?.booking_duration ||
+                                  "N/A"}
+                              </span>
                             </div>
                           </div>
-                        </div>
 
-                        <Separator />
+                          <Separator />
 
-                        <div className="space-y-4">
-                          <div className="flex items-start gap-3">
-                            <Avatar className="border-background h-12 w-12 border-2 shadow">
-                              <AvatarImage
-                                src={selectedAppointment.clientAvatar}
-                              />
-                              <AvatarFallback className="bg-pink-500 font-semibold text-white">
-                                {selectedAppointment.client.charAt(0)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1">
-                              <div className="text-foreground text-base font-semibold">
-                                {selectedAppointment.client}
+                          <div className="space-y-4">
+                            <div className="flex items-start gap-3">
+                              <Avatar className="border-background h-12 w-12 border-2 shadow">
+                                <AvatarImage
+                                  src={selectedAppointment.clientAvatar}
+                                />
+                                <AvatarFallback className="bg-primary font-semibold text-white">
+                                  {selectedAppointment.client.charAt(0)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1">
+                                <div className="text-foreground text-base font-semibold">
+                                  {selectedAppointment.client}
+                                </div>
+                                <div className="text-muted-foreground text-xs">
+                                  Client
+                                </div>
                               </div>
-                              <div className="text-muted-foreground text-xs">
-                                Client
-                              </div>
-                            </div>
-                            <Button
+                              {/* <Button
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8"
                             >
                               <MessageSquare className="h-4 w-4" />
-                            </Button>
+                            </Button> */}
+                            </div>
                           </div>
 
-                          <button className="text-primary text-sm hover:underline">
-                            Show additional client info
-                          </button>
+                          <Separator />
+
+                          <div className="space-y-3">
+                            <h4 className="text-foreground text-sm font-semibold">
+                              Services (
+                              {singleBookingData?.total_services ||
+                                selectedAppointment.fullBookingData
+                                  ?.total_services ||
+                                0}
+                              )
+                            </h4>
+                            {(
+                              singleBookingData?.services ||
+                              selectedAppointment.fullBookingData?.services ||
+                              []
+                            ).map((service) => (
+                              <div
+                                key={service.uid}
+                                className="space-y-1 rounded-lg border p-3"
+                              >
+                                <div className="flex items-start justify-between">
+                                  <span className="text-foreground text-sm font-medium">
+                                    {service.name}
+                                  </span>
+                                  <span className="text-foreground text-sm font-semibold">
+                                    ${service.discount_price}
+                                  </span>
+                                </div>
+                                <div className="text-muted-foreground text-xs">
+                                  Price: ${service.price} • Discount:{" "}
+                                  {service.discount_percentage}% • Final: $
+                                  {service.discount_price}
+                                </div>
+                                {service.description && (
+                                  <p className="text-muted-foreground mt-1 text-xs">
+                                    {service.description}
+                                  </p>
+                                )}
+                              </div>
+                            ))}
+                            <div className="text-muted-foreground flex items-center gap-3 pt-2 text-sm">
+                              <span>with {selectedAppointment.staff}</span>
+                            </div>
+                          </div>
+
+                          {(
+                            singleBookingData?.products ||
+                            selectedAppointment.fullBookingData?.products ||
+                            []
+                          ).length > 0 && (
+                            <>
+                              <Separator />
+                              <div className="space-y-3">
+                                <h4 className="text-foreground text-sm font-semibold">
+                                  Products (
+                                  {singleBookingData?.total_products ||
+                                    selectedAppointment.fullBookingData
+                                      ?.total_products ||
+                                    0}
+                                  )
+                                </h4>
+                                {(
+                                  singleBookingData?.products ||
+                                  selectedAppointment.fullBookingData
+                                    ?.products ||
+                                  []
+                                ).map((product) => (
+                                  <div
+                                    key={product.uid}
+                                    className="space-y-1 rounded-lg border p-3"
+                                  >
+                                    <div className="flex items-start justify-between">
+                                      <span className="text-foreground text-sm font-medium">
+                                        {product.name}
+                                      </span>
+                                      <span className="text-foreground text-sm font-semibold">
+                                        ${product.price}
+                                      </span>
+                                    </div>
+                                    {product.description && (
+                                      <p className="text-muted-foreground mt-1 text-xs">
+                                        {product.description}
+                                      </p>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </>
+                          )}
+
+                          <Separator />
+
+                          <div className="space-y-2">
+                            <h4 className="text-foreground text-sm font-semibold">
+                              Pricing Summary
+                            </h4>
+                            <div className="space-y-1.5">
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-muted-foreground">
+                                  Services Total
+                                </span>
+                                <del className="text-muted-foreground">
+                                  $
+                                  {(
+                                    singleBookingData?.total_services_price ||
+                                    selectedAppointment.fullBookingData
+                                      ?.total_services_price ||
+                                    (
+                                      singleBookingData?.services ||
+                                      selectedAppointment.fullBookingData
+                                        ?.services ||
+                                      []
+                                    ).reduce(
+                                      (sum, s) => sum + parseFloat(s.price),
+                                      0,
+                                    )
+                                  ).toFixed(2)}
+                                </del>
+                              </div>
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-muted-foreground">
+                                  Services Discount
+                                </span>
+                                <span className="text-foreground">
+                                  $
+                                  {(
+                                    singleBookingData?.services_discount_price ||
+                                    selectedAppointment.fullBookingData
+                                      ?.services_discount_price ||
+                                    (
+                                      singleBookingData?.services ||
+                                      selectedAppointment.fullBookingData
+                                        ?.services ||
+                                      []
+                                    ).reduce(
+                                      (sum, s) =>
+                                        sum + parseFloat(s.discount_price),
+                                      0,
+                                    )
+                                  ).toFixed(2)}
+                                </span>
+                              </div>
+                              {(
+                                singleBookingData?.products ||
+                                selectedAppointment.fullBookingData?.products ||
+                                []
+                              ).length > 0 && (
+                                <div className="flex items-center justify-between text-sm">
+                                  <span className="text-muted-foreground">
+                                    Products Total
+                                  </span>
+                                  <span className="text-foreground">
+                                    $
+                                    {(
+                                      singleBookingData?.total_products_price ||
+                                      selectedAppointment.fullBookingData
+                                        ?.total_products_price ||
+                                      (
+                                        singleBookingData?.products ||
+                                        selectedAppointment.fullBookingData
+                                          ?.products ||
+                                        []
+                                      ).reduce(
+                                        (sum, p) => sum + parseFloat(p.price),
+                                        0,
+                                      )
+                                    ).toFixed(2)}
+                                  </span>
+                                </div>
+                              )}
+                              <div className="mt-1.5 border-t pt-1.5">
+                                <div className="flex items-center justify-between text-sm">
+                                  <span className="text-muted-foreground">
+                                    Total Price
+                                  </span>
+                                  <del className="text-muted-foreground font-medium">
+                                    $
+                                    {(
+                                      singleBookingData?.total_price ||
+                                      selectedAppointment.fullBookingData
+                                        ?.total_price ||
+                                      0
+                                    ).toFixed(2)}
+                                  </del>
+                                </div>
+                              </div>
+                              <div className="flex items-center justify-between text-base">
+                                <span className="text-foreground font-semibold">
+                                  Final Price
+                                </span>
+                                <span className="text-foreground font-bold">
+                                  $
+                                  {(
+                                    singleBookingData?.final_price ||
+                                    selectedAppointment.fullBookingData
+                                      ?.final_price ||
+                                    0
+                                  ).toFixed(2)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <Separator />
+
+                          <div>
+                            <h4 className="text-foreground mb-2 text-sm font-semibold">
+                              Notes:
+                            </h4>
+                            {singleBookingData?.notes ? (
+                              <p className="text-foreground text-xs">
+                                {singleBookingData.notes}
+                              </p>
+                            ) : (
+                              <p className="text-muted-foreground text-xs">
+                                No additional notes for this booking.
+                              </p>
+                            )}
+                          </div>
                         </div>
-
-                        <Separator />
-
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-foreground text-base font-semibold">
-                              {selectedAppointment.service}
-                            </span>
-                          </div>
-                          <div className="text-muted-foreground flex items-center gap-3 text-sm">
-                            <span>with {selectedAppointment.staff}</span>
-                          </div>
-                          <div className="text-muted-foreground mt-1 text-xs">
-                            at {selectedAppointment.startTime}
-                          </div>
-                        </div>
-
-                        <Separator />
-
-                        <div>
-                          <h4 className="text-foreground mb-2 text-sm font-semibold">
-                            Booking Details
-                          </h4>
-                          <div className="text-muted-foreground text-sm">
-                            Status:{" "}
-                            <span className="capitalize">
-                              {selectedAppointment.status.replace("-", " ")}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
+                      )
                     ) : (
                       <div className="text-muted-foreground py-12 text-center">
                         <CalendarIcon className="mx-auto mb-4 h-16 w-16 opacity-30" />
@@ -719,6 +1170,63 @@ const BookingsTab: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Edit Booking Dialog */}
+      <EditBookingDialog
+        isOpen={isEditDialogOpen}
+        onClose={() => handleIsEditDialogOpen(false)}
+        bookingData={
+          selectedAppointment
+            ? {
+                uid: selectedAppointment.id,
+                booking_date:
+                  singleBookingData?.booking_date ||
+                  selectedAppointment.fullBookingData?.booking_date ||
+                  "",
+                booking_time:
+                  singleBookingData?.booking_time ||
+                  selectedAppointment.startTime,
+                booking_duration:
+                  singleBookingData?.booking_duration ||
+                  selectedAppointment.fullBookingData?.booking_duration ||
+                  "",
+                status:
+                  singleBookingData?.status ||
+                  selectedAppointment.fullBookingData?.status ||
+                  "PLACED",
+                notes:
+                  singleBookingData?.notes ||
+                  selectedAppointment.fullBookingData?.notes ||
+                  "",
+                customer: {
+                  name:
+                    singleBookingData?.customer?.name ||
+                    selectedAppointment.fullBookingData?.customer?.name ||
+                    selectedAppointment.client,
+                  phone:
+                    singleBookingData?.customer?.phone ||
+                    selectedAppointment.fullBookingData?.customer?.phone ||
+                    "",
+                },
+                employee: {
+                  uid:
+                    singleBookingData?.employee?.uid ||
+                    selectedAppointment.fullBookingData?.employee?.uid ||
+                    "",
+                },
+                services:
+                  singleBookingData?.services ||
+                  selectedAppointment.fullBookingData?.services ||
+                  [],
+                products:
+                  singleBookingData?.products ||
+                  selectedAppointment.fullBookingData?.products ||
+                  [],
+                images: [],
+              }
+            : undefined
+        }
+      />
     </div>
   );
 };

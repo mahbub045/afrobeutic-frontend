@@ -3,11 +3,20 @@ export interface BookingService {
   name: string;
   category: string;
   price: string;
+  discount_price: string;
   description: string;
   service_duration: string;
   available_time_slots: string[];
   gender_specific: "MALE" | "FEMALE" | "UNISEX";
   discount_percentage: string;
+}
+
+export interface BookingProduct {
+  uid: string;
+  name: string;
+  category: string;
+  price: string;
+  description: string | null;
 }
 
 export interface BookingCustomer {
@@ -17,16 +26,31 @@ export interface BookingCustomer {
   created_at: string;
 }
 
+export interface BookingEmployee {
+  uid: string;
+  name: string;
+}
+
 export interface Booking {
   uid: string;
   booking_date: string;
   booking_time: string;
-  completed_at: string | null;
   booking_duration: string;
+  completed_at: string | null;
   status: "PLACED" | "INPROGRESS" | "RESCHEDULED" | "COMPLETED";
-  services: BookingService[];
+  notes: string;
   customer: BookingCustomer;
+  services: BookingService[];
+  total_services: number;
+  total_services_price: number;
+  services_discount_price: number;
+  total_products_price: number;
+  total_price: number;
+  final_price: number;
+  products: BookingProduct[];
+  total_products: number;
   created_at: string;
+  employee: BookingEmployee;
 }
 
 export interface StaffMemberWithBookings {
@@ -41,4 +65,40 @@ export interface BookingsResponse {
   next: string | null;
   previous: string | null;
   results: StaffMemberWithBookings[];
+}
+
+export interface Employee {
+  uid: string;
+  name: string;
+}
+
+export interface Service {
+  uid: string;
+  name: string;
+  price: string;
+}
+
+export interface Product {
+  uid: string;
+  name: string;
+  price: string;
+}
+
+export interface EditBookingDialogProps {
+  // Define any props needed for the dialog here
+  isOpen: boolean;
+  onClose: () => void;
+  bookingData?: {
+    uid: string;
+    booking_date: string;
+    booking_time: string;
+    booking_duration: string;
+    status: string;
+    notes: string;
+    customer: { name: string; phone: string };
+    employee: { uid: string };
+    services: Array<{ uid: string }>;
+    products: Array<{ uid: string }>;
+    images?: string[];
+  };
 }
