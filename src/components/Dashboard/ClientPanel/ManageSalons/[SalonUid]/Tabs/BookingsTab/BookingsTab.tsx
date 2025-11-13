@@ -251,6 +251,69 @@ const BookingsTab: React.FC = () => {
     setSelectedDate(newDate);
   };
 
+  // Helpers to safely handle cancelled status and reason from possibly under-typed API shapes
+  const isCancelled = (() => {
+    const selectedAptCancelled = selectedAppointment?.status === "cancelled";
+    const apiStatus = (singleBookingData as unknown as { status?: string })
+      ?.status;
+    const fullStatus = (
+      selectedAppointment?.fullBookingData as unknown as { status?: string }
+    )?.status;
+    return (
+      selectedAptCancelled ||
+      apiStatus === "CANCELLED" ||
+      fullStatus === "CANCELLED"
+    );
+  })();
+
+  const cancellationReason = (
+    singleBookingData as unknown as { cancellation_reason?: string }
+  )?.cancellation_reason;
+
+  // Map API status to UI status string used for styling/labels
+  const getUiStatus = (
+    status?: string,
+  ):
+    | "placed"
+    | "in-progress"
+    | "rescheduled"
+    | "completed"
+    | "cancelled"
+    | undefined => {
+    switch (status) {
+      case "PLACED":
+        return "placed";
+      case "INPROGRESS":
+        return "in-progress";
+      case "COMPLETED":
+        return "completed";
+      case "RESCHEDULED":
+        return "rescheduled";
+      case "CANCELLED":
+        return "cancelled";
+      default:
+        return undefined;
+    }
+  };
+
+  const effectiveStatus =
+    getUiStatus(
+      (singleBookingData as unknown as { status?: string })?.status,
+    ) || selectedAppointment?.status;
+
+  const getServiceTitle = () => {
+    const services = (
+      singleBookingData as unknown as { services?: { name: string }[] }
+    )?.services;
+    if (services && services.length > 0) {
+      return services
+        .map((s) => s.name)
+        .join(", ")
+        .toUpperCase();
+    }
+    return selectedAppointment ? selectedAppointment.service : "Appointment";
+  };
+
   return (
     <div className="bg-background flex h-full flex-col">
       {/* Header */}
@@ -308,7 +371,7 @@ const BookingsTab: React.FC = () => {
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent align="end">
-              <SelectItem value="ALL">All</SelectItem>
+              <SelectItem value="ALL">All Status</SelectItem>
               <SelectItem value="PLACED">Placed</SelectItem>
               <SelectItem value="INPROGRESS">In-Progress</SelectItem>
               <SelectItem value="COMPLETED">Completed</SelectItem>
@@ -476,9 +539,7 @@ const BookingsTab: React.FC = () => {
             <div className="flex-shrink-0 border-b px-6 py-3">
               <div className="mb-3 flex items-start justify-between">
                 <h3 className="text-foreground text-base font-semibold">
-                  {selectedAppointment
-                    ? selectedAppointment.service
-                    : "Appointment"}
+                  {getServiceTitle()}
                 </h3>
                 <div className="-mt-1 flex items-center gap-1">
                   {selectedAppointment && (
@@ -503,21 +564,21 @@ const BookingsTab: React.FC = () => {
                   <div
                     className={cn(
                       "flex items-center gap-2 rounded-full px-3 py-1",
-                      selectedAppointment.status === "placed" &&
+                      effectiveStatus === "placed" &&
                         "bg-gradient-to-r from-blue-400 to-cyan-300 text-white",
-                      selectedAppointment.status === "in-progress" &&
+                      effectiveStatus === "in-progress" &&
                         "bg-gradient-to-r from-amber-300 to-orange-400 text-white",
-                      selectedAppointment.status === "rescheduled" &&
+                      effectiveStatus === "rescheduled" &&
                         "bg-gradient-to-r from-purple-300 to-pink-400 text-white",
-                      selectedAppointment.status === "completed" &&
+                      effectiveStatus === "completed" &&
                         "bg-gradient-to-r from-emerald-300 to-teal-400 text-white",
-                      selectedAppointment.status === "cancelled" &&
+                      effectiveStatus === "cancelled" &&
                         "bg-gradient-to-r from-red-400 to-rose-500 text-white",
                     )}
                   >
                     <div className={cn("h-2 w-2 rounded-full bg-white")} />
                     <span className="text-xs font-medium capitalize">
-                      {selectedAppointment.status.replace("-", " ")}
+                      {(effectiveStatus || "").replace("-", " ")}
                     </span>
                   </div>
                   <Button
@@ -553,18 +614,14 @@ const BookingsTab: React.FC = () => {
                         At:
                         <div>
                           <div className="text-foreground">
-                            {singleBookingData?.booking_time ||
-                              selectedAppointment.startTime}
+                            {singleBookingData?.booking_time ?? "N/A"}
                           </div>
                         </div>
                       </div>
                       <div className="text-muted-foreground text-xs">
                         Duration:{" "}
                         <span className="text-foreground">
-                          {singleBookingData?.booking_duration ||
-                            selectedAppointment.fullBookingData
-                              ?.booking_duration ||
-                            "N/A"}
+                          {singleBookingData?.booking_duration ?? "N/A"}
                         </span>
                       </div>
                     </div>
@@ -576,16 +633,14 @@ const BookingsTab: React.FC = () => {
                         <Avatar className="border-background h-12 w-12 border-2 shadow">
                           <AvatarImage src={selectedAppointment.clientAvatar} />
                           <AvatarFallback className="bg-primary font-semibold text-white">
-                            {(
-                              singleBookingData?.customer.name ||
-                              selectedAppointment.client
-                            ).charAt(0)}
+                            {(singleBookingData?.customer.name || "?").charAt(
+                              0,
+                            )}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
                           <div className="text-foreground text-base font-semibold">
-                            {singleBookingData?.customer.name ||
-                              selectedAppointment.client}
+                            {singleBookingData?.customer.name ?? "Unknown"}
                           </div>
                           <div className="text-muted-foreground text-xs">
                             Client
@@ -601,17 +656,9 @@ const BookingsTab: React.FC = () => {
 
                     <div className="space-y-3">
                       <h4 className="text-foreground text-sm font-semibold">
-                        Services (
-                        {singleBookingData?.total_services ||
-                          selectedAppointment.fullBookingData?.total_services ||
-                          0}
-                        )
+                        Services ({singleBookingData?.total_services ?? 0})
                       </h4>
-                      {(
-                        singleBookingData?.services ||
-                        selectedAppointment.fullBookingData?.services ||
-                        []
-                      ).map((service) => (
+                      {(singleBookingData?.services || []).map((service) => (
                         <div
                           key={service.uid}
                           className="space-y-1 rounded-lg border p-3"
@@ -637,53 +684,51 @@ const BookingsTab: React.FC = () => {
                         </div>
                       ))}
                       <div className="text-muted-foreground flex items-center gap-3 pt-2 text-sm">
-                        <span>with {selectedAppointment.staff}</span>
+                        <span>
+                          with{" "}
+                          {(
+                            singleBookingData as unknown as {
+                              employee?: { name?: string };
+                            }
+                          )?.employee?.name || selectedAppointment.staff}
+                        </span>
                       </div>
                     </div>
 
-                    {((singleBookingData?.products &&
-                      singleBookingData.products.length > 0) ||
-                      (selectedAppointment.fullBookingData?.products &&
-                        selectedAppointment.fullBookingData.products.length >
-                          0)) && (
-                      <>
-                        <Separator />
-                        <div className="space-y-3">
-                          <h4 className="text-foreground text-sm font-semibold">
-                            Products (
-                            {singleBookingData?.total_products ||
-                              selectedAppointment.fullBookingData
-                                ?.total_products ||
-                              0}
-                            )
-                          </h4>
-                          {(
-                            singleBookingData?.products ||
-                            selectedAppointment.fullBookingData?.products ||
-                            []
-                          ).map((product) => (
-                            <div
-                              key={product.uid}
-                              className="space-y-1 rounded-lg border p-3"
-                            >
-                              <div className="flex items-start justify-between">
-                                <span className="text-foreground text-sm font-medium">
-                                  {product.name}
-                                </span>
-                                <span className="text-foreground text-sm font-semibold">
-                                  ${product.price}
-                                </span>
-                              </div>
-                              {product.description && (
-                                <p className="text-muted-foreground mt-1 text-xs">
-                                  {product.description}
-                                </p>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </>
-                    )}
+                    {singleBookingData?.products &&
+                      singleBookingData.products.length > 0 && (
+                        <>
+                          <Separator />
+                          <div className="space-y-3">
+                            <h4 className="text-foreground text-sm font-semibold">
+                              Products ({singleBookingData?.total_products ?? 0}
+                              )
+                            </h4>
+                            {(singleBookingData?.products || []).map(
+                              (product) => (
+                                <div
+                                  key={product.uid}
+                                  className="space-y-1 rounded-lg border p-3"
+                                >
+                                  <div className="flex items-start justify-between">
+                                    <span className="text-foreground text-sm font-medium">
+                                      {product.name}
+                                    </span>
+                                    <span className="text-foreground text-sm font-semibold">
+                                      ${product.price}
+                                    </span>
+                                  </div>
+                                  {product.description && (
+                                    <p className="text-muted-foreground mt-1 text-xs">
+                                      {product.description}
+                                    </p>
+                                  )}
+                                </div>
+                              ),
+                            )}
+                          </div>
+                        </>
+                      )}
 
                     <Separator />
 
@@ -699,66 +744,50 @@ const BookingsTab: React.FC = () => {
                           <del className="text-muted-foreground">
                             $
                             {(
-                              singleBookingData?.total_services_price ||
-                              selectedAppointment.fullBookingData
-                                ?.total_services_price ||
-                              (
-                                singleBookingData?.services ||
-                                selectedAppointment.fullBookingData?.services ||
-                                []
-                              ).reduce((sum, s) => sum + parseFloat(s.price), 0)
+                              singleBookingData?.total_services_price ??
+                              (singleBookingData?.services || []).reduce(
+                                (sum, s) => sum + parseFloat(s.price),
+                                0,
+                              )
                             ).toFixed(2)}
                           </del>
                         </div>
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">
-                            Services Discount
+                            Services Total{" "}
+                            <small className="text-[10px]">
+                              (After Discount)
+                            </small>
                           </span>
                           <span className="text-foreground">
                             $
                             {(
-                              singleBookingData?.services_discount_price ||
-                              selectedAppointment.fullBookingData
-                                ?.services_discount_price ||
-                              (
-                                singleBookingData?.services ||
-                                selectedAppointment.fullBookingData?.services ||
-                                []
-                              ).reduce(
+                              singleBookingData?.services_discount_price ??
+                              (singleBookingData?.services || []).reduce(
                                 (sum, s) => sum + parseFloat(s.discount_price),
                                 0,
                               )
                             ).toFixed(2)}
                           </span>
                         </div>
-                        {((singleBookingData?.products &&
-                          singleBookingData.products.length > 0) ||
-                          (selectedAppointment.fullBookingData?.products &&
-                            selectedAppointment.fullBookingData.products
-                              .length > 0)) && (
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">
-                              Products Total
-                            </span>
-                            <span className="text-foreground">
-                              $
-                              {(
-                                singleBookingData?.total_products_price ||
-                                selectedAppointment.fullBookingData
-                                  ?.total_products_price ||
-                                (
-                                  singleBookingData?.products ||
-                                  selectedAppointment.fullBookingData
-                                    ?.products ||
-                                  []
-                                ).reduce(
-                                  (sum, p) => sum + parseFloat(p.price),
-                                  0,
-                                )
-                              ).toFixed(2)}
-                            </span>
-                          </div>
-                        )}
+                        {singleBookingData?.products &&
+                          singleBookingData.products.length > 0 && (
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-muted-foreground">
+                                Products Total
+                              </span>
+                              <span className="text-foreground">
+                                $
+                                {(
+                                  singleBookingData?.total_products_price ??
+                                  (singleBookingData?.products || []).reduce(
+                                    (sum, p) => sum + parseFloat(p.price),
+                                    0,
+                                  )
+                                ).toFixed(2)}
+                              </span>
+                            </div>
+                          )}
                         <div className="mt-1.5 border-t pt-1.5">
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-muted-foreground">
@@ -766,12 +795,7 @@ const BookingsTab: React.FC = () => {
                             </span>
                             <del className="text-muted-foreground font-medium">
                               $
-                              {(
-                                singleBookingData?.total_price ||
-                                selectedAppointment.fullBookingData
-                                  ?.total_price ||
-                                0
-                              ).toFixed(2)}
+                              {(singleBookingData?.total_price ?? 0).toFixed(2)}
                             </del>
                           </div>
                         </div>
@@ -780,13 +804,7 @@ const BookingsTab: React.FC = () => {
                             Final Price
                           </span>
                           <span className="text-foreground font-bold">
-                            $
-                            {(
-                              singleBookingData?.final_price ||
-                              selectedAppointment.fullBookingData
-                                ?.final_price ||
-                              0
-                            ).toFixed(2)}
+                            ${(singleBookingData?.final_price ?? 0).toFixed(2)}
                           </span>
                         </div>
                       </div>
@@ -808,6 +826,26 @@ const BookingsTab: React.FC = () => {
                         </p>
                       )}
                     </div>
+
+                    {isCancelled && (
+                      <>
+                        <Separator />
+                        <div>
+                          <h4 className="text-foreground mb-2 text-sm font-semibold">
+                            Cancellation Reason:
+                          </h4>
+                          {cancellationReason ? (
+                            <p className="text-foreground text-xs">
+                              {cancellationReason}
+                            </p>
+                          ) : (
+                            <p className="text-muted-foreground text-xs">
+                              No cancellation reason provided.
+                            </p>
+                          )}
+                        </div>
+                      </>
+                    )}
                   </div>
                 )
               ) : (
@@ -826,19 +864,13 @@ const BookingsTab: React.FC = () => {
             <Sheet open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
               <SheetContent side="bottom" className="h-[85vh] p-0">
                 <SheetHeader className="sr-only">
-                  <SheetTitle>
-                    {selectedAppointment
-                      ? selectedAppointment.service
-                      : "Appointment Details"}
-                  </SheetTitle>
+                  <SheetTitle>{getServiceTitle()}</SheetTitle>
                 </SheetHeader>
                 <div className="flex h-full flex-col">
                   <div className="border-b px-4 py-3">
                     <div className="mb-3 flex items-start justify-start gap-4">
                       <h3 className="text-foreground text-base font-semibold">
-                        {selectedAppointment
-                          ? selectedAppointment.service
-                          : "Appointment"}
+                        {getServiceTitle()}
                       </h3>
                       <div className="flex items-center gap-1">
                         {selectedAppointment && (
@@ -867,15 +899,15 @@ const BookingsTab: React.FC = () => {
                         <div
                           className={cn(
                             "flex items-center gap-2 rounded-full px-3 py-1",
-                            selectedAppointment.status === "placed" &&
+                            effectiveStatus === "placed" &&
                               "bg-gradient-to-r from-blue-400 to-cyan-300 text-white",
-                            selectedAppointment.status === "in-progress" &&
+                            effectiveStatus === "in-progress" &&
                               "bg-gradient-to-r from-amber-300 to-orange-400 text-white",
-                            selectedAppointment.status === "rescheduled" &&
+                            effectiveStatus === "rescheduled" &&
                               "bg-gradient-to-r from-purple-300 to-pink-400 text-white",
-                            selectedAppointment.status === "completed" &&
+                            effectiveStatus === "completed" &&
                               "bg-gradient-to-r from-emerald-300 to-teal-400 text-white",
-                            selectedAppointment.status === "cancelled" &&
+                            effectiveStatus === "cancelled" &&
                               "bg-gradient-to-r from-red-400 to-rose-500 text-white",
                           )}
                         >
@@ -883,7 +915,7 @@ const BookingsTab: React.FC = () => {
                             className={cn("h-2 w-2 rounded-full bg-white")}
                           />
                           <span className="text-xs font-medium capitalize">
-                            {selectedAppointment.status.replace("-", " ")}
+                            {(effectiveStatus || "").replace("-", " ")}
                           </span>
                         </div>
                         <Button
@@ -919,18 +951,14 @@ const BookingsTab: React.FC = () => {
                               At:
                               <div>
                                 <div className="text-foreground">
-                                  {singleBookingData?.booking_time ||
-                                    selectedAppointment.startTime}
+                                  {singleBookingData?.booking_time ?? "N/A"}
                                 </div>
                               </div>
                             </div>
                             <div className="text-muted-foreground text-xs">
                               Duration:{" "}
                               <span className="text-foreground">
-                                {singleBookingData?.booking_duration ||
-                                  selectedAppointment.fullBookingData
-                                    ?.booking_duration ||
-                                  "N/A"}
+                                {singleBookingData?.booking_duration ?? "N/A"}
                               </span>
                             </div>
                           </div>
@@ -940,16 +968,17 @@ const BookingsTab: React.FC = () => {
                           <div className="space-y-4">
                             <div className="flex items-start gap-3">
                               <Avatar className="border-background h-12 w-12 border-2 shadow">
-                                <AvatarImage
-                                  src={selectedAppointment.clientAvatar}
-                                />
+                                <AvatarImage src={undefined} />
                                 <AvatarFallback className="bg-primary font-semibold text-white">
-                                  {selectedAppointment.client.charAt(0)}
+                                  {(
+                                    singleBookingData?.customer?.name || "?"
+                                  ).charAt(0)}
                                 </AvatarFallback>
                               </Avatar>
                               <div className="flex-1">
                                 <div className="text-foreground text-base font-semibold">
-                                  {selectedAppointment.client}
+                                  {singleBookingData?.customer?.name ??
+                                    "Unknown"}
                                 </div>
                                 <div className="text-muted-foreground text-xs">
                                   Client
@@ -969,88 +998,78 @@ const BookingsTab: React.FC = () => {
 
                           <div className="space-y-3">
                             <h4 className="text-foreground text-sm font-semibold">
-                              Services (
-                              {singleBookingData?.total_services ||
-                                selectedAppointment.fullBookingData
-                                  ?.total_services ||
-                                0}
+                              Services ({singleBookingData?.total_services ?? 0}
                               )
                             </h4>
-                            {(
-                              singleBookingData?.services ||
-                              selectedAppointment.fullBookingData?.services ||
-                              []
-                            ).map((service) => (
-                              <div
-                                key={service.uid}
-                                className="space-y-1 rounded-lg border p-3"
-                              >
-                                <div className="flex items-start justify-between">
-                                  <span className="text-foreground text-sm font-medium">
-                                    {service.name}
-                                  </span>
-                                  <span className="text-foreground text-sm font-semibold">
-                                    ${service.discount_price}
-                                  </span>
+                            {(singleBookingData?.services || []).map(
+                              (service) => (
+                                <div
+                                  key={service.uid}
+                                  className="space-y-1 rounded-lg border p-3"
+                                >
+                                  <div className="flex items-start justify-between">
+                                    <span className="text-foreground text-sm font-medium">
+                                      {service.name}
+                                    </span>
+                                    <span className="text-foreground text-sm font-semibold">
+                                      ${service.discount_price}
+                                    </span>
+                                  </div>
+                                  <div className="text-muted-foreground text-xs">
+                                    Price: ${service.price} • Discount:{" "}
+                                    {service.discount_percentage}% • Final: $
+                                    {service.discount_price}
+                                  </div>
+                                  {service.description && (
+                                    <p className="text-muted-foreground mt-1 text-xs">
+                                      {service.description}
+                                    </p>
+                                  )}
                                 </div>
-                                <div className="text-muted-foreground text-xs">
-                                  Price: ${service.price} • Discount:{" "}
-                                  {service.discount_percentage}% • Final: $
-                                  {service.discount_price}
-                                </div>
-                                {service.description && (
-                                  <p className="text-muted-foreground mt-1 text-xs">
-                                    {service.description}
-                                  </p>
-                                )}
-                              </div>
-                            ))}
+                              ),
+                            )}
                             <div className="text-muted-foreground flex items-center gap-3 pt-2 text-sm">
-                              <span>with {selectedAppointment.staff}</span>
+                              <span>
+                                with{" "}
+                                {(
+                                  singleBookingData as unknown as {
+                                    employee?: { name?: string };
+                                  }
+                                )?.employee?.name || selectedAppointment.staff}
+                              </span>
                             </div>
                           </div>
 
-                          {(
-                            singleBookingData?.products ||
-                            selectedAppointment.fullBookingData?.products ||
-                            []
-                          ).length > 0 && (
+                          {(singleBookingData?.products || []).length > 0 && (
                             <>
                               <Separator />
                               <div className="space-y-3">
                                 <h4 className="text-foreground text-sm font-semibold">
                                   Products (
-                                  {singleBookingData?.total_products ||
-                                    selectedAppointment.fullBookingData
-                                      ?.total_products ||
-                                    0}
-                                  )
+                                  {singleBookingData?.total_products ?? 0})
                                 </h4>
-                                {(
-                                  singleBookingData?.products ||
-                                  selectedAppointment.fullBookingData
-                                    ?.products ||
-                                  []
-                                ).map((product) => (
-                                  <div
-                                    key={product.uid}
-                                    className="space-y-1 rounded-lg border p-3"
-                                  >
-                                    <div className="flex items-start justify-between">
-                                      <span className="text-foreground text-sm font-medium">
-                                        {product.name}
-                                      </span>
-                                      <span className="text-foreground text-sm font-semibold">
-                                        ${product.price}
-                                      </span>
+                                {(singleBookingData?.products || []).map(
+                                  (product) => (
+                                    <div
+                                      key={product.uid}
+                                      className="space-y-1 rounded-lg border p-3"
+                                    >
+                                      <div className="flex items-start justify-between">
+                                        <span className="text-foreground text-sm font-medium">
+                                          {product.name}
+                                        </span>
+                                        <span className="text-foreground text-sm font-semibold">
+                                          ${product.price}
+                                        </span>
+                                      </div>
+                                      {product.description && (
+                                        <p className="text-muted-foreground mt-1 text-xs">
+                                          {product.description}
+                                        </p>
+                                      )}
                                     </div>
-                                    {product.description && (
-                                      <p className="text-muted-foreground mt-1 text-xs">
-                                        {product.description}
-                                      </p>
-                                    )}
-                                  </div>
-                                ))}
+                                  ),
+                                )}
                               </div>
                             </>
                           )}
@@ -1069,15 +1088,8 @@ const BookingsTab: React.FC = () => {
                                 <del className="text-muted-foreground">
                                   $
                                   {(
-                                    singleBookingData?.total_services_price ||
-                                    selectedAppointment.fullBookingData
-                                      ?.total_services_price ||
-                                    (
-                                      singleBookingData?.services ||
-                                      selectedAppointment.fullBookingData
-                                        ?.services ||
-                                      []
-                                    ).reduce(
+                                    singleBookingData?.total_services_price ??
+                                    (singleBookingData?.services || []).reduce(
                                       (sum, s) => sum + parseFloat(s.price),
                                       0,
                                     )
@@ -1086,20 +1098,16 @@ const BookingsTab: React.FC = () => {
                               </div>
                               <div className="flex items-center justify-between text-sm">
                                 <span className="text-muted-foreground">
-                                  Services Discount
+                                  Services Total{" "}
+                                  <small className="text-[10px]">
+                                    (After Discount)
+                                  </small>
                                 </span>
                                 <span className="text-foreground">
                                   $
                                   {(
-                                    singleBookingData?.services_discount_price ||
-                                    selectedAppointment.fullBookingData
-                                      ?.services_discount_price ||
-                                    (
-                                      singleBookingData?.services ||
-                                      selectedAppointment.fullBookingData
-                                        ?.services ||
-                                      []
-                                    ).reduce(
+                                    singleBookingData?.services_discount_price ??
+                                    (singleBookingData?.services || []).reduce(
                                       (sum, s) =>
                                         sum + parseFloat(s.discount_price),
                                       0,
@@ -1107,11 +1115,8 @@ const BookingsTab: React.FC = () => {
                                   ).toFixed(2)}
                                 </span>
                               </div>
-                              {(
-                                singleBookingData?.products ||
-                                selectedAppointment.fullBookingData?.products ||
-                                []
-                              ).length > 0 && (
+                              {(singleBookingData?.products || []).length >
+                                0 && (
                                 <div className="flex items-center justify-between text-sm">
                                   <span className="text-muted-foreground">
                                     Products Total
@@ -1119,14 +1124,9 @@ const BookingsTab: React.FC = () => {
                                   <span className="text-foreground">
                                     $
                                     {(
-                                      singleBookingData?.total_products_price ||
-                                      selectedAppointment.fullBookingData
-                                        ?.total_products_price ||
+                                      singleBookingData?.total_products_price ??
                                       (
-                                        singleBookingData?.products ||
-                                        selectedAppointment.fullBookingData
-                                          ?.products ||
-                                        []
+                                        singleBookingData?.products || []
                                       ).reduce(
                                         (sum, p) => sum + parseFloat(p.price),
                                         0,
@@ -1143,10 +1143,7 @@ const BookingsTab: React.FC = () => {
                                   <del className="text-muted-foreground font-medium">
                                     $
                                     {(
-                                      singleBookingData?.total_price ||
-                                      selectedAppointment.fullBookingData
-                                        ?.total_price ||
-                                      0
+                                      singleBookingData?.total_price ?? 0
                                     ).toFixed(2)}
                                   </del>
                                 </div>
@@ -1158,10 +1155,7 @@ const BookingsTab: React.FC = () => {
                                 <span className="text-foreground font-bold">
                                   $
                                   {(
-                                    singleBookingData?.final_price ||
-                                    selectedAppointment.fullBookingData
-                                      ?.final_price ||
-                                    0
+                                    singleBookingData?.final_price ?? 0
                                   ).toFixed(2)}
                                 </span>
                               </div>
@@ -1184,6 +1178,26 @@ const BookingsTab: React.FC = () => {
                               </p>
                             )}
                           </div>
+
+                          {isCancelled && (
+                            <>
+                              <Separator />
+                              <div>
+                                <h4 className="text-foreground mb-2 text-sm font-semibold">
+                                  Cancellation Reason:
+                                </h4>
+                                {cancellationReason ? (
+                                  <p className="text-foreground text-xs">
+                                    {cancellationReason}
+                                  </p>
+                                ) : (
+                                  <p className="text-muted-foreground text-xs">
+                                    No cancellation reason provided.
+                                  </p>
+                                )}
+                              </div>
+                            </>
+                          )}
                         </div>
                       )
                     ) : (
