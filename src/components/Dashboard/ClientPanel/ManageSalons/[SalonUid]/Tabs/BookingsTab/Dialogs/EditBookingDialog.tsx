@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +12,12 @@ import { useGetEmployeesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSal
 import { useGetProductsDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Products/ProductsApi";
 import { useGetServicesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
 import {
+  EditBookingDialogProps,
+  Employee,
+  Product,
+  Service,
+} from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
+import {
   ErrorMessage,
   Field,
   FieldProps,
@@ -25,48 +30,12 @@ import { Loader2, Upload, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import PhoneInput from "react-phone-input-2";
 import { toast } from "sonner";
 import Swal from "sweetalert2";
 
 import * as Yup from "yup";
-
-interface Employee {
-  uid: string;
-  name: string;
-}
-
-interface Service {
-  uid: string;
-  name: string;
-  price: string;
-}
-
-interface Product {
-  uid: string;
-  name: string;
-  price: string;
-}
-
-export interface EditBookingDialogProps {
-  // Define any props needed for the dialog here
-  isOpen: boolean;
-  onClose: () => void;
-  bookingData?: {
-    uid: string;
-    booking_date: string;
-    booking_time: string;
-    booking_duration: string;
-    status: string;
-    notes: string;
-    customer: { name: string; phone: string };
-    employee: { uid: string };
-    services: Array<{ uid: string }>;
-    products: Array<{ uid: string }>;
-    images?: string[];
-  };
-}
 
 const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
   isOpen,
@@ -79,6 +48,14 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
   const [imagePreviews, setImagePreviews] = useState<string[]>(
     bookingData?.images || [],
   );
+  const [showServices, setShowServices] = useState(false);
+  const [showProducts, setShowProducts] = useState(false);
+  const [serviceSearch, setServiceSearch] = useState("");
+  const [productSearch, setProductSearch] = useState("");
+  const servicesInputRef = useRef<HTMLInputElement>(null);
+  const productsInputRef = useRef<HTMLInputElement>(null);
+  const servicesDropdownRef = useRef<HTMLDivElement>(null);
+  const productsDropdownRef = useRef<HTMLDivElement>(null);
 
   // RTK hooks
   const { data: servicesData, isLoading: isLoadingServices } =
@@ -93,6 +70,33 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
     String(i).padStart(2, "0"),
   );
   const minutes = ["00", "15", "30", "45"];
+
+  // Handle click outside to close dropdowns
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        servicesDropdownRef.current &&
+        !servicesDropdownRef.current.contains(event.target as Node) &&
+        servicesInputRef.current &&
+        !servicesInputRef.current.contains(event.target as Node)
+      ) {
+        setShowServices(false);
+      }
+      if (
+        productsDropdownRef.current &&
+        !productsDropdownRef.current.contains(event.target as Node) &&
+        productsInputRef.current &&
+        !productsInputRef.current.contains(event.target as Node)
+      ) {
+        setShowProducts(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Validation schema
   const validationSchema = Yup.object({
@@ -236,51 +240,11 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
     setImagePreviews(newPreviews);
   };
 
-  // Toggle service selection
-  const toggleService = (
-    serviceId: string,
-    setFieldValue: (
-      field: string,
-      value: string[],
-      shouldValidate?: boolean,
-    ) => void,
-    currentServices: string[],
-  ) => {
-    if (currentServices.includes(serviceId)) {
-      setFieldValue(
-        "services",
-        currentServices.filter((id) => id !== serviceId),
-      );
-    } else {
-      setFieldValue("services", [...currentServices, serviceId]);
-    }
-  };
-
-  // Toggle product selection
-  const toggleProduct = (
-    productId: string,
-    setFieldValue: (
-      field: string,
-      value: string[],
-      shouldValidate?: boolean,
-    ) => void,
-    currentProducts: string[],
-  ) => {
-    if (currentProducts.includes(productId)) {
-      setFieldValue(
-        "products",
-        currentProducts.filter((id) => id !== productId),
-      );
-    } else {
-      setFieldValue("products", [...currentProducts, productId]);
-    }
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-h-[80vh] !max-w-4xl overflow-y-auto shadow-md sm:!max-w-4xl md:!max-w-5xl dark:shadow-gray-600">
         <div className="flex max-h-[95vh] flex-col">
-          <div className="flex-shrink px-6 py-4">
+          <div className="pb-6">
             <DialogHeader>
               <DialogTitle className="text-primary">Edit Booking</DialogTitle>
               <DialogDescription>
@@ -480,121 +444,379 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
                   </div>
 
                   {/* Employee Selection */}
-                  <div className="space-y-2">
-                    <Label htmlFor="employee">
-                      Employee <span className="text-red-500">*</span>
-                    </Label>
-                    <Field id="employee" name="employee" as="select" required>
-                      <option value="" disabled>
-                        Select employee
-                      </option>
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-semibold">Assign Employee</h3>
+                    <div>
+                      <Label htmlFor="employee" className="mb-2">
+                        Employee <span className="text-red-500">*</span>
+                      </Label>
                       {isLoadingEmployees ? (
-                        <option value="" disabled>
-                          Loading employees...
-                        </option>
+                        <div className="flex items-center justify-center rounded-lg border border-dashed p-6">
+                          <p className="text-muted-foreground text-sm">
+                            Loading employees...
+                          </p>
+                        </div>
+                      ) : employeesData?.results &&
+                        employeesData.results.length > 0 ? (
+                        <div className="max-h-52 overflow-y-auto rounded-lg border p-3">
+                          <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                            {employeesData.results.map((employee: Employee) => (
+                              <label
+                                key={employee.uid}
+                                className="hover:border-primary hover:bg-primary/5 flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-all"
+                              >
+                                <input
+                                  type="radio"
+                                  name="employee"
+                                  value={employee.uid}
+                                  checked={values.employee === employee.uid}
+                                  onChange={(e) =>
+                                    setFieldValue("employee", e.target.value)
+                                  }
+                                  className="h-4 w-4 cursor-pointer"
+                                  style={{
+                                    accentColor: "#027f81",
+                                  }}
+                                />
+                                <span className="flex-1 text-sm font-medium">
+                                  {employee.name}
+                                </span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
                       ) : (
-                        employeesData?.results?.map((employee: Employee) => (
-                          <option key={employee.uid} value={employee.uid}>
-                            {employee.name}
-                          </option>
-                        ))
+                        <div className="flex items-center justify-center rounded-lg border border-dashed p-6">
+                          <p className="text-muted-foreground text-sm">
+                            No employees found
+                          </p>
+                        </div>
                       )}
-                    </Field>
-                    <ErrorMessage
-                      name="employee"
-                      component="p"
-                      className="text-xs text-red-500"
-                    />
+                      <ErrorMessage
+                        name="employee"
+                        component="p"
+                        className="mt-1 text-xs text-red-500"
+                      />
+                    </div>
                   </div>
 
                   {/* Services and Products Selection */}
-                  <div className="grid grid-cols-2 gap-4">
-                    {/* Services Selection */}
-                    <div className="space-y-2">
-                      <Label>
-                        Services <span className="text-red-500">*</span>
-                      </Label>
-                      <div className="max-h-60 overflow-y-auto rounded-md border p-3">
-                        {isLoadingServices ? (
-                          <p className="text-muted-foreground text-sm">
-                            Loading services...
-                          </p>
-                        ) : (
-                          <div className="space-y-2">
-                            {servicesData?.results?.map((service: Service) => (
-                              <div
-                                key={service.uid}
-                                className="flex items-center gap-2"
-                              >
-                                <Checkbox
-                                  id={`service-${service.uid}`}
-                                  checked={values.services.includes(
-                                    service.uid,
-                                  )}
-                                  onCheckedChange={() =>
-                                    toggleService(
-                                      service.uid,
-                                      setFieldValue,
-                                      values.services,
-                                    )
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-semibold">
+                      Services & Products
+                    </h3>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      {/* Services Selection */}
+                      <div className="relative">
+                        <Label htmlFor="services" className="mb-2">
+                          Services <span className="text-red-500">*</span>
+                        </Label>
+                        <div className="relative">
+                          <div
+                            onClick={() => {
+                              setShowServices(true);
+                              servicesInputRef.current?.focus();
+                            }}
+                            className="flex min-h-[42px] w-full cursor-text flex-wrap gap-2 rounded-md border px-3 py-2 dark:bg-[#181818]"
+                          >
+                            {values.services.length > 0 ? (
+                              <>
+                                {values.services.map((serviceUid) => {
+                                  const service = servicesData?.results?.find(
+                                    (s: Service) => s.uid === serviceUid,
+                                  );
+                                  return service ? (
+                                    <span
+                                      key={serviceUid}
+                                      className="bg-primary/10 text-primary inline-flex items-center gap-1 rounded-md px-2 py-1 text-sm"
+                                    >
+                                      {service.name}
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setFieldValue(
+                                            "services",
+                                            values.services.filter(
+                                              (s) => s !== serviceUid,
+                                            ),
+                                          );
+                                        }}
+                                        className="hover:bg-primary/20 rounded-full"
+                                      >
+                                        <X size={14} />
+                                      </button>
+                                    </span>
+                                  ) : null;
+                                })}
+                                <input
+                                  ref={servicesInputRef}
+                                  type="text"
+                                  placeholder="Search..."
+                                  value={serviceSearch}
+                                  onChange={(e) =>
+                                    setServiceSearch(e.target.value)
                                   }
+                                  onFocus={() => setShowServices(true)}
+                                  className="min-w-[120px] flex-1 border-none bg-transparent outline-none"
                                 />
-                                <Label
-                                  htmlFor={`service-${service.uid}`}
-                                  className="cursor-pointer text-sm font-normal"
-                                >
-                                  {service.name} - ${service.price}
-                                </Label>
-                              </div>
-                            ))}
+                              </>
+                            ) : (
+                              <input
+                                ref={servicesInputRef}
+                                type="text"
+                                placeholder="Search and select services..."
+                                value={serviceSearch}
+                                onChange={(e) =>
+                                  setServiceSearch(e.target.value)
+                                }
+                                onFocus={() => setShowServices(true)}
+                                className="w-full border-none bg-transparent outline-none"
+                              />
+                            )}
                           </div>
-                        )}
-                      </div>
-                      <ErrorMessage
-                        name="services"
-                        component="p"
-                        className="text-xs text-red-500"
-                      />
-                    </div>
 
-                    {/* Products Selection */}
-                    <div className="space-y-2">
-                      <Label>Products (Optional)</Label>
-                      <div className="max-h-40 overflow-y-auto rounded-md border p-3">
-                        {isLoadingProducts ? (
-                          <p className="text-muted-foreground text-sm">
-                            Loading products...
-                          </p>
-                        ) : (
-                          <div className="space-y-2">
-                            {productsData?.results?.map((product: Product) => (
-                              <div
-                                key={product.uid}
-                                className="flex items-center gap-2"
-                              >
-                                <Checkbox
-                                  id={`product-${product.uid}`}
-                                  checked={values.products.includes(
-                                    product.uid,
-                                  )}
-                                  onCheckedChange={() =>
-                                    toggleProduct(
-                                      product.uid,
-                                      setFieldValue,
-                                      values.products,
-                                    )
+                          {showServices && (
+                            <div
+                              ref={servicesDropdownRef}
+                              className="absolute right-0 left-0 z-50 mt-1 max-h-60 overflow-auto rounded border bg-white shadow-lg dark:bg-[#0b1116]"
+                            >
+                              {isLoadingServices ? (
+                                <div className="p-2 text-sm text-gray-500">
+                                  Loading services...
+                                </div>
+                              ) : (
+                                (() => {
+                                  const searchTerm = serviceSearch
+                                    .toLowerCase()
+                                    .trim();
+                                  const filteredServices = searchTerm
+                                    ? (servicesData?.results || [])
+                                        .filter((service: Service) =>
+                                          service.name
+                                            .toLowerCase()
+                                            .includes(searchTerm),
+                                        )
+                                        .sort((a: Service, b: Service) => {
+                                          const aStarts = a.name
+                                            .toLowerCase()
+                                            .startsWith(searchTerm);
+                                          const bStarts = b.name
+                                            .toLowerCase()
+                                            .startsWith(searchTerm);
+                                          if (aStarts && !bStarts) return -1;
+                                          if (!aStarts && bStarts) return 1;
+                                          return 0;
+                                        })
+                                    : servicesData?.results || [];
+
+                                  return filteredServices.length > 0 ? (
+                                    <ul className="divide-y p-2">
+                                      {filteredServices.map(
+                                        (service: Service) => (
+                                          <li key={service.uid}>
+                                            <label className="my-1 flex w-full cursor-pointer items-center gap-2 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-800">
+                                              <input
+                                                type="checkbox"
+                                                checked={values.services.includes(
+                                                  service.uid,
+                                                )}
+                                                onChange={(e) => {
+                                                  setFieldValue(
+                                                    "services",
+                                                    e.target.checked
+                                                      ? [
+                                                          ...values.services,
+                                                          service.uid,
+                                                        ]
+                                                      : values.services.filter(
+                                                          (s) =>
+                                                            s !== service.uid,
+                                                        ),
+                                                  );
+                                                }}
+                                                className="h-4 w-4 cursor-pointer"
+                                                style={{
+                                                  accentColor: "#027f81",
+                                                }}
+                                              />
+                                              <span className="text-sm">
+                                                {service.name}
+                                              </span>
+                                            </label>
+                                          </li>
+                                        ),
+                                      )}
+                                    </ul>
+                                  ) : (
+                                    <div className="p-2 text-sm text-gray-500">
+                                      No services found
+                                    </div>
+                                  );
+                                })()
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        <ErrorMessage
+                          name="services"
+                          component="p"
+                          className="mt-1 text-xs text-red-500"
+                        />
+                      </div>
+
+                      {/* Products Selection */}
+                      <div className="relative">
+                        <Label htmlFor="products" className="mb-2">
+                          Products
+                        </Label>
+                        <div className="relative">
+                          <div
+                            onClick={() => {
+                              setShowProducts(true);
+                              productsInputRef.current?.focus();
+                            }}
+                            className="flex min-h-[42px] w-full cursor-text flex-wrap gap-2 rounded-md border px-3 py-2 dark:bg-[#181818]"
+                          >
+                            {values.products.length > 0 ? (
+                              <>
+                                {values.products.map((productUid) => {
+                                  const product = productsData?.results?.find(
+                                    (p: Product) => p.uid === productUid,
+                                  );
+                                  return product ? (
+                                    <span
+                                      key={productUid}
+                                      className="bg-primary/10 text-primary inline-flex items-center gap-1 rounded-md px-2 py-1 text-sm"
+                                    >
+                                      {product.name}
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setFieldValue(
+                                            "products",
+                                            values.products.filter(
+                                              (p) => p !== productUid,
+                                            ),
+                                          );
+                                        }}
+                                        className="hover:bg-primary/20 rounded-full"
+                                      >
+                                        <X size={14} />
+                                      </button>
+                                    </span>
+                                  ) : null;
+                                })}
+                                <input
+                                  ref={productsInputRef}
+                                  type="text"
+                                  placeholder="Search..."
+                                  value={productSearch}
+                                  onChange={(e) =>
+                                    setProductSearch(e.target.value)
                                   }
+                                  onFocus={() => setShowProducts(true)}
+                                  className="min-w-[120px] flex-1 border-none bg-transparent outline-none"
                                 />
-                                <Label
-                                  htmlFor={`product-${product.uid}`}
-                                  className="cursor-pointer text-sm font-normal"
-                                >
-                                  {product.name} - ${product.price}
-                                </Label>
-                              </div>
-                            ))}
+                              </>
+                            ) : (
+                              <input
+                                ref={productsInputRef}
+                                type="text"
+                                placeholder="Search and select products..."
+                                value={productSearch}
+                                onChange={(e) =>
+                                  setProductSearch(e.target.value)
+                                }
+                                onFocus={() => setShowProducts(true)}
+                                className="w-full border-none bg-transparent outline-none"
+                              />
+                            )}
                           </div>
-                        )}
+
+                          {showProducts && (
+                            <div
+                              ref={productsDropdownRef}
+                              className="absolute right-0 left-0 z-50 mt-1 max-h-60 overflow-auto rounded border bg-white shadow-lg dark:bg-[#0b1116]"
+                            >
+                              {isLoadingProducts ? (
+                                <div className="p-2 text-sm text-gray-500">
+                                  Loading products...
+                                </div>
+                              ) : (
+                                (() => {
+                                  const searchTerm = productSearch
+                                    .toLowerCase()
+                                    .trim();
+                                  const filteredProducts = searchTerm
+                                    ? (productsData?.results || [])
+                                        .filter((product: Product) =>
+                                          product.name
+                                            .toLowerCase()
+                                            .includes(searchTerm),
+                                        )
+                                        .sort((a: Product, b: Product) => {
+                                          const aStarts = a.name
+                                            .toLowerCase()
+                                            .startsWith(searchTerm);
+                                          const bStarts = b.name
+                                            .toLowerCase()
+                                            .startsWith(searchTerm);
+                                          if (aStarts && !bStarts) return -1;
+                                          if (!aStarts && bStarts) return 1;
+                                          return 0;
+                                        })
+                                    : productsData?.results || [];
+
+                                  return filteredProducts.length > 0 ? (
+                                    <ul className="divide-y p-2">
+                                      {filteredProducts.map(
+                                        (product: Product) => (
+                                          <li key={product.uid}>
+                                            <label className="my-1 flex w-full cursor-pointer items-center gap-2 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-800">
+                                              <input
+                                                type="checkbox"
+                                                checked={values.products.includes(
+                                                  product.uid,
+                                                )}
+                                                onChange={(e) => {
+                                                  setFieldValue(
+                                                    "products",
+                                                    e.target.checked
+                                                      ? [
+                                                          ...values.products,
+                                                          product.uid,
+                                                        ]
+                                                      : values.products.filter(
+                                                          (p) =>
+                                                            p !== product.uid,
+                                                        ),
+                                                  );
+                                                }}
+                                                className="h-4 w-4 cursor-pointer"
+                                                style={{
+                                                  accentColor: "#027f81",
+                                                }}
+                                              />
+                                              <span className="text-sm">
+                                                {product.name}
+                                              </span>
+                                            </label>
+                                          </li>
+                                        ),
+                                      )}
+                                    </ul>
+                                  ) : (
+                                    <div className="p-2 text-sm text-gray-500">
+                                      No products found
+                                    </div>
+                                  );
+                                })()
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>

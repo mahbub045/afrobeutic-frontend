@@ -66,3 +66,39 @@ export interface BookingsResponse {
   previous: string | null;
   results: StaffMemberWithBookings[];
 }
+
+export interface Employee {
+  uid: string;
+  name: string;
+}
+
+export interface Service {
+  uid: string;
+  name: string;
+  price: string;
+}
+
+export interface Product {
+  uid: string;
+  name: string;
+  price: string;
+}
+
+export interface EditBookingDialogProps {
+  // Define any props needed for the dialog here
+  isOpen: boolean;
+  onClose: () => void;
+  bookingData?: {
+    uid: string;
+    booking_date: string;
+    booking_time: string;
+    booking_duration: string;
+    status: string;
+    notes: string;
+    customer: { name: string; phone: string };
+    employee: { uid: string };
+    services: Array<{ uid: string }>;
+    products: Array<{ uid: string }>;
+    images?: string[];
+  };
+}
