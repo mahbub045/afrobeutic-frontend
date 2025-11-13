@@ -45,7 +45,7 @@ interface Appointment {
   staff: string;
   startTime: string;
   endTime: string;
-  status: "placed" | "in-progress" | "rescheduled" | "completed";
+  status: "placed" | "in-progress" | "rescheduled" | "completed" | "cancelled";
   color: string;
   column: number;
   fullBookingData?: Booking;
@@ -124,22 +124,29 @@ const BookingsTab: React.FC = () => {
           .join(", ")
           .toUpperCase();
 
-        // Map status
+        // Assign colors based on status
+        const statusColorMap: { [key: string]: string } = {
+          PLACED: "bg-gradient-to-r from-blue-400 to-cyan-300",
+          INPROGRESS: "bg-gradient-to-r from-amber-300 to-orange-400",
+          COMPLETED: "bg-gradient-to-r from-emerald-300 to-teal-400",
+          RESCHEDULED: "bg-gradient-to-r from-purple-300 to-pink-400",
+          CANCELLED: "bg-gradient-to-r from-red-400 to-rose-500",
+        };
+
+        // Map status enum to display format
         const statusMap: {
-          [key: string]: "placed" | "in-progress" | "rescheduled" | "completed";
+          [key: string]:
+            | "placed"
+            | "in-progress"
+            | "rescheduled"
+            | "completed"
+            | "cancelled";
         } = {
           PLACED: "placed",
           INPROGRESS: "in-progress",
-          RESCHEDULED: "rescheduled",
           COMPLETED: "completed",
-        };
-
-        // Assign colors based on status
-        const statusColorMap: { [key: string]: string } = {
-          PLACED: "bg-blue-200",
-          INPROGRESS: "bg-yellow-200",
-          RESCHEDULED: "bg-pink-200",
-          COMPLETED: "bg-gray-200",
+          RESCHEDULED: "rescheduled",
+          CANCELLED: "cancelled",
         };
 
         return {
@@ -150,7 +157,7 @@ const BookingsTab: React.FC = () => {
           staff: staff.name,
           startTime,
           endTime: "",
-          status: statusMap[booking.status] || "pending",
+          status: statusMap[booking.status] || "placed",
           color: statusColorMap[booking.status] || "bg-gray-200",
           column: staffIndex,
           // Store full booking data for details view
@@ -303,7 +310,7 @@ const BookingsTab: React.FC = () => {
         </div>
       ) : staffMembers.length === 0 ? (
         <div className="flex flex-1 items-center justify-center">
-          <div className="text-muted-foreground text-center">
+          <div className="text-muted-foreground mt-10 text-center">
             <CalendarIcon className="mx-auto mb-4 h-16 w-16 opacity-30" />
             <p className="text-sm">No staff members found</p>
           </div>
@@ -455,28 +462,18 @@ const BookingsTab: React.FC = () => {
                     className={cn(
                       "flex items-center gap-2 rounded-full px-3 py-1",
                       selectedAppointment.status === "placed" &&
-                        "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400",
+                        "bg-gradient-to-r from-blue-400 to-cyan-300 text-white",
                       selectedAppointment.status === "in-progress" &&
-                        "bg-secondary/10 text-secondary",
+                        "bg-gradient-to-r from-amber-300 to-orange-400 text-white",
                       selectedAppointment.status === "rescheduled" &&
-                        "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400",
+                        "bg-gradient-to-r from-purple-300 to-pink-400 text-white",
                       selectedAppointment.status === "completed" &&
-                        "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400",
+                        "bg-gradient-to-r from-emerald-300 to-teal-400 text-white",
+                      selectedAppointment.status === "cancelled" &&
+                        "bg-gradient-to-r from-red-400 to-rose-500 text-white",
                     )}
                   >
-                    <div
-                      className={cn(
-                        "h-2 w-2 rounded-full",
-                        selectedAppointment.status === "placed" &&
-                          "bg-sky-500 dark:bg-sky-400",
-                        selectedAppointment.status === "in-progress" &&
-                          "bg-secondary",
-                        selectedAppointment.status === "rescheduled" &&
-                          "bg-pink-500 dark:bg-pink-400",
-                        selectedAppointment.status === "completed" &&
-                          "bg-gray-500 dark:bg-gray-400",
-                      )}
-                    />
+                    <div className={cn("h-2 w-2 rounded-full bg-white")} />
                     <span className="text-xs font-medium capitalize">
                       {selectedAppointment.status.replace("-", " ")}
                     </span>
@@ -829,27 +826,19 @@ const BookingsTab: React.FC = () => {
                           className={cn(
                             "flex items-center gap-2 rounded-full px-3 py-1",
                             selectedAppointment.status === "placed" &&
-                              "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400",
+                              "bg-gradient-to-r from-blue-400 to-cyan-300 text-white",
                             selectedAppointment.status === "in-progress" &&
-                              "bg-secondary/10 text-secondary",
+                              "bg-gradient-to-r from-amber-300 to-orange-400 text-white",
                             selectedAppointment.status === "rescheduled" &&
-                              "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400",
+                              "bg-gradient-to-r from-purple-300 to-pink-400 text-white",
                             selectedAppointment.status === "completed" &&
-                              "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400",
+                              "bg-gradient-to-r from-emerald-300 to-teal-400 text-white",
+                            selectedAppointment.status === "cancelled" &&
+                              "bg-gradient-to-r from-red-400 to-rose-500 text-white",
                           )}
                         >
                           <div
-                            className={cn(
-                              "h-2 w-2 rounded-full",
-                              selectedAppointment.status === "placed" &&
-                                "bg-sky-500 dark:bg-sky-400",
-                              selectedAppointment.status === "in-progress" &&
-                                "bg-secondary",
-                              selectedAppointment.status === "rescheduled" &&
-                                "bg-pink-500 dark:bg-pink-400",
-                              selectedAppointment.status === "completed" &&
-                                "bg-gray-500 dark:bg-gray-400",
-                            )}
+                            className={cn("h-2 w-2 rounded-full bg-white")}
                           />
                           <span className="text-xs font-medium capitalize">
                             {selectedAppointment.status.replace("-", " ")}
