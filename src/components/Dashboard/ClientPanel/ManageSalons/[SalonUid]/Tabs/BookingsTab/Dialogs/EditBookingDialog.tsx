@@ -750,73 +750,79 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
                     />
                   </div>
 
-                  {/* Image Upload */}
-                  <div className="space-y-2">
-                    <Label htmlFor="images">Images (Max 3)</Label>
-                    <div className="space-y-3">
-                      {imagePreviews.length < 3 && (
-                        <div className="flex items-center gap-2">
-                          <input
-                            id="images"
-                            name="images"
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            onChange={(e) =>
-                              handleImageChange(e, setFieldValue, values.images)
-                            }
-                            className="hidden"
-                          />
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              document.getElementById("images")?.click()
-                            }
-                          >
-                            <Upload className="mr-2 h-4 w-4" />
-                            Upload Images ({imagePreviews.length}/3)
-                          </Button>
-                        </div>
-                      )}
-                      <ErrorMessage
-                        name="images"
-                        component="p"
-                        className="text-xs text-red-500"
-                      />
-                      {imagePreviews.length > 0 && (
-                        <div className="grid grid-cols-3 gap-2">
-                          {imagePreviews.map((preview, index) => (
-                            <div key={index} className="relative">
-                              <Image
-                                src={preview}
-                                alt={`Preview ${index + 1}`}
-                                width={96}
-                                height={96}
-                                className="h-24 w-full rounded-md object-cover"
-                              />
-                              <Button
-                                type="button"
-                                variant="destructive"
-                                size="icon"
-                                className="absolute -top-2 -right-2 h-6 w-6"
-                                onClick={() =>
-                                  removeImage(
-                                    index,
-                                    setFieldValue,
-                                    values.images,
-                                  )
-                                }
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                  {/* Image Upload - Only shown when status is COMPLETED */}
+                  {values.status === "COMPLETED" && (
+                    <div className="space-y-2">
+                      <Label htmlFor="images">Images (Max 3)</Label>
+                      <div className="space-y-3">
+                        {imagePreviews.length < 3 && (
+                          <div className="flex items-center gap-2">
+                            <input
+                              id="images"
+                              name="images"
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              onChange={(e) =>
+                                handleImageChange(
+                                  e,
+                                  setFieldValue,
+                                  values.images,
+                                )
+                              }
+                              className="hidden"
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                document.getElementById("images")?.click()
+                              }
+                            >
+                              <Upload className="mr-2 h-4 w-4" />
+                              Upload Images ({imagePreviews.length}/3)
+                            </Button>
+                          </div>
+                        )}
+                        <ErrorMessage
+                          name="images"
+                          component="p"
+                          className="text-xs text-red-500"
+                        />
+                        {imagePreviews.length > 0 && (
+                          <div className="grid grid-cols-3 gap-2">
+                            {imagePreviews.map((preview, index) => (
+                              <div key={index} className="relative">
+                                <Image
+                                  src={preview}
+                                  alt={`Preview ${index + 1}`}
+                                  width={96}
+                                  height={96}
+                                  className="h-24 w-full rounded-md object-cover"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="icon"
+                                  className="absolute -top-2 -right-2 h-6 w-6"
+                                  onClick={() =>
+                                    removeImage(
+                                      index,
+                                      setFieldValue,
+                                      values.images,
+                                    )
+                                  }
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Form Actions */}
