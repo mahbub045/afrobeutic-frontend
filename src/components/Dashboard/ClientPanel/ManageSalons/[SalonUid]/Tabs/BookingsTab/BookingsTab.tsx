@@ -1175,6 +1175,57 @@ const BookingsTab: React.FC = () => {
       <EditBookingDialog
         isOpen={isEditDialogOpen}
         onClose={() => handleIsEditDialogOpen(false)}
+        bookingData={
+          selectedAppointment
+            ? {
+                uid: selectedAppointment.id,
+                booking_date:
+                  singleBookingData?.booking_date ||
+                  selectedAppointment.fullBookingData?.booking_date ||
+                  "",
+                booking_time:
+                  singleBookingData?.booking_time ||
+                  selectedAppointment.startTime,
+                booking_duration:
+                  singleBookingData?.booking_duration ||
+                  selectedAppointment.fullBookingData?.booking_duration ||
+                  "",
+                status:
+                  singleBookingData?.status ||
+                  selectedAppointment.fullBookingData?.status ||
+                  "PLACED",
+                notes:
+                  singleBookingData?.notes ||
+                  selectedAppointment.fullBookingData?.notes ||
+                  "",
+                customer: {
+                  name:
+                    singleBookingData?.customer?.name ||
+                    selectedAppointment.fullBookingData?.customer?.name ||
+                    selectedAppointment.client,
+                  phone:
+                    singleBookingData?.customer?.phone ||
+                    selectedAppointment.fullBookingData?.customer?.phone ||
+                    "",
+                },
+                employee: {
+                  uid:
+                    singleBookingData?.employee?.uid ||
+                    selectedAppointment.fullBookingData?.employee?.uid ||
+                    "",
+                },
+                services:
+                  singleBookingData?.services ||
+                  selectedAppointment.fullBookingData?.services ||
+                  [],
+                products:
+                  singleBookingData?.products ||
+                  selectedAppointment.fullBookingData?.products ||
+                  [],
+                images: [],
+              }
+            : undefined
+        }
       />
     </div>
   );
