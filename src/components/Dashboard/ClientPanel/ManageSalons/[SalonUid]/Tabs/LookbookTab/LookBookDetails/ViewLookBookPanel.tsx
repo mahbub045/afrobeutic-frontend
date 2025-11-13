@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDateTime, safe } from "@/lib/utils";
-import { useLookBookDetailsQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/LookBook/LookBookApi";
+import { useGetLookBookDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/LookBook/LookBookApi";
 import {
   LookBookProps,
   ViewLookBookPanelProps,
@@ -19,6 +19,7 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import EditLookBookImageDialog from "./Dialogs/EditLookBookImageDialog";
 import FullScreenImageViewer from "./FullScreenImageViewer";
 
 const ViewLookBookPanel: React.FC<ViewLookBookPanelProps> = ({
@@ -35,10 +36,9 @@ const ViewLookBookPanel: React.FC<ViewLookBookPanelProps> = ({
   const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false);
 
   // Re-fetch employees data to get updated employee
-  const { data: employeesDetailsData, refetch } = useLookBookDetailsQuery(
+  const { data: employeesDetailsData, refetch } = useGetLookBookDataQuery(
     {
       salonUid,
-      lookBookUid: selectedLookBook.uid,
     },
     { skip: !salonUid },
   );
@@ -303,12 +303,12 @@ const ViewLookBookPanel: React.FC<ViewLookBookPanelProps> = ({
         onImageChange={setSelectedImageIndex}
         productName={displayedLookBook?.customer.name}
       />
-      {/* <EditLookBookBasicInfoDialog
+      <EditLookBookImageDialog
         isOpen={isEditDialogOpen}
         onClose={() => setIsEditDialogOpen(false)}
         selectedLookBook={displayedLookBook}
         onEditSuccess={handleEditSuccess}
-      /> */}
+      />
     </>
   );
 };

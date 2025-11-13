@@ -17,3 +17,10 @@ export interface ViewLookBookPanelProps {
   selectedLookBook: LookBookProps;
   onClose: () => void;
 }
+
+export interface EditLookBookImageDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  selectedLookBook: LookBookProps | null;
+  onEditSuccess: () => void;
+}

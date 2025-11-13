@@ -21,13 +21,11 @@ import {
   LoaderPinwheel,
   Search,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import ViewLookBookPanel from "./LookBookDetails/ViewLookBookPanel";
 
 const LookbookTab: React.FC = () => {
-  const { data: session } = useSession();
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
   const [currentPage, setCurrentPage] = useState<number>(1);

@@ -26,21 +26,6 @@ export const LookBookApi = baseApi.injectEndpoints({
       },
       providesTags: ["LookBook"],
     }),
-    addLookBook: builder.mutation({
-      query: ({ salonUid, lookBookData }) => ({
-        url: `/salons/${salonUid}/lookbook`,
-        method: "POST",
-        body: lookBookData,
-      }),
-      invalidatesTags: ["LookBook"],
-    }),
-    lookBookDetails: builder.query({
-      query: ({ salonUid, lookBookUid }) => ({
-        url: `/salons/${salonUid}/lookbook/${lookBookUid}`,
-        method: "GET",
-      }),
-      providesTags: ["LookBook"],
-    }),
     editLookBook: builder.mutation({
       query: ({ salonUid, lookBookData, lookBookUid }) => ({
         url: `/salons/${salonUid}/lookbook/${lookBookUid}`,
@@ -52,9 +37,4 @@ export const LookBookApi = baseApi.injectEndpoints({
   }),
 });
 
-export const {
-  useGetLookBookDataQuery,
-  useAddLookBookMutation,
-  useLookBookDetailsQuery,
-  useEditLookBookMutation,
-} = LookBookApi;
+export const { useGetLookBookDataQuery, useEditLookBookMutation } = LookBookApi;
