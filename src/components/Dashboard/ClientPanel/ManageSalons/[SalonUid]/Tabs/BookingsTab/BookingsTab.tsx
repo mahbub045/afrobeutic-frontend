@@ -1239,6 +1239,18 @@ const BookingsTab: React.FC = () => {
                   singleBookingData?.status ||
                   selectedAppointment.fullBookingData?.status ||
                   "PLACED",
+                cancellation_reason:
+                  (
+                    singleBookingData as unknown as {
+                      cancellation_reason?: string;
+                    }
+                  )?.cancellation_reason ||
+                  (
+                    selectedAppointment.fullBookingData as unknown as {
+                      cancellation_reason?: string;
+                    }
+                  )?.cancellation_reason ||
+                  "",
                 notes:
                   singleBookingData?.notes ||
                   selectedAppointment.fullBookingData?.notes ||

@@ -119,7 +119,7 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
     booking_time: bookingData?.booking_time?.slice(0, 5) || "",
     booking_duration: bookingData?.booking_duration || "",
     status: bookingData?.status || "PLACED",
-    cancellation_reason: "",
+    cancellation_reason: bookingData?.cancellation_reason || "",
     notes: bookingData?.notes || "",
     employee: bookingData?.employee?.uid || "",
     services: bookingData?.services?.map((s) => s.uid) || [],
