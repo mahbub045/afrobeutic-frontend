@@ -75,7 +75,6 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
             </div>
 
             <div className="flex items-center gap-3">
-              <Skeleton className="h-6 w-16 rounded" />
               <Skeleton className="h-8 w-16 rounded" />
             </div>
           </>
