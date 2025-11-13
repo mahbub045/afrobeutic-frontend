@@ -12,12 +12,24 @@ import { useEditBookingMutation } from "@/Redux/Reducers/ClientPanel/ManageSalon
 import { useGetEmployeesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Employees/EmployeesApi";
 import { useGetProductsDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Products/ProductsApi";
 import { useGetServicesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
-import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
+import {
+  ErrorMessage,
+  Field,
+  FieldProps,
+  Form,
+  Formik,
+  FormikHelpers,
+  FormikProps,
+} from "formik";
 import { Loader2, Upload, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useState } from "react";
+import PhoneInput from "react-phone-input-2";
+import { toast } from "sonner";
+import Swal from "sweetalert2";
+
 import * as Yup from "yup";
 
 interface Employee {
@@ -86,10 +98,14 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
       .oneOf(["PLACED", "INPROGRESS", "RESCHEDULED", "COMPLETED"])
       .required("Status is required"),
     notes: Yup.string(),
-    customer_name: Yup.string().required("Customer name is required"),
-    customer_phone: Yup.string()
-      .required("Customer phone is required")
-      .matches(/^\+?[0-9]{10,15}$/, "Invalid phone number"),
+    customer: Yup.object()
+      .shape({
+        name: Yup.string().required("Customer name is required"),
+        phone: Yup.string()
+          .required("Customer phone is required")
+          .matches(/^\+?[1-9]\d{1,14}$/, "Please enter a valid phone number"),
+      })
+      .required("Customer information is required"),
     employee: Yup.string().required("Employee is required"),
     services: Yup.array()
       .min(1, "At least one service is required")
@@ -104,8 +120,10 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
     booking_duration: bookingData?.booking_duration || "",
     status: bookingData?.status || "PLACED",
     notes: bookingData?.notes || "",
-    customer_name: bookingData?.customer?.name || "",
-    customer_phone: bookingData?.customer?.phone || "",
+    customer: {
+      name: bookingData?.customer?.name || "",
+      phone: bookingData?.customer?.phone || "",
+    },
     employee: bookingData?.employee?.uid || "",
     services: bookingData?.services?.map((s) => s.uid) || [],
     products: bookingData?.products?.map((p) => p.uid) || [],
@@ -126,8 +144,8 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
       formData.append(
         "customer",
         JSON.stringify({
-          name: values.customer_name,
-          phone: values.customer_phone,
+          name: values.customer.name,
+          phone: values.customer.phone,
         }),
       );
       formData.append("employee", values.employee);
@@ -147,9 +165,24 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
         data: formData,
       }).unwrap();
 
+      Swal.fire({
+        icon: "success",
+        iconColor: "#037375",
+        title: "Booking Updated Successfully",
+        html: `Booking for <b class="text-primary">${values.customer.name}</b> has been updated.`,
+        background: resolvedTheme === "dark" ? "#0f1724" : undefined,
+        color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
+        confirmButtonColor: "#037375",
+        timer: 3000,
+      });
+
       onClose();
     } catch (error) {
       console.error("Failed to update booking:", error);
+      const errorMessage =
+        (error as { data?: { message: string } })?.data?.message ||
+        "Failed to update booking. Please try again.";
+      toast.error(errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -351,42 +384,83 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
                     </h3>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="customer_name">
+                        <Label htmlFor="customer.name">
                           Customer Name <span className="text-red-500">*</span>
                         </Label>
                         <Field
-                          id="customer_name"
-                          name="customer_name"
+                          id="customer.name"
+                          name="customer.name"
                           as="input"
                           type="text"
                           placeholder="John Doe"
                           required
                         />
                         <ErrorMessage
-                          name="customer_name"
+                          name="customer.name"
                           component="p"
                           className="text-xs text-red-500"
                         />
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="customer_phone">
+                        <Label htmlFor="customer.phone">
                           Phone <span className="text-red-500">*</span>
                         </Label>
-                        <Field
-                          id="customer_phone"
-                          name="customer_phone"
-                          as="input"
-                          type="tel"
-                          placeholder="+8801521507319"
-                          required
-                          className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                        />
-                        <ErrorMessage
-                          name="customer_phone"
-                          component="p"
-                          className="text-xs text-red-500"
-                        />
+                        <Field name="customer.phone" required>
+                          {({
+                            field,
+                            form,
+                          }: FieldProps<
+                            string,
+                            FormikProps<typeof initialValues>
+                          >) => (
+                            <div>
+                              <PhoneInput
+                                country={"gb"}
+                                value={field.value}
+                                onChange={(
+                                  val: string,
+                                  data?: { dialCode?: string },
+                                ) => {
+                                  const dial = data?.dialCode
+                                    ? `+${data.dialCode}`
+                                    : "";
+                                  const numeric = (val || "").replace(
+                                    /[^0-9]/g,
+                                    "",
+                                  );
+                                  let newVal = numeric;
+                                  if (dial) {
+                                    if (
+                                      !numeric.startsWith(
+                                        dial.replace(/\D/g, ""),
+                                      )
+                                    ) {
+                                      newVal = `${dial}${numeric}`;
+                                    } else {
+                                      newVal = `+${numeric}`;
+                                    }
+                                  } else if (numeric) {
+                                    newVal = `+${numeric}`;
+                                  }
+                                  form.setFieldValue(field.name, newVal);
+                                }}
+                                inputProps={{ name: field.name }}
+                                searchPlaceholder="Search"
+                                enableSearch
+                                inputClass="!w-full !h-auto px-3 py-2 rounded-md !bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100"
+                                buttonClass="!bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100 !border-1 dark:!border-gray-700"
+                                dropdownClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100 !px-2"
+                                searchClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100"
+                              />
+                              <ErrorMessage
+                                name="customer.phone"
+                                component="div"
+                                className="text-danger mt-1 text-xs text-red-500"
+                              />
+                            </div>
+                          )}
+                        </Field>
                       </div>
                     </div>
                   </div>
