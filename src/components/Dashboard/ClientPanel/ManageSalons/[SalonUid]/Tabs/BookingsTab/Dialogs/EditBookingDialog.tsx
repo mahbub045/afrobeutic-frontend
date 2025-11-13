@@ -89,6 +89,11 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
     useGetEmployeesDataQuery({ salonUid: salonUid });
   const [editBooking, { isLoading }] = useEditBookingMutation();
 
+  const hours = Array.from({ length: 24 }, (_, i) =>
+    String(i).padStart(2, "0"),
+  );
+  const minutes = ["00", "15", "30", "45"];
+
   // Validation schema
   const validationSchema = Yup.object({
     booking_date: Yup.string().required("Booking date is required"),
@@ -116,7 +121,7 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
 
   const initialValues = {
     booking_date: bookingData?.booking_date || "",
-    booking_time: bookingData?.booking_time || "",
+    booking_time: bookingData?.booking_time?.slice(0, 5) || "",
     booking_duration: bookingData?.booking_duration || "",
     status: bookingData?.status || "PLACED",
     notes: bookingData?.notes || "",
@@ -320,10 +325,19 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
                       <Field
                         id="booking_time"
                         name="booking_time"
-                        as="input"
-                        type="time"
+                        as="select"
                         required
-                      />
+                      >
+                        <option value="">Select time</option>
+                        {hours.map((h) =>
+                          minutes.map((m) => (
+                            <option
+                              key={`${h}:${m}`}
+                              value={`${h}:${m}`}
+                            >{`${h}:${m}`}</option>
+                          )),
+                        )}
+                      </Field>
                       <ErrorMessage
                         name="booking_time"
                         component="p"
@@ -546,7 +560,7 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
                     {/* Products Selection */}
                     <div className="space-y-2">
                       <Label>Products (Optional)</Label>
-                      <div className="max-h-60 overflow-y-auto rounded-md border p-3">
+                      <div className="max-h-40 overflow-y-auto rounded-md border p-3">
                         {isLoadingProducts ? (
                           <p className="text-muted-foreground text-sm">
                             Loading products...
