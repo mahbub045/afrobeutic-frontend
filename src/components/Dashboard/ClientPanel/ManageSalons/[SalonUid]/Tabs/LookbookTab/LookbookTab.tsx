@@ -19,9 +19,7 @@ import {
   ChevronRight,
   Eye,
   LoaderPinwheel,
-  Plus,
   Search,
-  Trash2,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
@@ -35,19 +33,12 @@ const LookbookTab: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
-  const [isOpenAddLookBookDialog, setIsOpenAddLookBookDialog] = useState(false);
-  const [selectedLookBook, setSelectedLookBook] =
-    useState<LookBookProps | null>(null);
   const [selectedLookBookToView, setSelectedLookBookToView] =
     useState<LookBookProps | null>(null);
   const [viewTab, setViewTab] = useState<string>("list");
 
   // RTK Hook
-  const {
-    data: lookBookData,
-    isLoading,
-    isError,
-  } = useGetLookBookDataQuery({
+  const { data: lookBookData, isLoading } = useGetLookBookDataQuery({
     salonUid,
     page: currentPage,
     search: debouncedSearch || undefined,
@@ -74,13 +65,6 @@ const LookbookTab: React.FC = () => {
     : 0;
 
   const extractedLookBook: LookBookProps[] = lookBookData?.results ?? [];
-
-  const handleIsOpenAddLookBookDialog = () =>
-    setIsOpenAddLookBookDialog((v) => !v);
-
-  const handleIsOpenDeleteDialog = (lookBook?: LookBookProps | null) => {
-    setSelectedLookBook(lookBook ?? null);
-  };
 
   const handleIsOpenSingleLookBookTab = (lookBook?: LookBookProps | null) => {
     if (lookBook) {
@@ -110,19 +94,7 @@ const LookbookTab: React.FC = () => {
               }
             />
           </div>
-          <div>
-            {(session?.user?.role === "OWNER" ||
-              session?.user?.role === "ADMIN") && (
-              <Button
-                size="sm"
-                variant="default"
-                onClick={handleIsOpenAddLookBookDialog}
-              >
-                <Plus className="h-4 w-4" />
-                Add New LookBook
-              </Button>
-            )}
-          </div>
+          <div />
         </div>
 
         <Table>
@@ -184,20 +156,6 @@ const LookbookTab: React.FC = () => {
                       >
                         <Eye />
                       </Button>
-                    </div>
-                    <div>
-                      {(session?.user?.role === "OWNER" ||
-                        session?.user?.role === "ADMIN") && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="text-danger/80 hover:text-danger dark:shadow-gray-600"
-                          color="red"
-                          onClick={() => handleIsOpenDeleteDialog(lookBook)}
-                        >
-                          <Trash2 />
-                        </Button>
-                      )}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -266,19 +224,6 @@ const LookbookTab: React.FC = () => {
           </div>
         )}
       </TabsContent>
-
-      {/* Dialogs */}
-      {/* <AddLookBookDialog
-        isOpen={isOpenAddLookBookDialog}
-        onClose={handleIsOpenAddLookBookDialog}
-      />
-      {selectedLookBook && (
-        <DeleteLookBookDialog
-          selectedLookBook={selectedLookBook}
-          isOpen={!!selectedLookBook}
-          onClose={() => handleIsOpenDeleteDialog()}
-        />
-      )} */}
     </Tabs>
   );
 };
