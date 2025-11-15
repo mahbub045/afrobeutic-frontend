@@ -115,9 +115,9 @@ const EnquiryDetails: React.FC = () => {
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-            <div className="flex-1">
-              <CardTitle className="mb-3 truncate text-2xl md:text-3xl">
+          <div className="flex flex-col gap-4 overflow-visible md:flex-row md:items-start md:justify-between">
+            <div className="min-w-0 flex-1">
+              <CardTitle className="mb-3 max-w-72 truncate text-2xl md:max-w-md md:text-3xl">
                 {enq.summary || "Enquiry"}
               </CardTitle>
               <div className="flex flex-wrap gap-2">
@@ -129,14 +129,21 @@ const EnquiryDetails: React.FC = () => {
                 </Badge>
               </div>
             </div>
-            <div className="bg-muted rounded-lg p-3 font-mono text-sm">
-              <div className="flex items-start justify-between gap-4">
-                <div>
+            <div className="bg-muted w-full max-w-full overflow-hidden rounded-lg p-3 font-mono text-sm break-words whitespace-normal md:w-auto">
+              <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+                <div className="min-w-0">
                   <div className="text-muted-foreground mb-1">Enquiry ID</div>
-                  <div className="font-semibold">{enq.uid}</div>
+                  <div className="font-semibold break-words break-all">
+                    {enq.uid}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={handleEdit}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleEdit}
+                    className="w-full md:w-auto"
+                  >
                     <Edit className="mr-2 h-4 w-4" />
                     Edit
                   </Button>
