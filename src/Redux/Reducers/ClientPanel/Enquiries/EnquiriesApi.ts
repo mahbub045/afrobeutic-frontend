@@ -11,11 +11,11 @@ export const EnquiriesApi = baseApi.injectEndpoints({
       }),
       providesTags: ["Enquiries"],
     }),
-    addEnquiry: builder.mutation({
-      query: (newTicket) => ({
+    createEnquiry: builder.mutation({
+      query: (payload) => ({
         url: `/support/customer-enquiries`,
         method: "POST",
-        body: newTicket,
+        body: payload,
       }),
       invalidatesTags: ["Enquiries"],
     }),
@@ -30,6 +30,6 @@ export const EnquiriesApi = baseApi.injectEndpoints({
 });
 export const {
   useGetEnquiriesQuery,
-  useAddEnquiryMutation,
+  useCreateEnquiryMutation,
   useGetEnquiryDetailsQuery,
 } = EnquiriesApi;

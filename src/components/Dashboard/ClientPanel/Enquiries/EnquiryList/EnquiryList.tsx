@@ -19,12 +19,14 @@ import {
   Edit,
   Eye,
   LoaderPinwheel,
+  Plus,
 } from "lucide-react";
 import Link from "next/link";
 import React, { useState } from "react";
 
 const EnquiryList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [isOpenCreateEnquiry, setIsOpenCreateEnquiry] = useState<boolean>(false);
   const [isOpenEditEnquiry, setIsOpenEditEnquiry] = useState<boolean>(false);
   const [selectedEnquiryUid, setSelectedEnquiryUid] = useState<string | null>(
     null,
@@ -80,6 +82,10 @@ const EnquiryList: React.FC = () => {
     <div>
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold">Enquiries</h2>
+        <Button variant="default" size="sm">
+          <Plus className="h-4 w-4" />
+          Create New Enquiry
+        </Button>
       </div>
 
       <Table>

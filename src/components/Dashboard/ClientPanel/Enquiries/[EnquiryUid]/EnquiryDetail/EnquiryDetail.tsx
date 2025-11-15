@@ -2,10 +2,11 @@
 
 import { useGetEnquiryDetailsQuery } from "@/Redux/Reducers/ClientPanel/Enquiries/EnquiriesApi";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatChoiceFieldValue, formatDateTime, safe } from "@/lib/utils";
-import { AlertCircle, LoaderPinwheel } from "lucide-react";
-import { useParams } from "next/navigation";
+import { AlertCircle, Edit, LoaderPinwheel } from "lucide-react";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import React from "react";
 
 interface Props {
@@ -53,6 +54,13 @@ interface Enquiry {
 
 const EnquiryDetails: React.FC = () => {
   const { enquiryuid } = useParams<{ enquiryuid: string }>();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const handleEdit = () => {
+    if (!pathname) return;
+    router.push(`${pathname}/edit`);
+  };
 
   const { data, isLoading, isError } = useGetEnquiryDetailsQuery(enquiryuid);
   const enq = data as Enquiry | undefined;
@@ -109,7 +117,7 @@ const EnquiryDetails: React.FC = () => {
         <CardHeader>
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div className="flex-1">
-              <CardTitle className="mb-3 text-2xl md:text-3xl truncate">
+              <CardTitle className="mb-3 truncate text-2xl md:text-3xl">
                 {enq.summary || "Enquiry"}
               </CardTitle>
               <div className="flex flex-wrap gap-2">
@@ -122,8 +130,18 @@ const EnquiryDetails: React.FC = () => {
               </div>
             </div>
             <div className="bg-muted rounded-lg p-3 font-mono text-sm">
-              <div className="text-muted-foreground mb-1">Enquiry ID</div>
-              <div className="font-semibold">{enq.uid}</div>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="text-muted-foreground mb-1">Enquiry ID</div>
+                  <div className="font-semibold">{enq.uid}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={handleEdit}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </CardHeader>
@@ -151,7 +169,9 @@ const EnquiryDetails: React.FC = () => {
             <CardTitle className="text-base">Source</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground text-sm">{enq.source ?? "Not Available"}</p>
+            <p className="text-muted-foreground text-sm">
+              {enq.source ?? "Not Available"}
+            </p>
           </CardContent>
         </Card>
 
