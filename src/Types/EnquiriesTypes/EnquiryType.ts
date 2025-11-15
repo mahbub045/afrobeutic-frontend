@@ -1,5 +1,5 @@
 export interface EnquiryProps {
-  uid: string;
+  uid?: string;
   type?: string | null;
   summary?: string | null;
   status?: string | null;

@@ -7,7 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatChoiceFieldValue, formatDateTime, safe } from "@/lib/utils";
 import { AlertCircle, Edit, LoaderPinwheel } from "lucide-react";
 import { useParams, usePathname, useRouter } from "next/navigation";
-import React from "react";
+import React, { useState } from "react";
+import EditEnquiryDialog from "../../../Enquiries/EnquiryList/Dialogs/EditEnquiryDialog";
 
 interface Props {
   uid: string;
@@ -56,10 +57,10 @@ const EnquiryDetails: React.FC = () => {
   const { enquiryuid } = useParams<{ enquiryuid: string }>();
   const router = useRouter();
   const pathname = usePathname();
+  const [isOpenEditEnquiry, setIsOpenEditEnquiry] = useState<boolean>(false);
 
   const handleEdit = () => {
-    if (!pathname) return;
-    router.push(`${pathname}/edit`);
+    setIsOpenEditEnquiry(true);
   };
 
   const { data, isLoading, isError } = useGetEnquiryDetailsQuery(enquiryuid);
@@ -249,6 +250,12 @@ const EnquiryDetails: React.FC = () => {
           <p className="text-sm">{enq.summary || "-"}</p>
         </CardContent>
       </Card>
+
+      <EditEnquiryDialog
+        isOpen={isOpenEditEnquiry}
+        onClose={() => setIsOpenEditEnquiry(false)}
+        enquiryData={enq}
+      />
     </div>
   );
 };
