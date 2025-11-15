@@ -85,7 +85,7 @@ const LookbookTab: React.FC = () => {
             />
             <Input
               className="focus:!border-primary pl-7 shadow-md focus:!ring-0 dark:shadow-gray-600"
-              placeholder="Search employees..."
+              placeholder="Search lookbook..."
               value={searchTerm}
               onChange={(e) =>
                 setSearchTerm((e.target as HTMLInputElement).value)
@@ -101,8 +101,8 @@ const LookbookTab: React.FC = () => {
               <TableHead className="text-primary">Booking ID</TableHead>
               <TableHead className="text-primary">Customer Name</TableHead>
               <TableHead className="text-primary">Customer Phone</TableHead>
-              <TableHead className="text-primary">Completed At</TableHead>
               <TableHead className="text-primary">Created At</TableHead>
+              <TableHead className="text-primary">Completed At</TableHead>
               <TableHead className="text-primary">Updated At</TableHead>
               <TableHead className="text-primary text-center">
                 Actions
@@ -135,10 +135,10 @@ const LookbookTab: React.FC = () => {
                   <TableCell>{lookBook.customer?.name}</TableCell>
                   <TableCell>{lookBook?.customer?.phone}</TableCell>
                   <TableCell>
-                    {formatDateTime(lookBook.completed_at ?? null)}
+                    {formatDateTime(lookBook?.created_at ?? null)}
                   </TableCell>
                   <TableCell>
-                    {formatDateTime(lookBook?.created_at ?? null)}
+                    {formatDateTime(lookBook.completed_at ?? null)}
                   </TableCell>
                   <TableCell>
                     {formatDateTime(lookBook?.updated_at ?? null)}
