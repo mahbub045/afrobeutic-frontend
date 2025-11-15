@@ -16,6 +16,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Edit,
+  Filter,
   LoaderPinwheel,
   Plus,
   Search,
@@ -127,6 +128,7 @@ const LeadsTab: React.FC = () => {
             variant={showFilters ? "secondary" : "outline"}
             onClick={() => setShowFilters((s) => !s)}
           >
+            <Filter />
             Filters
           </Button>
 
