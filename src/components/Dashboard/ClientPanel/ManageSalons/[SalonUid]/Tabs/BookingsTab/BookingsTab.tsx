@@ -85,7 +85,6 @@ const BookingsTab: React.FC = () => {
     setIsEditDialogOpen(open);
   };
 
-  // RTK Hooks
   // Convert selected date to local YYYY-MM-DD to avoid UTC shift (off-by-one)
   const toLocalYMD = (date: Date) => {
     const y = date.getFullYear();
@@ -98,6 +97,8 @@ const BookingsTab: React.FC = () => {
   if (statusFilter !== "ALL") {
     filters.status = statusFilter;
   }
+
+  // RTK Hooks
   const { data: bookingsData, isLoading: isBookingsLoading } =
     useGetBookingQuery({
       salonUid: salonuid as string,
