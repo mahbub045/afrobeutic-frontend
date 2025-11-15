@@ -204,8 +204,7 @@ const EnquiryList: React.FC = () => {
         <div>
           {enquiriesData && enquiriesData.count > 0 && (
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              Total: {enquiriesData.count} enquiry
-              {enquiriesData.count !== 1 ? "ies" : ""}
+              Total: {enquiriesData.count} Enquiries
             </div>
           )}
         </div>
@@ -247,7 +246,7 @@ const EnquiryList: React.FC = () => {
       </div>
       <CreateEnquiryDialogs
         isOpen={isOpenCreateEnquiry}
-        onClose={()=> setIsOpenCreateEnquiry(false)}
+        onClose={() => setIsOpenCreateEnquiry(false)}
       />
     </div>
   );

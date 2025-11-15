@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -101,6 +102,9 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
       <DialogContent className="max-h-[80vh] !max-w-xl overflow-y-auto shadow-md sm:!max-w-3xl md:!max-w-4xl dark:shadow-gray-600">
         <DialogHeader>
           <DialogTitle className="text-primary">Create Enquiry</DialogTitle>
+          <DialogDescription>
+            Please fill out the form below to create a new enquiry.
+          </DialogDescription>
         </DialogHeader>
 
         <Formik
