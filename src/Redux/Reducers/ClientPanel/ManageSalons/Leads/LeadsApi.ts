@@ -28,7 +28,7 @@ export const LeadsApi = baseApi.injectEndpoints({
       },
       providesTags: ["Leads"],
     }),
-    addLeads: builder.mutation({
+    addLead: builder.mutation({
       query: ({ salonUid, leadsData }) => ({
         url: `/salons/${salonUid}/leads`,
         method: "POST",
@@ -36,7 +36,7 @@ export const LeadsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Leads"],
     }),
-    editLeads: builder.mutation({
+    editLead: builder.mutation({
       query: ({ salonUid, leadsData, leadsUid }) => ({
         url: `/salons/${salonUid}/leads/${leadsUid}`,
         method: "PATCH",
@@ -44,19 +44,8 @@ export const LeadsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Leads"],
     }),
-    deleteLeads: builder.mutation({
-      query: ({ salonUid, leadsUid }) => ({
-        url: `/salons/${salonUid}/leads/${leadsUid}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: ["Leads"],
-    }),
   }),
 });
 
-export const {
-  useGetLeadsDataQuery,
-  useAddLeadsMutation,
-  useEditLeadsMutation,
-  useDeleteLeadsMutation,
-} = LeadsApi;
+export const { useGetLeadsDataQuery, useAddLeadMutation, useEditLeadMutation } =
+  LeadsApi;
