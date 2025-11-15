@@ -13,11 +13,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatChoiceFieldValue, formatDateTime, safe } from "@/lib/utils";
-import { ChevronLeft, ChevronRight, Eye, LoaderPinwheel } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Edit,
+  Eye,
+  LoaderPinwheel,
+} from "lucide-react";
+import Link from "next/link";
 import React, { useState } from "react";
 
 const EnquiryList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [isOpenEditEnquiry, setIsOpenEditEnquiry] = useState<boolean>(false);
   const [selectedEnquiryUid, setSelectedEnquiryUid] = useState<string | null>(
     null,
   );
@@ -144,16 +152,29 @@ const EnquiryList: React.FC = () => {
                       {formatChoiceFieldValue(enq.status)}
                     </Badge>
                   </TableCell>
-                  <TableCell className="flex justify-center">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex items-center gap-2"
-                      onClick={() => setSelectedEnquiryUid(enq.uid)}
-                    >
-                      <Eye className="h-4 w-4" />
-                      View
-                    </Button>
+                  <TableCell className="flex justify-center gap-1">
+                    <div>
+                      <Link
+                        href={`/dashboard/client-panel/enquiries/${enq.uid}`}
+                      >
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center gap-2"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </div>
+                    <div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-2"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               );
