@@ -7,8 +7,8 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import {
+  BadgeQuestionMark,
   BookOpen,
-  Calendar,
   ChevronRight,
   Headphones,
   HelpCircle,
@@ -110,13 +110,13 @@ const SideBar: React.FC<SideBarProps> = ({
           Icon: Users,
         },
         {
-          label: "Client Requests",
-          href: "/dashboard/requests",
-          Icon: Calendar,
+          label: "Enquiries",
+          href: "/dashboard/client-panel/enquiries",
+          Icon: BadgeQuestionMark,
         },
         {
           label: "Broadcasting",
-          href: "/dashboard/broadcast",
+          href: "/dashboard/client-panel/broadcast",
           Icon: Megaphone,
         },
         {
