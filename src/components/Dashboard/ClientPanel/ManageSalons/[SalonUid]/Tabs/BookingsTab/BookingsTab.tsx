@@ -28,7 +28,9 @@ import {
   useGetSingleBookingQuery,
 } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/BookingsApi";
 import {
+  Appointment,
   Booking,
+  StaffMember,
   StaffMemberWithBookings,
 } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
 import {
@@ -44,26 +46,6 @@ import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import EditBookingDialog from "./Dialogs/EditBookingDialog";
-
-interface Appointment {
-  id: string;
-  service: string;
-  client: string;
-  clientAvatar?: string;
-  staff: string;
-  startTime: string;
-  endTime: string;
-  status: "placed" | "in-progress" | "rescheduled" | "completed" | "cancelled";
-  color: string;
-  column: number;
-  fullBookingData?: Booking;
-}
-
-interface StaffMember {
-  id: string;
-  name: string;
-  avatar?: string;
-}
 
 const BookingsTab: React.FC = () => {
   const { salonuid } = useParams();
@@ -86,13 +68,16 @@ const BookingsTab: React.FC = () => {
   };
 
   // Convert selected date to local YYYY-MM-DD to avoid UTC shift (off-by-one)
-  const toLocalYMD = (date: Date) => {
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, "0");
-    const d = String(date.getDate()).padStart(2, "0");
-    return `${y}-${m}-${d}`;
-  };
-  const dateParam = toLocalYMD(selectedDate);
+  // const toLocalYMD = (date: Date) => {
+  //   const y = date.getFullYear();
+  //   const m = String(date.getMonth() + 1).padStart(2, "0");
+  //   const d = String(date.getDate()).padStart(2, "0");
+  //   return `${y}-${m}-${d}`;
+  // };
+  // const dateParam = toLocalYMD(selectedDate);
+
+  // Use UTC YYYY-MM-DD to avoid local timezone shifts
+  const dateParam = selectedDate.toISOString().slice(0, 10);
   const filters: Record<string, string> = { date: dateParam };
   if (statusFilter !== "ALL") {
     filters.status = statusFilter;
@@ -245,7 +230,7 @@ const BookingsTab: React.FC = () => {
   };
 
   const navigateDate = (direction: "prev" | "next") => {
-    const newDate = new Date(selectedDate);
+    const newDate = new Date(selectedDate.toISOString().slice(0, 10));
     if (viewMode === "day") {
       newDate.setDate(newDate.getDate() + (direction === "next" ? 1 : -1));
     } else {
