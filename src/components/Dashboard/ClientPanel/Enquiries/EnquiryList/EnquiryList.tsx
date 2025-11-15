@@ -1,6 +1,9 @@
 "use client";
 
-import { useGetEnquiriesQuery } from "@/Redux/Reducers/ClientPanel/Enquiries/EnquiriesApi";
+import {
+  useGetEnquiriesQuery,
+  useGetEnquiryDetailsQuery,
+} from "@/Redux/Reducers/ClientPanel/Enquiries/EnquiriesApi";
 import { EnquiryProps } from "@/Types/EnquiriesTypes/EnquiryType";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,6 +27,7 @@ import {
 import Link from "next/link";
 import React, { useState } from "react";
 import CreateEnquiryDialogs from "./Dialogs/CreateEnquiryDialogs";
+import EditEnquiryDialog from "./Dialogs/EditEnquiryDialog";
 
 const EnquiryList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -41,10 +45,20 @@ const EnquiryList: React.FC = () => {
     isFetching,
   } = useGetEnquiriesQuery({ page: currentPage });
 
+  const { data: selectedEnquiryData } = useGetEnquiryDetailsQuery(
+    selectedEnquiryUid ?? "",
+    { skip: !selectedEnquiryUid },
+  );
+
   const enquiries: EnquiryProps[] = enquiriesData?.results || [];
 
   const handleOpenCreateEnquiry = () => {
     setIsOpenCreateEnquiry(true);
+  };
+
+  const handleOpenEditEnquiry = (enquiryUid: string) => {
+    setSelectedEnquiryUid(enquiryUid);
+    setIsOpenEditEnquiry(true);
   };
 
   const handlePreviousPage = () => {
@@ -188,6 +202,7 @@ const EnquiryList: React.FC = () => {
                         variant="outline"
                         size="sm"
                         className="flex items-center gap-2"
+                        onClick={() => handleOpenEditEnquiry(enq.uid)}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -244,9 +259,15 @@ const EnquiryList: React.FC = () => {
             )}
         </div>
       </div>
+      {/* Modals */}
       <CreateEnquiryDialogs
         isOpen={isOpenCreateEnquiry}
         onClose={() => setIsOpenCreateEnquiry(false)}
+      />
+      <EditEnquiryDialog
+        isOpen={isOpenEditEnquiry}
+        onClose={() => setIsOpenEditEnquiry(false)}
+        enquiryData={selectedEnquiryData}
       />
     </div>
   );

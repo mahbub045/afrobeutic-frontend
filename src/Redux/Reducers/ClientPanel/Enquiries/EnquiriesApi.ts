@@ -39,4 +39,5 @@ export const {
   useGetEnquiriesQuery,
   useCreateEnquiryMutation,
   useGetEnquiryDetailsQuery,
+  useEditEnquiryMutation,
 } = EnquiriesApi;
