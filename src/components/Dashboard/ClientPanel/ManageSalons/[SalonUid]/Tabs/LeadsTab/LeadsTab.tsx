@@ -34,6 +34,12 @@ const LeadsTab: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+  const [debouncedStartDate, setDebouncedStartDate] = useState<string>("");
+  const [debouncedEndDate, setDebouncedEndDate] = useState<string>("");
+  const [ordering, setOrdering] = useState<string>("");
+  const [showFilters, setShowFilters] = useState<boolean>(false);
   const [addLeadDialogOpen, setAddLeadDialogOpen] = useState<boolean>(false);
   const [editLeadDialogOpen, setEditLeadDialogOpen] = useState<boolean>(false);
   const [selectedLead, setSelectedLead] = useState<LeadProps | null>(null);
@@ -46,6 +52,21 @@ const LeadsTab: React.FC = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
+  // Debounce startDate / endDate changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedStartDate(startDate);
+      setDebouncedEndDate(endDate);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [startDate, endDate]);
+
+  // Reset page when ordering changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [ordering]);
+
   const {
     data: leadsData,
     isLoading,
@@ -53,7 +74,10 @@ const LeadsTab: React.FC = () => {
   } = useGetLeadsDataQuery({
     salonUid,
     page: currentPage,
-    search: debouncedSearch || undefined,
+    search: debouncedSearch ? debouncedSearch : undefined,
+    created_at__gte: debouncedStartDate ? debouncedStartDate : undefined,
+    created_at__lte: debouncedEndDate ? debouncedEndDate : undefined,
+    ordering: ordering ? ordering : undefined,
   });
 
   const extractedLeadsData: LeadProps[] = leadsData?.results ?? [];
@@ -62,11 +86,6 @@ const LeadsTab: React.FC = () => {
     setSelectedLead(lead);
     setEditLeadDialogOpen(true);
   };
-
-  //   const closeEditDialog = () => {
-  //     setEditLeadDialogOpen(false);
-  //     setSelectedLead(null);
-  //   };
 
   const handlePreviousPage = () => {
     if (leadsData?.previous) setCurrentPage((p) => Math.max(1, p - 1));
@@ -85,27 +104,100 @@ const LeadsTab: React.FC = () => {
       <div className="mb-4 flex flex-col gap-4 md:flex-row md:justify-between">
         <h2 className="text-lg font-semibold">Leads</h2>
 
-        <div className="relative">
-          <Search
-            size={18}
-            className="text-muted-foreground pointer-events-none absolute top-[10px] left-2"
-          />
-          <Input
-            className="focus:!border-primary pl-7 shadow-md focus:!ring-0 dark:shadow-gray-600"
-            placeholder="Search leads..."
-            value={searchTerm}
-            onChange={(e) =>
-              setSearchTerm((e.target as HTMLInputElement).value)
-            }
-          />
+        <div className="flex w-full max-w-xs items-center gap-3">
+          <div className="relative flex-1">
+            <Search
+              size={18}
+              className="text-muted-foreground pointer-events-none absolute top-[10px] left-2"
+            />
+            <Input
+              className="focus:!border-primary pl-7 shadow-md focus:!ring-0 dark:shadow-gray-600"
+              placeholder="Search leads..."
+              value={searchTerm}
+              onChange={(e) =>
+                setSearchTerm((e.target as HTMLInputElement).value)
+              }
+            />
+          </div>
         </div>
-        <div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant={showFilters ? "secondary" : "outline"}
+            onClick={() => setShowFilters((s) => !s)}
+          >
+            Filters
+          </Button>
+
           <Button size="sm" onClick={() => setAddLeadDialogOpen(true)}>
             <Plus />
             Add Lead
           </Button>
         </div>
       </div>
+
+      {showFilters && (
+        <div className="border-border from-background to-muted/20 mb-6 rounded-lg border bg-gradient-to-br p-4 shadow-sm">
+          <div className="grid gap-4 md:grid-cols-4 md:items-end">
+            <div className="flex flex-col gap-2">
+              <label className="text-foreground text-sm font-medium">
+                Start Date
+              </label>
+              <Input
+                type="date"
+                value={startDate}
+                onChange={(e) =>
+                  setStartDate((e.target as HTMLInputElement).value)
+                }
+                className="shadow-sm"
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-foreground text-sm font-medium">
+                End Date
+              </label>
+              <Input
+                type="date"
+                value={endDate}
+                onChange={(e) =>
+                  setEndDate((e.target as HTMLInputElement).value)
+                }
+                className="shadow-sm"
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-foreground text-sm font-medium">
+                Sort By
+              </label>
+              <select
+                value={ordering}
+                onChange={(e) => setOrdering(e.target.value)}
+                className="border-input bg-background hover:border-primary/50 focus:border-primary focus:ring-primary rounded-md border px-3 !py-2 text-sm shadow-sm transition-colors focus:ring-1 focus:outline-none"
+              >
+                <option value="">All Time</option>
+                <option value="-created_at">Newest First</option>
+                <option value="created_at">Oldest First</option>
+              </select>
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setStartDate("");
+                setEndDate("");
+                setOrdering("");
+              }}
+              className="border-destructive/50 text-destructive hover:bg-destructive/10 hover:text-destructive h-10"
+            >
+              Clear Filters
+            </Button>
+          </div>
+        </div>
+      )}
 
       <Table>
         <TableHeader className="text-xs">
