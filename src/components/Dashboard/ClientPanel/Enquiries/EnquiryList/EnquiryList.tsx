@@ -23,10 +23,12 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import React, { useState } from "react";
+import CreateEnquiryDialogs from "./Dialogs/CreateEnquiryDialogs";
 
 const EnquiryList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [isOpenCreateEnquiry, setIsOpenCreateEnquiry] = useState<boolean>(false);
+  const [isOpenCreateEnquiry, setIsOpenCreateEnquiry] =
+    useState<boolean>(false);
   const [isOpenEditEnquiry, setIsOpenEditEnquiry] = useState<boolean>(false);
   const [selectedEnquiryUid, setSelectedEnquiryUid] = useState<string | null>(
     null,
@@ -40,6 +42,10 @@ const EnquiryList: React.FC = () => {
   } = useGetEnquiriesQuery({ page: currentPage });
 
   const enquiries: EnquiryProps[] = enquiriesData?.results || [];
+
+  const handleOpenCreateEnquiry = () => {
+    setIsOpenCreateEnquiry(true);
+  };
 
   const handlePreviousPage = () => {
     if (enquiriesData?.previous) setCurrentPage((p) => Math.max(1, p - 1));
@@ -82,7 +88,12 @@ const EnquiryList: React.FC = () => {
     <div>
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold">Enquiries</h2>
-        <Button variant="default" size="sm">
+        <Button
+          variant="default"
+          size="sm"
+          onClick={handleOpenCreateEnquiry}
+          className="flex items-center gap-2"
+        >
           <Plus className="h-4 w-4" />
           Create New Enquiry
         </Button>
@@ -234,6 +245,10 @@ const EnquiryList: React.FC = () => {
             )}
         </div>
       </div>
+      <CreateEnquiryDialogs
+        isOpen={isOpenCreateEnquiry}
+        onClose={()=> setIsOpenCreateEnquiry(false)}
+      />
     </div>
   );
 };

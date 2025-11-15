@@ -8,3 +8,8 @@
     created_at?: string | null;
     salon?: { name?: string | null } | null;
   };
+
+  export interface EnquiryDialogsProps {
+    isOpen: boolean;
+    onClose: () => void;
+  }
