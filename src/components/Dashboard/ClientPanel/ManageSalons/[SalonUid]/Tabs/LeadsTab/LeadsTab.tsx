@@ -23,6 +23,7 @@ import {
 import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import AddLeadDialog from "./Dialogs/AddLeadDialog";
 import EditLeadDialog from "./Dialogs/EditLeadDialog";
 
 const LeadsTab: React.FC = () => {
@@ -57,19 +58,15 @@ const LeadsTab: React.FC = () => {
 
   const extractedLeadsData: LeadProps[] = leadsData?.results ?? [];
 
-  const handleIsOpenAddEmployeeDialog = (isOpen: boolean) => {
-    setAddLeadDialogOpen(isOpen);
-  };
-
   const openEditDialog = (lead: LeadProps) => {
     setSelectedLead(lead);
     setEditLeadDialogOpen(true);
   };
 
-  const closeEditDialog = () => {
-    setEditLeadDialogOpen(false);
-    setSelectedLead(null);
-  };
+  //   const closeEditDialog = () => {
+  //     setEditLeadDialogOpen(false);
+  //     setSelectedLead(null);
+  //   };
 
   const handlePreviousPage = () => {
     if (leadsData?.previous) setCurrentPage((p) => Math.max(1, p - 1));
@@ -243,9 +240,13 @@ const LeadsTab: React.FC = () => {
         </div>
       </div>
       {/* Modals */}
+      <AddLeadDialog
+        isOpen={addLeadDialogOpen}
+        onClose={() => setAddLeadDialogOpen(false)}
+      />
       <EditLeadDialog
         isOpen={editLeadDialogOpen}
-        onClose={closeEditDialog}
+        onClose={() => setEditLeadDialogOpen(false)}
         LeadData={selectedLead}
       />
     </div>

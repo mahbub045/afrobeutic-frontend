@@ -97,7 +97,7 @@ const EditLeadDialog: React.FC<LeadDialogProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-lg shadow-md dark:shadow-gray-600">
         <DialogHeader>
-          <DialogTitle>Edit Lead</DialogTitle>
+          <DialogTitle className="text-primary">Edit Lead</DialogTitle>
           <DialogDescription className="text-xs">
             Update the lead information.
           </DialogDescription>
