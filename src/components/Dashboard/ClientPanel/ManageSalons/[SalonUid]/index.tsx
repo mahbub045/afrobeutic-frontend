@@ -1,6 +1,7 @@
 "use client";
 
 import Breadcrumbs from "@/components/Dashboard/CommonComponents/Breadcrumbs";
+import { setActiveTab } from "@/Redux/Reducers/ClientPanel/ManageSalons/SingleSalon/singleSalonSlice";
 import {
   Armchair,
   BarChart2,
@@ -15,6 +16,8 @@ import {
 } from "lucide-react";
 import { useParams, usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState } from "@/Redux/Reducers/Store";
 import AnalyticsTab from "./Tabs/AnalyticsTab/AnalyticsTab";
 import BookingsTab from "./Tabs/BookingsTab/BookingsTab";
 import ChairsTab from "./Tabs/ChairsTab/ChairsTab";
@@ -28,6 +31,8 @@ import SettingsTab from "./Tabs/SettingsTab/SettingsTab";
 
 const SingleSalonContainer: React.FC = () => {
   const { salonuid } = useParams();
+  const dispatch = useDispatch();
+  const activeTab = useSelector((state: RootState) => state.singleSalon.activeTab);
 
   interface MenuItemProps {
     label: string;
@@ -52,7 +57,6 @@ const SingleSalonContainer: React.FC = () => {
   );
 
   const pathname = usePathname();
-  const [activeTab, setActiveTab] = useState<string>("dashboard");
 
   useEffect(() => {
     // Prefer URL hash (e.g. #services), fallback to last pathname segment
@@ -60,21 +64,20 @@ const SingleSalonContainer: React.FC = () => {
       const hash =
         typeof window !== "undefined" ? window.location.hash.slice(1) : "";
       if (hash) {
-        setActiveTab(hash);
+        dispatch(setActiveTab(hash));
         return;
       }
       const seg =
         (pathname ?? "").split("/").filter(Boolean).pop() ?? "dashboard";
       // if seg matches any menu href, set it; otherwise default to dashboard
-      setActiveTab(
-        salonNavMenus.some((m) => m.href === seg) ? seg : "dashboard",
-      );
+      const tab = salonNavMenus.some((m) => m.href === seg) ? seg : "dashboard";
+      dispatch(setActiveTab(tab));
     };
 
     update();
     window.addEventListener("hashchange", update);
     return () => window.removeEventListener("hashchange", update);
-  }, [pathname, salonNavMenus]);
+  }, [pathname, salonNavMenus, dispatch]);
 
   return (
     <div className="container mx-auto px-4 py-6 md:px-6 lg:px-8">
