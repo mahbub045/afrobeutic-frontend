@@ -2,21 +2,13 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface SingleSalonState {
   activeTab: string;
+  isHydrated: boolean;
 }
 
-const getInitialState = (): SingleSalonState => {
-  if (typeof window !== "undefined") {
-    const savedTab = localStorage.getItem("singleSalonActiveTab");
-    return {
-      activeTab: savedTab || "dashboard",
-    };
-  }
-  return {
-    activeTab: "dashboard",
-  };
+const initialState: SingleSalonState = {
+  activeTab: "dashboard",
+  isHydrated: false,
 };
-
-const initialState: SingleSalonState = getInitialState();
 
 const singleSalonSlice = createSlice({
   name: "singleSalon",
@@ -28,8 +20,15 @@ const singleSalonSlice = createSlice({
         localStorage.setItem("singleSalonActiveTab", action.payload);
       }
     },
+    hydrateFromLocalStorage: (state) => {
+      if (typeof window !== "undefined") {
+        const savedTab = localStorage.getItem("singleSalonActiveTab");
+        state.activeTab = savedTab || "dashboard";
+      }
+      state.isHydrated = true;
+    },
   },
 });
 
-export const { setActiveTab } = singleSalonSlice.actions;
+export const { setActiveTab, hydrateFromLocalStorage } = singleSalonSlice.actions;
 export default singleSalonSlice.reducer;
