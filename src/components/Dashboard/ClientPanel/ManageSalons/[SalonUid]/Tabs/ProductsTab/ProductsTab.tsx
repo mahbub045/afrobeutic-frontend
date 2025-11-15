@@ -30,7 +30,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import AddProductDialog from "./Dialogs/AddProductDialog";
 import DeleteProductDialog from "./Dialogs/DeleteProductDialog";
-import ViewProductPanel from "./SingleProduct/ViewProductPanel";
+import ViewProductPanel from "./ProductDetails/ViewProductPanel";
 
 const ProductsTab: React.FC = () => {
   const { data: session } = useSession();
@@ -47,7 +47,7 @@ const ProductsTab: React.FC = () => {
   const [selectedProductToView, setSelectedProductToView] =
     useState<ProductProps | null>(null);
   const [viewTab, setViewTab] = useState<string>("list");
-   const [ordering, setOrdering] = useState<string | undefined>(undefined);
+  const [ordering, setOrdering] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -57,10 +57,10 @@ const ProductsTab: React.FC = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-    // Reset to first page whenever ordering changes
-    useEffect(() => {
-      setCurrentPage(1);
-    }, [ordering]);
+  // Reset to first page whenever ordering changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [ordering]);
 
   const {
     data: productData,

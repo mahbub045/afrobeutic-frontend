@@ -1,5 +1,4 @@
 "use client";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -28,7 +27,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import AddEmployeeDialog from "./Dialogs/AddEmployeeDialog";
 import DeleteEmployeeDialog from "./Dialogs/DeleteEmloyeeDialog";
-import ViewEmployeePanel from "./SingleEmployee/ViewEmployeePanel";
+import ViewEmployeePanel from "./EmployeeDetails/ViewEmployeePanel";
 
 const EmployeesTab: React.FC = () => {
   const { data: session } = useSession();

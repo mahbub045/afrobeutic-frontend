@@ -43,7 +43,7 @@ const SingleSalonContainer: React.FC = () => {
       { label: "Products", href: `products`, Icon: Box },
       { label: "Chairs", href: `chairs`, Icon: Armchair },
       { label: "Bookings", href: `bookings`, Icon: Calendar },
-      { label: "LookBook", href: `lookbook`, Icon: Image },
+      { label: "Lookbooks", href: `lookbooks`, Icon: Image },
       { label: "Employees", href: `employees`, Icon: Users },
       { label: "Analytics", href: `analytics`, Icon: BarChart2 },
       { label: "Settings", href: `settings`, Icon: Settings },
@@ -121,7 +121,7 @@ const SingleSalonContainer: React.FC = () => {
         {activeTab === "products" && <ProductsTab />}
         {activeTab === "chairs" && <ChairsTab />}
         {activeTab === "bookings" && <BookingsTab />}
-        {activeTab === "lookbook" && <LookbookTab />}
+        {activeTab === "lookbooks" && <LookbookTab />}
         {activeTab === "employees" && <EmployeesTab />}
         {activeTab === "analytics" && <AnalyticsTab />}
         {activeTab === "settings" && <SettingsTab />}
