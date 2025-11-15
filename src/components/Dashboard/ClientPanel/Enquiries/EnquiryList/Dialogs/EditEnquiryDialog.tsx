@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -61,9 +62,14 @@ const EditEnquiryDialog: React.FC<EnquiryDialogsProps> = ({
   const validationSchema = Yup.object().shape({
     phone: Yup.string().required("Phone is required"),
     first_name: Yup.string().required("First name is required"),
+    last_name: Yup.string().required("Last name is required"),
+    source: Yup.string().required("Source is required"),
     summary: Yup.string().required("Summary is required"),
     salon: Yup.string().required("Please select a salon"),
-    email: Yup.string().email("Invalid email address").nullable(),
+    email: Yup.string()
+      .required("Email is required")
+      .email("Invalid email address")
+      .nullable(),
   });
 
   const handleSubmit = async (
@@ -103,6 +109,9 @@ const EditEnquiryDialog: React.FC<EnquiryDialogsProps> = ({
       <DialogContent className="max-h-[80vh] !max-w-xl overflow-y-auto shadow-md sm:!max-w-3xl md:!max-w-4xl dark:shadow-gray-600">
         <DialogHeader>
           <DialogTitle className="text-primary">Edit Enquiry</DialogTitle>
+          <DialogDescription>
+            Please update the form below to edit the enquiry.
+          </DialogDescription>
         </DialogHeader>
 
         <Formik
@@ -186,7 +195,7 @@ const EditEnquiryDialog: React.FC<EnquiryDialogsProps> = ({
 
               <div>
                 <Label htmlFor="first_name" className="mb-2">
-                  First Name
+                  First Name<span className="text-danger">*</span>
                 </Label>
                 <Field
                   id="first_name"
@@ -194,6 +203,7 @@ const EditEnquiryDialog: React.FC<EnquiryDialogsProps> = ({
                   type="text"
                   as="input"
                   placeholder="First name"
+                  required
                 />
                 <div className="text-destructive text-sm">
                   <ErrorMessage name="first_name" />
@@ -202,7 +212,7 @@ const EditEnquiryDialog: React.FC<EnquiryDialogsProps> = ({
 
               <div>
                 <Label htmlFor="last_name" className="mb-2">
-                  Last Name
+                  Last Name<span className="text-danger">*</span>
                 </Label>
                 <Field
                   id="last_name"
@@ -210,12 +220,13 @@ const EditEnquiryDialog: React.FC<EnquiryDialogsProps> = ({
                   type="text"
                   as="input"
                   placeholder="Last name"
+                  required
                 />
               </div>
 
               <div>
                 <Label htmlFor="email" className="mb-2">
-                  Email
+                  Email<span className="text-danger">*</span>
                 </Label>
                 <Field
                   id="email"
@@ -223,6 +234,7 @@ const EditEnquiryDialog: React.FC<EnquiryDialogsProps> = ({
                   type="email"
                   as="input"
                   placeholder="Email"
+                  required
                 />
                 <div className="text-destructive text-sm">
                   <ErrorMessage name="email" />
@@ -301,7 +313,7 @@ const EditEnquiryDialog: React.FC<EnquiryDialogsProps> = ({
 
               <div>
                 <Label htmlFor="source" className="mb-2">
-                  Source
+                  Source<span className="text-danger">*</span>
                 </Label>
                 <Field
                   id="source"
@@ -309,6 +321,7 @@ const EditEnquiryDialog: React.FC<EnquiryDialogsProps> = ({
                   type="text"
                   as="input"
                   placeholder="Source"
+                  required
                 />
               </div>
 
@@ -324,9 +337,9 @@ const EditEnquiryDialog: React.FC<EnquiryDialogsProps> = ({
 
               <div>
                 <Label htmlFor="salon" className="mb-2">
-                  Salon
+                  Salon<span className="text-danger">*</span>
                 </Label>
-                <Field as="select" id="salon" name="salon">
+                <Field as="select" id="salon" name="salon" required>
                   <option value="">
                     {isSalonsLoading ? "Loading salons..." : "Select a salon"}
                   </option>
@@ -343,13 +356,14 @@ const EditEnquiryDialog: React.FC<EnquiryDialogsProps> = ({
 
               <div className="md:col-span-2">
                 <Label htmlFor="summary" className="mb-2">
-                  Summary
+                  Summary<span className="text-danger">*</span>
                 </Label>
                 <Field
                   as={Textarea}
                   id="summary"
                   name="summary"
                   placeholder="Short summary"
+                  required
                 />
                 <div className="text-destructive text-sm">
                   <ErrorMessage name="summary" />

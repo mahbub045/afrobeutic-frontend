@@ -24,12 +24,14 @@ import {
   LoaderPinwheel,
   Plus,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import React, { useState } from "react";
 import CreateEnquiryDialogs from "./Dialogs/CreateEnquiryDialogs";
 import EditEnquiryDialog from "./Dialogs/EditEnquiryDialog";
 
 const EnquiryList: React.FC = () => {
+  const { data: session } = useSession();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isOpenCreateEnquiry, setIsOpenCreateEnquiry] =
     useState<boolean>(false);
@@ -198,14 +200,17 @@ const EnquiryList: React.FC = () => {
                       </Link>
                     </div>
                     <div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex items-center gap-2"
-                        onClick={() => handleOpenEditEnquiry(enq.uid)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
+                      {(session?.user?.role === "OWNER" ||
+                        session?.user?.role === "ADMIN") && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center gap-2"
+                          onClick={() => handleOpenEditEnquiry(enq.uid)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
