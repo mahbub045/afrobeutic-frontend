@@ -17,6 +17,7 @@ import {
   FieldProps,
   Formik,
   Form as FormikForm,
+  FormikHelpers,
 } from "formik";
 import { useTheme } from "next-themes";
 import { useParams } from "next/navigation";
@@ -44,17 +45,47 @@ const AddLeadDialog: React.FC<LeadDialogProps> = ({ isOpen, onClose }) => {
   const [addLead, { isLoading: isAddingLead }] = useAddLeadMutation();
 
   const validationSchema = Yup.object().shape({
-    first_name: Yup.string().nullable(),
-    last_name: Yup.string().nullable(),
+    first_name: Yup.string().required("First name is required"),
+    last_name: Yup.string().required("Last name is required"),
     email: Yup.string().email("Invalid email address").nullable(),
-    phone: Yup.string().nullable(),
-    whatsapp: Yup.string().nullable(),
-    source: Yup.string().nullable(),
+    phone: Yup.string()
+      .nullable()
+      .test(
+        "phone-or-whatsapp",
+        "Either phone or whatsapp must be provided.",
+        function (value) {
+          const parent = this.parent as { whatsapp?: string };
+          const whatsapp = parent?.whatsapp;
+          const p = value ? String(value).trim() : "";
+          const w = whatsapp ? String(whatsapp).trim() : "";
+          return p !== "" || w !== "";
+        },
+      ),
+    whatsapp: Yup.string()
+      .nullable()
+      .test(
+        "whatsapp-or-phone",
+        "Either phone or whatsapp must be provided.",
+        function (value) {
+          const parent = this.parent as { phone?: string };
+          const phone = parent?.phone;
+          const p = phone ? String(phone).trim() : "";
+          const w = value ? String(value).trim() : "";
+          return p !== "" || w !== "";
+        },
+      ),
+    source: Yup.string().required("Source is required"),
   });
 
-  const handleSubmit = (values: typeof initialValues) => {
+  const handleSubmit = async (
+    values: typeof initialValues,
+    { setSubmitting, setFieldError }: FormikHelpers<typeof initialValues>,
+  ) => {
+    setSubmitting(true);
+
     if (!salonUid) {
       toast.error("Salon identifier not found.");
+      setSubmitting(false);
       return;
     }
 
@@ -67,25 +98,46 @@ const AddLeadDialog: React.FC<LeadDialogProps> = ({ isOpen, onClose }) => {
       source: values.source || null,
     };
 
-    addLead({ salonUid, leadsData })
-      .unwrap()
-      .then(() => {
-        onClose();
-        Swal.fire({
-          icon: "success",
-          iconColor: "#037375",
-          title: "Lead Added",
-          text: `Lead has been added successfully.`,
-          background: resolvedTheme === "dark" ? "#0f1724" : undefined,
-          color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
-          confirmButtonColor: "#037375",
-          timer: 2200,
-        });
-      })
-      .catch((error) => {
-        console.error("Failed to add lead:", error);
-        toast.error("Failed to add lead.");
+    try {
+      await addLead({ salonUid, leadsData }).unwrap();
+      onClose();
+      Swal.fire({
+        icon: "success",
+        iconColor: "#037375",
+        title: "Lead Added",
+        text: `Lead has been added successfully.`,
+        background: resolvedTheme === "dark" ? "#0f1724" : undefined,
+        color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
+        confirmButtonColor: "#037375",
+        timer: 2200,
       });
+    } catch (err) {
+      console.error("Failed to add lead:", err);
+      const errorObj = err as {
+        data?: {
+          non_field_errors?: string[];
+          message?: string;
+          phone?: string[];
+          whatsapp?: string[];
+        };
+        message?: string;
+      };
+      const serverMsg =
+        errorObj?.data?.non_field_errors?.[0] ||
+        errorObj?.data?.phone?.[0] ||
+        errorObj?.data?.whatsapp?.[0] ||
+        errorObj?.message ||
+        (typeof err === "string" ? err : "Failed to add lead.");
+
+      if (errorObj?.data?.non_field_errors) {
+        setFieldError("phone", serverMsg);
+        setFieldError("whatsapp", serverMsg);
+      }
+
+      toast.error(serverMsg);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -107,13 +159,15 @@ const AddLeadDialog: React.FC<LeadDialogProps> = ({ isOpen, onClose }) => {
             <div className="grid gap-3">
               <div>
                 <Label htmlFor="first_name" className="mb-2">
-                  First Name
+                  First Name<span className="text-danger">*</span>
                 </Label>
                 <Field
                   id="first_name"
                   name="first_name"
                   as="input"
                   type="text"
+                  required
+                  placeholder="Enter first name"
                 />
                 <ErrorMessage
                   name="first_name"
@@ -124,9 +178,16 @@ const AddLeadDialog: React.FC<LeadDialogProps> = ({ isOpen, onClose }) => {
 
               <div>
                 <Label htmlFor="last_name" className="mb-2">
-                  Last Name
+                  Last Name<span className="text-danger">*</span>
                 </Label>
-                <Field id="last_name" name="last_name" as="input" type="text" />
+                <Field
+                  id="last_name"
+                  name="last_name"
+                  as="input"
+                  type="text"
+                  required
+                  placeholder="Enter last name"
+                />
                 <ErrorMessage
                   name="last_name"
                   component="div"
@@ -244,9 +305,16 @@ const AddLeadDialog: React.FC<LeadDialogProps> = ({ isOpen, onClose }) => {
 
               <div>
                 <Label htmlFor="source" className="mb-2">
-                  Source
+                  Source<span className="text-danger">*</span>
                 </Label>
-                <Field id="source" name="source" as="input" type="text" />
+                <Field
+                  id="source"
+                  name="source"
+                  as="input"
+                  type="text"
+                  required
+                  placeholder="Enter source"
+                />
                 <ErrorMessage
                   name="source"
                   component="div"

@@ -17,6 +17,7 @@ import {
   FieldProps,
   Formik,
   Form as FormikForm,
+  FormikHelpers,
 } from "formik";
 import { useTheme } from "next-themes";
 import { useParams } from "next/navigation";
@@ -56,7 +57,10 @@ const EditLeadDialog: React.FC<LeadDialogProps> = ({
     source: Yup.string().nullable(),
   });
 
-  const handleSubmit = (values: typeof initialValues) => {
+  const handleSubmit = (
+    values: typeof initialValues,
+    { setFieldError }: FormikHelpers<typeof initialValues>,
+  ) => {
     if (!LeadData) return;
     if (!salonUid) {
       toast.error("Salon identifier not found.");
@@ -87,9 +91,30 @@ const EditLeadDialog: React.FC<LeadDialogProps> = ({
           timer: 2500,
         });
       })
-      .catch((error) => {
-        console.error("Failed to edit lead:", error);
-        toast.error("Failed to update lead information.");
+      .catch((err) => {
+        console.error("Failed to add lead:", err);
+        const errorObj = err as {
+          data?: {
+            non_field_errors?: string[];
+            message?: string;
+            phone?: string[];
+            whatsapp?: string[];
+          };
+          message?: string;
+        };
+        const serverMsg =
+          errorObj?.data?.non_field_errors?.[0] ||
+          errorObj?.data?.phone?.[0] ||
+          errorObj?.data?.whatsapp?.[0] ||
+          errorObj?.message ||
+          (typeof err === "string" ? err : "Failed to add lead.");
+
+        if (errorObj?.data?.non_field_errors) {
+          setFieldError("phone", serverMsg);
+          setFieldError("whatsapp", serverMsg);
+        }
+
+        toast.error(serverMsg);
       });
   };
 
