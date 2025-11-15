@@ -3,6 +3,9 @@ export interface EnquiryProps {
   type?: string | null;
   summary?: string | null;
   status?: string | null;
+  source?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
   lead?: {
     first_name?: string | null;
     last_name?: string | null;
@@ -14,9 +17,18 @@ export interface EnquiryProps {
     name?: string | null;
     phone?: string | null;
     email?: string | null;
+    created_at?: string | null;
   } | null;
-  created_at?: string | null;
-  salon?: { uid?: string; name?: string | null } | null;
+  salon?: {
+    uid?: string;
+    name?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    city?: string | null;
+    country?: string | null;
+    status?: string | null;
+  } | null;
+  [key: string]: unknown;
 }
 
 export interface FormValues {

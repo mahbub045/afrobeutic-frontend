@@ -206,7 +206,9 @@ const EnquiryList: React.FC = () => {
                           variant="outline"
                           size="sm"
                           className="flex items-center gap-2"
-                          onClick={() => handleOpenEditEnquiry(enq.uid)}
+                          onClick={() =>
+                            enq.uid && handleOpenEditEnquiry(enq.uid)
+                          }
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
