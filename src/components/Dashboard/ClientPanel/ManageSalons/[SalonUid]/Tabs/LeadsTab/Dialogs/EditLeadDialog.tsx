@@ -8,7 +8,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useEditLeadMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Leads/LeadsApi";
 import { LeadDialogProps } from "@/Types/ClientPanel/ManageSalonTypes/LeadsTypes/LeadsType";
@@ -108,7 +107,12 @@ const EditLeadDialog: React.FC<LeadDialogProps> = ({
                 <Label htmlFor="first_name" className="mb-2">
                   First Name
                 </Label>
-                <Field id="first_name" name="first_name" as={Input} />
+                <Field
+                  id="first_name"
+                  name="first_name"
+                  as="input"
+                  type="text"
+                />
                 <ErrorMessage
                   name="first_name"
                   component="div"
@@ -120,7 +124,7 @@ const EditLeadDialog: React.FC<LeadDialogProps> = ({
                 <Label htmlFor="last_name" className="mb-2">
                   Last Name
                 </Label>
-                <Field id="last_name" name="last_name" as={Input} />
+                <Field id="last_name" name="last_name" as="input" type="text" />
                 <ErrorMessage
                   name="last_name"
                   component="div"
@@ -132,7 +136,7 @@ const EditLeadDialog: React.FC<LeadDialogProps> = ({
                 <Label htmlFor="email" className="mb-2">
                   Email
                 </Label>
-                <Field id="email" name="email" as={Input} type="email" />
+                <Field id="email" name="email" as="input" type="email" />
                 <ErrorMessage
                   name="email"
                   component="div"
@@ -144,7 +148,7 @@ const EditLeadDialog: React.FC<LeadDialogProps> = ({
                 <Label htmlFor="phone" className="mb-2">
                   Phone
                 </Label>
-                <Field id="phone" name="phone" as={Input} />
+                <Field id="phone" name="phone" as="input" />
                 <ErrorMessage
                   name="phone"
                   component="div"
@@ -156,7 +160,7 @@ const EditLeadDialog: React.FC<LeadDialogProps> = ({
                 <Label htmlFor="whatsapp" className="mb-2">
                   Whatsapp
                 </Label>
-                <Field id="whatsapp" name="whatsapp" as={Input} />
+                <Field id="whatsapp" name="whatsapp" as="input" />
                 <ErrorMessage
                   name="whatsapp"
                   component="div"
@@ -168,7 +172,7 @@ const EditLeadDialog: React.FC<LeadDialogProps> = ({
                 <Label htmlFor="source" className="mb-2">
                   Source
                 </Label>
-                <Field id="source" name="source" as={Input} />
+                <Field id="source" name="source" as="input" type="text" />
                 <ErrorMessage
                   name="source"
                   component="div"

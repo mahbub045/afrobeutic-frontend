@@ -17,6 +17,7 @@ import {
   ChevronRight,
   Edit,
   LoaderPinwheel,
+  Plus,
   Search,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -101,7 +102,12 @@ const LeadsTab: React.FC = () => {
             }
           />
         </div>
-        <div />
+        <div>
+          <Button size="sm" onClick={() => setAddLeadDialogOpen(true)}>
+            <Plus />
+            Add Lead
+          </Button>
+        </div>
       </div>
 
       <Table>
