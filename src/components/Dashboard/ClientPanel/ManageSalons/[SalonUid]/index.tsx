@@ -1,7 +1,6 @@
 "use client";
 
 import Breadcrumbs from "@/components/Dashboard/CommonComponents/Breadcrumbs";
-import { setActiveTab, hydrateFromLocalStorage } from "@/Redux/Reducers/ClientPanel/ManageSalons/SingleSalon/singleSalonSlice";
 import {
   Armchair,
   BarChart2,
@@ -14,10 +13,8 @@ import {
   Settings,
   Users,
 } from "lucide-react";
-import { useParams } from "next/navigation";
-import { useEffect, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import type { RootState } from "@/Redux/Reducers/Store";
+import { useParams, usePathname } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import AnalyticsTab from "./Tabs/AnalyticsTab/AnalyticsTab";
 import BookingsTab from "./Tabs/BookingsTab/BookingsTab";
 import ChairsTab from "./Tabs/ChairsTab/ChairsTab";
@@ -31,40 +28,53 @@ import SettingsTab from "./Tabs/SettingsTab/SettingsTab";
 
 const SingleSalonContainer: React.FC = () => {
   const { salonuid } = useParams();
-  const dispatch = useDispatch();
-  const activeTab = useSelector((state: RootState) => state.singleSalon.activeTab);
-  const isHydrated = useSelector((state: RootState) => state.singleSalon.isHydrated);
 
   interface MenuItemProps {
     label: string;
-    tabName: string;
+    href?: string;
     Icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   }
 
   const salonNavMenus: MenuItemProps[] = useMemo(
     () => [
-      { label: "Dashboard", tabName: "dashboard", Icon: Home },
-      { label: "Opening Hours", tabName: "opening-hours", Icon: Clock },
-      { label: "Services", tabName: "services", Icon: Scissors },
-      { label: "Products", tabName: "products", Icon: Box },
-      { label: "Chairs", tabName: "chairs", Icon: Armchair },
-      { label: "Bookings", tabName: "bookings", Icon: Calendar },
-      { label: "Lookbooks", tabName: "lookbooks", Icon: Image },
-      { label: "Employees", tabName: "employees", Icon: Users },
-      { label: "Analytics", tabName: "analytics", Icon: BarChart2 },
-      { label: "Settings", tabName: "settings", Icon: Settings },
+      { label: "Dashboard", href: `dashboard`, Icon: Home },
+      { label: "Opening Hours", href: `opening-hours`, Icon: Clock },
+      { label: "Services", href: `services`, Icon: Scissors },
+      { label: "Products", href: `products`, Icon: Box },
+      { label: "Chairs", href: `chairs`, Icon: Armchair },
+      { label: "Bookings", href: `bookings`, Icon: Calendar },
+      { label: "Lookbooks", href: `lookbooks`, Icon: Image },
+      { label: "Employees", href: `employees`, Icon: Users },
+      { label: "Analytics", href: `analytics`, Icon: BarChart2 },
+      { label: "Settings", href: `settings`, Icon: Settings },
     ],
     [],
   );
 
-  // Hydrate from localStorage on mount
-  useEffect(() => {
-    dispatch(hydrateFromLocalStorage());
-  }, [dispatch]);
+  const pathname = usePathname();
+  const [activeTab, setActiveTab] = useState<string>("dashboard");
 
-  const handleTabClick = (tabName: string) => {
-    dispatch(setActiveTab(tabName));
-  };
+  useEffect(() => {
+    // Prefer URL hash (e.g. #services), fallback to last pathname segment
+    const update = () => {
+      const hash =
+        typeof window !== "undefined" ? window.location.hash.slice(1) : "";
+      if (hash) {
+        setActiveTab(hash);
+        return;
+      }
+      const seg =
+        (pathname ?? "").split("/").filter(Boolean).pop() ?? "dashboard";
+      // if seg matches any menu href, set it; otherwise default to dashboard
+      setActiveTab(
+        salonNavMenus.some((m) => m.href === seg) ? seg : "dashboard",
+      );
+    };
+
+    update();
+    window.addEventListener("hashchange", update);
+    return () => window.removeEventListener("hashchange", update);
+  }, [pathname, salonNavMenus]);
 
   return (
     <div className="container mx-auto px-4 py-6 md:px-6 lg:px-8">
@@ -85,12 +95,12 @@ const SingleSalonContainer: React.FC = () => {
       <nav className="mt-4 mb-4 flex flex-wrap items-center justify-center gap-2">
         {salonNavMenus.map((menu) => {
           const Icon = menu.Icon;
-          const isActive = activeTab === menu.tabName;
+          const isActive = menu.href ? activeTab === menu.href : false;
           return (
-            <button
-              key={menu.tabName}
-              onClick={() => handleTabClick(menu.tabName)}
-              className={`inline-flex items-center gap-2 rounded-md border px-2 py-1 text-sm shadow-md dark:shadow-gray-600 transition-colors ${
+            <a
+              key={menu.href}
+              href={menu.href ? `#${menu.href}` : undefined}
+              className={`inline-flex items-center gap-2 rounded-md border px-2 py-1 text-sm shadow-md dark:shadow-gray-600 ${
                 isActive
                   ? "bg-primary border-primary text-white"
                   : "border-primary/40 bg-primary/5 text-primary hover:bg-primary/10"
@@ -99,7 +109,7 @@ const SingleSalonContainer: React.FC = () => {
             >
               {Icon ? <Icon className="h-4 w-4" /> : null}
               <span>{menu.label}</span>
-            </button>
+            </a>
           );
         })}
       </nav>
