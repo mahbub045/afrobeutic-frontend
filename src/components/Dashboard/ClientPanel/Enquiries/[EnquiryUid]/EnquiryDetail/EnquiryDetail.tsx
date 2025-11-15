@@ -51,8 +51,9 @@ interface Enquiry {
   [key: string]: unknown;
 }
 
-const EnquiryDetail: React.FC = () => {
+const EnquiryDetails: React.FC = () => {
   const { enquiryuid } = useParams<{ enquiryuid: string }>();
+
   const { data, isLoading, isError } = useGetEnquiryDetailsQuery(enquiryuid);
   const enq = data as Enquiry | undefined;
 
@@ -105,10 +106,10 @@ const EnquiryDetail: React.FC = () => {
   return (
     <div className="space-y-4">
       <Card>
-        <CardHeader className="pb-4">
+        <CardHeader>
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div className="flex-1">
-              <CardTitle className="mb-3 text-2xl md:text-3xl">
+              <CardTitle className="mb-3 text-2xl md:text-3xl truncate">
                 {enq.summary || "Enquiry"}
               </CardTitle>
               <div className="flex flex-wrap gap-2">
@@ -130,7 +131,7 @@ const EnquiryDetail: React.FC = () => {
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
-          <CardHeader className="pb-3">
+          <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               Created At
             </CardTitle>
@@ -146,16 +147,16 @@ const EnquiryDetail: React.FC = () => {
         </Card>
 
         <Card>
-          <CardHeader className="pb-3">
+          <CardHeader>
             <CardTitle className="text-base">Source</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground text-sm">{enq.source ?? "-"}</p>
+            <p className="text-muted-foreground text-sm">{enq.source ?? "Not Available"}</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="pb-3">
+          <CardHeader>
             <CardTitle className="text-base">Person</CardTitle>
           </CardHeader>
           <CardContent>
@@ -186,7 +187,7 @@ const EnquiryDetail: React.FC = () => {
         </Card>
 
         <Card>
-          <CardHeader className="pb-3">
+          <CardHeader>
             <CardTitle className="text-base">Salon</CardTitle>
           </CardHeader>
           <CardContent>
@@ -214,26 +215,15 @@ const EnquiryDetail: React.FC = () => {
       </div>
 
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader>
           <CardTitle className="text-base">Summary</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm">{enq.summary || "-"}</p>
         </CardContent>
       </Card>
-
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Raw Data</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <pre className="max-h-64 overflow-auto text-xs">
-            {JSON.stringify(enq, null, 2)}
-          </pre>
-        </CardContent>
-      </Card>
     </div>
   );
 };
 
-export default EnquiryDetail;
+export default EnquiryDetails;

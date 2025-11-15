@@ -20,11 +20,11 @@ export const EnquiriesApi = baseApi.injectEndpoints({
       invalidatesTags: ["Enquiries"],
     }),
     getEnquiryDetails: builder.query({
-      query: (uid: string) => ({
-        url: `/support/customer-enquiries/${uid}`,
+      query: (enquiryuid) => ({
+        url: `/support/customer-enquiries/${enquiryuid}`,
         method: "GET",
       }),
-      providesTags: (uid) => [{ type: "Enquiries", id: uid }],
+      providesTags: ["Enquiries"],
     }),
   }),
 });

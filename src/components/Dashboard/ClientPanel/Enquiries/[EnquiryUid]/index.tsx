@@ -1,5 +1,6 @@
 import Breadcrumbs from "@/components/Dashboard/CommonComponents/Breadcrumbs";
 import { useParams } from "next/navigation";
+import EnquiryDetails from "./EnquiryDetail/EnquiryDetail";
 
 const EnquiryDetailContainer: React.FC = () => {
   const { enquiryuid } = useParams<{ enquiryuid: string }>();
@@ -18,7 +19,7 @@ const EnquiryDetailContainer: React.FC = () => {
           },
         ]}
       />
-      {/* <EnquiryDetail /> */}
+      <EnquiryDetails />
     </div>
   );
 };
