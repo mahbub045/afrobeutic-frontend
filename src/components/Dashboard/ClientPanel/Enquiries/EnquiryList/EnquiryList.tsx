@@ -1,6 +1,7 @@
 "use client";
 
 import { useGetEnquiriesQuery } from "@/Redux/Reducers/ClientPanel/Enquiries/EnquiriesApi";
+import { EnquiryProps } from "@/Types/EnquiriesTypes/EnquiryType";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,18 +29,7 @@ const EnquiryList: React.FC = () => {
     isFetching,
   } = useGetEnquiriesQuery({ page: currentPage });
 
-  type Enquiry = {
-    uid: string;
-    type?: string | null;
-    summary?: string | null;
-    status?: string | null;
-    lead?: { first_name?: string | null; last_name?: string | null } | null;
-    customer?: { name?: string | null } | null;
-    created_at?: string | null;
-    salon?: { name?: string | null } | null;
-  };
-
-  const enquiries: Enquiry[] = enquiriesData?.results || [];
+  const enquiries: EnquiryProps[] = enquiriesData?.results || [];
 
   const handlePreviousPage = () => {
     if (enquiriesData?.previous) setCurrentPage((p) => Math.max(1, p - 1));
@@ -122,34 +112,36 @@ const EnquiryList: React.FC = () => {
               </TableCell>
             </TableRow>
           ) : (
-            enquiries.map((e, idx) => {
-              const personName = e.lead
-                ? `${safe(e.lead.first_name)} ${safe(e.lead.last_name)}`.trim()
-                : e.customer
-                  ? safe(e.customer.name)
-                  : "-";
-
+            enquiries.map((enq, idx) => {
               return (
-                <TableRow key={e.uid}>
+                <TableRow key={enq.uid}>
                   <TableCell className="text-start">{idx + 1}</TableCell>
-                  <TableCell className="max-w-[300px] truncate text-start">
-                    {e.summary || "-"}
+                  <TableCell className="max-w-[100px] truncate text-start">
+                    {enq.summary || "-"}
                   </TableCell>
                   <TableCell className="text-center">
-                    <Badge variant={getColorBasedOnType(e.type)}>
-                      {formatChoiceFieldValue(e.type)}
+                    <Badge variant={getColorBasedOnType(enq.type)}>
+                      {formatChoiceFieldValue(enq.type)}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-center">
-                    {formatDateTime(e.created_at)}
-                  </TableCell>
-                  <TableCell className="text-center">{personName}</TableCell>
-                  <TableCell className="text-center">
-                    {e.salon?.name ? safe(e.salon.name) : "-"}
+                    {formatDateTime(enq.created_at)}
                   </TableCell>
                   <TableCell className="text-center">
-                    <Badge variant={getColorBasedOnStatus(e.status)}>
-                      {formatChoiceFieldValue(e.status)}
+                    {enq.lead ? (
+                      `${enq.lead.first_name} ${enq.lead.last_name}`
+                    ) : enq.customer?.name ? (
+                      `${enq.customer?.name}`
+                    ) : (
+                      <small className="text-muted-foreground">Not Found</small>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {enq.salon?.name ? safe(enq.salon.name) : "-"}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Badge variant={getColorBasedOnStatus(enq.status)}>
+                      {formatChoiceFieldValue(enq.status)}
                     </Badge>
                   </TableCell>
                   <TableCell className="flex justify-center">
@@ -157,7 +149,7 @@ const EnquiryList: React.FC = () => {
                       variant="outline"
                       size="sm"
                       className="flex items-center gap-2"
-                      onClick={() => setSelectedEnquiryUid(e.uid)}
+                      onClick={() => setSelectedEnquiryUid(enq.uid)}
                     >
                       <Eye className="h-4 w-4" />
                       View
