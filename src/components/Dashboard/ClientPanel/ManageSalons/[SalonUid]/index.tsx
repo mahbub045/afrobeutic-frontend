@@ -59,7 +59,7 @@ const SingleSalonContainer: React.FC = () => {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Prefer URL hash (e.g. #services), fallback to last pathname segment
+    // Prefer URL hash (e.g. #services), fallback to saved state or pathname
     const update = () => {
       const hash =
         typeof window !== "undefined" ? window.location.hash.slice(1) : "";
@@ -67,17 +67,20 @@ const SingleSalonContainer: React.FC = () => {
         dispatch(setActiveTab(hash));
         return;
       }
-      const seg =
-        (pathname ?? "").split("/").filter(Boolean).pop() ?? "dashboard";
-      // if seg matches any menu href, set it; otherwise default to dashboard
-      const tab = salonNavMenus.some((m) => m.href === seg) ? seg : "dashboard";
-      dispatch(setActiveTab(tab));
+      
+      // Only update from pathname if not already set in Redux
+      if (activeTab === "dashboard") {
+        const seg =
+          (pathname ?? "").split("/").filter(Boolean).pop() ?? "dashboard";
+        const tab = salonNavMenus.some((m) => m.href === seg) ? seg : "dashboard";
+        dispatch(setActiveTab(tab));
+      }
     };
 
     update();
     window.addEventListener("hashchange", update);
     return () => window.removeEventListener("hashchange", update);
-  }, [pathname, salonNavMenus, dispatch]);
+  }, [pathname, salonNavMenus, dispatch, activeTab]);
 
   return (
     <div className="container mx-auto px-4 py-6 md:px-6 lg:px-8">
