@@ -68,16 +68,14 @@ const BookingsTab: React.FC = () => {
   };
 
   // Convert selected date to local YYYY-MM-DD to avoid UTC shift (off-by-one)
-  // const toLocalYMD = (date: Date) => {
-  //   const y = date.getFullYear();
-  //   const m = String(date.getMonth() + 1).padStart(2, "0");
-  //   const d = String(date.getDate()).padStart(2, "0");
-  //   return `${y}-${m}-${d}`;
-  // };
-  // const dateParam = toLocalYMD(selectedDate);
+  const toLocalYMD = (date: Date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  };
+  const dateParam = toLocalYMD(selectedDate);
 
-  // Use UTC YYYY-MM-DD to avoid local timezone shifts
-  const dateParam = selectedDate.toISOString().slice(0, 10);
   const filters: Record<string, string> = { date: dateParam };
   if (statusFilter !== "ALL") {
     filters.status = statusFilter;
