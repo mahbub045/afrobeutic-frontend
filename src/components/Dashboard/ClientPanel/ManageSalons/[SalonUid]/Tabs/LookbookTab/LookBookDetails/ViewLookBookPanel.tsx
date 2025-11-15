@@ -106,7 +106,7 @@ const ViewLookBookPanel: React.FC<ViewLookBookPanelProps> = ({
   return (
     <>
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">LookBook details</h2>
+        <h2 className="text-lg font-semibold">Lookbook details</h2>
         <TabsList className="shadow-md dark:shadow-gray-600">
           <TabsTrigger value="list" className="px-3">
             List

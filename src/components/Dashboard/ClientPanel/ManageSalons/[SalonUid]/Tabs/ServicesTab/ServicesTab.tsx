@@ -30,7 +30,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import AddServiceDialog from "./Dialogs/AddServiceDialog";
 import DeleteServiceDialog from "./Dialogs/DeleteServiceDialog";
-import ViewServicePanel from "./SingleService/ViewServicePanel";
+import ViewServicePanel from "./ServiceDetails/ViewServicePanel";
 
 const ServicesTab: React.FC = () => {
   const { data: session } = useSession();

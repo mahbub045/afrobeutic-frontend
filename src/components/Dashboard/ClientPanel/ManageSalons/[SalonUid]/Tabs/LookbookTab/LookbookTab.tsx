@@ -77,7 +77,7 @@ const LookbookTab: React.FC = () => {
     <Tabs value={viewTab} onValueChange={(v) => setViewTab(v)}>
       <TabsContent value="list">
         <div className="mb-4 flex flex-col gap-4 md:flex-row md:justify-between">
-          <h2 className="text-lg font-semibold">LookBooks</h2>
+          <h2 className="text-lg font-semibold">Lookbooks</h2>
           <div className="relative">
             <Search
               size={18}
