@@ -555,9 +555,6 @@ const BookingsTab: React.FC = () => {
                 <div className="-mt-1 flex items-center gap-1">
                   {selectedAppointment && (
                     <>
-                      {/* <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button> */}
                       <div>
                         {(session?.user?.role === "OWNER" ||
                           session?.user?.role === "ADMIN") && (
@@ -891,13 +888,6 @@ const BookingsTab: React.FC = () => {
                       <div className="flex items-center gap-1">
                         {selectedAppointment && (
                           <>
-                            {/* <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8"
-                            >
-                              <MoreVertical className="h-4 w-4" />
-                            </Button> */}
                             <div>
                               {(session?.user?.role === "OWNER" ||
                                 session?.user?.role === "ADMIN") && (
