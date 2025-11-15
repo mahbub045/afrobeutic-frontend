@@ -45,7 +45,9 @@ export const baseApi = createApi({
     "Bookings",
     "LookBook",
     "Employees",
+    "Leads",
     "Customers",
+    "Enquiries",
     "SupportTickets",
 
     //Admin Panel tag types

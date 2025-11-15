@@ -28,7 +28,9 @@ import {
   useGetSingleBookingQuery,
 } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/BookingsApi";
 import {
+  Appointment,
   Booking,
+  StaffMember,
   StaffMemberWithBookings,
 } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
 import {
@@ -44,26 +46,6 @@ import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import EditBookingDialog from "./Dialogs/EditBookingDialog";
-
-interface Appointment {
-  id: string;
-  service: string;
-  client: string;
-  clientAvatar?: string;
-  staff: string;
-  startTime: string;
-  endTime: string;
-  status: "placed" | "in-progress" | "rescheduled" | "completed" | "cancelled";
-  color: string;
-  column: number;
-  fullBookingData?: Booking;
-}
-
-interface StaffMember {
-  id: string;
-  name: string;
-  avatar?: string;
-}
 
 const BookingsTab: React.FC = () => {
   const { salonuid } = useParams();
@@ -85,7 +67,6 @@ const BookingsTab: React.FC = () => {
     setIsEditDialogOpen(open);
   };
 
-  // RTK Hooks
   // Convert selected date to local YYYY-MM-DD to avoid UTC shift (off-by-one)
   const toLocalYMD = (date: Date) => {
     const y = date.getFullYear();
@@ -94,10 +75,13 @@ const BookingsTab: React.FC = () => {
     return `${y}-${m}-${d}`;
   };
   const dateParam = toLocalYMD(selectedDate);
+
   const filters: Record<string, string> = { date: dateParam };
   if (statusFilter !== "ALL") {
     filters.status = statusFilter;
   }
+
+  // RTK Hooks
   const { data: bookingsData, isLoading: isBookingsLoading } =
     useGetBookingQuery({
       salonUid: salonuid as string,
@@ -244,7 +228,7 @@ const BookingsTab: React.FC = () => {
   };
 
   const navigateDate = (direction: "prev" | "next") => {
-    const newDate = new Date(selectedDate);
+    const newDate = new Date(selectedDate.toISOString().slice(0, 10));
     if (viewMode === "day") {
       newDate.setDate(newDate.getDate() + (direction === "next" ? 1 : -1));
     } else {
@@ -555,9 +539,6 @@ const BookingsTab: React.FC = () => {
                 <div className="-mt-1 flex items-center gap-1">
                   {selectedAppointment && (
                     <>
-                      {/* <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button> */}
                       <div>
                         {(session?.user?.role === "OWNER" ||
                           session?.user?.role === "ADMIN") && (
@@ -891,13 +872,6 @@ const BookingsTab: React.FC = () => {
                       <div className="flex items-center gap-1">
                         {selectedAppointment && (
                           <>
-                            {/* <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8"
-                            >
-                              <MoreVertical className="h-4 w-4" />
-                            </Button> */}
                             <div>
                               {(session?.user?.role === "OWNER" ||
                                 session?.user?.role === "ADMIN") && (

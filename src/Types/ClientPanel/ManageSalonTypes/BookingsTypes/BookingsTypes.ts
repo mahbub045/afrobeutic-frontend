@@ -103,3 +103,23 @@ export interface EditBookingDialogProps {
     images?: string[];
   };
 }
+
+export interface Appointment {
+  id: string;
+  service: string;
+  client: string;
+  clientAvatar?: string;
+  staff: string;
+  startTime: string;
+  endTime: string;
+  status: "placed" | "in-progress" | "rescheduled" | "completed" | "cancelled";
+  color: string;
+  column: number;
+  fullBookingData?: Booking;
+}
+
+export interface StaffMember {
+  id: string;
+  name: string;
+  avatar?: string;
+}

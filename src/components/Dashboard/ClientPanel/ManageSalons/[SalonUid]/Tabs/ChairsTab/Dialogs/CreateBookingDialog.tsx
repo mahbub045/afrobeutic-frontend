@@ -271,6 +271,10 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
                                 /[^0-9]/g,
                                 "",
                               );
+                              if (!numeric) {
+                                form.setFieldValue(field.name, "");
+                                return;
+                              }
                               let newVal = numeric;
                               if (dial) {
                                 if (

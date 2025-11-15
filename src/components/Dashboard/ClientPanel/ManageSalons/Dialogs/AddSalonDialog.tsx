@@ -552,6 +552,10 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                   /[^0-9]/g,
                                   "",
                                 );
+                                if (!numeric) {
+                                  form.setFieldValue(field.name, "");
+                                  return;
+                                }
                                 let newVal = numeric;
                                 if (dial) {
                                   // ensure numeric does not already contain dial

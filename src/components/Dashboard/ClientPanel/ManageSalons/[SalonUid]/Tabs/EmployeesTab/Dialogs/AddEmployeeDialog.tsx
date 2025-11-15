@@ -314,6 +314,10 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
                             ? `+${data.dialCode}`
                             : "";
                           const numeric = (val || "").replace(/[^0-9]/g, "");
+                          if (!numeric) {
+                            form.setFieldValue(field.name, "");
+                            return;
+                          }
                           let newVal = numeric;
                           if (dial) {
                             if (!numeric.startsWith(dial.replace(/\D/g, ""))) {
