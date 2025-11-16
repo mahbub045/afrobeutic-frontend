@@ -1,9 +1,22 @@
 "use client";
 
-import { useGetEnquiriesQuery } from "@/Redux/Reducers/ClientPanel/Enquiries/EnquiriesApi";
+import {
+  useGetEnquiriesQuery,
+  useGetEnquiryDetailsQuery,
+} from "@/Redux/Reducers/ClientPanel/Enquiries/EnquiriesApi";
+import { useGetCommonCategoriesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Common/CategoriesApi";
 import { EnquiryProps } from "@/Types/EnquiriesTypes/EnquiryType";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -13,23 +26,134 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatChoiceFieldValue, formatDateTime, safe } from "@/lib/utils";
-import { ChevronLeft, ChevronRight, Eye, LoaderPinwheel } from "lucide-react";
-import React, { useState } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Edit,
+  Eye,
+  Filter,
+  LoaderPinwheel,
+  Plus,
+  Search,
+  X,
+} from "lucide-react";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
+import React, { useEffect, useState } from "react";
+import CreateEnquiryDialogs from "./Dialogs/CreateEnquiryDialogs";
+import EditEnquiryDialog from "./Dialogs/EditEnquiryDialog";
 
 const EnquiryList: React.FC = () => {
+  const { data: session } = useSession();
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [debouncedSearch, setDebouncedSearch] = useState<string>("");
+  const [isOpenCreateEnquiry, setIsOpenCreateEnquiry] =
+    useState<boolean>(false);
+  const [isOpenEditEnquiry, setIsOpenEditEnquiry] = useState<boolean>(false);
   const [selectedEnquiryUid, setSelectedEnquiryUid] = useState<string | null>(
     null,
   );
+  const [showFilters, setShowFilters] = useState<boolean>(false);
+  const [typeFilter, setTypeFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [sourceFilter, setSourceFilter] = useState<string>("");
+  const [ordering, setOrdering] = useState<string>("-created_at");
+
+  const CATEGORY_TYPE_FILTER = "CUSTOMER_SOURCE";
+
+  // build query params, only include values when present to avoid empty query keys
+  const queryParams: Record<string, unknown> = { page: currentPage };
+  if (debouncedSearch) queryParams.search = debouncedSearch;
+  if (typeFilter) queryParams.type = typeFilter;
+  if (statusFilter) queryParams.status = statusFilter;
+  if (sourceFilter) queryParams.source = sourceFilter;
+  if (ordering) queryParams.ordering = ordering;
+
+  const { data: commonCategoriesData } = useGetCommonCategoriesDataQuery({
+    category_type: CATEGORY_TYPE_FILTER,
+  });
+
+  // build a deduplicated list of customer source strings from commonCategoriesData
+  const customerSourceOptions: string[] = (() => {
+    const src: unknown[] = Array.isArray(commonCategoriesData)
+      ? commonCategoriesData
+      : Array.isArray(commonCategoriesData?.data)
+        ? commonCategoriesData!.data
+        : [];
+
+    const looksLikeSource = (c: unknown) => {
+      if (typeof c === "string") return true;
+      if (c && typeof c === "object") {
+        const obj = c as Record<string, unknown>;
+        const ct =
+          obj.category_type ?? obj.type ?? obj.categoryType ?? obj.kind;
+        if (ct === undefined || ct === null) return true;
+        return String(ct).toLowerCase() === CATEGORY_TYPE_FILTER.toLowerCase();
+      }
+      return false;
+    };
+
+    const formatCategoryValue = (c: unknown, idx: number) => {
+      if (typeof c === "string") return c;
+      if (c && typeof c === "object") {
+        const obj = c as Record<string, unknown>;
+        const val =
+          obj.name ?? obj.category ?? obj.title ?? obj.label ?? obj.id ?? idx;
+        return String(val);
+      }
+      return String(c ?? idx);
+    };
+
+    const seen = new Set<string>();
+    const out: string[] = [];
+    src.forEach((c, i) => {
+      if (!looksLikeSource(c)) return;
+      const v = formatCategoryValue(c, i);
+      if (v !== "" && !seen.has(v)) {
+        seen.add(v);
+        out.push(v);
+      }
+    });
+    return out;
+  })();
 
   const {
     data: enquiriesData,
     isLoading,
     isError,
     isFetching,
-  } = useGetEnquiriesQuery({ page: currentPage });
+  } = useGetEnquiriesQuery(queryParams);
+
+  const { data: selectedEnquiryData } = useGetEnquiryDetailsQuery(
+    selectedEnquiryUid ?? "",
+    { skip: !selectedEnquiryUid },
+  );
 
   const enquiries: EnquiryProps[] = enquiriesData?.results || [];
+
+  // Debounce search input to reduce repeated network calls
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchTerm.trim());
+    }, 500);
+
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  // Reset to first page when filters/search/order change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, typeFilter, statusFilter, sourceFilter, ordering]);
+
+  const handleOpenCreateEnquiry = () => {
+    setIsOpenCreateEnquiry(true);
+  };
+
+  const handleOpenEditEnquiry = (enquiryUid: string) => {
+    setSelectedEnquiryUid(enquiryUid);
+    setIsOpenEditEnquiry(true);
+  };
 
   const handlePreviousPage = () => {
     if (enquiriesData?.previous) setCurrentPage((p) => Math.max(1, p - 1));
@@ -71,8 +195,164 @@ const EnquiryList: React.FC = () => {
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Enquiries</h2>
+        <div>
+          {" "}
+          <h2 className="text-lg font-semibold">Enquiries</h2>
+        </div>
+        <div className="relative mx-4 max-w-xs flex-1">
+          <Search
+            size={18}
+            className="text-muted-foreground pointer-events-none absolute top-[10px] left-2"
+          />
+          <Input
+            value={searchTerm}
+            onChange={(e) =>
+              setSearchTerm((e.target as HTMLInputElement).value)
+            }
+            className="focus:!border-primary pl-7 shadow-md focus:!ring-0 dark:shadow-gray-600"
+            placeholder="Search enquiries..."
+          />
+          {searchTerm && (
+            <Button
+              size="xs"
+              variant="ghost"
+              onClick={() => setSearchTerm("")}
+              className="absolute top-1 right-1"
+            >
+              <X />
+            </Button>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant={showFilters ? "default" : "outline"}
+            size="sm"
+            onClick={() => setShowFilters((s) => !s)}
+          >
+            <Filter />
+            <span className="ml-1">
+              {showFilters ? "Hide" : "Show"} Filters
+            </span>
+          </Button>
+          <Button
+            variant="default"
+            size="sm"
+            onClick={handleOpenCreateEnquiry}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Create New Enquiry
+          </Button>
+        </div>
       </div>
+
+      {/* Filter panel */}
+      {showFilters && (
+        <div className="mb-4">
+          <div className="bg-card rounded-md p-4 shadow-md dark:shadow-gray-700">
+            <div className="grid grid-cols-1 items-end gap-4 sm:grid-cols-2 lg:grid-cols-5">
+              <div>
+                <Label className="mb-1">Type</Label>
+                <Select value={typeFilter} onValueChange={setTypeFilter}>
+                  <SelectTrigger size="sm" className="w-full">
+                    <SelectValue placeholder="All types" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="GENERAL">General</SelectItem>
+                    <SelectItem value="EMERGENCY">Emergency</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="mb-1">Status</Label>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger size="sm" className="w-full">
+                    <SelectValue placeholder="All status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="NEW">New</SelectItem>
+                    <SelectItem value="IN_REVIEW">In Review</SelectItem>
+                    <SelectItem value="OPEN">Open</SelectItem>
+                    <SelectItem value="RESOLVED">Resolved</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="mb-1">Source</Label>
+                {customerSourceOptions.length === 0 ? (
+                  <Input disabled placeholder="No sources" className="mt-1" />
+                ) : (
+                  <Select
+                    value={sourceFilter}
+                    onValueChange={(v) => setSourceFilter(v)}
+                  >
+                    <SelectTrigger size="sm" className="w-full">
+                      <SelectValue placeholder="All sources" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-52 overflow-auto">
+                      {customerSourceOptions.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {s}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+
+              <div>
+                <Label className="mb-1">Ordering</Label>
+                <Select value={ordering} onValueChange={setOrdering}>
+                  <SelectTrigger size="sm" className="w-full">
+                    <SelectValue placeholder="Order" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="-created_at">Newest first</SelectItem>
+                    <SelectItem value="created_at">Oldest first</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex justify-start">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-danger w-full"
+                  onClick={() => {
+                    setTypeFilter("");
+                    setStatusFilter("");
+                    setSourceFilter("");
+                    setOrdering("-created_at");
+                    setSearchTerm("");
+                  }}
+                >
+                  Reset
+                </Button>
+              </div>
+            </div>
+
+            {/* <div className="mt-4">
+              <div className="flex justify-start">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setTypeFilter("");
+                    setStatusFilter("");
+                    setLeadSourceFilter("");
+                    setOrdering("-created_at");
+                    setSearchTerm("");
+                  }}
+                >
+                  Reset
+                </Button>
+              </div>
+            </div> */}
+          </div>
+        </div>
+      )}
 
       <Table>
         <TableHeader>
@@ -130,8 +410,8 @@ const EnquiryList: React.FC = () => {
                   <TableCell className="text-center">
                     {enq.lead ? (
                       `${enq.lead.first_name} ${enq.lead.last_name}`
-                    ) : enq.customer?.name ? (
-                      `${enq.customer?.name}`
+                    ) : enq.customer ? (
+                      `${enq.customer?.first_name} ${enq.customer?.last_name}`
                     ) : (
                       <small className="text-muted-foreground">Not Found</small>
                     )}
@@ -144,16 +424,35 @@ const EnquiryList: React.FC = () => {
                       {formatChoiceFieldValue(enq.status)}
                     </Badge>
                   </TableCell>
-                  <TableCell className="flex justify-center">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex items-center gap-2"
-                      onClick={() => setSelectedEnquiryUid(enq.uid)}
-                    >
-                      <Eye className="h-4 w-4" />
-                      View
-                    </Button>
+                  <TableCell className="flex justify-center gap-1">
+                    <div>
+                      <Link
+                        href={`/dashboard/client-panel/enquiries/${enq.uid}`}
+                      >
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center gap-2"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </div>
+                    <div>
+                      {(session?.user?.role === "OWNER" ||
+                        session?.user?.role === "ADMIN") && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center gap-2"
+                          onClick={() =>
+                            enq.uid && handleOpenEditEnquiry(enq.uid)
+                          }
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               );
@@ -166,8 +465,7 @@ const EnquiryList: React.FC = () => {
         <div>
           {enquiriesData && enquiriesData.count > 0 && (
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              Total: {enquiriesData.count} enquiry
-              {enquiriesData.count !== 1 ? "ies" : ""}
+              Total: {enquiriesData.count} Enquiries
             </div>
           )}
         </div>
@@ -207,6 +505,16 @@ const EnquiryList: React.FC = () => {
             )}
         </div>
       </div>
+      {/* Modals */}
+      <CreateEnquiryDialogs
+        isOpen={isOpenCreateEnquiry}
+        onClose={() => setIsOpenCreateEnquiry(false)}
+      />
+      <EditEnquiryDialog
+        isOpen={isOpenEditEnquiry}
+        onClose={() => setIsOpenEditEnquiry(false)}
+        enquiryData={selectedEnquiryData}
+      />
     </div>
   );
 };

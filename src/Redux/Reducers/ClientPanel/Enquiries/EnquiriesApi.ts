@@ -3,7 +3,6 @@ import { baseApi } from "@/Redux/Api/BaseApi";
 export const EnquiriesApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getEnquiries: builder.query({
-      // Accept optional params (e.g. { page, search }) and forward them as query params
       query: (params) => ({
         url: `/support/customer-enquiries`,
         method: "GET",
@@ -11,25 +10,34 @@ export const EnquiriesApi = baseApi.injectEndpoints({
       }),
       providesTags: ["Enquiries"],
     }),
-    addEnquiry: builder.mutation({
-      query: (newTicket) => ({
+    createEnquiry: builder.mutation({
+      query: (values) => ({
         url: `/support/customer-enquiries`,
         method: "POST",
-        body: newTicket,
+        body: values,
       }),
       invalidatesTags: ["Enquiries"],
     }),
     getEnquiryDetails: builder.query({
-      query: (uid: string) => ({
-        url: `/support/customer-enquiries/${uid}`,
+      query: (enquiryuid) => ({
+        url: `/support/customer-enquiries/${enquiryuid}`,
         method: "GET",
       }),
-      providesTags: (uid) => [{ type: "Enquiries", id: uid }],
+      providesTags: ["Enquiries"],
+    }),
+    editEnquiry: builder.mutation({
+      query: ({ enquiryuid, ...values }) => ({
+        url: `/support/customer-enquiries/${enquiryuid}`,
+        method: "PATCH",
+        body: values,
+      }),
+      invalidatesTags: ["Enquiries"],
     }),
   }),
 });
 export const {
   useGetEnquiriesQuery,
-  useAddEnquiryMutation,
+  useCreateEnquiryMutation,
   useGetEnquiryDetailsQuery,
+  useEditEnquiryMutation,
 } = EnquiriesApi;
