@@ -100,8 +100,8 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
     })) || [];
 
   // Debug log (remove in production)
-  console.log("[LeadsSearch] raw data", leadAndCustomerData);
-  console.log("[LeadsSearch] options", leadAndCustomerOptions);
+  // console.log("[LeadsSearch] raw data", leadAndCustomerData);
+  // console.log("[LeadsSearch] options", leadAndCustomerOptions);
 
   const salonOptions =
     salonsData?.results?.map((salon) => ({

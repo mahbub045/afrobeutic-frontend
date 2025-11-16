@@ -17,6 +17,7 @@ import {
   LoaderPinwheel,
   Megaphone,
   MessageSquare,
+  ShieldUser,
   Users,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -108,6 +109,11 @@ const SideBar: React.FC<SideBarProps> = ({
           label: "Customers",
           href: "/dashboard/client-panel/customers",
           Icon: Users,
+        },
+        {
+          label: "Leads",
+          href: "/dashboard/client-panel/leads",
+          Icon: ShieldUser,
         },
         {
           label: "Enquiries",

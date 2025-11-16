@@ -3,10 +3,7 @@ import { baseApi } from "@/Redux/Api/BaseApi";
 export const LeadsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getLeadsData: builder.query({
-      // Accepts { salonUid, page?, page_size?, search?, created_at__gte?, created_at__lte?, ordering? }
-      // and forwards them as query params
       query: ({
-        salonUid,
         page,
         page_size,
         search,
@@ -14,7 +11,6 @@ export const LeadsApi = baseApi.injectEndpoints({
         created_at__lte,
         ordering,
       }: {
-        salonUid: string;
         page?: number;
         page_size?: number;
         search?: string;
@@ -33,7 +29,7 @@ export const LeadsApi = baseApi.injectEndpoints({
         if (ordering && ordering.trim()) params.ordering = ordering;
 
         return {
-          url: `/salons/${salonUid}/leads`,
+          url: `/leads`,
           method: "GET",
           params,
         };
@@ -41,16 +37,16 @@ export const LeadsApi = baseApi.injectEndpoints({
       providesTags: ["Leads"],
     }),
     addLead: builder.mutation({
-      query: ({ salonUid, leadsData }) => ({
-        url: `/salons/${salonUid}/leads`,
+      query: ({ leadsData }) => ({
+        url: `/leads`,
         method: "POST",
         body: leadsData,
       }),
       invalidatesTags: ["Leads"],
     }),
     editLead: builder.mutation({
-      query: ({ salonUid, leadsData, leadsUid }) => ({
-        url: `/salons/${salonUid}/leads/${leadsUid}`,
+      query: ({ leadsData, leadsUid }) => ({
+        url: `/leads/${leadsUid}`,
         method: "PATCH",
         body: leadsData,
       }),

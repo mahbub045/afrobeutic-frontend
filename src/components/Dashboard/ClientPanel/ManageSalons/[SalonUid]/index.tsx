@@ -21,7 +21,6 @@ import BookingsTab from "./Tabs/BookingsTab/BookingsTab";
 import ChairsTab from "./Tabs/ChairsTab/ChairsTab";
 import DashboardTab from "./Tabs/DashboardTab/DashboardTab";
 import EmployeesTab from "./Tabs/EmployeesTab/EmployeesTab";
-import LeadsTab from "./Tabs/LeadsTab/LeadsTab";
 import LookbookTab from "./Tabs/LookbookTab/LookbookTab";
 import OpeningHoursTab from "./Tabs/OpeningHoursTab/OpeningHoursTab";
 import ProductsTab from "./Tabs/ProductsTab/ProductsTab";
@@ -47,7 +46,6 @@ const SingleSalonContainer: React.FC = () => {
       { label: "Bookings", href: `bookings`, Icon: Calendar },
       { label: "Lookbooks", href: `lookbooks`, Icon: Image },
       { label: "Employees", href: `employees`, Icon: Users },
-      { label: "Leads", href: `leads`, Icon: ShieldUser },
       { label: "Analytics", href: `analytics`, Icon: BarChart2 },
       { label: "Settings", href: `settings`, Icon: Settings },
     ],
@@ -126,7 +124,6 @@ const SingleSalonContainer: React.FC = () => {
         {activeTab === "bookings" && <BookingsTab />}
         {activeTab === "lookbooks" && <LookbookTab />}
         {activeTab === "employees" && <EmployeesTab />}
-        {activeTab === "leads" && <LeadsTab />}
         {activeTab === "analytics" && <AnalyticsTab />}
         {activeTab === "settings" && <SettingsTab />}
       </section>

@@ -10,8 +10,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDateTime } from "@/lib/utils";
-import { useGetLeadsDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Leads/LeadsApi";
-import { LeadProps } from "@/Types/ClientPanel/ManageSalonTypes/LeadsTypes/LeadsType";
+import { useGetLeadsDataQuery } from "@/Redux/Reducers/ClientPanel/Leads/LeadsApi";
+import { LeadProps } from "@/Types/ClientPanel/LeadsTypes/LeadsType";
 import {
   ChevronLeft,
   ChevronRight,
@@ -27,7 +27,7 @@ import { useEffect, useState } from "react";
 import AddLeadDialog from "./Dialogs/AddLeadDialog";
 import EditLeadDialog from "./Dialogs/EditLeadDialog";
 
-const LeadsTab: React.FC = () => {
+const LeadList: React.FC = () => {
   const { data: session } = useSession();
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
@@ -73,7 +73,6 @@ const LeadsTab: React.FC = () => {
     isLoading,
     isFetching,
   } = useGetLeadsDataQuery({
-    salonUid,
     page: currentPage,
     search: debouncedSearch ? debouncedSearch : undefined,
     created_at__gte: debouncedStartDate ? debouncedStartDate : undefined,
@@ -207,7 +206,7 @@ const LeadsTab: React.FC = () => {
             <TableHead className="text-primary">Name</TableHead>
             <TableHead className="text-primary">Email</TableHead>
             <TableHead className="text-primary">Phone</TableHead>
-            <TableHead className="text-primary">Whatsapp</TableHead>
+            <TableHead className="text-primary">Salon</TableHead>
             <TableHead className="text-primary">Source</TableHead>
             <TableHead className="text-primary">Created At</TableHead>
             <TableHead className="text-primary text-center">Actions</TableHead>
@@ -254,8 +253,8 @@ const LeadsTab: React.FC = () => {
                   )}
                 </TableCell>
                 <TableCell>
-                  {lead.whatsapp ? (
-                    lead.whatsapp
+                  {lead.salon ? (
+                    lead.salon.name
                   ) : (
                     <small className="text-muted-foreground">Not Found</small>
                   )}
@@ -347,4 +346,4 @@ const LeadsTab: React.FC = () => {
   );
 };
 
-export default LeadsTab;
+export default LeadList;
