@@ -7,6 +7,7 @@ import {
 import { EnquiryProps } from "@/Types/EnquiriesTypes/EnquiryType";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -21,8 +22,10 @@ import {
   ChevronRight,
   Edit,
   Eye,
+  Filter,
   LoaderPinwheel,
   Plus,
+  Search,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -103,16 +106,39 @@ const EnquiryList: React.FC = () => {
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Enquiries</h2>
-        <Button
-          variant="default"
-          size="sm"
-          onClick={handleOpenCreateEnquiry}
-          className="flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Create New Enquiry
-        </Button>
+        <div>
+          {" "}
+          <h2 className="text-lg font-semibold">Enquiries</h2>
+        </div>
+        <div className="relative">
+          <Search
+            size={18}
+            className="text-muted-foreground pointer-events-none absolute top-[10px] left-2"
+          />
+          <Input
+            className="focus:!border-primary pl-7 shadow-md focus:!ring-0 dark:shadow-gray-600"
+            placeholder="Search products..."
+            // value={searchTerm}
+            // onChange={(e) =>
+            //   setSearchTerm((e.target as HTMLInputElement).value)
+            // }
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm">
+            <Filter />
+            Filter
+          </Button>
+          <Button
+            variant="default"
+            size="sm"
+            onClick={handleOpenCreateEnquiry}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Create New Enquiry
+          </Button>
+        </div>
       </div>
 
       <Table>
