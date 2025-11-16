@@ -1,70 +1,31 @@
 "use client";
 
 import { useGetEnquiryDetailsQuery } from "@/Redux/Reducers/ClientPanel/Enquiries/EnquiriesApi";
+import { EnquiryProps } from "@/Types/EnquiriesTypes/EnquiryType";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatChoiceFieldValue, formatDateTime, safe } from "@/lib/utils";
-import { AlertCircle, Edit, LoaderPinwheel } from "lucide-react";
-import { useParams, usePathname, useRouter } from "next/navigation";
+import { AlertCircle, ArrowLeft, Edit, LoaderPinwheel } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
 import React, { useState } from "react";
 import EditEnquiryDialog from "../../../Enquiries/EnquiryList/Dialogs/EditEnquiryDialog";
-
-interface Props {
-  uid: string;
-}
-
-type NullableString = string | null | undefined;
-
-interface Lead {
-  first_name?: string;
-  last_name?: string;
-  email?: string;
-  phone?: string;
-}
-
-interface Customer {
-  name?: string;
-  phone?: string;
-  created_at?: string;
-}
-
-interface Salon {
-  name?: string;
-  email?: string;
-  phone?: string;
-  city?: string;
-  country?: string;
-  status?: NullableString;
-}
-
-interface Enquiry {
-  uid?: string;
-  summary?: string | null;
-  status?: NullableString;
-  type?: NullableString;
-  created_at?: string;
-  updated_at?: string;
-  source?: NullableString;
-  lead?: Lead | null;
-  customer?: Customer | null;
-  salon?: Salon | null;
-  // allow extra unknown properties without using `any`
-  [key: string]: unknown;
-}
 
 const EnquiryDetails: React.FC = () => {
   const { enquiryuid } = useParams<{ enquiryuid: string }>();
   const router = useRouter();
-  const pathname = usePathname();
   const [isOpenEditEnquiry, setIsOpenEditEnquiry] = useState<boolean>(false);
 
   const handleEdit = () => {
     setIsOpenEditEnquiry(true);
   };
 
+  const handleBack = () => {
+    router.back();
+  };
+
   const { data, isLoading, isError } = useGetEnquiryDetailsQuery(enquiryuid);
-  const enq = data as Enquiry | undefined;
+  const enq = data as EnquiryProps | undefined;
 
   const getColorBasedOnType = (type?: string | null) => {
     switch (type) {
@@ -114,6 +75,18 @@ const EnquiryDetails: React.FC = () => {
 
   return (
     <div className="space-y-4">
+      <div className="">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleBack}
+          className="shrink-0"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back
+        </Button>
+      </div>
+
       <Card>
         <CardHeader>
           <div className="flex flex-col gap-4 overflow-visible md:flex-row md:items-start md:justify-between">
@@ -178,7 +151,11 @@ const EnquiryDetails: React.FC = () => {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground text-sm">
-              {enq.source ?? "Not Available"}
+              {enq.lead
+                ? enq.lead.source
+                : enq.customer
+                  ? enq.customer.source
+                  : "-"}
             </p>
           </CardContent>
         </Card>
@@ -197,10 +174,13 @@ const EnquiryDetails: React.FC = () => {
                 <div className="text-muted-foreground text-xs">
                   {enq.lead.phone}
                 </div>
+                <div className="text-muted-foreground text-xs">
+                  Joined: {formatDateTime(enq.lead.created_at)}
+                </div>
               </div>
             ) : enq.customer ? (
               <div className="text-sm">
-                <div className="font-semibold">{safe(enq.customer.name)}</div>
+                <div className="font-semibold">{`${safe(enq.customer.first_name)} ${safe(enq.customer.last_name)}`}</div>
                 <div className="text-muted-foreground text-xs">
                   {enq.customer.phone}
                 </div>
@@ -222,6 +202,11 @@ const EnquiryDetails: React.FC = () => {
             {enq.salon ? (
               <div className="text-sm">
                 <div className="font-semibold">{safe(enq.salon.name)}</div>
+                <div className="text-muted-foreground text-xs">
+                  <small className="bg-secondary/60 rounded-md p-1">
+                    {formatChoiceFieldValue(enq.salon.salon_type)}
+                  </small>
+                </div>
                 <div className="text-muted-foreground text-xs">
                   {enq.salon.email}
                 </div>

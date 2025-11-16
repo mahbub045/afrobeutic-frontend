@@ -171,8 +171,8 @@ const EnquiryList: React.FC = () => {
                   <TableCell className="text-center">
                     {enq.lead ? (
                       `${enq.lead.first_name} ${enq.lead.last_name}`
-                    ) : enq.customer?.name ? (
-                      `${enq.customer?.name}`
+                    ) : enq.customer ? (
+                      `${enq.customer?.first_name} ${enq.customer?.last_name}`
                     ) : (
                       <small className="text-muted-foreground">Not Found</small>
                     )}

@@ -3,7 +3,6 @@ export interface EnquiryProps {
   type?: string | null;
   summary?: string | null;
   status?: string | null;
-  source?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
   lead?: {
@@ -12,16 +11,21 @@ export interface EnquiryProps {
     phone?: string | null;
     whatsapp?: string | null;
     email?: string | null;
+    source?: string | null;
+    created_at?: string | null;
   } | null;
   customer?: {
-    name?: string | null;
+    first_name?: string | null;
+    last_name?: string | null;
     phone?: string | null;
     email?: string | null;
+    source?: string | null;
     created_at?: string | null;
   } | null;
   salon?: {
     uid?: string;
     name?: string | null;
+    salon_type?: string | null;
     email?: string | null;
     phone?: string | null;
     city?: string | null;
