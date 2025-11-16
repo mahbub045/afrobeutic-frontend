@@ -2,6 +2,7 @@
 
 import { useCreateEnquiryMutation } from "@/Redux/Reducers/ClientPanel/Enquiries/EnquiriesApi";
 import { useGetLeadsAndCustomersQuery } from "@/Redux/Reducers/ClientPanel/LeadsAndCustomers/LeadsAndCustomersApi";
+import { useGetCommonCategoriesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Common/CategoriesApi";
 import { useGetSalonListQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonApi";
 import { LeadAndCustomerProps } from "@/Types/ClientPanel/LeadsAndCustomersTypes/LeadsAndCustomersType";
 import { EnquiryDialogsProps } from "@/Types/EnquiriesTypes/EnquiryType";
@@ -26,7 +27,7 @@ import {
   FormikProps,
 } from "formik";
 import { useTheme } from "next-themes";
-import React from "react";
+import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import { toast } from "react-toastify";
@@ -41,13 +42,17 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
 
   // RTK Hooks for API calls
   // Debounced phone search state for suggestions
-  const [phoneSearch, setPhoneSearch] = React.useState("");
-  const [debouncedPhone, setDebouncedPhone] = React.useState("");
-  const [showSuggestions, setShowSuggestions] = React.useState(false);
+  const [phoneSearch, setPhoneSearch] = useState("");
+  const [debouncedPhone, setDebouncedPhone] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedContact, setSelectedContact] =
-    React.useState<LeadAndCustomerProps | null>(null);
+    useState<LeadAndCustomerProps | null>(null);
+  const CATEGORY_TYPE_FILTER = "CUSTOMER_SOURCE";
+  const [showSourceSuggestions, setShowSourceSuggestions] = useState(false);
+  const sourceInputRef = useRef<HTMLInputElement>(null);
+  const sourceDropdownRef = useRef<HTMLDivElement>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const t = setTimeout(() => setDebouncedPhone(phoneSearch), 400);
     return () => clearTimeout(t);
   }, [phoneSearch]);
@@ -61,11 +66,15 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
   // Require at least 4 digits (excluding +) before querying
   const digitsOnly = normalizedDebounced.replace(/[^0-9]/g, "");
   const searchParam = digitsOnly.length >= 4 ? normalizedDebounced : undefined;
-  // Query: if searchParam defined pass it, else fetch base list (no skip so we can still show suggestions as user types)
   const { data: leadAndCustomerData, isLoading: isLeadAndCustomerLoading } =
     useGetLeadsAndCustomersQuery(
       searchParam ? { search: searchParam } : undefined,
     );
+  const {
+    data: commonCategoriesData,
+    isLoading: isLoadingCategories,
+    refetch,
+  } = useGetCommonCategoriesDataQuery({ category_type: CATEGORY_TYPE_FILTER });
   const { data: salonsData, isLoading: isSalonsLoading } =
     useGetSalonListQuery();
   const [createEnquiry, { isLoading }] = useCreateEnquiryMutation();
@@ -100,6 +109,68 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
       uid: salon.uid,
       name: salon.name,
     })) ?? [];
+
+  // helpers to safely read category value/label from possible shapes
+  const formatCategoryValue = (c: unknown, idx: number) => {
+    if (typeof c === "string") return c;
+    if (c && typeof c === "object") {
+      const obj = c as Record<string, unknown>;
+      const val =
+        obj.name ?? obj.category ?? obj.title ?? obj.label ?? obj.id ?? idx;
+      return String(val);
+    }
+    return String(c ?? idx);
+  };
+
+  // Build a deduplicated list of source suggestions (CUSTOMER_SOURCE)
+  const sourceSuggestions: string[] = (() => {
+    const maybeObj = (commonCategoriesData ?? {}) as { data?: unknown[] };
+    const src: unknown[] = Array.isArray(commonCategoriesData)
+      ? (commonCategoriesData as unknown[])
+      : Array.isArray(maybeObj.data)
+        ? (maybeObj.data as unknown[])
+        : [];
+
+    const looksLikeSource = (c: unknown) => {
+      if (typeof c === "string") return true;
+      if (c && typeof c === "object") {
+        const obj = c as Record<string, unknown>;
+        const ct =
+          obj.category_type ?? obj.type ?? obj.categoryType ?? obj.kind;
+        if (ct === undefined || ct === null) return true;
+        return String(ct).toLowerCase() === CATEGORY_TYPE_FILTER.toLowerCase();
+      }
+      return false;
+    };
+
+    const seen = new Set<string>();
+    const out: string[] = [];
+    src.forEach((c, i) => {
+      if (!looksLikeSource(c)) return;
+      const v = formatCategoryValue(c, i).trim();
+      if (v !== "" && !seen.has(v)) {
+        seen.add(v);
+        out.push(v);
+      }
+    });
+    return out;
+  })();
+
+  // Close source dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        sourceDropdownRef.current &&
+        !sourceDropdownRef.current.contains(event.target as Node) &&
+        sourceInputRef.current &&
+        !sourceInputRef.current.contains(event.target as Node)
+      ) {
+        setShowSourceSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const initialValues = {
     phone: "",
@@ -306,7 +377,7 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                               )
                             ) : (
                               <div className="text-muted-foreground px-3 py-2 text-sm">
-                                No matches
+                                No match found
                               </div>
                             )}
                           </div>
@@ -460,15 +531,114 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                 <Label htmlFor="source" className="mb-2">
                   Source<span className="text-danger">*</span>
                 </Label>
-                <Field
-                  id="source"
-                  name="source"
-                  type="text"
-                  as="input"
-                  placeholder="Source"
-                  required
-                  disabled={!!selectedContact}
-                />
+                <div className="relative">
+                  <Field name="source">
+                    {({
+                      field,
+                      form,
+                    }: {
+                      field: FieldInputProps<string>;
+                      form: FormikProps<FormValues>;
+                    }) => (
+                      <>
+                        <input
+                          id="source"
+                          ref={sourceInputRef}
+                          type="text"
+                          autoComplete="off"
+                          placeholder='e.g. "Instagram", "Google", "Walk-in"'
+                          required
+                          disabled={!!selectedContact}
+                          className="w-full rounded-md border bg-white px-3 py-2 text-black dark:bg-[#181818] dark:text-gray-100"
+                          {...field}
+                          onFocus={() =>
+                            !selectedContact && setShowSourceSuggestions(true)
+                          }
+                          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                            field.onChange(e);
+                            if (!selectedContact)
+                              setShowSourceSuggestions(true);
+                          }}
+                          onBlur={() => {
+                            setTimeout(
+                              () => setShowSourceSuggestions(false),
+                              150,
+                            );
+                          }}
+                        />
+
+                        {showSourceSuggestions && !selectedContact && (
+                          <div
+                            ref={sourceDropdownRef}
+                            className="bg-popover text-popover-foreground absolute right-0 left-0 z-50 mt-1 max-h-40 overflow-auto rounded-md border shadow-lg"
+                          >
+                            {(() => {
+                              const inputValue =
+                                sourceInputRef.current?.value || "";
+                              const searchTerm = inputValue
+                                .toLowerCase()
+                                .trim();
+
+                              const filteredAndSorted = searchTerm
+                                ? sourceSuggestions
+                                    .map((v) => ({
+                                      value: v,
+                                      matches: v
+                                        .toLowerCase()
+                                        .includes(searchTerm),
+                                      startsWithMatch: v
+                                        .toLowerCase()
+                                        .startsWith(searchTerm),
+                                    }))
+                                    .sort((a, b) => {
+                                      if (
+                                        a.startsWithMatch &&
+                                        !b.startsWithMatch
+                                      )
+                                        return -1;
+                                      if (
+                                        !a.startsWithMatch &&
+                                        b.startsWithMatch
+                                      )
+                                        return 1;
+                                      if (a.matches && !b.matches) return -1;
+                                      if (!a.matches && b.matches) return 1;
+                                      return 0;
+                                    })
+                                    .map((item) => item.value)
+                                : sourceSuggestions;
+
+                              return filteredAndSorted.length > 0 ? (
+                                <ul className="divide-y p-2">
+                                  {filteredAndSorted.map((v) => (
+                                    <li key={v}>
+                                      <button
+                                        type="button"
+                                        className="hover:bg-accent hover:text-accent-foreground my-1 w-full px-3 py-2 text-left"
+                                        onMouseDown={(e) => e.preventDefault()}
+                                        onClick={() => {
+                                          form.setFieldValue("source", v);
+                                          setShowSourceSuggestions(false);
+                                          sourceInputRef.current?.blur();
+                                        }}
+                                      >
+                                        {v}
+                                      </button>
+                                    </li>
+                                  ))}
+                                </ul>
+                              ) : (
+                                <div className="p-2 text-sm">
+                                  {searchTerm ? "No match found" : "No sources"}
+                                </div>
+                              );
+                            })()}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </Field>
+                </div>
               </div>
 
               <div>
