@@ -72,7 +72,6 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
     );
   const {
     data: commonCategoriesData,
-    isLoading: isLoadingCategories,
     refetch,
   } = useGetCommonCategoriesDataQuery({ category_type: CATEGORY_TYPE_FILTER });
   const { data: salonsData, isLoading: isSalonsLoading } =
@@ -220,6 +219,7 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
       });
       onClose();
       resetForm();
+      refetch();
     } catch (error) {
       console.error("Failed to create enquiry:", error);
       toast.error("Failed to create enquiry. Please try again.");

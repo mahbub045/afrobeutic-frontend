@@ -8,6 +8,14 @@ import { EnquiryProps } from "@/Types/EnquiriesTypes/EnquiryType";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -26,29 +34,53 @@ import {
   LoaderPinwheel,
   Plus,
   Search,
+  X,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import CreateEnquiryDialogs from "./Dialogs/CreateEnquiryDialogs";
 import EditEnquiryDialog from "./Dialogs/EditEnquiryDialog";
+import { useGetCommonCategoriesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Common/CategoriesApi";
 
 const EnquiryList: React.FC = () => {
   const { data: session } = useSession();
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [isOpenCreateEnquiry, setIsOpenCreateEnquiry] =
     useState<boolean>(false);
   const [isOpenEditEnquiry, setIsOpenEditEnquiry] = useState<boolean>(false);
   const [selectedEnquiryUid, setSelectedEnquiryUid] = useState<string | null>(
     null,
   );
+  const [showFilters, setShowFilters] = useState<boolean>(false);
+  const [typeFilter, setTypeFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [customerSourceFilter, setCustomerSourceFilter] = useState<string>("");
+  const [ordering, setOrdering] = useState<string>("-created_at");
+
+   const CATEGORY_TYPE_FILTER = "CUSTOMER_SOURCE";
+
+  // build query params, only include values when present to avoid empty query keys
+  const queryParams: Record<string, unknown> = { page: currentPage };
+  if (debouncedSearch) queryParams.search = debouncedSearch;
+  if (typeFilter) queryParams.type = typeFilter;
+  if (statusFilter) queryParams.status = statusFilter;
+  if (customerSourceFilter) queryParams.customer__source__name = customerSourceFilter;
+  if (ordering) queryParams.ordering = ordering;
+
+  const {
+      data: commonCategoriesData,
+      refetch,
+    } = useGetCommonCategoriesDataQuery({ category_type: CATEGORY_TYPE_FILTER });
 
   const {
     data: enquiriesData,
     isLoading,
     isError,
     isFetching,
-  } = useGetEnquiriesQuery({ page: currentPage });
+  } = useGetEnquiriesQuery(queryParams);
 
   const { data: selectedEnquiryData } = useGetEnquiryDetailsQuery(
     selectedEnquiryUid ?? "",
@@ -56,6 +88,20 @@ const EnquiryList: React.FC = () => {
   );
 
   const enquiries: EnquiryProps[] = enquiriesData?.results || [];
+
+  // Debounce search input to reduce repeated network calls
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchTerm.trim());
+    }, 500);
+
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  // Reset to first page when filters/search/order change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, typeFilter, statusFilter, customerSourceFilter, ordering]);
 
   const handleOpenCreateEnquiry = () => {
     setIsOpenCreateEnquiry(true);
@@ -110,24 +156,41 @@ const EnquiryList: React.FC = () => {
           {" "}
           <h2 className="text-lg font-semibold">Enquiries</h2>
         </div>
-        <div className="relative">
+        <div className="relative mx-4 max-w-xs flex-1">
           <Search
             size={18}
             className="text-muted-foreground pointer-events-none absolute top-[10px] left-2"
           />
           <Input
+            value={searchTerm}
+            onChange={(e) =>
+              setSearchTerm((e.target as HTMLInputElement).value)
+            }
             className="focus:!border-primary pl-7 shadow-md focus:!ring-0 dark:shadow-gray-600"
-            placeholder="Search products..."
-            // value={searchTerm}
-            // onChange={(e) =>
-            //   setSearchTerm((e.target as HTMLInputElement).value)
-            // }
+            placeholder="Search enquiries..."
           />
+          {searchTerm && (
+            <Button
+              size="xs"
+              variant="ghost"
+              onClick={() => setSearchTerm("")}
+              className="absolute top-1 right-1"
+            >
+              <X />
+            </Button>
+          )}
         </div>
+
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
+          <Button
+            variant={showFilters ? "default" : "outline"}
+            size="sm"
+            onClick={() => setShowFilters((s) => !s)}
+          >
             <Filter />
-            Filter
+            <span className="ml-1">
+              {showFilters ? "Hide" : "Show"} Filters
+            </span>
           </Button>
           <Button
             variant="default"
@@ -140,6 +203,99 @@ const EnquiryList: React.FC = () => {
           </Button>
         </div>
       </div>
+
+      {/* Filter panel */}
+      {showFilters && (
+        <div className="mb-4">
+          <div className="bg-card rounded-md p-4 shadow-md dark:shadow-gray-700">
+            <div className="grid grid-cols-1 items-end gap-4 sm:grid-cols-2 lg:grid-cols-5">
+              <div>
+                <Label className="mb-1">Type</Label>
+                <Select value={typeFilter} onValueChange={setTypeFilter}>
+                  <SelectTrigger size="sm" className="w-full">
+                    <SelectValue placeholder="All types" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="GENERAL">General</SelectItem>
+                    <SelectItem value="EMERGENCY">Emergency</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="mb-1">Status</Label>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger size="sm" className="w-full">
+                    <SelectValue placeholder="All status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="NEW">New</SelectItem>
+                    <SelectItem value="IN_REVIEW">In Review</SelectItem>
+                    <SelectItem value="OPEN">Open</SelectItem>
+                    <SelectItem value="RESOLVED">Resolved</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="mb-1">Source</Label>
+                <Input
+                  value={customerSourceFilter}
+                  onChange={(e) => setCustomerSourceFilter(e.target.value)}
+                  placeholder="e.g. Facebook"
+                />
+              </div>
+
+              <div>
+                <Label className="mb-1">Ordering</Label>
+                <Select value={ordering} onValueChange={setOrdering}>
+                  <SelectTrigger size="sm" className="w-full">
+                    <SelectValue placeholder="Order" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="-created_at">Newest first</SelectItem>
+                    <SelectItem value="created_at">Oldest first</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex justify-start">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-danger w-full"
+                  onClick={() => {
+                    setTypeFilter("");
+                    setStatusFilter("");
+                    setCustomerSourceFilter("");
+                    setOrdering("-created_at");
+                    setSearchTerm("");
+                  }}
+                >
+                  Reset
+                </Button>
+              </div>
+            </div>
+
+            {/* <div className="mt-4">
+              <div className="flex justify-start">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setTypeFilter("");
+                    setStatusFilter("");
+                    setLeadSourceFilter("");
+                    setOrdering("-created_at");
+                    setSearchTerm("");
+                  }}
+                >
+                  Reset
+                </Button>
+              </div>
+            </div> */}
+          </div>
+        </div>
+      )}
 
       <Table>
         <TableHeader>
