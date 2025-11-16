@@ -1,7 +1,9 @@
 "use client";
 
 import { useCreateEnquiryMutation } from "@/Redux/Reducers/ClientPanel/Enquiries/EnquiriesApi";
+import { useGetLeadsAndCustomersQuery } from "@/Redux/Reducers/ClientPanel/LeadsAndCustomers/LeadsAndCustomersApi";
 import { useGetSalonListQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonApi";
+import { LeadAndCustomerProps } from "@/Types/ClientPanel/LeadsAndCustomersTypes/LeadsAndCustomersType";
 import { EnquiryDialogsProps } from "@/Types/EnquiriesTypes/EnquiryType";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,9 +38,62 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
   onClose,
 }) => {
   const { resolvedTheme } = useTheme();
+
+  // RTK Hooks for API calls
+  // Debounced phone search state for suggestions
+  const [phoneSearch, setPhoneSearch] = React.useState("");
+  const [debouncedPhone, setDebouncedPhone] = React.useState("");
+  const [showSuggestions, setShowSuggestions] = React.useState(false);
+  const [selectedContact, setSelectedContact] =
+    React.useState<LeadAndCustomerProps | null>(null);
+
+  React.useEffect(() => {
+    const t = setTimeout(() => setDebouncedPhone(phoneSearch), 400);
+    return () => clearTimeout(t);
+  }, [phoneSearch]);
+
+  // Build search param (API expects ?search=+447... per spec). Ensure single leading plus and minimum length.
+  const normalizedDebounced = debouncedPhone
+    ? debouncedPhone.startsWith("+")
+      ? debouncedPhone
+      : `+${debouncedPhone}`
+    : "";
+  // Require at least 4 digits (excluding +) before querying
+  const digitsOnly = normalizedDebounced.replace(/[^0-9]/g, "");
+  const searchParam = digitsOnly.length >= 4 ? normalizedDebounced : undefined;
+  // Query: if searchParam defined pass it, else fetch base list (no skip so we can still show suggestions as user types)
+  const { data: leadAndCustomerData, isLoading: isLeadAndCustomerLoading } =
+    useGetLeadsAndCustomersQuery(
+      searchParam ? { search: searchParam } : undefined,
+    );
   const { data: salonsData, isLoading: isSalonsLoading } =
     useGetSalonListQuery();
   const [createEnquiry, { isLoading }] = useCreateEnquiryMutation();
+
+  const leadAndCustomerOptions: Array<{
+    uid?: string;
+    first_name?: string | null;
+    last_name?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    source?: string | null;
+  }> =
+    // Support both paginated shape {results: [...]} and direct array response
+    (Array.isArray(leadAndCustomerData)
+      ? (leadAndCustomerData as LeadAndCustomerProps[])
+      : (leadAndCustomerData?.results as LeadAndCustomerProps[] | undefined)
+    )?.map((item: LeadAndCustomerProps) => ({
+      uid: item.uid,
+      first_name: item.first_name,
+      last_name: item.last_name,
+      email: item.email,
+      phone: item.phone,
+      source: item.source,
+    })) || [];
+
+  // Debug log (remove in production)
+  console.log("[LeadsSearch] raw data", leadAndCustomerData);
+  console.log("[LeadsSearch] options", leadAndCustomerOptions);
 
   const salonOptions =
     salonsData?.results?.map((salon) => ({
@@ -131,7 +186,7 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                     field: FieldInputProps<string>;
                     form: FormikProps<FormValues>;
                   }) => (
-                    <div>
+                    <div className="relative">
                       <PhoneInput
                         country={"gb"}
                         value={field.value}
@@ -146,6 +201,9 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                           const numeric = (value || "").replace(/[^0-9]/g, "");
                           if (!numeric) {
                             form.setFieldValue(field.name, "");
+                            setPhoneSearch("");
+                            setShowSuggestions(false);
+                            setSelectedContact(null);
                             return;
                           }
                           let newVal = numeric;
@@ -160,6 +218,11 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                           }
                           form.setFieldValue(field.name, newVal);
                           form.setFieldValue("country_dial_code", dial);
+                          // Update debounced search term with the full formatted phone (with leading +)
+                          setPhoneSearch(newVal);
+                          setShowSuggestions(true);
+                          // Editing phone clears any prior selection lock
+                          if (selectedContact) setSelectedContact(null);
                         }}
                         onBlur={() => {
                           const dial = form.values.country_dial_code || "";
@@ -170,6 +233,8 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                             );
                             form.setFieldValue("phone", `${dial}${numeric}`);
                           }
+                          // Hide suggestions on blur after a short delay to allow click
+                          setTimeout(() => setShowSuggestions(false), 150);
                         }}
                         inputProps={{ name: field.name, required: true }}
                         searchPlaceholder="Search"
@@ -180,11 +245,91 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                         dropdownClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100 !px-2"
                         searchClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100"
                       />
+                      {showSuggestions &&
+                        debouncedPhone &&
+                        debouncedPhone.length >= 3 && (
+                          <div className="bg-popover text-popover-foreground absolute z-50 mt-1 max-h-56 w-full overflow-auto rounded-md border shadow-lg">
+                            {isLeadAndCustomerLoading ? (
+                              <div className="px-3 py-2 text-sm">
+                                Searching…
+                              </div>
+                            ) : leadAndCustomerOptions.length > 0 ? (
+                              leadAndCustomerOptions.map(
+                                (
+                                  item: (typeof leadAndCustomerOptions)[number],
+                                ) => (
+                                  <button
+                                    type="button"
+                                    key={item.uid}
+                                    className="hover:bg-accent hover:text-accent-foreground flex w-full items-start gap-2 px-3 py-2 text-left"
+                                    onMouseDown={(e) => e.preventDefault()}
+                                    onClick={() => {
+                                      // Fill in values and lock fields
+                                      form.setFieldValue(
+                                        "phone",
+                                        item.phone || form.values.phone,
+                                      );
+                                      form.setFieldValue(
+                                        "first_name",
+                                        item.first_name || "",
+                                      );
+                                      form.setFieldValue(
+                                        "last_name",
+                                        item.last_name || "",
+                                      );
+                                      form.setFieldValue(
+                                        "email",
+                                        item.email || "",
+                                      );
+                                      form.setFieldValue(
+                                        "source",
+                                        item.source || "",
+                                      );
+                                      setSelectedContact(
+                                        item as unknown as LeadAndCustomerProps,
+                                      );
+                                      setShowSuggestions(false);
+                                    }}
+                                  >
+                                    <div className="flex flex-col">
+                                      <span className="text-sm font-medium">
+                                        {item.phone || "Unknown phone"}
+                                      </span>
+                                      <span className="text-muted-foreground text-xs">
+                                        {(item.first_name || "").trim()}{" "}
+                                        {(item.last_name || "").trim()}{" "}
+                                        {item.email ? `• ${item.email}` : ""}
+                                      </span>
+                                    </div>
+                                  </button>
+                                ),
+                              )
+                            ) : (
+                              <div className="text-muted-foreground px-3 py-2 text-sm">
+                                No matches
+                              </div>
+                            )}
+                          </div>
+                        )}
                       <ErrorMessage
                         name="phone"
                         component="div"
                         className="text-destructive mt-1 text-xs"
                       />
+                      {selectedContact && (
+                        <div className="text-muted-foreground mt-1 flex items-center justify-between gap-2 text-xs">
+                          <span>
+                            Contact selected. Fields auto-filled and locked.
+                          </span>
+                          <button
+                            type="button"
+                            className="text-primary hover:underline"
+                            onClick={() => setSelectedContact(null)}
+                          >
+                            Clear selection
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </Field>
@@ -201,6 +346,7 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                   as="input"
                   placeholder="First name"
                   required
+                  disabled={!!selectedContact}
                 />
                 <div className="text-destructive text-sm">
                   <ErrorMessage name="first_name" />
@@ -218,6 +364,7 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                   as="input"
                   placeholder="Last name"
                   required
+                  disabled={!!selectedContact}
                 />
               </div>
 
@@ -232,6 +379,7 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                   as="input"
                   placeholder="Email"
                   required
+                  disabled={!!selectedContact}
                 />
                 <div className="text-destructive text-sm">
                   <ErrorMessage name="email" />
@@ -319,6 +467,7 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                   as="input"
                   placeholder="Source"
                   required
+                  disabled={!!selectedContact}
                 />
               </div>
 
