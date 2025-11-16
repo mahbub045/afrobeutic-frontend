@@ -4,6 +4,7 @@ import {
   useGetEnquiriesQuery,
   useGetEnquiryDetailsQuery,
 } from "@/Redux/Reducers/ClientPanel/Enquiries/EnquiriesApi";
+import { useGetCommonCategoriesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Common/CategoriesApi";
 import { EnquiryProps } from "@/Types/EnquiriesTypes/EnquiryType";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -41,7 +42,6 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import CreateEnquiryDialogs from "./Dialogs/CreateEnquiryDialogs";
 import EditEnquiryDialog from "./Dialogs/EditEnquiryDialog";
-import { useGetCommonCategoriesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Common/CategoriesApi";
 
 const EnquiryList: React.FC = () => {
   const { data: session } = useSession();
@@ -57,23 +57,66 @@ const EnquiryList: React.FC = () => {
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [typeFilter, setTypeFilter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("");
-  const [customerSourceFilter, setCustomerSourceFilter] = useState<string>("");
+  const [sourceFilter, setSourceFilter] = useState<string>("");
   const [ordering, setOrdering] = useState<string>("-created_at");
 
-   const CATEGORY_TYPE_FILTER = "CUSTOMER_SOURCE";
+  const CATEGORY_TYPE_FILTER = "CUSTOMER_SOURCE";
 
   // build query params, only include values when present to avoid empty query keys
   const queryParams: Record<string, unknown> = { page: currentPage };
   if (debouncedSearch) queryParams.search = debouncedSearch;
   if (typeFilter) queryParams.type = typeFilter;
   if (statusFilter) queryParams.status = statusFilter;
-  if (customerSourceFilter) queryParams.customer__source__name = customerSourceFilter;
+  if (sourceFilter) queryParams.source = sourceFilter;
   if (ordering) queryParams.ordering = ordering;
 
-  const {
-      data: commonCategoriesData,
-      refetch,
-    } = useGetCommonCategoriesDataQuery({ category_type: CATEGORY_TYPE_FILTER });
+  const { data: commonCategoriesData } = useGetCommonCategoriesDataQuery({
+    category_type: CATEGORY_TYPE_FILTER,
+  });
+
+  // build a deduplicated list of customer source strings from commonCategoriesData
+  const customerSourceOptions: string[] = (() => {
+    const src: unknown[] = Array.isArray(commonCategoriesData)
+      ? commonCategoriesData
+      : Array.isArray(commonCategoriesData?.data)
+        ? commonCategoriesData!.data
+        : [];
+
+    const looksLikeSource = (c: unknown) => {
+      if (typeof c === "string") return true;
+      if (c && typeof c === "object") {
+        const obj = c as Record<string, unknown>;
+        const ct =
+          obj.category_type ?? obj.type ?? obj.categoryType ?? obj.kind;
+        if (ct === undefined || ct === null) return true;
+        return String(ct).toLowerCase() === CATEGORY_TYPE_FILTER.toLowerCase();
+      }
+      return false;
+    };
+
+    const formatCategoryValue = (c: unknown, idx: number) => {
+      if (typeof c === "string") return c;
+      if (c && typeof c === "object") {
+        const obj = c as Record<string, unknown>;
+        const val =
+          obj.name ?? obj.category ?? obj.title ?? obj.label ?? obj.id ?? idx;
+        return String(val);
+      }
+      return String(c ?? idx);
+    };
+
+    const seen = new Set<string>();
+    const out: string[] = [];
+    src.forEach((c, i) => {
+      if (!looksLikeSource(c)) return;
+      const v = formatCategoryValue(c, i);
+      if (v !== "" && !seen.has(v)) {
+        seen.add(v);
+        out.push(v);
+      }
+    });
+    return out;
+  })();
 
   const {
     data: enquiriesData,
@@ -101,7 +144,7 @@ const EnquiryList: React.FC = () => {
   // Reset to first page when filters/search/order change
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearch, typeFilter, statusFilter, customerSourceFilter, ordering]);
+  }, [debouncedSearch, typeFilter, statusFilter, sourceFilter, ordering]);
 
   const handleOpenCreateEnquiry = () => {
     setIsOpenCreateEnquiry(true);
@@ -239,11 +282,25 @@ const EnquiryList: React.FC = () => {
 
               <div>
                 <Label className="mb-1">Source</Label>
-                <Input
-                  value={customerSourceFilter}
-                  onChange={(e) => setCustomerSourceFilter(e.target.value)}
-                  placeholder="e.g. Facebook"
-                />
+                {customerSourceOptions.length === 0 ? (
+                  <Input disabled placeholder="No sources" className="mt-1" />
+                ) : (
+                  <Select
+                    value={sourceFilter}
+                    onValueChange={(v) => setSourceFilter(v)}
+                  >
+                    <SelectTrigger size="sm" className="w-full">
+                      <SelectValue placeholder="All sources" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-52 overflow-auto">
+                      {customerSourceOptions.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {s}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
 
               <div>
@@ -266,7 +323,7 @@ const EnquiryList: React.FC = () => {
                   onClick={() => {
                     setTypeFilter("");
                     setStatusFilter("");
-                    setCustomerSourceFilter("");
+                    setSourceFilter("");
                     setOrdering("-created_at");
                     setSearchTerm("");
                   }}
