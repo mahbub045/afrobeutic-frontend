@@ -226,7 +226,7 @@ const EnquiryList: React.FC = () => {
 
         <div className="flex items-center gap-2">
           <Button
-            variant={showFilters ? "default" : "outline"}
+            variant={showFilters ? "secondary" : "outline"}
             size="sm"
             onClick={() => setShowFilters((s) => !s)}
           >
