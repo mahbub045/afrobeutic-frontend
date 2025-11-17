@@ -152,14 +152,14 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
                 Profile
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
+            {/* <DropdownMenuItem asChild>
               <Link
                 className="cursor-pointer"
                 href="/dashboard/admin-panel/accounts/switch-account"
               >
                 Switch Account
               </Link>
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
           </>
         )}
         <DropdownMenuSeparator />

@@ -10,6 +10,7 @@ import {
   BadgeQuestionMark,
   BookOpen,
   ChevronRight,
+  CircleUserRound,
   Headphones,
   HelpCircle,
   Home,
@@ -73,9 +74,25 @@ const SideBar: React.FC<SideBarProps> = ({
       return [
         { label: "Home", href: "/dashboard/admin-panel", Icon: Home },
         {
-          label: "Manage Salons",
-          href: "/dashboard/admin-panel/manage-salons",
-          Icon: LifeBuoy,
+          label: "Accounts",
+          href: "/dashboard/admin-panel/accounts",
+          Icon: CircleUserRound,
+        },
+        {
+          label: "Users",
+          href: "/dashboard/admin-panel/users",
+          Icon: Users,
+        },
+        {
+          label: "Salon",
+          Icon: Users,
+          children: [
+            {
+              label: "Salons",
+              href: "/dashboard/admin-panel/salons",
+              Icon: LifeBuoy,
+            },
+          ],
         },
         {
           label: "Help",
