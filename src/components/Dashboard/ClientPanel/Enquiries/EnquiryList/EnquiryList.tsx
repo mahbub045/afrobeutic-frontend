@@ -32,6 +32,7 @@ import {
   Edit,
   Eye,
   Filter,
+  FilterX,
   LoaderPinwheel,
   Plus,
   Search,
@@ -212,16 +213,6 @@ const EnquiryList: React.FC = () => {
             className="focus:!border-primary pl-7 shadow-md focus:!ring-0 dark:shadow-gray-600"
             placeholder="Search enquiries..."
           />
-          {searchTerm && (
-            <Button
-              size="xs"
-              variant="ghost"
-              onClick={() => setSearchTerm("")}
-              className="absolute top-1 right-1"
-            >
-              <X />
-            </Button>
-          )}
         </div>
 
         <div className="flex items-center gap-2">
@@ -230,10 +221,7 @@ const EnquiryList: React.FC = () => {
             size="sm"
             onClick={() => setShowFilters((s) => !s)}
           >
-            <Filter />
-            <span className="ml-1">
-              {showFilters ? "Hide" : "Show"} Filters
-            </span>
+            {showFilters ? <FilterX /> : <Filter />} Filters
           </Button>
           <Button
             variant="default"
@@ -317,7 +305,7 @@ const EnquiryList: React.FC = () => {
               </div>
               <div className="flex justify-start">
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   className="text-danger w-full"
                   onClick={() => {
@@ -328,6 +316,7 @@ const EnquiryList: React.FC = () => {
                     setSearchTerm("");
                   }}
                 >
+                  <X />
                   Reset
                 </Button>
               </div>

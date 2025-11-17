@@ -26,6 +26,7 @@ import {
   ChevronRight,
   Edit,
   Filter,
+  FilterX,
   LoaderPinwheel,
   Plus,
   Search,
@@ -187,8 +188,7 @@ const LeadList: React.FC = () => {
             variant={showFilters ? "secondary" : "outline"}
             onClick={() => setShowFilters((s) => !s)}
           >
-            <Filter />
-            Filters
+            {showFilters ? <FilterX /> : <Filter />} Filters
           </Button>
 
           <Button size="sm" onClick={() => setAddLeadDialogOpen(true)}>
