@@ -277,7 +277,7 @@ const EditEmployeeBasicInfoDialog: React.FC<
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
-          {({ handleSubmit, isSubmitting, values, setFieldValue, ...rest }) => (
+          {({ handleSubmit, isSubmitting, values, setFieldValue }) => (
             <Form
               onSubmit={(e) => {
                 e.preventDefault();

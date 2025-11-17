@@ -1,10 +1,7 @@
 "use client";
 
 import { useGetCustomerByIdQuery } from "@/Redux/Reducers/ClientPanel/Customers/CustomersApi";
-import {
-  CustomerDetailData,
-  CustomerDetailProps,
-} from "@/Types/ClientPanel/CustomersTypes/CustomersType";
+import { CustomerProps } from "@/Types/ClientPanel/CustomersTypes/CustomersType";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,7 +19,7 @@ import {
   Phone,
   User,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import React from "react";
 
 const getStatusColor = (status: string) => {
@@ -42,9 +39,14 @@ const getStatusColor = (status: string) => {
   }
 };
 
-const CustomerDetail: React.FC<CustomerDetailProps> = ({ uid }) => {
+const CustomerDetail: React.FC = () => {
+  const { customeruid } = useParams();
   const router = useRouter();
-  const { data: customer, isLoading, error } = useGetCustomerByIdQuery(uid);
+  const {
+    data: customer,
+    isLoading,
+    error,
+  } = useGetCustomerByIdQuery(customeruid as string);
 
   if (error) {
     return (
@@ -96,7 +98,7 @@ const CustomerDetail: React.FC<CustomerDetailProps> = ({ uid }) => {
     );
   }
 
-  const customerData: CustomerDetailData = customer;
+  const customerData: CustomerProps = customer;
 
   return (
     <div className="space-y-6">
@@ -184,7 +186,9 @@ const CustomerDetail: React.FC<CustomerDetailProps> = ({ uid }) => {
               <label className="text-muted-foreground text-sm font-medium">
                 Name
               </label>
-              <p className="mt-1 text-lg font-semibold">{customerData.name}</p>
+              <p className="mt-1 text-lg font-semibold">
+                {customerData.first_name} {customerData.last_name}
+              </p>
             </div>
             <div>
               <label className="text-muted-foreground text-sm font-medium">

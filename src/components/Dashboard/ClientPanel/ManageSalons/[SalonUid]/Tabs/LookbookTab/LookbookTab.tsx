@@ -132,7 +132,10 @@ const LookbookTab: React.FC = () => {
               extractedLookBook.map((lookBook: LookBookProps) => (
                 <TableRow key={lookBook.uid}>
                   <TableCell>{lookBook?.booking_id}</TableCell>
-                  <TableCell>{lookBook.customer?.name}</TableCell>
+                  <TableCell>
+                    {lookBook.customer?.first_name}{" "}
+                    {lookBook.customer?.last_name}
+                  </TableCell>
                   <TableCell>{lookBook?.customer?.phone}</TableCell>
                   <TableCell>
                     {formatDateTime(lookBook?.created_at ?? null)}

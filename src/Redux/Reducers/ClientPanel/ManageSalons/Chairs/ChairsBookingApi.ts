@@ -32,7 +32,7 @@ export const ChairsBookingApi = baseApi.injectEndpoints({
           },
         };
       },
-      providesTags: ["ChairsBooking"],
+      providesTags: ["ChairsBooking", "Bookings"],
     }),
     addChairBooking: builder.mutation({
       query: ({ salonUid, chairUid, chairBookingData }) => ({

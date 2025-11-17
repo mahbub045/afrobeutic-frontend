@@ -95,7 +95,7 @@ const EditLookBookImageDialog: React.FC<EditLookBookImageDialogProps> = ({
         icon: "success",
         iconColor: "#037375",
         title: "Updated successfully",
-        html: `Successfully updated images for <b class="text-primary">${selectedLookBook.customer.name}</b>`,
+        html: `Successfully updated images for <b class="text-primary">${selectedLookBook.customer.first_name} ${selectedLookBook.customer.last_name}</b>`,
         background: resolvedTheme === "dark" ? "#0f1724" : undefined,
         color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
         confirmButtonColor: "#037375",

@@ -117,8 +117,7 @@ const EditLeadDialog: React.FC<LeadDialogProps> = ({
     salon: LeadData?.salon?.uid ?? null,
     source: LeadData?.source ?? "",
   };
-  const { data: salonsData, isLoading: isSalonsLoading } =
-    useGetSalonListQuery();
+  const { data: salonsData } = useGetSalonListQuery();
   const [editLead, { isLoading: isEditing }] = useEditLeadMutation();
 
   const salonOptions =

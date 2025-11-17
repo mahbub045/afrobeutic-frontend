@@ -152,7 +152,8 @@ const BookingsTab: React.FC = () => {
         return {
           id: booking.uid,
           service: serviceNames,
-          client: booking.customer.name,
+          client:
+            `${booking.customer.first_name} ${booking.customer.last_name}`.trim(),
           clientAvatar: undefined,
           staff: staff.name,
           startTime,
@@ -630,14 +631,16 @@ const BookingsTab: React.FC = () => {
                         <Avatar className="border-background h-12 w-12 border-2 shadow">
                           <AvatarImage src={selectedAppointment.clientAvatar} />
                           <AvatarFallback className="bg-primary font-semibold text-white">
-                            {(singleBookingData?.customer.name || "?").charAt(
-                              0,
-                            )}
+                            {(
+                              singleBookingData?.customer.first_name || "?"
+                            ).charAt(0)}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
                           <div className="text-foreground text-base font-semibold">
-                            {singleBookingData?.customer.name ?? "Unknown"}
+                            {singleBookingData?.customer.first_name ??
+                              "Unknown"}{" "}
+                            {singleBookingData?.customer.last_name ?? ""}
                           </div>
                           <div className="text-muted-foreground text-xs">
                             Client
@@ -966,13 +969,14 @@ const BookingsTab: React.FC = () => {
                                 <AvatarImage src={undefined} />
                                 <AvatarFallback className="bg-primary font-semibold text-white">
                                   {(
-                                    singleBookingData?.customer?.name || "?"
+                                    singleBookingData?.customer?.first_name ||
+                                    "?"
                                   ).charAt(0)}
                                 </AvatarFallback>
                               </Avatar>
                               <div className="flex-1">
                                 <div className="text-foreground text-base font-semibold">
-                                  {singleBookingData?.customer?.name ??
+                                  {`${singleBookingData?.customer?.first_name || ""} ${singleBookingData?.customer?.last_name || ""}`.trim() ||
                                     "Unknown"}
                                 </div>
                                 <div className="text-muted-foreground text-xs">
@@ -1251,13 +1255,25 @@ const BookingsTab: React.FC = () => {
                   selectedAppointment.fullBookingData?.notes ||
                   "",
                 customer: {
-                  name:
-                    singleBookingData?.customer?.name ||
-                    selectedAppointment.fullBookingData?.customer?.name ||
-                    selectedAppointment.client,
+                  uid:
+                    singleBookingData?.customer?.uid ||
+                    selectedAppointment.fullBookingData?.customer?.uid ||
+                    "",
+                  first_name:
+                    singleBookingData?.customer?.first_name ||
+                    selectedAppointment.fullBookingData?.customer?.first_name ||
+                    "",
+                  last_name:
+                    singleBookingData?.customer?.last_name ||
+                    selectedAppointment.fullBookingData?.customer?.last_name ||
+                    "",
                   phone:
                     singleBookingData?.customer?.phone ||
                     selectedAppointment.fullBookingData?.customer?.phone ||
+                    "",
+                  created_at:
+                    singleBookingData?.customer?.created_at ||
+                    selectedAppointment.fullBookingData?.customer?.created_at ||
                     "",
                 },
                 employee: {

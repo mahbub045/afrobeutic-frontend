@@ -1,15 +1,13 @@
-// export interface Booking {
-//   booking_date: string;
-//   booking_time: string;
-//   status: string;
-//   booking_id?: string;
-// }
-
-export interface Customer {
+export interface CustomerProps {
   uid: string;
-  name: string;
-  phone?: string | null;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string | null;
+  source: string | null;
   booking: Booking[];
+  created_at: string;
+  updated_at: string;
 }
 
 export interface CustomersQueryParams {
@@ -81,17 +79,4 @@ export interface Booking {
   employee: Employee;
   services: Service[];
   products: Product[];
-}
-
-export interface CustomerDetailData {
-  uid: string;
-  name: string;
-  phone: string | null;
-  booking: Booking[];
-  created_at: string;
-  updated_at: string;
-}
-
-export interface CustomerDetailProps {
-  uid: string;
 }

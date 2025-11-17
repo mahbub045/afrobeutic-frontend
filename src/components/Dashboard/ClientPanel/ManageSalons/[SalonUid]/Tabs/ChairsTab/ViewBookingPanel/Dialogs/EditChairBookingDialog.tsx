@@ -131,7 +131,7 @@ const EditChairBookingDialog: React.FC<EditChairBookingDialogProps> = ({
         icon: "success",
         iconColor: "#037375",
         title: "Booking Edited Successfully",
-        html: `Booking for <b class="text-primary">${values.customer.name}</b> has been edited.`,
+        html: `Booking for <b class="text-primary">${values.customer.first_name} ${values.customer.last_name}</b> has been edited.`,
         background: resolvedTheme === "dark" ? "#0f1724" : undefined,
         color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
         confirmButtonColor: "#037375",
@@ -167,7 +167,8 @@ const EditChairBookingDialog: React.FC<EditChairBookingDialogProps> = ({
           initialValues={
             {
               customer: {
-                name: selectedChairBookingData?.customer.name || "",
+                first_name: selectedChairBookingData?.customer.first_name || "",
+                last_name: selectedChairBookingData?.customer.last_name || "",
                 phone: selectedChairBookingData?.customer.phone || "",
               },
               booking_date:

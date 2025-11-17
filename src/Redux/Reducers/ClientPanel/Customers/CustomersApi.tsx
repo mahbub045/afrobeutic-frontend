@@ -12,8 +12,8 @@ export const CustomersApi = baseApi.injectEndpoints({
       providesTags: ["Customers"],
     }),
     getCustomerById: builder.query({
-      query: (uid: string) => ({
-        url: `/customers/${uid}`,
+      query: (customeruid: string) => ({
+        url: `/customers/${customeruid}`,
         method: "GET",
       }),
       providesTags: ["Customers"],

@@ -26,21 +26,19 @@ import {
   ChevronRight,
   Edit,
   Filter,
+  FilterX,
   LoaderPinwheel,
   Plus,
   Search,
   X,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import AddLeadDialog from "./Dialogs/AddLeadDialog";
 import EditLeadDialog from "./Dialogs/EditLeadDialog";
 
 const LeadList: React.FC = () => {
   const { data: session } = useSession();
-  const { salonuid } = useParams();
-
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
@@ -187,8 +185,7 @@ const LeadList: React.FC = () => {
             variant={showFilters ? "secondary" : "outline"}
             onClick={() => setShowFilters((s) => !s)}
           >
-            <Filter />
-            Filters
+            {showFilters ? <FilterX /> : <Filter />} Filters
           </Button>
 
           <Button size="sm" onClick={() => setAddLeadDialogOpen(true)}>

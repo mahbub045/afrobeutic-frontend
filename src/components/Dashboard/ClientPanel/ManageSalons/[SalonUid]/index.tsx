@@ -11,7 +11,6 @@ import {
   Image,
   Scissors,
   Settings,
-  ShieldUser,
   Users,
 } from "lucide-react";
 import { useParams, usePathname } from "next/navigation";

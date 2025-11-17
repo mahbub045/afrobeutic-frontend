@@ -53,7 +53,7 @@ export const BookingsApi = baseApi.injectEndpoints({
           body: data,
         };
       },
-      invalidatesTags: ["Bookings"],
+      invalidatesTags: ["Bookings","ChairsBooking"],
     }),
   }),
 });
