@@ -29,13 +29,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatChoiceFieldValue } from "@/lib/utils";
+import { formatChoiceFieldValue, formatDateTime } from "@/lib/utils";
 import {
+  CalendarRange,
   ChevronLeft,
   ChevronRight,
   Eye,
   LoaderPinwheel,
   Search,
+  X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -153,8 +155,9 @@ const CustomerList: React.FC = () => {
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                className="shadow-md dark:shadow-gray-600"
+                className="text-primary shadow-md dark:shadow-gray-600"
               >
+                <CalendarRange />
                 Date Range
               </Button>
             </PopoverTrigger>
@@ -191,8 +194,9 @@ const CustomerList: React.FC = () => {
           <Button
             variant="outline"
             onClick={handleClearFilters}
-            className="shadow-md dark:shadow-gray-600"
+            className="text-danger shadow-md dark:shadow-gray-600"
           >
+            <X />
             Clear Filters
           </Button>
         </div>
@@ -205,6 +209,8 @@ const CustomerList: React.FC = () => {
             <TableHead className="text-primary">Name</TableHead>
             <TableHead className="text-primary">Email</TableHead>
             <TableHead className="text-primary text-center">Phone</TableHead>
+            <TableHead className="text-primary text-center">Salon</TableHead>
+            <TableHead className="text-primary text-center">Chair</TableHead>
             <TableHead className="text-primary text-center">Bookings</TableHead>
             <TableHead className="text-primary text-center">
               Recent booking
@@ -219,7 +225,7 @@ const CustomerList: React.FC = () => {
         <TableBody className="text-center">
           {isLoadingCustomers ? (
             <TableRow>
-              <TableCell colSpan={8} className="py-8 text-center">
+              <TableCell colSpan={10} className="py-8 text-center">
                 <div className="flex items-center justify-center">
                   <LoaderPinwheel className="h-6 w-6 animate-spin" />
                 </div>
@@ -227,7 +233,7 @@ const CustomerList: React.FC = () => {
             </TableRow>
           ) : customers.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={8} className="py-8 text-center">
+              <TableCell colSpan={10} className="py-8 text-center">
                 No customers found.
               </TableCell>
             </TableRow>
@@ -242,12 +248,14 @@ const CustomerList: React.FC = () => {
                   </TableCell>
                   <TableCell className="text-start">{c.email ?? "—"}</TableCell>
                   <TableCell>{c.phone ?? "—"}</TableCell>
+                  <TableCell>{latest?.salon?.name ?? "—"}</TableCell>
+                  <TableCell>{latest?.chair?.name ?? "—"}</TableCell>
                   <TableCell>{c.booking?.length ?? 0}</TableCell>
                   <TableCell>
                     {latest
-                      ? new Date(
+                      ? formatDateTime(
                           `${latest.booking_date}T${latest.booking_time}`,
-                        ).toLocaleString()
+                        )
                       : "—"}
                   </TableCell>
                   <TableCell>
