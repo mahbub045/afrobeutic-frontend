@@ -21,14 +21,12 @@ import {
   FieldProps,
   Formik,
   FormikProps,
-  type FormikErrors,
   type FormikHelpers,
-  type FormikTouched,
 } from "formik";
-import { LucideFilter, LucideFilterX, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import PhoneInput from "react-phone-input-2";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
@@ -51,7 +49,9 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [showValues, setShowValues] = useState(false);
+  const [showCategories, setShowCategories] = useState(false);
+  const categoryInputRef = useRef<HTMLInputElement>(null);
+  const categoryDropdownRef = useRef<HTMLDivElement>(null);
   const CATEGORY_TYPE_FILTER = "EMPLOYEE";
   // RTK Hooks
   const [addEmployee, { isLoading }] = useAddEmployeeMutation();
@@ -107,7 +107,21 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
   })();
 
   useEffect(() => {
+    // Handle click outside to close dropdown
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        categoryDropdownRef.current &&
+        !categoryDropdownRef.current.contains(event.target as Node) &&
+        categoryInputRef.current &&
+        !categoryInputRef.current.contains(event.target as Node)
+      ) {
+        setShowCategories(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
       if (previewUrl) {
         try {
           URL.revokeObjectURL(previewUrl);
@@ -116,7 +130,8 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
         }
       }
     };
-  }, [previewUrl]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleAddEmployee(
     values: EmployeeFormValues,
@@ -138,94 +153,84 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
       }
 
       // send FormData directly as employeeData — baseApi will attach headers
-      await addEmployee({
+      const res = await addEmployee({
         salonUid: salonuid as string,
         employeeData: form as unknown as object,
-      }).unwrap();
-      onClose();
-      Swal.fire({
-        icon: "success",
-        iconColor: "#037375",
-        title: "Added successfully",
-        html: `Successfully added <b class="text-primary">${values.name}</b> employee`,
-        background: resolvedTheme === "dark" ? "#0f1724" : undefined,
-        color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
-        confirmButtonColor: "#037375",
-        timer: 3000,
       });
-      helpers.resetForm();
-      refetch();
-      // clear selected file and preview
-      if (previewUrl) {
-        try {
-          URL.revokeObjectURL(previewUrl);
-        } catch {
-          /* ignore */
-        }
-      }
-      setSelectedFile(null);
-      setPreviewUrl(null);
-    } catch (err: unknown) {
-      console.error(err);
+      if (res.data) {
+        Swal.fire({
+          icon: "success",
+          iconColor: "#037375",
+          title: "Added successfully",
+          html: `Successfully added <b class="text-primary">${values.name}</b> employee`,
+          background: resolvedTheme === "dark" ? "#0f1724" : undefined,
+          color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
+          confirmButtonColor: "#037375",
+          timer: 3000,
+        });
+        onClose();
+        helpers.resetForm();
+        refetch();
+        setSelectedFile(null);
+        setPreviewUrl(null);
+      } else if ("error" in res) {
+        // Try to surface server-side validation errors under the correct fields
+        const errObj: unknown = (res as { error?: unknown }).error;
+        const errData: unknown =
+          errObj && typeof errObj === "object" && "data" in errObj
+            ? (errObj as { data?: unknown }).data
+            : undefined;
 
-      // Try to extract server-side validation errors and show them on the form
-      // Common API shapes: { employee_id: ["..."] } or { errors: { ... } } or err.data
-      let payload: unknown = null;
-      if (typeof err === "object" && err !== null) {
-        const e = err as Record<string, unknown>;
-        payload = e.data ?? e.errors ?? e;
-      } else {
-        payload = err;
-      }
+        // Support both { field: [msgs] } and { errors: { field: [msgs] } }
+        const rawErrors: unknown =
+          errData && typeof errData === "object" && "errors" in errData
+            ? (errData as { errors?: unknown }).errors
+            : errData;
 
-      if (payload && typeof payload === "object") {
-        // If the API returns { errors: { field: [msg] } }
-        let maybeErrors: unknown = payload;
-        if (typeof payload === "object" && payload !== null) {
-          const p = payload as Record<string, unknown>;
-          maybeErrors = p.errors ?? payload;
-        }
-        if (maybeErrors && typeof maybeErrors === "object") {
-          const fieldErrors: Record<string, string> = {};
-          for (const [key, val] of Object.entries(
-            maybeErrors as Record<string, unknown>,
-          )) {
-            if (Array.isArray(val)) {
-              fieldErrors[key] = (val as string[]).join(" ");
-            } else if (typeof val === "string") {
-              fieldErrors[key] = val as string;
-            } else if (typeof val === "object" && val !== null) {
-              // nested object -> try to find message arrays or strings
-              const nestedMsgs: string[] = [];
-              for (const nestedVal of Object.values(
-                val as Record<string, unknown>,
-              )) {
-                if (Array.isArray(nestedVal))
-                  nestedMsgs.push((nestedVal as string[]).join(" "));
-                else if (typeof nestedVal === "string")
-                  nestedMsgs.push(nestedVal as string);
-              }
-              fieldErrors[key] = nestedMsgs.join(" ") || JSON.stringify(val);
-            } else {
-              fieldErrors[key] = String(val);
+        const candidateFields = [
+          "employee_id",
+          "phone",
+          "name",
+          "designation",
+          "image",
+        ] as const;
+
+        let fieldHandled = false;
+        candidateFields.forEach((f) => {
+          const v =
+            rawErrors && typeof rawErrors === "object"
+              ? (rawErrors as Record<string, unknown>)[f]
+              : undefined;
+          if (!v) return;
+          const msg = Array.isArray(v) ? String(v[0]) : String(v);
+          // mark touched so the inline error shows immediately
+          helpers.setFieldTouched(f, true, false);
+          helpers.setFieldError(f, msg);
+          fieldHandled = true;
+        });
+
+        if (!fieldHandled) {
+          const generic = (() => {
+            if (errData && typeof errData === "object") {
+              const obj = errData as Record<string, unknown>;
+              if (typeof obj.detail === "string") return obj.detail;
+              if (typeof obj.message === "string") return obj.message;
             }
-          }
-
-          // Set Formik errors so field-level messages appear under inputs
-          helpers.setErrors(
-            fieldErrors as unknown as FormikErrors<EmployeeFormValues>,
-          );
-          const touchedObj: Record<string, boolean> = {};
-          Object.keys(fieldErrors).forEach((k) => (touchedObj[k] = true));
-          helpers.setTouched(
-            touchedObj as unknown as FormikTouched<EmployeeFormValues>,
-          );
-          return;
+            if (errObj && typeof errObj === "object") {
+              const obj = errObj as Record<string, unknown>;
+              if (typeof obj.error === "string") return obj.error;
+            }
+            return "Failed to add employee. Please try again.";
+          })();
+          toast.error(generic);
         }
+      } else {
+        toast.error("Failed to add employee. Please try again.");
       }
-
-      // Fallback generic message
-      toast.error("Failed to add employee. Please try again.");
+    } catch (err: unknown) {
+      // Network or unexpected error
+      const fallback = err instanceof Error ? err.message : String(err);
+      toast.error(fallback || "Failed to add employee. Please try again.");
     }
   }
 
@@ -233,7 +238,7 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md shadow-md dark:shadow-gray-600">
         <DialogHeader>
-          <DialogTitle>Add New Employee</DialogTitle>
+          <DialogTitle className="text-primary">Add New Employee</DialogTitle>
           <DialogDescription>Add a new employee to the salon</DialogDescription>
         </DialogHeader>
 
@@ -262,7 +267,7 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
                   as="input"
                   type="text"
                   required
-                  placeholder="e.g. Emp-888"
+                  placeholder="e.g. EMP-888"
                 />
                 {touched.employee_id && errors.employee_id ? (
                   <p className="text-destructive text-sm">
@@ -309,6 +314,10 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
                             ? `+${data.dialCode}`
                             : "";
                           const numeric = (val || "").replace(/[^0-9]/g, "");
+                          if (!numeric) {
+                            form.setFieldValue(field.name, "");
+                            return;
+                          }
                           let newVal = numeric;
                           if (dial) {
                             if (!numeric.startsWith(dial.replace(/\D/g, ""))) {
@@ -344,68 +353,84 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
                   Designation<span className="text-danger">*</span>
                 </Label>
                 <Field
+                  innerRef={categoryInputRef}
                   id="designation"
                   name="designation"
                   as="input"
                   type="text"
                   required
-                  placeholder="e.g. Hair Stylist"
-                  list="designation-list"
+                  autoComplete="off"
+                  placeholder='e.g. "Hair Stylist", "Nail Technician"'
+                  onFocus={() => setShowCategories(true)}
                   onChange={(e: ChangeEvent<HTMLInputElement>) =>
                     setFieldValue("designation", e.target.value)
                   }
                 />
-                <div className="absolute top-[15px] right-0 mt-2 flex items-center gap-2">
-                  <button
-                    type="button"
-                    className="inline-flex items-center !rounded-l-none border-l bg-[#f6f8fb] p-4 text-sm hover:bg-white dark:bg-[#1f1e1e] hover:dark:bg-[#242222]"
-                    onClick={() => setShowValues((s) => !s)}
-                  >
-                    {showValues ? (
-                      <LucideFilterX size={16} />
-                    ) : (
-                      <LucideFilter size={16} />
-                    )}
-                  </button>
-                </div>
 
-                {showValues ? (
-                  <div className="absolute right-0 left-0 z-50 mt-1 max-h-40 overflow-auto rounded border bg-white shadow-lg dark:bg-[#0b1116]">
-                    {categorySuggestions.length > 0 ? (
-                      <ul className="divide-y p-2">
-                        {categorySuggestions.map((v) => (
-                          <li key={v}>
-                            <button
-                              type="button"
-                              className="my-1 w-full px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-800"
-                              onClick={() => {
-                                setFieldValue("designation", v);
-                                setShowValues(false);
-                              }}
-                            >
-                              {v}
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <div className="text-muted p-2 text-sm">
-                        No Designation
-                      </div>
-                    )}
+                {showCategories && (
+                  <div
+                    ref={categoryDropdownRef}
+                    className="absolute right-0 left-0 z-50 mt-1 max-h-40 overflow-auto rounded border bg-white shadow-lg dark:bg-[#0b1116]"
+                  >
+                    {(() => {
+                      const inputValue = categoryInputRef.current?.value || "";
+                      const searchTerm = inputValue.toLowerCase().trim();
+
+                      // Filter and sort categories: matching ones first
+                      const filteredAndSorted = searchTerm
+                        ? categorySuggestions
+                            .map((v) => ({
+                              value: v,
+                              matches: v.toLowerCase().includes(searchTerm),
+                              startsWithMatch: v
+                                .toLowerCase()
+                                .startsWith(searchTerm),
+                            }))
+                            .sort((a, b) => {
+                              // Prioritize: starts with > contains > no match
+                              if (a.startsWithMatch && !b.startsWithMatch)
+                                return -1;
+                              if (!a.startsWithMatch && b.startsWithMatch)
+                                return 1;
+                              if (a.matches && !b.matches) return -1;
+                              if (!a.matches && b.matches) return 1;
+                              return 0;
+                            })
+                            .map((item) => item.value)
+                        : categorySuggestions;
+
+                      return filteredAndSorted.length > 0 ? (
+                        <ul className="divide-y p-2">
+                          {filteredAndSorted.map((v) => (
+                            <li key={v}>
+                              <button
+                                type="button"
+                                className="my-1 w-full px-3 py-2 text-left hover:bg-gray-50 dark:shadow-gray-600 dark:hover:bg-gray-800"
+                                onClick={() => {
+                                  setFieldValue("designation", v);
+                                  setShowCategories(false);
+                                }}
+                              >
+                                {v}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <div className="p-2 text-sm">No Designation</div>
+                      );
+                    })()}
                   </div>
-                ) : null}
+                )}
 
                 {isLoadingCategories ? (
-                  <p className="text-muted mt-1 text-sm">
-                    Loading Designations...
-                  </p>
+                  <p className="mt-1 text-sm">Loading Designations...</p>
                 ) : !commonCategoriesData ||
                   (Array.isArray(commonCategoriesData) &&
                     commonCategoriesData.length === 0) ||
                   (Array.isArray(commonCategoriesData?.data) &&
                     commonCategoriesData.data.length === 0) ? (
-                  <p className="text-muted mt-1 text-sm">No categories found</p>
+                  <p className="mt-1 text-sm">No categories found</p>
                 ) : null}
                 {touched.designation && errors.designation ? (
                   <p className="text-destructive text-sm">

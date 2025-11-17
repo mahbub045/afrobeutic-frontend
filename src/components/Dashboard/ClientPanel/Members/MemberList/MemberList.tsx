@@ -14,11 +14,12 @@ import { MemberProps } from "@/Types/ClientPanel/ManageSalonTypes/MemberTypes/Me
 import {
   ChevronLeft,
   ChevronRight,
-  EllipsisVertical,
+  MoreVertical,
   Plus,
   UserRoundPen,
   UserX,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import AddNewMemberDialog from "./Dialogs/AddNewMemberDialog";
@@ -26,6 +27,7 @@ import DeleteMemberDialog from "./Dialogs/DeleteMemberDialog";
 import EditMemberInfoDialog from "./Dialogs/EditMemberInfoDialog";
 
 const MemberList: React.FC = () => {
+  const { data: session } = useSession();
   const [isOpenAddMemberModal, setIsOpenAddMemberModal] = useState(false);
   const [isOpenEditMemberModal, setIsOpenEditMemberModal] = useState(false);
   const [isOpenDeleteMemberModal, setIsOpenDeleteMemberModal] = useState(false);
@@ -98,16 +100,20 @@ const MemberList: React.FC = () => {
             className="!px-8"
           />
         </div> */}
-
-        <Button
-          variant="default"
-          size="sm"
-          className="text-white"
-          onClick={handleOpenAddMemberModal}
-        >
-          <Plus />
-          Invite Member
-        </Button>
+        <div>
+          {(session?.user?.role === "OWNER" ||
+            session?.user?.role === "ADMIN") && (
+            <Button
+              variant="default"
+              size="sm"
+              className="text-white"
+              onClick={handleOpenAddMemberModal}
+            >
+              <Plus />
+              Invite Member
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Member Cards */}
@@ -133,10 +139,10 @@ const MemberList: React.FC = () => {
           membersData.results.map((member: MemberProps) => (
             <Card
               key={member.uid}
-              className="group hover:shadow-primary/10 gap-2 overflow-hidden border border-gray-200/60 bg-white/80 p-2 text-center shadow-md backdrop-blur-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl dark:border-gray-700/60 dark:bg-gray-900/80 dark:shadow-gray-600 dark:hover:shadow-gray-600/30"
+              className="group hover:shadow-primary/10 relative gap-2 overflow-hidden border border-gray-200/60 bg-white/80 p-2 text-center shadow-md backdrop-blur-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl dark:border-gray-700/60 dark:bg-gray-900/80 dark:shadow-gray-600 dark:hover:shadow-gray-600/30"
             >
               {/* Animated border gradient */}
-              <div className="from-primary/10 dark:from-primary/20 dark:to-primary/20 to-primary/10 absolute inset-0 rounded-lg bg-gradient-to-r via-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+              <div className="from-primary/10 dark:from-primary/20 dark:to-primary/20 to-primary/10 pointer-events-none absolute inset-0 z-0 rounded-lg bg-gradient-to-r via-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
               <div className="flex items-center justify-between">
                 <div>
@@ -145,11 +151,19 @@ const MemberList: React.FC = () => {
                   </Badge>
                 </div>
                 <div>
-                  {member.role !== "OWNER" && (
+                  {(session?.user?.role === "OWNER" ||
+                    session?.user?.role === "ADMIN") &&
+                    member.role !== "OWNER" && (
                     <div>
                       <DropdownMenu>
-                        <DropdownMenuTrigger className="px-1 shadow-md dark:shadow-gray-600">
-                          <EllipsisVertical className="cursor-pointer text-xs" />
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="relative z-10 h-8 w-8 p-0 shadow-md dark:shadow-gray-600"
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
                           <DropdownMenuItem

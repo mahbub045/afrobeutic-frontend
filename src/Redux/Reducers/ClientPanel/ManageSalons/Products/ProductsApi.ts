@@ -9,11 +9,13 @@ export const ProductsApi = baseApi.injectEndpoints({
         page,
         page_size,
         search,
+        ordering,
       }: {
         salonUid: string;
         page?: number;
         page_size?: number;
         search?: string;
+        ordering?: string;
       }) => {
         return {
           url: `/salons/${salonUid}/products`,
@@ -23,6 +25,7 @@ export const ProductsApi = baseApi.injectEndpoints({
             ...(page ? { page } : {}),
             ...(page_size ? { page_size } : {}),
             ...(search ? { search } : {}),
+            ...(ordering ? { ordering } : {}),
           },
         };
       },

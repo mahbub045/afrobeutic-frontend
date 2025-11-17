@@ -14,6 +14,9 @@ import { formatDateTime } from "@/lib/utils";
 import { useGetProductsDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Products/ProductsApi";
 import { ProductProps } from "@/Types/ClientPanel/ManageSalonTypes/ProductsTypes/ProductsType";
 import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
   ChevronLeft,
   ChevronRight,
   Eye,
@@ -22,13 +25,15 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import AddProductDialog from "./Dialogs/AddProductDialog";
 import DeleteProductDialog from "./Dialogs/DeleteProductDialog";
-import ViewProductPanel from "./SingleProduct/ViewProductPanel";
+import ViewProductPanel from "./ProductDetails/ViewProductPanel";
 
 const ProductsTab: React.FC = () => {
+  const { data: session } = useSession();
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
 
@@ -42,6 +47,7 @@ const ProductsTab: React.FC = () => {
   const [selectedProductToView, setSelectedProductToView] =
     useState<ProductProps | null>(null);
   const [viewTab, setViewTab] = useState<string>("list");
+  const [ordering, setOrdering] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -51,6 +57,11 @@ const ProductsTab: React.FC = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
+  // Reset to first page whenever ordering changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [ordering]);
+
   const {
     data: productData,
     isLoading,
@@ -59,6 +70,7 @@ const ProductsTab: React.FC = () => {
     salonUid,
     page: currentPage,
     search: debouncedSearch || undefined,
+    ordering: ordering || undefined,
   });
 
   const extractedProducts: ProductProps[] = productData?.results ?? [];
@@ -110,27 +122,60 @@ const ProductsTab: React.FC = () => {
               }
             />
           </div>
-
-          <Button
-            size="sm"
-            variant="default"
-            onClick={handleIsOpenAddProductDialog}
-          >
-            <Plus className="h-4 w-4" />
-            Add New Product
-          </Button>
+          <div>
+            {(session?.user?.role === "OWNER" ||
+              session?.user?.role === "ADMIN") && (
+              <Button
+                size="sm"
+                variant="default"
+                onClick={handleIsOpenAddProductDialog}
+              >
+                <Plus className="h-4 w-4" />
+                Add New Product
+              </Button>
+            )}
+          </div>
         </div>
 
         <Table>
           <TableHeader className="text-xs">
             <TableRow>
-              <TableHead>#</TableHead>
-              <TableHead>Product Name</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>Created At</TableHead>
-              <TableHead>Updated At</TableHead>
-              <TableHead className="text-center">Actions</TableHead>
+              <TableHead className="text-primary">#</TableHead>
+              <TableHead className="text-primary">Product Name</TableHead>
+              <TableHead className="text-primary">Category</TableHead>
+              <TableHead className="text-primary">
+                <div className="flex items-center gap-1">
+                  <span>Price</span>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    className="text-primary h-7 w-7"
+                    aria-label="Toggle price ordering"
+                    title={`Toggle price ordering (current: ${ordering === undefined ? "none" : ordering === "price" ? "asc" : "desc"})`}
+                    onClick={() =>
+                      setOrdering((prev) =>
+                        prev === undefined
+                          ? "price"
+                          : prev === "price"
+                            ? "-price"
+                            : undefined,
+                      )
+                    }
+                  >
+                    {ordering === undefined && (
+                      <ArrowUpDown className="h-4 w-4" />
+                    )}
+                    {ordering === "price" && <ArrowDown className="h-4 w-4" />}
+                    {ordering === "-price" && <ArrowUp className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </TableHead>
+              <TableHead className="text-primary">Created At</TableHead>
+              <TableHead className="text-primary">Updated At</TableHead>
+              <TableHead className="text-primary text-center">
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
 
@@ -153,7 +198,7 @@ const ProductsTab: React.FC = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              extractedProducts.map((product: ProductProps, index) => (
+              extractedProducts?.map((product: ProductProps, index) => (
                 <TableRow key={product.uid}>
                   <TableCell className="font-medium">{index + 1}</TableCell>
                   <TableCell className="font-medium">{product.name}</TableCell>
@@ -167,23 +212,31 @@ const ProductsTab: React.FC = () => {
                   </TableCell>
 
                   <TableCell className="flex justify-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-primary/80 hover:text-primary dark:shadow-gray-600"
-                      onClick={() => handleIsOpenSingleProductTab(product)}
-                    >
-                      <Eye />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-danger/80 hover:text-danger dark:shadow-gray-600"
-                      color="red"
-                      onClick={() => handleIsOpenDeleteDialog(product)}
-                    >
-                      <Trash2 />
-                    </Button>
+                    <div>
+                      {" "}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-primary/80 hover:text-primary dark:shadow-gray-600"
+                        onClick={() => handleIsOpenSingleProductTab(product)}
+                      >
+                        <Eye />
+                      </Button>
+                    </div>
+                    <div>
+                      {(session?.user?.role === "OWNER" ||
+                        session?.user?.role === "ADMIN") && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-danger/80 hover:text-danger dark:shadow-gray-600"
+                          color="red"
+                          onClick={() => handleIsOpenDeleteDialog(product)}
+                        >
+                          <Trash2 />
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))

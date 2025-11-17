@@ -14,6 +14,9 @@ import { formatDateTime } from "@/lib/utils";
 import { useGetServicesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
 import { ServiceProps } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
   ChevronLeft,
   ChevronRight,
   Eye,
@@ -22,13 +25,15 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import AddServiceDialog from "./Dialogs/AddServiceDialog";
 import DeleteServiceDialog from "./Dialogs/DeleteServiceDialog";
-import ViewServicePanel from "./SingleService/ViewServicePanel";
+import ViewServicePanel from "./ServiceDetails/ViewServicePanel";
 
 const ServicesTab: React.FC = () => {
+  const { data: session } = useSession();
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
 
@@ -42,6 +47,7 @@ const ServicesTab: React.FC = () => {
   const [selectedServiceToView, setSelectedServiceToView] =
     useState<ServiceProps | null>(null);
   const [viewTab, setViewTab] = useState<string>("list");
+  const [ordering, setOrdering] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -51,6 +57,11 @@ const ServicesTab: React.FC = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
+  // Reset to first page whenever ordering changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [ordering]);
+
   const {
     data: serviceData,
     isLoading,
@@ -59,6 +70,7 @@ const ServicesTab: React.FC = () => {
     salonUid,
     page: currentPage,
     search: debouncedSearch || undefined,
+    ordering: ordering || undefined,
   });
 
   const extractedServices: ServiceProps[] = serviceData?.results ?? [];
@@ -110,27 +122,60 @@ const ServicesTab: React.FC = () => {
               }
             />
           </div>
-
-          <Button
-            size="sm"
-            variant="default"
-            onClick={handleIsOpenAddServiceDialog}
-          >
-            <Plus className="h-4 w-4" />
-            Add New Service
-          </Button>
+          <div>
+            {(session?.user?.role === "OWNER" ||
+              session?.user?.role === "ADMIN") && (
+              <Button
+                size="sm"
+                variant="default"
+                onClick={handleIsOpenAddServiceDialog}
+              >
+                <Plus className="h-4 w-4" />
+                Add New Service
+              </Button>
+            )}
+          </div>
         </div>
 
         <Table>
           <TableHeader className="text-xs">
             <TableRow>
-              <TableHead>#</TableHead>
-              <TableHead>Service Name</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>Created At</TableHead>
-              <TableHead>Updated At</TableHead>
-              <TableHead className="text-center">Actions</TableHead>
+              <TableHead className="text-primary">#</TableHead>
+              <TableHead className="text-primary">Service Name</TableHead>
+              <TableHead className="text-primary">Category</TableHead>
+              <TableHead className="text-primary">
+                <div className="flex items-center gap-1">
+                  <span>Price</span>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    className="text-primary h-7 w-7"
+                    aria-label="Toggle price ordering"
+                    title={`Toggle price ordering (current: ${ordering === undefined ? "none" : ordering === "price" ? "asc" : "desc"})`}
+                    onClick={() =>
+                      setOrdering((prev) =>
+                        prev === undefined
+                          ? "price"
+                          : prev === "price"
+                            ? "-price"
+                            : undefined,
+                      )
+                    }
+                  >
+                    {ordering === undefined && (
+                      <ArrowUpDown className="h-4 w-4" />
+                    )}
+                    {ordering === "price" && <ArrowDown className="h-4 w-4" />}
+                    {ordering === "-price" && <ArrowUp className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </TableHead>
+              <TableHead className="text-primary">Created At</TableHead>
+              <TableHead className="text-primary">Updated At</TableHead>
+              <TableHead className="text-primary text-center">
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
 
@@ -167,23 +212,31 @@ const ServicesTab: React.FC = () => {
                   </TableCell>
 
                   <TableCell className="flex justify-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-primary/80 hover:text-primary dark:shadow-gray-600"
-                      onClick={() => handleIsOpenSingleServiceTab(service)}
-                    >
-                      <Eye />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-danger/80 hover:text-danger dark:shadow-gray-600"
-                      color="red"
-                      onClick={() => handleIsOpenDeleteDialog(service)}
-                    >
-                      <Trash2 />
-                    </Button>
+                    <div>
+                      {" "}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-primary/80 hover:text-primary dark:shadow-gray-600"
+                        onClick={() => handleIsOpenSingleServiceTab(service)}
+                      >
+                        <Eye />
+                      </Button>
+                    </div>
+                    <div>
+                      {(session?.user?.role === "OWNER" ||
+                        session?.user?.role === "ADMIN") && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-danger/80 hover:text-danger dark:shadow-gray-600"
+                          color="red"
+                          onClick={() => handleIsOpenDeleteDialog(service)}
+                        >
+                          <Trash2 />
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))

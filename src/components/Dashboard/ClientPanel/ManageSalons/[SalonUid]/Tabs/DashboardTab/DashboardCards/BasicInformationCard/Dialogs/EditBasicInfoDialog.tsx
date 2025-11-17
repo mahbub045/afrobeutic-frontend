@@ -49,10 +49,8 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
     city: Yup.string().required("City is required"),
     postal_code: Yup.string().required("Postal code is required"),
     country: Yup.string().required("Country is required"),
-    address: Yup.string().required("Address is required"),
+    address: Yup.string().nullable(),
   });
-
-  // Note: we'll send logo as multipart/form-data when a file is present
 
   const handleSubmit = async (
     values: BasicInfoFormValues,

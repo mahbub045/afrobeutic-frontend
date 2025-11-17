@@ -19,7 +19,7 @@ import {
 import { formatChoiceFieldValue } from "@/lib/utils";
 import { useGetChairsBookingDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Chairs/ChairsBookingApi";
 import {
-  BookingData,
+  ChairBookingProps,
   ViewBookingPanelProps,
 } from "@/Types/ClientPanel/ManageSalonTypes/ChairsTypes/ChairBookingTypes";
 import {
@@ -38,16 +38,15 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
   const salonUid = Array.isArray(params.salonuid)
     ? params.salonuid[0]
     : (params.salonuid ?? "");
-  const [selectedBooking, setSelectedBooking] = useState<BookingData | null>(
-    null,
-  );
+  const [selectedBooking, setSelectedBooking] =
+    useState<ChairBookingProps | null>(null);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isEditBookingDialogOpen, setIsEditBookingDialogOpen] = useState(false);
 
-  // const handleEditBooking = (booking: BookingData) => {
+  // const handleEditBooking = (booking: ChairBookingProps) => {
   //   setSelectedBooking(booking);
   //   setIsEditBookingDialogOpen(true);
   // };
@@ -64,7 +63,7 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
   });
   const extractingChairBookingData = chairsBookingData?.results || [];
 
-  const handleViewDetails = (booking: BookingData) => {
+  const handleViewDetails = (booking: ChairBookingProps) => {
     setSelectedBooking(booking);
     setIsSheetOpen(true);
   };
@@ -101,14 +100,12 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
         return "default";
       case "INPROGRESS":
         return "warning";
+      case "COMPLETED":
+        return "destructive";
       case "RESCHEDULED":
         return "secondary";
-      case "COMPLETED":
-        return "outline";
       case "CANCELLED":
         return "danger";
-      case "ABSENT":
-        return "destructive";
       default:
         return "outline";
     }
@@ -127,8 +124,8 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
   };
 
   const calculateTotalPrice = (
-    services: BookingData["services"],
-    products: BookingData["products"],
+    services: ChairBookingProps["services"],
+    products: ChairBookingProps["products"],
   ) => {
     const servicesTotal = services.reduce(
       (sum, service) => sum + parseFloat(service.price),
@@ -165,7 +162,7 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
         <div className="relative flex w-1/4">
           <Search className="text-muted-foreground absolute top-1/4 left-2 size-4" />
           <Input
-            placeholder="Search by customer and employee name..."
+            placeholder="Search Bookings..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="focus:!border-primary pl-7 shadow-md focus:!ring-0 dark:shadow-gray-600"
@@ -175,28 +172,30 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
       <Table>
         <TableHeader className="text-xs">
           <TableRow>
-            <TableHead>#</TableHead>
-            <TableHead>Booking ID</TableHead>
-            <TableHead>Customer</TableHead>
-            <TableHead>Phone</TableHead>
-            <TableHead>Employee</TableHead>
-            <TableHead>Date</TableHead>
-            <TableHead>Time</TableHead>
-            <TableHead>Duration</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Total Price</TableHead>
-            <TableHead className="text-center">Actions</TableHead>
+            <TableHead className="text-primary">#</TableHead>
+            <TableHead className="text-primary">Booking ID</TableHead>
+            <TableHead className="text-primary">Customer</TableHead>
+            <TableHead className="text-primary">Phone</TableHead>
+            <TableHead className="text-primary">Employee</TableHead>
+            <TableHead className="text-primary">Date</TableHead>
+            <TableHead className="text-primary">Time</TableHead>
+            <TableHead className="text-primary">Duration</TableHead>
+            <TableHead className="text-primary">Status</TableHead>
+            <TableHead className="text-primary">Total Price</TableHead>
+            <TableHead className="text-primary text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {extractingChairBookingData.map(
-            (booking: BookingData, index: number) => (
+            (booking: ChairBookingProps, index: number) => (
               <TableRow key={booking.uid}>
                 <TableCell className="font-medium">{index + 1}</TableCell>
                 <TableCell className="font-medium">
                   {booking.booking_id}
                 </TableCell>
-                <TableCell>{booking.customer.name}</TableCell>
+                <TableCell>
+                  {booking.customer.first_name} {booking.customer.last_name}
+                </TableCell>
                 <TableCell>{booking.customer.phone}</TableCell>
                 <TableCell>{booking.employee.name}</TableCell>
                 <TableCell>{formatDate(booking.booking_date)}</TableCell>
@@ -299,7 +298,8 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
                 <div className="space-y-1">
                   <p className="text-sm">
                     <span className="font-medium">Name:</span>{" "}
-                    {selectedBooking.customer.name}
+                    {selectedBooking.customer.first_name}{" "}
+                    {selectedBooking.customer.last_name}
                   </p>
                   <p className="text-sm">
                     <span className="font-medium">Phone:</span>{" "}

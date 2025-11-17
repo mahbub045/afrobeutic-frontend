@@ -5,11 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetSalonListQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonApi";
 import { AlertCircle, Plus, Scissors } from "lucide-react";
+import { useSession } from "next-auth/react";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import AddSalonDialog from "../../../ManageSalons/Dialogs/AddSalonDialog";
 
 const SalonsCard: React.FC = () => {
+  const { data: session } = useSession();
   const { data: salonsData, isLoading, isError } = useGetSalonListQuery();
   const [isAddSalonDialogOpen, setIsAddSalonDialogOpen] = useState(false);
 
@@ -21,14 +24,17 @@ const SalonsCard: React.FC = () => {
     <Card className="h-full shadow-md dark:shadow-gray-600">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <CardTitle className="text-xl font-semibold">My Salons</CardTitle>
-        <Button
-          onClick={handleOpenAddSalonDialog}
-          size="sm"
-          className="gap-1 text-white"
-        >
-          <Plus className="h-4 w-4" />
-          Add salon
-        </Button>
+        {(session?.user?.role === "OWNER" ||
+          session?.user?.role === "ADMIN") && (
+          <Button
+            onClick={handleOpenAddSalonDialog}
+            size="sm"
+            className="gap-1 text-white"
+          >
+            <Plus className="h-4 w-4" />
+            Add salon
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -74,7 +80,17 @@ const SalonsCard: React.FC = () => {
               >
                 <div className="bg-card hover:bg-accent/50 mb-3 flex items-start gap-3 rounded-lg border p-4 shadow-md transition-colors dark:shadow-gray-600">
                   <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
-                    <Scissors className="text-primary h-5 w-5" />
+                    {salon?.logo ? (
+                      <Image
+                        src={salon.logo}
+                        alt={salon.name}
+                        width={40}
+                        height={40}
+                        className="h-10 w-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <Scissors className="text-primary h-5 w-5" />
+                    )}
                   </div>
                   <div className="flex-1 space-y-1">
                     <h4 className="text-sm leading-none font-medium">

@@ -42,7 +42,17 @@ export const baseApi = createApi({
     "Products",
     "Chairs",
     "ChairsBooking",
+    "Bookings",
+    "LookBook",
     "Employees",
+    "Leads",
+    "Customers",
+    "LeadsAndCustomers",
+    "Enquiries",
+    "SupportTickets",
+
+    //Admin Panel tag types
+    "AccountsList",
   ],
   endpoints: () => ({}),
 });
