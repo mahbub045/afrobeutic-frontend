@@ -19,7 +19,7 @@ import {
   Phone,
   User,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import React from "react";
 
 const getStatusColor = (status: string) => {
@@ -39,9 +39,14 @@ const getStatusColor = (status: string) => {
   }
 };
 
-const CustomerDetail: React.FC<CustomerProps> = ({ uid }) => {
+const CustomerDetail: React.FC = () => {
+  const { customeruid } = useParams();
   const router = useRouter();
-  const { data: customer, isLoading, error } = useGetCustomerByIdQuery(uid);
+  const {
+    data: customer,
+    isLoading,
+    error,
+  } = useGetCustomerByIdQuery(customeruid as string);
 
   if (error) {
     return (

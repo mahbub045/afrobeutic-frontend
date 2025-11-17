@@ -1,3 +1,4 @@
+"use client";
 import Breadcrumbs from "@/components/Dashboard/CommonComponents/Breadcrumbs";
 import { useParams } from "next/navigation";
 import EnquiryDetails from "./EnquiryDetail/EnquiryDetail";
