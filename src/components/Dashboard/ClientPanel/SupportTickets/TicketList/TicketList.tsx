@@ -4,6 +4,7 @@ import { useGetSupportTicketsQuery } from "@/Redux/Reducers/ClientPanel/SupportT
 import { TicketProps } from "@/Types/ClientPanel/SupportTicketsTypes/SupportTicketsType";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -14,23 +15,42 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatChoiceFieldValue, formatDateTime } from "@/lib/utils";
-import { ChevronLeft, ChevronRight, Eye, LoaderPinwheel } from "lucide-react";
-import React, { useState } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  LoaderPinwheel,
+  Search,
+} from "lucide-react";
+import React, { useEffect, useState } from "react";
 import AddTicketDialog from "./Dialogs/AddTicketDialog";
 import TicketDetail from "./TicketDetail/TicketDetail";
 
 const TicketList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [selectedTicketUid, setSelectedTicketUid] = useState<string | null>(
     null,
   );
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebouncedSearch(searchTerm.trim());
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(t);
+  }, [searchTerm]);
 
   const {
     data: ticketsData,
     isLoading,
     isError,
     isFetching,
-  } = useGetSupportTicketsQuery({ page: currentPage });
+  } = useGetSupportTicketsQuery({
+    page: currentPage,
+    search: debouncedSearch || undefined,
+  });
 
   const tickets: TicketProps[] = ticketsData?.results || [];
 
@@ -87,9 +107,31 @@ const TicketList: React.FC = () => {
       </TabsList>
 
       <TabsContent value="list" className="space-y-4">
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <h2 className="text-lg font-semibold"> Support Tickets</h2>
-          <AddTicketDialog />
+
+          <div className="flex w-full max-w-xs items-center gap-3">
+            <div className="relative flex-1">
+              <Search
+                size={18}
+                className="text-muted-foreground pointer-events-none absolute top-[10px] left-2"
+              />
+              <Input
+                className="focus:!border-primary pl-7 shadow-md focus:!ring-0 dark:shadow-gray-600"
+                placeholder="Search tickets..."
+                value={searchTerm}
+                onChange={(e) =>
+                  setSearchTerm((e.target as HTMLInputElement).value)
+                }
+              />
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline">
+              Filter
+            </Button>
+            <AddTicketDialog />
+          </div>
         </div>
 
         <Table>
