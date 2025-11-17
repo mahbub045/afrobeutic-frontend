@@ -1,8 +1,9 @@
-export interface BookingData {
+export interface ChairBookingProps {
   uid: string;
   customer: {
     uid: string;
-    name: string;
+    first_name: string;
+    last_name: string;
     phone: string;
     created_at: string;
     updated_at: string;
@@ -42,7 +43,8 @@ export interface BookingData {
 
 export interface BookingFormValues {
   customer: {
-    name: string;
+    first_name: string;
+    last_name: string;
     phone: string;
   };
   booking_date: string;
@@ -65,7 +67,7 @@ export interface EditChairBookingDialogProps {
   isOpen: boolean;
   onClose: () => void;
   selectedChairUid: string;
-  selectedChairBookingData: BookingData | null;
+  selectedChairBookingData: ChairBookingProps | null;
 }
 
 export interface ViewBookingPanelProps {

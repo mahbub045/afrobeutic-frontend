@@ -38,7 +38,8 @@ import * as Yup from "yup";
 const BookingSchema = Yup.object().shape({
   customer: Yup.object()
     .shape({
-      name: Yup.string().required("Customer name is required"),
+      first_name: Yup.string().required("Customer name is required"),
+      last_name: Yup.string().required("Customer last name is required"),
       phone: Yup.string()
         .required("Customer phone is required")
         .matches(/^\+?[1-9]\d{1,14}$/, "Please enter a valid phone number"),
@@ -169,7 +170,7 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
         icon: "success",
         iconColor: "#037375",
         title: "Booking Created Successfully",
-        html: `Booking for <b class="text-primary">${values.customer.name}</b> has been created.`,
+        html: `Booking for <b class="text-primary">${values.customer.first_name} ${values.customer.last_name}</b> has been created.`,
         background: resolvedTheme === "dark" ? "#0f1724" : undefined,
         color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
         confirmButtonColor: "#037375",
@@ -205,11 +206,12 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
           initialValues={
             {
               customer: {
-                name: "",
+                first_name: "",
+                last_name: "",
                 phone: "",
               },
               booking_date: new Date().toISOString().split("T")[0],
-              booking_time: "",
+              booking_time: "08:00",
               notes: "",
               services: [],
               products: [],
@@ -224,21 +226,39 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
               {/* Customer Information */}
               <div className="space-y-4 rounded-lg border p-4">
                 <h3 className="font-semibold">Customer Information</h3>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div>
-                    <Label htmlFor="customer.name" className="mb-2">
-                      Customer Name<span className="text-danger">*</span>
+                    <Label htmlFor="customer.first_name" className="mb-2">
+                      Customer First Name<span className="text-danger">*</span>
                     </Label>
                     <Field
-                      id="customer.name"
-                      name="customer.name"
+                      id="customer.first_name"
+                      name="customer.first_name"
                       as="input"
                       type="text"
                       required
-                      placeholder="Enter customer name"
+                      placeholder="Enter customer first name"
                     />
                     <ErrorMessage
-                      name="customer.name"
+                      name="customer.first_name"
+                      component="p"
+                      className="mt-1 text-sm text-red-500"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="customer.last_name" className="mb-2">
+                      Customer Last Name<span className="text-danger">*</span>
+                    </Label>
+                    <Field
+                      id="customer.last_name"
+                      name="customer.last_name"
+                      as="input"
+                      type="text"
+                      required
+                      placeholder="Enter customer last name"
+                    />
+                    <ErrorMessage
+                      name="customer.last_name"
                       component="p"
                       className="mt-1 text-sm text-red-500"
                     />

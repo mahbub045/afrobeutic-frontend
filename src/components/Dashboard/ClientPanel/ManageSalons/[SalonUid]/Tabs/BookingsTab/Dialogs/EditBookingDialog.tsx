@@ -7,6 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { baseApi } from "@/Redux/Api/BaseApi";
 import { useEditBookingMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/BookingsApi";
 import { useGetEmployeesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Employees/EmployeesApi";
 import { useGetProductsDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Products/ProductsApi";
@@ -23,6 +24,7 @@ import { useTheme } from "next-themes";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
 import { toast } from "sonner";
 import Swal from "sweetalert2";
 
@@ -55,6 +57,7 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
     useGetProductsDataQuery({ salonUid: salonUid });
   const { data: employeesData, isLoading: isLoadingEmployees } =
     useGetEmployeesDataQuery({ salonUid: salonUid });
+  const dispatch = useDispatch();
   const [editBooking, { isLoading }] = useEditBookingMutation();
 
   const hours = Array.from({ length: 24 }, (_, i) =>
@@ -157,6 +160,15 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
         bookingUid: bookingData?.uid || "",
         data: formData,
       }).unwrap();
+
+      // Invalidate ChairsBooking tag to force refetch for useGetChairsBookingDataQuery
+      // This ensures any views that rely on Chairs bookings will refresh
+      try {
+        dispatch(baseApi.util.invalidateTags(["ChairsBooking"]));
+      } catch (e) {
+        // non-blocking if dispatch fails for some reason
+        console.warn("Failed to invalidate ChairsBooking tag:", e);
+      }
 
       Swal.fire({
         icon: "success",

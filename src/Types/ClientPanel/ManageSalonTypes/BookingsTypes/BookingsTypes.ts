@@ -21,14 +21,19 @@ export interface BookingProduct {
 
 export interface BookingCustomer {
   uid: string;
-  name: string;
+  first_name: string;
+  last_name: string;
   phone: string;
   created_at: string;
 }
 
 export interface BookingEmployee {
   uid: string;
+  employee_id: string;
   name: string;
+  phone: string;
+  designation: string;
+  image: string | null;
 }
 
 export interface Booking {
@@ -96,7 +101,7 @@ export interface EditBookingDialogProps {
     cancellation_reason?: string;
     status: string;
     notes: string;
-    customer: { name: string; phone: string };
+    customer: BookingCustomer;
     employee: { uid: string };
     services: Array<{ uid: string }>;
     products: Array<{ uid: string }>;
