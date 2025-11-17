@@ -114,7 +114,7 @@ const EditLeadDialog: React.FC<LeadDialogProps> = ({
     last_name: LeadData?.last_name ?? "",
     email: LeadData?.email ?? "",
     phone: LeadData?.phone ?? "",
-    salon: LeadData?.salon ?? null,
+    salon: LeadData?.salon?.uid ?? null,
     source: LeadData?.source ?? "",
   };
   const { data: salonsData, isLoading: isSalonsLoading } =

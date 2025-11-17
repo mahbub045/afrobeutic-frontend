@@ -9,6 +9,7 @@ export const LeadsApi = baseApi.injectEndpoints({
         search,
         created_at__gte,
         created_at__lte,
+        source,
         ordering,
       }: {
         page?: number;
@@ -16,6 +17,7 @@ export const LeadsApi = baseApi.injectEndpoints({
         search?: string;
         created_at__gte?: string;
         created_at__lte?: string;
+        source?: string;
         ordering?: string;
       }) => {
         const params: Record<string, string | number> = {};
@@ -26,6 +28,7 @@ export const LeadsApi = baseApi.injectEndpoints({
           params.created_at__gte = created_at__gte;
         if (created_at__lte && created_at__lte.trim())
           params.created_at__lte = created_at__lte;
+        if (source && source.trim()) params.source = source;
         if (ordering && ordering.trim()) params.ordering = ordering;
 
         return {

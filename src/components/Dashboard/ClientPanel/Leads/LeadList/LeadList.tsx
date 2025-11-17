@@ -1,6 +1,14 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -11,6 +19,7 @@ import {
 } from "@/components/ui/table";
 import { formatDateTime } from "@/lib/utils";
 import { useGetLeadsDataQuery } from "@/Redux/Reducers/ClientPanel/Leads/LeadsApi";
+import { useGetCommonCategoriesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Common/CategoriesApi";
 import { LeadProps } from "@/Types/ClientPanel/LeadsTypes/LeadsType";
 import {
   ChevronLeft,
@@ -20,6 +29,7 @@ import {
   LoaderPinwheel,
   Plus,
   Search,
+  X,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
@@ -30,7 +40,6 @@ import EditLeadDialog from "./Dialogs/EditLeadDialog";
 const LeadList: React.FC = () => {
   const { data: session } = useSession();
   const { salonuid } = useParams();
-  const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
 
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -44,6 +53,8 @@ const LeadList: React.FC = () => {
   const [addLeadDialogOpen, setAddLeadDialogOpen] = useState<boolean>(false);
   const [editLeadDialogOpen, setEditLeadDialogOpen] = useState<boolean>(false);
   const [selectedLead, setSelectedLead] = useState<LeadProps | null>(null);
+  const [sourceFilter, setSourceFilter] = useState<string>("");
+  const CATEGORY_TYPE_FILTER = "CUSTOMER_SOURCE";
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -68,6 +79,10 @@ const LeadList: React.FC = () => {
     setCurrentPage(1);
   }, [ordering]);
 
+  const { data: commonCategoriesData } = useGetCommonCategoriesDataQuery({
+    category_type: CATEGORY_TYPE_FILTER,
+  });
+
   const {
     data: leadsData,
     isLoading,
@@ -78,9 +93,54 @@ const LeadList: React.FC = () => {
     created_at__gte: debouncedStartDate ? debouncedStartDate : undefined,
     created_at__lte: debouncedEndDate ? debouncedEndDate : undefined,
     ordering: ordering ? ordering : undefined,
+    source: sourceFilter ? sourceFilter : undefined,
   });
 
   const extractedLeadsData: LeadProps[] = leadsData?.results ?? [];
+
+  // build a deduplicated list of customer source strings from commonCategoriesData
+  const customerSourceOptions: string[] = (() => {
+    const src: unknown[] = Array.isArray(commonCategoriesData)
+      ? commonCategoriesData
+      : Array.isArray(commonCategoriesData?.data)
+        ? commonCategoriesData!.data
+        : [];
+
+    const looksLikeSource = (c: unknown) => {
+      if (typeof c === "string") return true;
+      if (c && typeof c === "object") {
+        const obj = c as Record<string, unknown>;
+        const ct =
+          obj.category_type ?? obj.type ?? obj.categoryType ?? obj.kind;
+        if (ct === undefined || ct === null) return true;
+        return String(ct).toLowerCase() === CATEGORY_TYPE_FILTER.toLowerCase();
+      }
+      return false;
+    };
+
+    const formatCategoryValue = (c: unknown, idx: number) => {
+      if (typeof c === "string") return c;
+      if (c && typeof c === "object") {
+        const obj = c as Record<string, unknown>;
+        const val =
+          obj.name ?? obj.category ?? obj.title ?? obj.label ?? obj.id ?? idx;
+        return String(val);
+      }
+      return String(c ?? idx);
+    };
+
+    const seen = new Set<string>();
+    const out: string[] = [];
+    src.forEach((c, i) => {
+      if (!looksLikeSource(c)) return;
+      const v = formatCategoryValue(c, i);
+      if (v !== "" && !seen.has(v)) {
+        seen.add(v);
+        out.push(v);
+      }
+    });
+    return out;
+  })();
 
   const openEditDialog = (lead: LeadProps) => {
     setSelectedLead(lead);
@@ -140,7 +200,7 @@ const LeadList: React.FC = () => {
 
       {showFilters && (
         <div className="border-border from-background to-muted/20 mb-6 rounded-lg border bg-gradient-to-br p-4 shadow-sm">
-          <div className="grid gap-4 md:grid-cols-4 md:items-end">
+          <div className="grid gap-4 md:grid-cols-5 md:items-end">
             <div className="flex flex-col gap-2">
               <label className="text-foreground text-sm font-medium">
                 Start Date
@@ -168,6 +228,28 @@ const LeadList: React.FC = () => {
                 className="shadow-sm"
               />
             </div>
+            <div className="flex flex-col gap-2">
+              <Label>Source</Label>
+              {customerSourceOptions.length === 0 ? (
+                <Input disabled placeholder="No sources" />
+              ) : (
+                <Select
+                  value={sourceFilter}
+                  onValueChange={(v) => setSourceFilter(v)}
+                >
+                  <SelectTrigger size="sm" className="w-full py-[17px]">
+                    <SelectValue placeholder="All sources" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-52 overflow-auto">
+                    {customerSourceOptions.map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {s}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
 
             <div className="flex flex-col gap-2">
               <label className="text-foreground text-sm font-medium">
@@ -192,8 +274,9 @@ const LeadList: React.FC = () => {
                 setEndDate("");
                 setOrdering("");
               }}
-              className="border-destructive/50 text-destructive hover:bg-destructive/10 hover:text-destructive h-10"
+              className="border-destructive/50 text-destructive hover:bg-destructive/10 hover:text-destructive h-9"
             >
+              <X />
               Clear Filters
             </Button>
           </div>
