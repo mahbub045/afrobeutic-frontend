@@ -33,15 +33,12 @@ import {
   X,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import AddLeadDialog from "./Dialogs/AddLeadDialog";
 import EditLeadDialog from "./Dialogs/EditLeadDialog";
 
 const LeadList: React.FC = () => {
   const { data: session } = useSession();
-  const { salonuid } = useParams();
-
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");

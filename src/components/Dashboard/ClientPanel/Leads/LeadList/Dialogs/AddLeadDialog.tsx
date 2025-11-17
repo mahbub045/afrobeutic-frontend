@@ -35,7 +35,7 @@ const AddLeadDialog: React.FC<LeadDialogProps> = ({ isOpen, onClose }) => {
 
   const { data: commonCategoriesData, refetch } =
     useGetCommonCategoriesDataQuery({ category_type: CATEGORY_TYPE_FILTER });
-    
+
   const sourceInputRef = useRef<HTMLInputElement | null>(null);
   const sourceDropdownRef = useRef<HTMLDivElement | null>(null);
   const [showSourceSuggestions, setShowSourceSuggestions] =
@@ -103,8 +103,7 @@ const AddLeadDialog: React.FC<LeadDialogProps> = ({ isOpen, onClose }) => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-  const { data: salonsData, isLoading: isSalonsLoading } =
-    useGetSalonListQuery();
+  const { data: salonsData } = useGetSalonListQuery();
   const [addLead, { isLoading: isAddingLead }] = useAddLeadMutation();
 
   const salonOptions =

@@ -125,7 +125,7 @@ const ViewLookBookPanel: React.FC<ViewLookBookPanelProps> = ({
               <div className="group relative h-[300px] w-full cursor-pointer overflow-hidden md:h-[450px]">
                 <Image
                   src={mainImage}
-                  alt={`${displayedLookBook.customer.name}-main`}
+                  alt={`${displayedLookBook.customer.first_name}-main`}
                   height={600}
                   width={300}
                   className="h-full w-full object-cover"
@@ -194,7 +194,8 @@ const ViewLookBookPanel: React.FC<ViewLookBookPanelProps> = ({
               <div></div>
               <div>
                 <a className="text-primary text-lg font-medium hover:underline">
-                  {displayedLookBook.customer.name}
+                  {displayedLookBook.customer.first_name}{" "}
+                  {displayedLookBook.customer.last_name}
                 </a>
               </div>
 
@@ -232,7 +233,8 @@ const ViewLookBookPanel: React.FC<ViewLookBookPanelProps> = ({
                   Customer name
                 </div>
                 <div className="text-sm font-medium">
-                  {safe(displayedLookBook.customer.name)}
+                  {safe(displayedLookBook.customer.first_name)}{" "}
+                  {safe(displayedLookBook.customer.last_name)}
                 </div>
               </div>
               <div>
@@ -301,7 +303,7 @@ const ViewLookBookPanel: React.FC<ViewLookBookPanelProps> = ({
         currentImageIndex={selectedImageIndex}
         onClose={() => setIsFullScreenOpen(false)}
         onImageChange={setSelectedImageIndex}
-        productName={displayedLookBook?.customer.name}
+        productName={`${displayedLookBook?.customer.first_name} ${displayedLookBook?.customer.last_name}`}
       />
       <EditLookBookImageDialog
         isOpen={isEditDialogOpen}
