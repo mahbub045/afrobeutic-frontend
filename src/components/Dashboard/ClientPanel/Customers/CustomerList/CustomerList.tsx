@@ -4,7 +4,7 @@ import { useGetCustomersQuery } from "@/Redux/Reducers/ClientPanel/Customers/Cus
 import { useGetSalonListQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonApi";
 import {
   Booking,
-  Customer,
+  CustomerProps,
   CustomersQueryParams,
 } from "@/Types/ClientPanel/CustomersTypes/CustomersType";
 import { Button } from "@/components/ui/button";
@@ -76,7 +76,8 @@ const CustomerList: React.FC = () => {
     isFetching: isFetchingCustomers,
   } = useGetCustomersQuery(queryParams);
 
-  const customers: Customer[] = (customersData && customersData.results) || [];
+  const customers: CustomerProps[] =
+    (customersData && customersData.results) || [];
 
   function getLatestBooking(bookings: Booking[] | undefined) {
     if (!bookings || bookings.length === 0) return null;
@@ -202,6 +203,7 @@ const CustomerList: React.FC = () => {
           <TableRow>
             <TableHead className="text-primary">#</TableHead>
             <TableHead className="text-primary">Name</TableHead>
+            <TableHead className="text-primary">Email</TableHead>
             <TableHead className="text-primary text-center">Phone</TableHead>
             <TableHead className="text-primary text-center">Bookings</TableHead>
             <TableHead className="text-primary text-center">
@@ -217,7 +219,7 @@ const CustomerList: React.FC = () => {
         <TableBody className="text-center">
           {isLoadingCustomers ? (
             <TableRow>
-              <TableCell colSpan={7} className="py-8 text-center">
+              <TableCell colSpan={8} className="py-8 text-center">
                 <div className="flex items-center justify-center">
                   <LoaderPinwheel className="h-6 w-6 animate-spin" />
                 </div>
@@ -225,7 +227,7 @@ const CustomerList: React.FC = () => {
             </TableRow>
           ) : customers.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} className="py-8 text-center">
+              <TableCell colSpan={8} className="py-8 text-center">
                 No customers found.
               </TableCell>
             </TableRow>
@@ -235,7 +237,10 @@ const CustomerList: React.FC = () => {
               return (
                 <TableRow key={c.uid}>
                   <TableCell className="text-start">{index + 1}</TableCell>
-                  <TableCell className="text-start">{c.name}</TableCell>
+                  <TableCell className="text-start">
+                    {c.first_name} {c.last_name}
+                  </TableCell>
+                  <TableCell className="text-start">{c.email ?? "—"}</TableCell>
                   <TableCell>{c.phone ?? "—"}</TableCell>
                   <TableCell>{c.booking?.length ?? 0}</TableCell>
                   <TableCell>
