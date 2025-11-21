@@ -3,6 +3,15 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -10,12 +19,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatChoiceFieldValue, formatDateTime } from "@/lib/utils";
+import {
+  formatChoiceFieldValue,
+  formatDateTime,
+  getCountryName,
+} from "@/lib/utils";
 import { useGetManagementsListQuery } from "@/Redux/Reducers/AdminPanel/Managements/ManagementsApi";
 import {
   ChevronLeft,
   ChevronRight,
-  Eye,
+  Edit,
   LoaderPinwheel,
   Plus,
   Search,
@@ -78,10 +91,30 @@ const ManagementList: React.FC = () => {
         </div>
 
         <div className="flex gap-2">
-          <Button variant="default" size="sm">
-            <Plus />
-            Add New
-          </Button>
+          <div>
+            <Select>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Select a role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Roles</SelectLabel>
+                  <SelectItem value="MANAGEMENT_ADMIN">
+                    Management Admin
+                  </SelectItem>
+                  <SelectItem value="MANAGEMENT_STAFF">
+                    Management Staff
+                  </SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Button variant="default" size="sm">
+              <Plus />
+              Add New
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -134,7 +167,7 @@ const ManagementList: React.FC = () => {
                   </div>
                 </TableCell>
                 <TableCell className="text-start">{m.email ?? "—"}</TableCell>
-                <TableCell>{m.country ?? "—"}</TableCell>
+                <TableCell>{getCountryName(m.country) ?? "—"}</TableCell>
                 <TableCell>{formatChoiceFieldValue(m.role) ?? "—"}</TableCell>
                 <TableCell>
                   {m.last_login ? formatDateTime(m.last_login) : "Never"}
@@ -146,14 +179,7 @@ const ManagementList: React.FC = () => {
                       size="sm"
                       className="shadow-md dark:shadow-gray-600"
                     >
-                      <Eye />
-                      View
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="shadow-md dark:shadow-gray-600"
-                    >
+                      <Edit />
                       Edit
                     </Button>
                   </div>
