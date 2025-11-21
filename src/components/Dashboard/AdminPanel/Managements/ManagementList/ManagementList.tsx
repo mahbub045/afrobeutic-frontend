@@ -7,7 +7,6 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -32,6 +31,7 @@ import {
   LoaderPinwheel,
   Plus,
   Search,
+  X,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
@@ -52,6 +52,7 @@ const ManagementList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
+  const [roleFilter, setRoleFilter] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(searchTerm.trim()), 400);
@@ -65,6 +66,7 @@ const ManagementList: React.FC = () => {
   } = useGetManagementsListQuery({
     page: currentPage,
     search: debouncedSearch || undefined,
+    role: roleFilter || undefined,
   });
 
   const rows: ManagementItem[] =
@@ -91,14 +93,25 @@ const ManagementList: React.FC = () => {
         </div>
 
         <div className="flex gap-2">
-          <div>
-            <Select>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Select a role" />
+          <div className="flex items-center gap-2">
+            <Select
+              value={roleFilter}
+              onValueChange={(v: string) => {
+                setRoleFilter(v);
+                setCurrentPage(1);
+              }}
+            >
+              <SelectTrigger
+                size="sm"
+                className="flex w-[190px] items-center justify-between gap-2"
+              >
+                <div className="flex items-center gap-2">
+                  <SelectValue placeholder="Select a role" />
+                </div>
               </SelectTrigger>
+
               <SelectContent>
                 <SelectGroup>
-                  <SelectLabel>Roles</SelectLabel>
                   <SelectItem value="MANAGEMENT_ADMIN">
                     Management Admin
                   </SelectItem>
@@ -108,7 +121,24 @@ const ManagementList: React.FC = () => {
                 </SelectGroup>
               </SelectContent>
             </Select>
+
+            {/* Clear Button */}
+            {roleFilter && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setRoleFilter("");
+                  setCurrentPage(1);
+                }}
+                className="!border !border-red-500 text-red-500 hover:!bg-red-500 hover:text-white"
+              >
+                <X />
+                Clear
+              </Button>
+            )}
           </div>
+
           <div>
             <Button variant="default" size="sm">
               <Plus />
