@@ -53,6 +53,8 @@ export const baseApi = createApi({
 
     //Admin Panel tag types
     "AccountsList",
+    "ManagementsList",
+    "UsersList",
   ],
   endpoints: () => ({}),
 });

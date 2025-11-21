@@ -1,6 +1,6 @@
 "use client";
-import Breadcrumbs from "../CommonComponents/Breadcrumbs";
-import Test from "./Accounts/Test";
+import Breadcrumbs from "../../CommonComponents/Breadcrumbs";
+import Test from "../Accounts/Test";
 
 const AdminPanelContainer: React.FC = () => {
   return (
