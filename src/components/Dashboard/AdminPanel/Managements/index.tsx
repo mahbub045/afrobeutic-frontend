@@ -1,20 +1,21 @@
 "use client";
 
-import { useGetManagementsListQuery } from "@/Redux/Reducers/AdminPanel/Managements/ManagementsApi";
-import { useSession } from "next-auth/react";
 import Breadcrumbs from "../../CommonComponents/Breadcrumbs";
+import ManagementList from "./ManagementList/ManagementList";
 
 const ManagementsContainer: React.FC = () => {
-  const { data: session } = useSession();
-  //   RTK Hook
-  const { data: managementData, isLoading } =
-    useGetManagementsListQuery(undefined);
-
   return (
     <div>
       <Breadcrumbs
-        items={[{ label: "Home", href: "/dashboard/admin-panel" }]}
+        items={[
+          { label: "Home", href: "/dashboard/admin-panel" },
+          {
+            label: "Managements",
+            href: "/dashboard/admin-panel/managements",
+          },
+        ]}
       />
+      <ManagementList />
     </div>
   );
 };
