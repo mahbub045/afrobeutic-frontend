@@ -1,4 +1,4 @@
-import AdminPanelContainer from "@/components/Dashboard/AdminPanel";
+import AdminPanelContainer from "@/components/Dashboard/AdminPanel/Home";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";

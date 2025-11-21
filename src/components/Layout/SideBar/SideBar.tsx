@@ -19,6 +19,7 @@ import {
   Megaphone,
   MessageSquare,
   ShieldUser,
+  UserCog,
   Users,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -74,9 +75,9 @@ const SideBar: React.FC<SideBarProps> = ({
       return [
         { label: "Home", href: "/dashboard/admin-panel", Icon: Home },
         {
-          label: "Accounts",
-          href: "/dashboard/admin-panel/accounts",
-          Icon: CircleUserRound,
+          label: "Managements",
+          href: "/dashboard/admin-panel/managements",
+          Icon: UserCog,
         },
         {
           label: "Users",
@@ -84,27 +85,9 @@ const SideBar: React.FC<SideBarProps> = ({
           Icon: Users,
         },
         {
-          label: "Salon",
-          Icon: Users,
-          children: [
-            {
-              label: "Salons",
-              href: "/dashboard/admin-panel/salons",
-              Icon: LifeBuoy,
-            },
-          ],
-        },
-        {
-          label: "Help",
-          Icon: HelpCircle,
-          children: [
-            {
-              label: "Support",
-              href: "/dashboard/admin-panel/support-tickets",
-              Icon: Headphones,
-            },
-            { label: "User Guide", href: "/user-guide", Icon: BookOpen },
-          ],
+          label: "Accounts",
+          href: "/dashboard/admin-panel/accounts",
+          Icon: CircleUserRound,
         },
       ];
     }
