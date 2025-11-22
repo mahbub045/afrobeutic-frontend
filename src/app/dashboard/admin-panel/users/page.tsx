@@ -1,7 +1,7 @@
-import React from 'react'
+import UsersContainer from '@/components/Dashboard/AdminPanel/Users'
 
 export default function UsersPage() {
   return (
-    <div>UserPage</div>
+    <UsersContainer />
   )
 }
