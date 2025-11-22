@@ -62,7 +62,7 @@ const RegisterManagementDialog: React.FC<ManagementsListDialogsProps> = ({
 
   const handleSubmit = async (
     values: FormValues,
-    { resetForm }: FormikHelpers<FormValues>,
+    { resetForm, setErrors, setSubmitting }: FormikHelpers<FormValues>,
   ) => {
     try {
       const payload = {
@@ -72,38 +72,61 @@ const RegisterManagementDialog: React.FC<ManagementsListDialogsProps> = ({
         country: values.country,
         role: values.role,
         password: values.password,
+        confirm_password: values.confirm_password,
       };
 
       await registerManagement(payload).unwrap();
 
       Swal.fire({
         icon: "success",
+        iconColor: "#037375",
         title: "Registered",
         html: `Verification email sent to <span class="text-primary">${values.email}</span>. Please check your inbox to verify your account.`,
         background: resolvedTheme === "dark" ? "#0f1724" : undefined,
         color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
-        timer: 2500,
-        showConfirmButton: false,
+        confirmButtonColor: "#037375",
+        timer: 3000,
       });
       resetForm();
       onClose();
     } catch (error: unknown) {
       console.error("Register management failed:", error);
-      // Try to extract meaningful messages from API error
-      const err = error as { data?: unknown; response?: { data?: unknown } };
+      setSubmitting(false);
+      // Try to extract meaningful messages from API error and map them to form fields
+      const err = error as {
+        data?: unknown;
+        response?: { data?: unknown };
+        message?: unknown;
+      };
       const data = err?.data || err?.response?.data;
+
       if (data && typeof data === "object") {
-        const messages: string[] = [];
         const obj = data as Record<string, unknown>;
+        const fieldErrors: Partial<Record<keyof FormValues, string>> = {};
+        const generalMessages: string[] = [];
+
         Object.keys(obj).forEach((k) => {
           const v = obj[k];
-          if (Array.isArray(v))
-            messages.push(`${k}: ${(v as unknown[]).join(", ")}`);
-          else if (typeof v === "string") messages.push(`${k}: ${v}`);
+          const message = Array.isArray(v)
+            ? (v as unknown[]).join(", ")
+            : String(v);
+          // If the key matches a form field, set it as a field error
+          if (Object.prototype.hasOwnProperty.call(initialValues, k)) {
+            // cast to proper key of FormValues
+            (fieldErrors as Record<string, string>)[k] = message;
+          } else {
+            generalMessages.push(`${k}: ${message}`);
+          }
         });
-        if (messages.length) messages.forEach((m) => toast.error(m));
-        else toast.error("Failed to register management user");
+
+        if (Object.keys(fieldErrors).length)
+          setErrors(fieldErrors as unknown as Record<keyof FormValues, string>);
+        if (generalMessages.length)
+          generalMessages.forEach((m) => toast.error(m));
+        if (!generalMessages.length && !Object.keys(fieldErrors).length)
+          toast.error("Failed to register management user");
       } else {
+        // Fallback to generic error message
         toast.error("Failed to register management user");
       }
     }
