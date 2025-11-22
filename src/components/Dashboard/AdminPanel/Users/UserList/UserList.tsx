@@ -3,6 +3,14 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -18,6 +26,7 @@ import {
   ChevronRight,
   LoaderPinwheel,
   Search,
+  X,
 } from "lucide-react";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
@@ -26,6 +35,7 @@ const UserList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
+  const [roleFilter, setRoleFilter] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(searchTerm.trim()), 400);
@@ -39,6 +49,7 @@ const UserList: React.FC = () => {
   } = useGetUserListQuery({
     page: currentPage,
     search: debouncedSearch || undefined,
+    role: roleFilter || undefined,
   });
 
   const users: UserProps[] = usersData?.results || [];
@@ -64,17 +75,47 @@ const UserList: React.FC = () => {
         </div>
 
         <div className="flex gap-2">
-          <div>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={() => {
-                setSearchTerm("");
+          <div className="flex items-center gap-2">
+            <Select
+              value={roleFilter}
+              onValueChange={(v: string) => {
+                setRoleFilter(v);
                 setCurrentPage(1);
               }}
             >
-              Clear
-            </Button>
+              <SelectTrigger
+                size="sm"
+                className="flex w-[130px] items-center justify-between gap-2"
+              >
+                <div className="flex items-center gap-2">
+                  <SelectValue placeholder="Select a role" />
+                </div>
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="OWNER">Owner</SelectItem>
+                  <SelectItem value="ADMIN">Admin</SelectItem>
+                  <SelectItem value="STAFF">Staff</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+
+            {/* Clear Button */}
+            {roleFilter && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setRoleFilter("");
+                  setCurrentPage(1);
+                }}
+                className="!border !border-red-500 text-red-500 hover:!bg-red-500 hover:text-white"
+              >
+                <X />
+                Clear
+              </Button>
+            )}
           </div>
         </div>
       </div>
