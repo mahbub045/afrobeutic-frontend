@@ -140,10 +140,12 @@ const ManagementList: React.FC = () => {
           </div>
 
           <div>
-            <Button variant="default" size="sm">
-              <Plus />
-              Add New
-            </Button>
+            {session?.user?.role === "MANAGEMENT_ADMIN" && (
+              <Button variant="default" size="sm">
+                <Plus />
+                Add New
+              </Button>
+            )}
           </div>
         </div>
       </div>
