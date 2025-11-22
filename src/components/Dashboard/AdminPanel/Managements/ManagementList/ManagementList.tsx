@@ -36,8 +36,10 @@ import {
   X,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import DeleteManagementUserDialog from "./Dialogs/DeleteManagementUserDialog";
+import EditManagementUserDialog from "./Dialogs/EditManagementUserDialog";
 import RegisterManagementDialog from "./Dialogs/RegisterManagementDialog";
 
 const ManagementList: React.FC = () => {
@@ -51,6 +53,7 @@ const ManagementList: React.FC = () => {
   const [selectedManagementUser, setSelectedManagementUser] =
     useState<ManagementsProps | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(searchTerm.trim()), 400);
@@ -76,6 +79,10 @@ const ManagementList: React.FC = () => {
   const handleDeleteDialogOpen = (management: ManagementsProps) => {
     setSelectedManagementUser(management);
     setIsDeleteDialogOpen(true);
+  };
+  const handleEditDialogOpen = (management: ManagementsProps) => {
+    setSelectedManagementUser(management);
+    setIsEditDialogOpen(true);
   };
 
   return (
@@ -200,11 +207,25 @@ const ManagementList: React.FC = () => {
                 <TableCell className="text-start">{index + 1}</TableCell>
                 <TableCell className="text-start">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 font-medium text-indigo-700">
-                      {(
-                        (m.first_name?.[0] ?? "") + (m.last_name?.[0] ?? "")
-                      ).toUpperCase()}
-                    </div>
+                    {m.avatar ? (
+                      <Image
+                        src={
+                          typeof m.avatar === "string"
+                            ? m.avatar
+                            : (m.avatar ?? "")
+                        }
+                        alt={`${m.first_name ?? ""} ${m.last_name ?? ""}`}
+                        width={32}
+                        height={32}
+                        className="h-8 w-8 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 font-medium text-indigo-700">
+                        {(
+                          (m.first_name?.[0] ?? "") + (m.last_name?.[0] ?? "")
+                        ).toUpperCase()}
+                      </div>
+                    )}
                     <div>
                       <div className="font-medium text-gray-800 dark:text-gray-100">
                         {`${m.first_name ?? ""} ${m.last_name ?? ""}`.trim()}
@@ -225,6 +246,7 @@ const ManagementList: React.FC = () => {
                         variant="outline"
                         size="sm"
                         className="shadow-md dark:shadow-gray-600"
+                        onClick={() => handleEditDialogOpen(m)}
                       >
                         <Edit />
                       </Button>
@@ -305,6 +327,11 @@ const ManagementList: React.FC = () => {
       <RegisterManagementDialog
         isOpen={isRegisterDialogOpen}
         onClose={() => setIsRegisterDialogOpen(false)}
+      />
+      <EditManagementUserDialog
+        isOpen={isEditDialogOpen}
+        onClose={() => setIsEditDialogOpen(false)}
+        managementUser={selectedManagementUser}
       />
       <DeleteManagementUserDialog
         isOpen={isDeleteDialogOpen}

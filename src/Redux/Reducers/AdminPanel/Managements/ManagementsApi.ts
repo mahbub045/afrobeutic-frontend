@@ -18,6 +18,22 @@ export const ManagementsListApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["ManagementsList"],
     }),
+    editManagement: build.mutation({
+      // Accepts an object { managementUid, body } where `body` can be
+      // a plain object (JSON) or a FormData instance for file upload.
+      query: ({
+        managementUid,
+        body,
+      }: {
+        managementUid: string;
+        body: unknown;
+      }) => ({
+        url: `/admin/managements/${managementUid}`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["ManagementsList"],
+    }),
     deleteManagement: build.mutation({
       query: (managementUid) => ({
         url: `/admin/managements/${managementUid}`,
@@ -31,5 +47,6 @@ export const ManagementsListApi = baseApi.injectEndpoints({
 export const {
   useGetManagementsListQuery,
   useRegisterManagementMutation,
+  useEditManagementMutation,
   useDeleteManagementMutation,
 } = ManagementsListApi;

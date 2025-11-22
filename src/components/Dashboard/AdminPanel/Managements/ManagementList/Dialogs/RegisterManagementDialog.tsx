@@ -134,7 +134,7 @@ const RegisterManagementDialog: React.FC<ManagementsListDialogsProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="!max-w-md md:!max-w-2xl">
+      <DialogContent className="!max-w-md shadow-md md:!max-w-2xl dark:shadow-gray-600">
         <DialogHeader>
           <DialogTitle className="text-primary text-lg">
             Register Management
