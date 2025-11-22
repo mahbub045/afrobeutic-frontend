@@ -1,5 +1,6 @@
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import SessionMonitor from "@/components/SessionMonitor";
+import TokenRefreshMonitor from "@/components/TokenRefreshMonitor";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Viewport } from "next";
 import { Geist, Inter } from "next/font/google";
@@ -252,6 +253,7 @@ export default function RootLayout({
           {/* <PWAInstallPrompt /> */}
           <Providers>
             <SessionMonitor />
+            <TokenRefreshMonitor />
             {children}
           </Providers>
         </ThemeProvider>

@@ -1,5 +1,10 @@
+import type {
+  BaseQueryFn,
+  FetchArgs,
+  FetchBaseQueryError,
+} from "@reduxjs/toolkit/query";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { getSession } from "next-auth/react";
+import { getSession, signOut } from "next-auth/react";
 
 const baseQuery = fetchBaseQuery({
   baseUrl: process.env.NEXT_PUBLIC_APIBASE_URL,
@@ -26,9 +31,57 @@ const baseQuery = fetchBaseQuery({
     return headers;
   },
 });
+
+const baseQueryWithReauth: BaseQueryFn<
+  string | FetchArgs,
+  unknown,
+  FetchBaseQueryError
+> = async (args, api, extraOptions) => {
+  let result = await baseQuery(args, api, extraOptions);
+
+  if (result.error && result.error.status === 401) {
+    // Try to get a new token
+    const session = await getSession();
+    const refreshToken = session?.user?.refreshToken;
+
+    if (refreshToken) {
+      // Try to refresh the token
+      const refreshResult = await fetch(
+        `${process.env.NEXT_PUBLIC_APIBASE_URL}/token/refresh`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ refresh: refreshToken }),
+        },
+      );
+
+      if (refreshResult.ok) {
+        const data = await refreshResult.json();
+        if (data?.access) {
+          // Token refreshed - retry the original query
+          result = await baseQuery(args, api, extraOptions);
+        }
+      } else {
+        // Refresh failed - sign out
+        if (typeof window !== "undefined") {
+          await signOut({ redirect: true, callbackUrl: "/auth/login" });
+        }
+      }
+    } else {
+      // No refresh token - sign out
+      if (typeof window !== "undefined") {
+        await signOut({ redirect: true, callbackUrl: "/auth/login" });
+      }
+    }
+  }
+
+  return result;
+};
 export const baseApi = createApi({
   reducerPath: "baseApi",
-  baseQuery: baseQuery,
+  baseQuery: baseQueryWithReauth,
   tagTypes: [
     //Register tag types here
     "AcceptInvitation",
