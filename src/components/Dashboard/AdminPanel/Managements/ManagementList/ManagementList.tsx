@@ -239,30 +239,35 @@ const ManagementList: React.FC = () => {
                 <TableCell>
                   {m.last_login ? formatDateTime(m.last_login) : "Never"}
                 </TableCell>
-                {session?.user?.role === "MANAGEMENT_ADMIN" && (
-                  <TableCell className="flex items-center justify-center gap-2">
-                    <div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="shadow-md dark:shadow-gray-600"
-                        onClick={() => handleEditDialogOpen(m)}
-                      >
-                        <Edit />
-                      </Button>
-                    </div>
-                    <div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-danger shadow-md dark:shadow-gray-600"
-                        onClick={() => handleDeleteDialogOpen(m)}
-                      >
-                        <Trash />
-                      </Button>
-                    </div>
-                  </TableCell>
-                )}
+                {session?.user?.role === "MANAGEMENT_ADMIN" &&
+                  (session?.user?.uid !== m.uid ? (
+                    <TableCell className="flex items-center justify-center gap-2">
+                      <div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="shadow-md dark:shadow-gray-600"
+                          onClick={() => handleEditDialogOpen(m)}
+                        >
+                          <Edit />
+                        </Button>
+                      </div>
+                      <div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-danger shadow-md dark:shadow-gray-600"
+                          onClick={() => handleDeleteDialogOpen(m)}
+                        >
+                          <Trash />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  ) : (
+                    <TableCell className="text-warning/80 py-4 text-[7px]">
+                      Can&apos;t perform this action
+                    </TableCell>
+                  ))}
               </TableRow>
             ))
           )}

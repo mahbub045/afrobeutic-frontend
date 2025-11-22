@@ -287,7 +287,7 @@ const EditManagementUserDialog: React.FC<ManagementsListDialogsProps> = ({
               <div className="grid grid-cols-1 gap-3 md:grid-cols-1">
                 <div>
                   <Label htmlFor="avatar" className="mb-1">
-                    Avatar (file)
+                    Avatar
                   </Label>
                   <input
                     id="avatar"
@@ -308,7 +308,7 @@ const EditManagementUserDialog: React.FC<ManagementsListDialogsProps> = ({
                         alt="avatar preview"
                         width={64}
                         height={64}
-                        className="rounded-full object-cover"
+                        className="rounded-full object-cover w-16 h-16"
                         unoptimized
                       />
                     </div>
