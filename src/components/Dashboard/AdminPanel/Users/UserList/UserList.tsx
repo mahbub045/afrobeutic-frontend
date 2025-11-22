@@ -24,11 +24,13 @@ import { UserProps } from "@/Types/AdminPanel/UsersTypes/UsersType";
 import {
   ChevronLeft,
   ChevronRight,
+  Eye,
   LoaderPinwheel,
   Search,
   X,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
 const UserList: React.FC = () => {
@@ -128,6 +130,7 @@ const UserList: React.FC = () => {
             <TableHead className="text-primary">Email</TableHead>
             <TableHead className="text-primary text-center">Country</TableHead>
             <TableHead className="text-primary text-center">Accounts</TableHead>
+            <TableHead className="text-primary text-center">Action</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -178,6 +181,14 @@ const UserList: React.FC = () => {
                 <TableCell>{getCountryName(u.country) ?? "—"}</TableCell>
                 <TableCell className="text-center">
                   {u.accounts?.length ?? 0}
+                </TableCell>
+                <TableCell className="text-center">
+                  <Link href={`/dashboard/admin-panel/users/${u.uid}`}>
+                    <Button variant="outline" size="sm">
+                      <Eye />
+                      View
+                    </Button>
+                  </Link>
                 </TableCell>
               </TableRow>
             ))

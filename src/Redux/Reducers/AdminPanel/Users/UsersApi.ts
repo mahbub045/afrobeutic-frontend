@@ -10,7 +10,14 @@ export const UsersListApi = baseApi.injectEndpoints({
       }),
       providesTags: ["UsersList"],
     }),
+    getUserDetails: build.query({
+      query: ({userUid}) => ({
+        url: `/admin/users/${userUid}`,
+        method: "GET",
+      }),
+      providesTags: ["UsersList"],
+    }),
   }),
 });
 
-export const { useGetUserListQuery } = UsersListApi;
+export const { useGetUserListQuery, useGetUserDetailsQuery } = UsersListApi;
