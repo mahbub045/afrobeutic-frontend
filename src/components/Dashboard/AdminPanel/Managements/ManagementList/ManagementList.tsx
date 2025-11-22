@@ -24,6 +24,7 @@ import {
   getCountryName,
 } from "@/lib/utils";
 import { useGetManagementsListQuery } from "@/Redux/Reducers/AdminPanel/Managements/ManagementsApi";
+import { ManagementsProps } from "@/Types/AdminPanel/ManagementsTypes/ManagementsType";
 import {
   ChevronLeft,
   ChevronRight,
@@ -31,21 +32,12 @@ import {
   LoaderPinwheel,
   Plus,
   Search,
+  Trash,
   X,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
-
-interface ManagementItem {
-  uid: string;
-  avatar?: string | null;
-  first_name?: string | null;
-  last_name?: string | null;
-  email?: string | null;
-  country?: string | null;
-  role?: string | null;
-  last_login?: string | null;
-}
+import RegisterManagementDialog from "./Dialogs/RegisterManagementDialog";
 
 const ManagementList: React.FC = () => {
   const { data: session } = useSession();
@@ -53,6 +45,8 @@ const ManagementList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [roleFilter, setRoleFilter] = useState<string | undefined>(undefined);
+  const [isRegisterDialogOpen, setIsRegisterDialogOpen] =
+    useState<boolean>(false);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(searchTerm.trim()), 400);
@@ -69,8 +63,12 @@ const ManagementList: React.FC = () => {
     role: roleFilter || undefined,
   });
 
-  const rows: ManagementItem[] =
+  const rows: ManagementsProps[] =
     (managementData && managementData.results) || [];
+
+  const handleRegisterDialogOpen = () => {
+    setIsRegisterDialogOpen(true);
+  };
 
   return (
     <>
@@ -141,9 +139,13 @@ const ManagementList: React.FC = () => {
 
           <div>
             {session?.user?.role === "MANAGEMENT_ADMIN" && (
-              <Button variant="default" size="sm">
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleRegisterDialogOpen}
+              >
                 <Plus />
-                Add New
+                Register Management
               </Button>
             )}
           </div>
@@ -204,18 +206,28 @@ const ManagementList: React.FC = () => {
                 <TableCell>
                   {m.last_login ? formatDateTime(m.last_login) : "Never"}
                 </TableCell>
-                <TableCell className="text-center">
-                  <div className="flex items-center justify-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="shadow-md dark:shadow-gray-600"
-                    >
-                      <Edit />
-                      Edit
-                    </Button>
-                  </div>
-                </TableCell>
+                {session?.user?.role === "MANAGEMENT_ADMIN" && (
+                  <TableCell className="flex items-center justify-center gap-2">
+                    <div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="shadow-md dark:shadow-gray-600"
+                      >
+                        <Edit />
+                      </Button>
+                    </div>
+                    <div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-danger shadow-md dark:shadow-gray-600"
+                      >
+                        <Trash />
+                      </Button>
+                    </div>
+                  </TableCell>
+                )}
               </TableRow>
             ))
           )}
@@ -276,6 +288,11 @@ const ManagementList: React.FC = () => {
             )}
         </div>
       </div>
+      {/* Dialogs */}
+      <RegisterManagementDialog
+        isOpen={isRegisterDialogOpen}
+        onClose={() => setIsRegisterDialogOpen(false)}
+      />
     </>
   );
 };
