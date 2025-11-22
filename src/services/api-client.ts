@@ -1,5 +1,23 @@
-import axios, { AxiosRequestHeaders } from "axios";
-import { getSession } from "next-auth/react";
+import axios, { AxiosRequestHeaders, InternalAxiosRequestConfig } from "axios";
+import { getSession, signOut } from "next-auth/react";
+
+// Flag to prevent multiple simultaneous refresh attempts
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (value?: unknown) => void;
+  reject: (reason?: unknown) => void;
+}> = [];
+
+const processQueue = (error: Error | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve();
+    }
+  });
+  failedQueue = [];
+};
 
 // Create a reusable Axios instance
 const apiClient = axios.create({
@@ -53,7 +71,70 @@ apiClient.interceptors.request.use(
 // Normalize common error responses
 apiClient.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
+
+    // Handle 401 Unauthorized - Token might be expired
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        // If already refreshing, queue this request
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then(() => {
+            return apiClient(originalRequest);
+          })
+          .catch((err) => {
+            return Promise.reject(err);
+          });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const session = await getSession();
+        const refreshToken = session?.user?.refreshToken;
+
+        if (!refreshToken) {
+          throw new Error("No refresh token available");
+        }
+
+        // Try to refresh the token
+        const response = await axios.post(
+          `${process.env.NEXT_PUBLIC_APIBASE_URL}/token/refresh`,
+          { refresh: refreshToken },
+        );
+
+        if (response.data?.access) {
+          // Token refreshed successfully
+          // Note: The session will be updated on next getSession() call via NextAuth
+          isRefreshing = false;
+          processQueue(null);
+
+          // Retry the original request with new token
+          originalRequest.headers.Authorization = `Bearer ${response.data.access}`;
+          return apiClient(originalRequest);
+        }
+      } catch (refreshError) {
+        console.error("Token refresh failed:", refreshError);
+        processQueue(
+          refreshError instanceof Error
+            ? refreshError
+            : new Error("Token refresh failed"),
+        );
+        isRefreshing = false;
+
+        // If refresh fails, sign out the user
+        if (typeof window !== "undefined") {
+          await signOut({ redirect: true, callbackUrl: "/auth/login" });
+        }
+        return Promise.reject(refreshError);
+      }
+    }
+
     if (axios.isAxiosError(error)) {
       const status = error.response?.status;
       if (status === 429) {

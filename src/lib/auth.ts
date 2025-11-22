@@ -6,6 +6,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 // Extend NextAuth's user type to include all API response data
 interface UserWithToken extends NextAuthUser {
   accessToken?: string;
+  refreshToken?: string;
   uid?: string;
   account_id?: string; // Added account id from login response
   avatar?: string | null;
@@ -13,6 +14,7 @@ interface UserWithToken extends NextAuthUser {
   last_name?: string;
   country?: string;
   role?: string;
+  accessTokenExpires?: number; // Timestamp when access token expires
 }
 
 // TypeScript Declaration Module for Custom Session and User Properties
@@ -28,12 +30,15 @@ declare module "next-auth" {
       last_name?: string;
       country?: string;
       accessToken?: string;
+      refreshToken?: string;
       role?: string;
     };
+    error?: string;
   }
 
   interface User {
     accessToken?: string;
+    refreshToken?: string;
     uid?: string;
     account_id?: string;
     avatar?: string | null;
@@ -41,10 +46,12 @@ declare module "next-auth" {
     last_name?: string;
     country?: string;
     role?: string;
+    accessTokenExpires?: number;
   }
 
   interface JWT {
     accessToken?: string;
+    refreshToken?: string;
     uid?: string;
     account_id?: string;
     avatar?: string | null;
@@ -52,6 +59,49 @@ declare module "next-auth" {
     last_name?: string;
     country?: string;
     role?: string;
+    accessTokenExpires?: number;
+    error?: string;
+  }
+}
+
+/**
+ * Refreshes the access token using the refresh token
+ */
+async function refreshAccessToken(token: {
+  refreshToken?: string;
+  [key: string]: unknown;
+}) {
+  try {
+    // First verify if the access token is still valid
+    await axios.post(`${process.env.NEXT_PUBLIC_APIBASE_URL}/token/verify`, {
+      token: token.accessToken,
+    });
+
+    // If verification succeeds, refresh the token
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_APIBASE_URL}/token/refresh`,
+      { refresh: token.refreshToken },
+    );
+
+    const refreshedTokens = response.data;
+
+    if (!refreshedTokens?.access) {
+      throw new Error("No access token in refresh response");
+    }
+
+    return {
+      ...token,
+      accessToken: refreshedTokens.access,
+      accessTokenExpires: Date.now() + 12 * 60 * 60 * 1000, // 12 hours from now
+      refreshToken: refreshedTokens.refresh ?? token.refreshToken, // Fall back to old refresh token
+    };
+  } catch (error) {
+    console.error("Error refreshing access token:", error);
+
+    return {
+      ...token,
+      error: "RefreshAccessTokenError",
+    };
   }
 }
 
@@ -115,7 +165,9 @@ export const authOptions: NextAuthOptions = {
               country: userInfo.country,
               role: userInfo.role,
               accessToken: loginResponse.data.access,
+              refreshToken: loginResponse.data.refresh,
               account_id: loginResponse.data.account_id,
+              accessTokenExpires: Date.now() + 12 * 60 * 60 * 1000, // 12 hours
             };
           }
           return null;
@@ -144,10 +196,17 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ token, user }) {
+      // Initial sign in - store all user data
       if (user) {
         const userWithToken = user as UserWithToken;
         if (userWithToken.accessToken) {
           token.accessToken = userWithToken.accessToken;
+        }
+        if (userWithToken.refreshToken) {
+          token.refreshToken = userWithToken.refreshToken;
+        }
+        if (userWithToken.accessTokenExpires) {
+          token.accessTokenExpires = userWithToken.accessTokenExpires;
         }
         if (userWithToken.uid) {
           token.uid = userWithToken.uid;
@@ -170,8 +229,21 @@ export const authOptions: NextAuthOptions = {
         if (userWithToken.role) {
           token.role = userWithToken.role;
         }
+        return token;
       }
-      return token;
+
+      // Return previous token if the access token has not expired yet
+      if (
+        token.accessTokenExpires &&
+        typeof token.accessTokenExpires === "number" &&
+        Date.now() < token.accessTokenExpires
+      ) {
+        return token;
+      }
+
+      // Access token has expired, try to refresh it
+      console.log("Access token expired, refreshing...");
+      return refreshAccessToken(token);
     },
 
     async session({ session, token }) {
@@ -185,7 +257,14 @@ export const authOptions: NextAuthOptions = {
         country: token.country as string | undefined,
         role: token.role as string | undefined,
         accessToken: token.accessToken as string | undefined,
+        refreshToken: token.refreshToken as string | undefined,
       };
+
+      // Pass error to client if token refresh failed
+      if (token.error) {
+        session.error = token.error as string;
+      }
+
       return session;
     },
 
