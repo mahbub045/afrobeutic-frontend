@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
+import DeleteManagementUserDialog from "./Dialogs/DeleteManagementUserDialog";
 import RegisterManagementDialog from "./Dialogs/RegisterManagementDialog";
 
 const ManagementList: React.FC = () => {
@@ -47,6 +48,9 @@ const ManagementList: React.FC = () => {
   const [roleFilter, setRoleFilter] = useState<string | undefined>(undefined);
   const [isRegisterDialogOpen, setIsRegisterDialogOpen] =
     useState<boolean>(false);
+  const [selectedManagementUser, setSelectedManagementUser] =
+    useState<ManagementsProps | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(searchTerm.trim()), 400);
@@ -68,6 +72,10 @@ const ManagementList: React.FC = () => {
 
   const handleRegisterDialogOpen = () => {
     setIsRegisterDialogOpen(true);
+  };
+  const handleDeleteDialogOpen = (management: ManagementsProps) => {
+    setSelectedManagementUser(management);
+    setIsDeleteDialogOpen(true);
   };
 
   return (
@@ -145,7 +153,7 @@ const ManagementList: React.FC = () => {
                 onClick={handleRegisterDialogOpen}
               >
                 <Plus />
-                Register Management
+                Register User
               </Button>
             )}
           </div>
@@ -163,7 +171,11 @@ const ManagementList: React.FC = () => {
             <TableHead className="text-primary text-center">
               Last Login
             </TableHead>
-            <TableHead className="text-primary text-center">Actions</TableHead>
+            {session?.user?.role === "MANAGEMENT_ADMIN" && (
+              <TableHead className="text-primary text-center">
+                Actions
+              </TableHead>
+            )}
           </TableRow>
         </TableHeader>
 
@@ -222,6 +234,7 @@ const ManagementList: React.FC = () => {
                         variant="outline"
                         size="sm"
                         className="text-danger shadow-md dark:shadow-gray-600"
+                        onClick={() => handleDeleteDialogOpen(m)}
                       >
                         <Trash />
                       </Button>
@@ -292,6 +305,11 @@ const ManagementList: React.FC = () => {
       <RegisterManagementDialog
         isOpen={isRegisterDialogOpen}
         onClose={() => setIsRegisterDialogOpen(false)}
+      />
+      <DeleteManagementUserDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        managementUser={selectedManagementUser}
       />
     </>
   );

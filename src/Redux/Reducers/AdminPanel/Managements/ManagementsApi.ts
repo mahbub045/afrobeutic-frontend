@@ -1,5 +1,4 @@
 import { baseApi } from "@/Redux/Api/BaseApi";
-import { register } from "module";
 
 export const ManagementsListApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
@@ -19,7 +18,18 @@ export const ManagementsListApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["ManagementsList"],
     }),
+    deleteManagement: build.mutation({
+      query: (managementUid) => ({
+        url: `/admin/managements/${managementUid}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["ManagementsList"],
+    }),
   }),
 });
 
-export const { useGetManagementsListQuery, useRegisterManagementMutation } = ManagementsListApi;
+export const {
+  useGetManagementsListQuery,
+  useRegisterManagementMutation,
+  useDeleteManagementMutation,
+} = ManagementsListApi;

@@ -12,4 +12,5 @@ export interface ManagementsProps {
 export interface ManagementsListDialogsProps {
   isOpen: boolean;
   onClose: () => void;
+  managementUser?: ManagementsProps | null;
 }
