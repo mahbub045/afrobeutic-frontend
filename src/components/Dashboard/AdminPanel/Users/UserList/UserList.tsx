@@ -129,7 +129,9 @@ const UserList: React.FC = () => {
             <TableHead className="text-primary">Name</TableHead>
             <TableHead className="text-primary">Email</TableHead>
             <TableHead className="text-primary text-center">Country</TableHead>
-            <TableHead className="text-primary text-center">Accounts</TableHead>
+            <TableHead className="text-primary text-center">
+              Accounts Access
+            </TableHead>
             <TableHead className="text-primary text-center">Action</TableHead>
           </TableRow>
         </TableHeader>
@@ -137,7 +139,7 @@ const UserList: React.FC = () => {
         <TableBody className="text-center">
           {isLoading ? (
             <TableRow>
-              <TableCell colSpan={5} className="py-8 text-center">
+              <TableCell colSpan={6} className="py-8 text-center">
                 <div className="flex items-center justify-center">
                   <LoaderPinwheel className="h-6 w-6 animate-spin" />
                 </div>
@@ -145,7 +147,7 @@ const UserList: React.FC = () => {
             </TableRow>
           ) : users.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5} className="py-8 text-center">
+              <TableCell colSpan={6} className="py-8 text-center">
                 No users found.
               </TableCell>
             </TableRow>

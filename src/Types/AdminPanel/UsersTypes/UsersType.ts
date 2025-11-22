@@ -5,9 +5,9 @@ export interface UserProps {
   last_name: string | null;
   email: string;
   country: string | null;
-  accounts: Accounts[] | null;
+  accounts: AccountProps[] | null;
 }
-interface Accounts {
+export interface AccountProps {
   uid: string;
   name: string;
   owner_name: string;
