@@ -19,6 +19,7 @@ import {
   Form as FormikForm,
   FormikHelpers,
 } from "formik";
+import { useTheme } from "next-themes";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -28,7 +29,6 @@ import * as Yup from "yup";
 const validationSchema = Yup.object().shape({
   first_name: Yup.string().required("First name is required"),
   last_name: Yup.string().required("Last name is required"),
-  email: Yup.string().email("Invalid email").required("Email is required"),
   country: Yup.string().required("Country is required"),
   role: Yup.string().required("Role is required"),
 });
@@ -38,6 +38,7 @@ const EditManagementUserDialog: React.FC<ManagementsListDialogsProps> = ({
   onClose,
   managementUser,
 }) => {
+  const { resolvedTheme } = useTheme();
   const [editManagement, { isLoading }] = useEditManagementMutation();
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -51,7 +52,6 @@ const EditManagementUserDialog: React.FC<ManagementsListDialogsProps> = ({
   const initialValues = {
     first_name: managementUser?.first_name ?? "",
     last_name: managementUser?.last_name ?? "",
-    email: managementUser?.email ?? "",
     country: managementUser?.country ?? "",
     role: managementUser?.role ?? "",
   };
@@ -81,7 +81,6 @@ const EditManagementUserDialog: React.FC<ManagementsListDialogsProps> = ({
         form.append("avatar", selectedFile);
         form.append("first_name", values.first_name);
         form.append("last_name", values.last_name);
-        form.append("email", values.email);
         form.append("country", values.country);
         form.append("role", values.role);
         body = form;
@@ -91,7 +90,6 @@ const EditManagementUserDialog: React.FC<ManagementsListDialogsProps> = ({
         body = {
           first_name: values.first_name,
           last_name: values.last_name,
-          email: values.email,
           country: values.country,
           role: values.role,
         };
@@ -104,10 +102,15 @@ const EditManagementUserDialog: React.FC<ManagementsListDialogsProps> = ({
 
       Swal.fire({
         icon: "success",
+        iconColor: "#037375",
         title: "Updated",
-        text: "Management user updated successfully.",
-        timer: 1600,
-        showConfirmButton: false,
+        html: `Management user <span class="text-primary">${
+          values.first_name || "user"
+        }</span> updated successfully.`,
+        background: resolvedTheme === "dark" ? "#0f1724" : undefined,
+        color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
+        confirmButtonColor: "#037375",
+        timer: 3000,
       });
 
       resetForm();
@@ -201,55 +204,6 @@ const EditManagementUserDialog: React.FC<ManagementsListDialogsProps> = ({
                   ))}
                 </div>
               )}
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <div>
-                  <Label htmlFor="avatar" className="mb-1">
-                    Avatar (file)
-                  </Label>
-                  <input
-                    id="avatar"
-                    name="avatar"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const f = e.currentTarget.files?.[0] ?? null;
-                      setSelectedFile(f);
-                      if (f) setPreviewUrl(URL.createObjectURL(f));
-                    }}
-                    className="w-full"
-                  />
-                  {previewUrl && (
-                    <div className="mt-2">
-                      <Image
-                        src={previewUrl as string}
-                        alt="avatar preview"
-                        width={64}
-                        height={64}
-                        className="rounded-full object-cover"
-                        unoptimized
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="email" className="mb-1">
-                    Email
-                  </Label>
-                  <Field
-                    id="email"
-                    name="email"
-                    as="input"
-                    type="email"
-                    placeholder="email@example.com"
-                  />
-                  <ErrorMessage
-                    name="email"
-                    component="div"
-                    className="text-danger mt-1 text-xs"
-                  />
-                </div>
-              </div>
 
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <div>
@@ -328,6 +282,37 @@ const EditManagementUserDialog: React.FC<ManagementsListDialogsProps> = ({
                     component="div"
                     className="text-danger mt-1 text-xs"
                   />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-1">
+                <div>
+                  <Label htmlFor="avatar" className="mb-1">
+                    Avatar (file)
+                  </Label>
+                  <input
+                    id="avatar"
+                    name="avatar"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const f = e.currentTarget.files?.[0] ?? null;
+                      setSelectedFile(f);
+                      if (f) setPreviewUrl(URL.createObjectURL(f));
+                    }}
+                    className="w-full"
+                  />
+                  {previewUrl && (
+                    <div className="mt-2">
+                      <Image
+                        src={previewUrl as string}
+                        alt="avatar preview"
+                        width={64}
+                        height={64}
+                        className="rounded-full object-cover"
+                        unoptimized
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
 
