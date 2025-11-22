@@ -72,11 +72,10 @@ async function refreshAccessToken(token: {
   [key: string]: unknown;
 }) {
   try {
-    // First verify if the refresh token is still valid
-    const verifyResponse = await axios.post(
-      `${process.env.NEXT_PUBLIC_APIBASE_URL}/token/verify`,
-      { token: token.accessToken },
-    );
+    // First verify if the access token is still valid
+    await axios.post(`${process.env.NEXT_PUBLIC_APIBASE_URL}/token/verify`, {
+      token: token.accessToken,
+    });
 
     // If verification succeeds, refresh the token
     const response = await axios.post(
@@ -196,7 +195,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user, trigger }) {
+    async jwt({ token, user }) {
       // Initial sign in - store all user data
       if (user) {
         const userWithToken = user as UserWithToken;
