@@ -24,6 +24,7 @@ import {
   getCountryName,
 } from "@/lib/utils";
 import { useGetManagementsListQuery } from "@/Redux/Reducers/AdminPanel/Managements/ManagementsApi";
+import { ManagementsProps } from "@/Types/AdminPanel/ManagementsTypes/ManagementsType";
 import {
   ChevronLeft,
   ChevronRight,
@@ -31,21 +32,15 @@ import {
   LoaderPinwheel,
   Plus,
   Search,
+  Trash,
   X,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import React, { useEffect, useState } from "react";
-
-interface ManagementItem {
-  uid: string;
-  avatar?: string | null;
-  first_name?: string | null;
-  last_name?: string | null;
-  email?: string | null;
-  country?: string | null;
-  role?: string | null;
-  last_login?: string | null;
-}
+import DeleteManagementUserDialog from "./Dialogs/DeleteManagementUserDialog";
+import EditManagementUserDialog from "./Dialogs/EditManagementUserDialog";
+import RegisterManagementDialog from "./Dialogs/RegisterManagementDialog";
 
 const ManagementList: React.FC = () => {
   const { data: session } = useSession();
@@ -53,6 +48,12 @@ const ManagementList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [roleFilter, setRoleFilter] = useState<string | undefined>(undefined);
+  const [isRegisterDialogOpen, setIsRegisterDialogOpen] =
+    useState<boolean>(false);
+  const [selectedManagementUser, setSelectedManagementUser] =
+    useState<ManagementsProps | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(searchTerm.trim()), 400);
@@ -69,8 +70,20 @@ const ManagementList: React.FC = () => {
     role: roleFilter || undefined,
   });
 
-  const rows: ManagementItem[] =
+  const rows: ManagementsProps[] =
     (managementData && managementData.results) || [];
+
+  const handleRegisterDialogOpen = () => {
+    setIsRegisterDialogOpen(true);
+  };
+  const handleDeleteDialogOpen = (management: ManagementsProps) => {
+    setSelectedManagementUser(management);
+    setIsDeleteDialogOpen(true);
+  };
+  const handleEditDialogOpen = (management: ManagementsProps) => {
+    setSelectedManagementUser(management);
+    setIsEditDialogOpen(true);
+  };
 
   return (
     <>
@@ -140,10 +153,16 @@ const ManagementList: React.FC = () => {
           </div>
 
           <div>
-            <Button variant="default" size="sm">
-              <Plus />
-              Add New
-            </Button>
+            {session?.user?.role === "MANAGEMENT_ADMIN" && (
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleRegisterDialogOpen}
+              >
+                <Plus />
+                Register User
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -159,7 +178,11 @@ const ManagementList: React.FC = () => {
             <TableHead className="text-primary text-center">
               Last Login
             </TableHead>
-            <TableHead className="text-primary text-center">Actions</TableHead>
+            {session?.user?.role === "MANAGEMENT_ADMIN" && (
+              <TableHead className="text-primary text-center">
+                Actions
+              </TableHead>
+            )}
           </TableRow>
         </TableHeader>
 
@@ -184,11 +207,25 @@ const ManagementList: React.FC = () => {
                 <TableCell className="text-start">{index + 1}</TableCell>
                 <TableCell className="text-start">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 font-medium text-indigo-700">
-                      {(
-                        (m.first_name?.[0] ?? "") + (m.last_name?.[0] ?? "")
-                      ).toUpperCase()}
-                    </div>
+                    {m.avatar ? (
+                      <Image
+                        src={
+                          typeof m.avatar === "string"
+                            ? m.avatar
+                            : (m.avatar ?? "")
+                        }
+                        alt={`${m.first_name ?? ""} ${m.last_name ?? ""}`}
+                        width={32}
+                        height={32}
+                        className="h-8 w-8 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 font-medium text-indigo-700">
+                        {(
+                          (m.first_name?.[0] ?? "") + (m.last_name?.[0] ?? "")
+                        ).toUpperCase()}
+                      </div>
+                    )}
                     <div>
                       <div className="font-medium text-gray-800 dark:text-gray-100">
                         {`${m.first_name ?? ""} ${m.last_name ?? ""}`.trim()}
@@ -202,18 +239,35 @@ const ManagementList: React.FC = () => {
                 <TableCell>
                   {m.last_login ? formatDateTime(m.last_login) : "Never"}
                 </TableCell>
-                <TableCell className="text-center">
-                  <div className="flex items-center justify-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="shadow-md dark:shadow-gray-600"
-                    >
-                      <Edit />
-                      Edit
-                    </Button>
-                  </div>
-                </TableCell>
+                {session?.user?.role === "MANAGEMENT_ADMIN" &&
+                  (session?.user?.uid !== m.uid ? (
+                    <TableCell className="flex items-center justify-center gap-2">
+                      <div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="shadow-md dark:shadow-gray-600"
+                          onClick={() => handleEditDialogOpen(m)}
+                        >
+                          <Edit />
+                        </Button>
+                      </div>
+                      <div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-danger shadow-md dark:shadow-gray-600"
+                          onClick={() => handleDeleteDialogOpen(m)}
+                        >
+                          <Trash />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  ) : (
+                    <TableCell className="text-warning/80 py-4 text-[7px]">
+                      Can&apos;t perform this action
+                    </TableCell>
+                  ))}
               </TableRow>
             ))
           )}
@@ -274,6 +328,21 @@ const ManagementList: React.FC = () => {
             )}
         </div>
       </div>
+      {/* Dialogs */}
+      <RegisterManagementDialog
+        isOpen={isRegisterDialogOpen}
+        onClose={() => setIsRegisterDialogOpen(false)}
+      />
+      <EditManagementUserDialog
+        isOpen={isEditDialogOpen}
+        onClose={() => setIsEditDialogOpen(false)}
+        managementUser={selectedManagementUser}
+      />
+      <DeleteManagementUserDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        managementUser={selectedManagementUser}
+      />
     </>
   );
 };
