@@ -1,3 +1,4 @@
+import apiClient from "@/services/api-client";
 import type {
   BaseQueryFn,
   FetchArgs,
@@ -6,20 +7,21 @@ import type {
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { getSession, signOut } from "next-auth/react";
 
+// Mutex to prevent concurrent refresh token calls
+let isRefreshing = false;
+let refreshPromise: Promise<string | null> | null = null;
+
 const baseQuery = fetchBaseQuery({
   baseUrl: process.env.NEXT_PUBLIC_APIBASE_URL,
   prepareHeaders: async (headers) => {
-    const session = await getSession();
-    const storedToken =
+    // Prioritize localStorage for tokens (single source of truth)
+    const token =
       typeof window !== "undefined" ? localStorage.getItem("token") : null;
-    const token = storedToken || session?.user?.accessToken;
 
-    const storedAccountId =
+    const accountId =
       typeof window !== "undefined"
         ? localStorage.getItem("activeAccountId")
         : null;
-
-    const accountId = storedAccountId || session?.user?.account_id;
 
     if (token) {
       headers.set("Authorization", `Bearer ${token}`);
@@ -31,6 +33,77 @@ const baseQuery = fetchBaseQuery({
   },
 });
 
+// Centralized token refresh function with mutex
+const refreshAccessToken = async (): Promise<string | null> => {
+  // If already refreshing, wait for the existing promise
+  if (isRefreshing && refreshPromise) {
+    return refreshPromise;
+  }
+
+  isRefreshing = true;
+
+  refreshPromise = (async () => {
+    try {
+      let refreshToken: string | null = null;
+      
+      // Try localStorage first
+      if (typeof window !== "undefined") {
+        refreshToken = localStorage.getItem("refreshToken");
+      }
+
+      // Fallback to session if not in localStorage
+      if (!refreshToken) {
+        const session = await getSession();
+        refreshToken = session?.user?.refreshToken ?? null;
+      }
+
+      if (!refreshToken) {
+        console.error("No refresh token available");
+        await logOut();
+        return null;
+      }
+
+      const formData = new FormData();
+      formData.append("refresh", refreshToken);
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_APIBASE_URL}/token/refresh`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Token refresh failed");
+      }
+
+      const data = await response.json();
+      const newToken = data.access;
+      const newRefreshToken = data.refresh;
+
+      // Update localStorage (single source of truth)
+      if (typeof window !== "undefined") {
+        localStorage.setItem("token", newToken);
+        if (newRefreshToken) {
+          localStorage.setItem("refreshToken", newRefreshToken);
+        }
+      }
+
+      return newToken;
+    } catch (error) {
+      console.error("Token refresh error:", error);
+      await logOut();
+      return null;
+    } finally {
+      isRefreshing = false;
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+};
+
 const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
   unknown,
@@ -38,71 +111,17 @@ const baseQueryWithReauth: BaseQueryFn<
 > = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions);
 
+  // Handle 401 Unauthorized
   if (result.error && result.error.status === 401) {
-    let refreshToken: string | null = null;
-    if (typeof window !== "undefined") {
-      refreshToken = localStorage.getItem("refreshToken");
+    // Attempt to refresh the token
+    const newToken = await refreshAccessToken();
+
+    if (newToken) {
+      // Retry the original request with the new token
+      // The new token will be automatically picked up by prepareHeaders
+      result = await baseQuery(args, api, extraOptions);
     }
-    if (!refreshToken) {
-      const session = await getSession();
-      refreshToken = session?.user?.refreshToken ?? null;
-    }
-
-    if (!refreshToken) {
-      // No refresh token available, sign out
-      // await signOut({ redirect: false });
-      await logOut();
-      return result;
-    }
-
-    try {
-      const formData = new FormData();
-      formData.append("refresh", refreshToken);
-
-      const refreshResult = await baseQuery(
-        {
-          url: "/token/refresh", // Verify this endpoint matches your API
-          method: "POST",
-          body: formData,
-        },
-        api,
-        extraOptions,
-      );
-
-      if (refreshResult.data) {
-        const newToken = (refreshResult.data as { access: string }).access;
-        const newRefreshToken = (refreshResult.data as { refresh: string })
-          .refresh;
-
-        // Update localStorage
-        if (typeof window !== "undefined") {
-          localStorage.setItem("token", newToken);
-          if (newRefreshToken) {
-            localStorage.setItem("refreshToken", newRefreshToken);
-          }
-        }
-
-        // Update the session to reflect new tokens
-        const session = await getSession();
-        if (session) {
-          // This triggers a session update in NextAuth
-          session.user.accessToken = newToken;
-          if (newRefreshToken) {
-            session.user.refreshToken = newRefreshToken;
-          }
-        }
-
-        // Retry the original query with the new token
-        result = await baseQuery(args, api, extraOptions);
-      } else if (refreshResult.error) {
-        // Refresh failed, sign out
-        await signOut({ redirect: false });
-      }
-    } catch (error) {
-      console.error("Token refresh failed:", error);
-      await signOut({ redirect: false });
-      return result;
-    }
+    // If refresh failed, user is already logged out by refreshAccessToken
   }
 
   return result;
@@ -137,29 +156,63 @@ export const baseApi = createApi({
   endpoints: () => ({}),
 });
 
-
 export const logOut = async () => {
+  try {
+    // Get tokens before clearing them
+    let accessToken: string | null = null;
+    let refreshToken: string | null = null;
 
-  //! TODO: Call log out Api here if needed
-  // Clear localStorage
-  localStorage.removeItem("token");
-  localStorage.removeItem("refreshToken");
-  localStorage.removeItem("activeAccountId");
-  localStorage.removeItem("logout-event");
+    if (typeof window !== "undefined") {
+      accessToken = localStorage.getItem("token");
+      refreshToken = localStorage.getItem("refreshToken");
+    }
 
+    // Fallback to session if not in localStorage
+    if (!accessToken || !refreshToken) {
+      const session = await getSession();
+      accessToken = accessToken || session?.user?.accessToken || null;
+      refreshToken = refreshToken || session?.user?.refreshToken || null;
+    }
 
-  clearNextAuthCookies();
-  clearAllCookies();
+    // Call logout API if tokens are available
+    if (refreshToken && accessToken) {
+      const formData = new FormData();
+      formData.append("refresh_token", refreshToken);
 
+      await fetch(`${process.env.NEXT_PUBLIC_APIBASE_URL}/auth/logout`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: formData,
+      }).catch((error) => {
+        // Log error but don't block logout
+        console.error("Logout API call failed:", error);
+      });
+    }
+  } catch (error) {
+    console.error("Error during logout API call:", error);
+  } finally {
+    // Always clear local data regardless of API call success
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("activeAccountId");
+      localStorage.removeItem("logout-event");
+    }
 
-  // Sign out from NextAuth (this also clears session-related cookies)
-  await signOut({ callbackUrl: "/auth/login" });
+    // Clear cookies
+    clearNextAuthCookies();
+    clearAllCookies();
+
+    // Sign out from NextAuth
+    await signOut({ callbackUrl: "/auth/login" });
+  }
 };
 
-
-
-
 const clearNextAuthCookies = () => {
+  if (typeof window === "undefined") return;
+
   const cookiesToRemove = [
     "next-auth.session-token",
     "next-auth.csrf-token",
@@ -184,8 +237,9 @@ const clearNextAuthCookies = () => {
   });
 };
 
-// Alternative: Use a more robust helper function
 export const clearAllCookies = () => {
+  if (typeof window === "undefined") return;
+
   document.cookie.split(";").forEach((c) => {
     const eqPos = c.indexOf("=");
     const name = eqPos > -1 ? c.substring(0, eqPos).trim() : c.trim();
@@ -195,18 +249,5 @@ export const clearAllCookies = () => {
 };
 
 export const logOutWithFullCleanup = async () => {
-  // Clear localStorage
-  localStorage.removeItem("token");
-  localStorage.removeItem("refreshToken");
-  localStorage.removeItem("activeAccountId");
-  localStorage.removeItem("logout-event");
-
-  // Option 1: Clear specific NextAuth cookies
-  clearNextAuthCookies();
-
-  // Option 2: Or clear all cookies (more aggressive)
-  // clearAllCookies();
-
-  // Sign out from NextAuth
-  await signOut({ callbackUrl: "/auth/login" });
+  await logOut();
 };
