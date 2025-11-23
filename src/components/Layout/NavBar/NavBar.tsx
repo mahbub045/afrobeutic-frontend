@@ -8,7 +8,6 @@ import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import apiClient from "@/services/api-client";
 import UserDropdown from "./UserDropdown";
 
 interface NavBarProps {
@@ -19,30 +18,15 @@ const NavBar: React.FC<NavBarProps> = ({ onMobileMenuToggle }) => {
   const { data: session, status } = useSession();
   const { theme, setTheme } = useTheme();
 
-  const handleSignOut = async () => {
-    try {
-      // Get the refresh token from the session
-      const refreshToken = session?.user?.refreshToken;
+  const handleSignOut = () => {
+    // Broadcast logout event to all tabs
+    localStorage.setItem("logout-event", Date.now().toString());
 
-      if (refreshToken) {
-        // Call backend logout API
-        await apiClient.post("/auth/logout", {
-          refresh_token: refreshToken,
-        });
-      }
-    } catch (error) {
-      console.error("Error during logout:", error);
-      // Continue with frontend logout even if backend logout fails
-    } finally {
-      // Broadcast logout event to all tabs
-      localStorage.setItem("logout-event", Date.now().toString());
+    // Clear active account from localStorage
+    localStorage.removeItem("activeAccountId");
 
-      // Clear active account from localStorage
-      localStorage.removeItem("activeAccountId");
-
-      // Perform the actual sign out
-      signOut({ callbackUrl: "/auth/login" });
-    }
+    // Perform the actual sign out
+    signOut({ callbackUrl: "/auth/login" });
   };
 
   return (
