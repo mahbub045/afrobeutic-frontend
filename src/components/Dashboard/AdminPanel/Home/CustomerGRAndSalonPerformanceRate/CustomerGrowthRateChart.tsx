@@ -32,7 +32,7 @@ export default function CustomerGrowthRateChart() {
       <div className="flex items-start justify-between">
         <div>
           <h3 className="text-sm font-medium text-slate-700 dark:text-slate-200">
-            Bookings and Cancellations
+            Customer Growth Rate
           </h3>
           <p className="mb-2 text-xs text-slate-500 dark:text-slate-400">
             Monthly bookings vs cancellations
