@@ -1,4 +1,3 @@
-import apiClient from "@/services/api-client";
 import type {
   BaseQueryFn,
   FetchArgs,
@@ -45,7 +44,7 @@ const refreshAccessToken = async (): Promise<string | null> => {
   refreshPromise = (async () => {
     try {
       let refreshToken: string | null = null;
-      
+
       // Try localStorage first
       if (typeof window !== "undefined") {
         refreshToken = localStorage.getItem("refreshToken");
@@ -71,7 +70,7 @@ const refreshAccessToken = async (): Promise<string | null> => {
         {
           method: "POST",
           body: formData,
-        }
+        },
       );
 
       if (!response.ok) {
