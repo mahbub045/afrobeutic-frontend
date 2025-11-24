@@ -1,6 +1,6 @@
 "use client";
 import Breadcrumbs from "../../CommonComponents/Breadcrumbs";
-import Test from "../Accounts/Test";
+import WelcomeMessage from "../../CommonComponents/WelcomeMessage";
 
 const AdminPanelContainer: React.FC = () => {
   return (
@@ -8,12 +8,11 @@ const AdminPanelContainer: React.FC = () => {
       <Breadcrumbs
         items={[{ label: "Home", href: "/dashboard/admin-panel" }]}
       />
-      {/* <ActiveAccountBanner />
       <WelcomeMessage />
+      {/* <ActiveAccountBanner />
       <Overview />
       <OthersInfo />
       <SalonsAndChatBotsCard /> */}
-      <Test />
     </div>
   );
 };
