@@ -7,6 +7,7 @@ import { useGetSalonListQuery } from "@/Redux/Reducers/AdminPanel/Accounts/Salon
 import { SalonProps } from "@/Types/AdminPanel/AccountsTypes/SalonsTypes/SalonsType";
 import { Bot, LoaderPinwheel } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 
 const SalonsCard: React.FC = () => {
@@ -51,46 +52,50 @@ const SalonsCard: React.FC = () => {
         ) : (
           <div className="max-h-[340px] space-y-4 overflow-y-auto pr-2 pb-4">
             {salons?.map((salon: SalonProps) => (
-              <div
+              <Link
                 key={salon.uid}
-                className="bg-card hover:bg-accent/50 flex items-center gap-3 rounded-lg border p-3 shadow-md transition-colors dark:shadow-gray-600"
+                href={`/admin/accounts/${accountuid}/salons/${salon.uid}`}
+                className="block w-full"
+                aria-label={`Open salon ${salon.name ?? salon.uid}`}
               >
-                <div className="bg-primary/10 flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full">
-                  {salon.logo ? (
-                    <Image
-                      src={salon.logo}
-                      alt={salon.name ?? "salon"}
-                      width={48}
-                      height={48}
-                      className="h-12 w-12 object-cover"
-                    />
-                  ) : (
-                    <div className="text-primary flex h-12 w-12 items-center justify-center text-sm font-medium">
-                      {getInitials(salon.name)}
-                    </div>
-                  )}
-                </div>
-
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between">
-                    <h4 className="truncate text-sm leading-none font-medium">
-                      {salon.name}
-                    </h4>
-                    <Badge variant="secondary" className="text-xs">
-                      {formatChoiceFieldValue(salon.status) ??
-                        salon.status ??
-                        "Unknown"}
-                    </Badge>
+                <div className="bg-card hover:bg-accent/50 group flex w-full cursor-pointer items-center gap-3 rounded-lg border p-3 shadow-md transition-colors dark:shadow-gray-600">
+                  <div className="bg-primary/10 flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-full">
+                    {salon.logo ? (
+                      <Image
+                        src={salon.logo}
+                        alt={salon.name ?? "salon"}
+                        width={48}
+                        height={48}
+                        className="h-12 w-12 object-cover"
+                      />
+                    ) : (
+                      <span className="text-primary text-sm font-medium">
+                        {getInitials(salon.name)}
+                      </span>
+                    )}
                   </div>
-                  <p className="text-muted-foreground mt-1 text-xs">
-                    {salon.email ?? "No email provided"}
-                  </p>
-                  <p className="text-muted-foreground mt-1 text-xs">
-                    {formatChoiceFieldValue(salon.salon_type) ??
-                      salon.salon_type}
-                  </p>
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between">
+                      <h4 className="truncate text-sm leading-none font-medium">
+                        {salon.name}
+                      </h4>
+                      <Badge variant="secondary" className="text-xs">
+                        {formatChoiceFieldValue(salon.status) ??
+                          salon.status ??
+                          "Unknown"}
+                      </Badge>
+                    </div>
+                    <p className="text-muted-foreground mt-1 text-xs">
+                      {salon.email ?? "No email provided"}
+                    </p>
+                    <p className="text-muted-foreground mt-1 text-xs">
+                      {formatChoiceFieldValue(salon.salon_type) ??
+                        salon.salon_type}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
