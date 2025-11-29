@@ -103,7 +103,10 @@ const Products: React.FC = () => {
             </TableRow>
           ) : products.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="py-8">
+              <TableCell
+                colSpan={6}
+                className="text-muted-foreground py-8 text-center"
+              >
                 No products found.
               </TableCell>
             </TableRow>

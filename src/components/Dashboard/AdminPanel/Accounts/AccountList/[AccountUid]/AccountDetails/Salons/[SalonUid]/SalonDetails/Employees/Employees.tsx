@@ -120,7 +120,10 @@ const Employees: React.FC = () => {
             </TableRow>
           ) : employees.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="py-8">
+              <TableCell
+                colSpan={6}
+                className="text-muted-foreground py-8 text-center"
+              >
                 No employees found.
               </TableCell>
             </TableRow>

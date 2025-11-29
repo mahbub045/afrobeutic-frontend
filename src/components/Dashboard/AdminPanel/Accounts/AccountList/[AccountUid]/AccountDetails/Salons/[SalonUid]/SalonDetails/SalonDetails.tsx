@@ -67,8 +67,7 @@ const SalonDetails: React.FC = () => {
 
   return (
     <>
-      {" "}
-      <div className="overflow-hidden rounded-xl bg-white shadow-md dark:bg-gray-900 dark:shadow-gray-600">
+      <div className="overflow-hidden rounded-xl shadow-md dark:shadow-gray-600">
         <div className="flex items-center gap-4 p-6">
           <div className="bg-primary/10 flex h-24 w-24 items-center justify-center overflow-hidden rounded-lg dark:bg-gray-800">
             {salon.logo ? (

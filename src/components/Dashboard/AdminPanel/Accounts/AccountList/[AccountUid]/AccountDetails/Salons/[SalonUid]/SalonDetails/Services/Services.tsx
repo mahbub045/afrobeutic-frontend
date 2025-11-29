@@ -109,7 +109,10 @@ const Services: React.FC = () => {
             </TableRow>
           ) : services.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={10} className="py-8">
+              <TableCell
+                colSpan={10}
+                className="text-muted-foreground py-8 text-center"
+              >
                 No services found.
               </TableCell>
             </TableRow>
