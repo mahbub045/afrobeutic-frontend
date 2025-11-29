@@ -14,3 +14,16 @@ export interface SalonProps {
   status?: string | null;
   created_at?: string | null;
 }
+export interface SalonServicesProps {
+  uid: string;
+  name?: string | null;
+  category?: string | null;
+  price?: string | null;
+  description?: string | null;
+  service_duration?: string | null;
+  available_time_slots?: string[] | null;
+  gender_specific?: string | null;
+  discount_percentage?: string | null;
+  assign_employees?: string[] | null;
+  created_at?: string | null;
+}
