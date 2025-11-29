@@ -176,10 +176,10 @@ const SalonDetails: React.FC = () => {
         </div>
       </div>
       {/* Add additional salon details below */}
-      <div className="py-8">
+      <div className="pt-10">
         <Services />
       </div>
-      <div className="py-8">
+      <div className="pt-10">
         <Products />
       </div>
     </>

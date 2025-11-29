@@ -27,3 +27,12 @@ export interface SalonServicesProps {
   assign_employees?: string[] | null;
   created_at?: string | null;
 }
+
+export interface SalonProductsProps {
+  uid: string;
+  name?: string | null;
+  category?: string | null;
+  price?: string | null;
+  description?: string | null;
+  created_at?: string | null;
+}

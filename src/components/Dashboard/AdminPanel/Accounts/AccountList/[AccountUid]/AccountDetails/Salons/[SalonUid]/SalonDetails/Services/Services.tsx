@@ -12,7 +12,12 @@ import {
 import { formatChoiceFieldValue, formatDateTime } from "@/lib/utils";
 import { useGetSalonServicesQuery } from "@/Redux/Reducers/AdminPanel/Accounts/Salons/SalonsApi";
 import { SalonServicesProps } from "@/Types/AdminPanel/AccountsTypes/SalonsTypes/SalonsType";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  LoaderPinwheel,
+  Search,
+} from "lucide-react";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
@@ -94,34 +99,50 @@ const Services: React.FC = () => {
           </tr>
         </TableHeader>
         <TableBody>
-          {services.map((s, index) => (
-            <TableRow key={s.uid}>
-              <TableCell className="font-medium">{index + 1}</TableCell>
-              <TableCell className="font-medium">{s.name}</TableCell>
-              <TableCell>{s.category ?? "-"}</TableCell>
-              <TableCell>{s.price ? `$${s.price}` : "-"}</TableCell>
-              <TableCell>{s.service_duration ?? "-"}</TableCell>
-              <TableCell>
-                {s.available_time_slots && s.available_time_slots.length
-                  ? formatChoiceFieldValue(s.available_time_slots.join(", "))
-                  : "-"}
-              </TableCell>
-              <TableCell>
-                {formatChoiceFieldValue(s.gender_specific) ?? "-"}
-              </TableCell>
-              <TableCell>
-                {s.discount_percentage ? `${s.discount_percentage}%` : "-"}
-              </TableCell>
-              <TableCell>
-                {s.assign_employees && s.assign_employees.length
-                  ? s.assign_employees.length
-                  : "-"}
-              </TableCell>
-              <TableCell>
-                {s.created_at ? formatDateTime(s.created_at) : "-"}
+          {isLoading ? (
+            <TableRow>
+              <TableCell colSpan={10} className="py-8">
+                <div className="flex items-center justify-center">
+                  <LoaderPinwheel className="h-6 w-6 animate-spin" />
+                </div>
               </TableCell>
             </TableRow>
-          ))}
+          ) : services.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={10} className="py-8">
+                No services found.
+              </TableCell>
+            </TableRow>
+          ) : (
+            services.map((s, index) => (
+              <TableRow key={s.uid}>
+                <TableCell className="font-medium">{index + 1}</TableCell>
+                <TableCell className="font-medium">{s.name}</TableCell>
+                <TableCell>{s.category ?? "-"}</TableCell>
+                <TableCell>{s.price ? `$${s.price}` : "-"}</TableCell>
+                <TableCell>{s.service_duration ?? "-"}</TableCell>
+                <TableCell>
+                  {s.available_time_slots && s.available_time_slots.length
+                    ? formatChoiceFieldValue(s.available_time_slots.join(", "))
+                    : "-"}
+                </TableCell>
+                <TableCell>
+                  {formatChoiceFieldValue(s.gender_specific) ?? "-"}
+                </TableCell>
+                <TableCell>
+                  {s.discount_percentage ? `${s.discount_percentage}%` : "-"}
+                </TableCell>
+                <TableCell>
+                  {s.assign_employees && s.assign_employees.length
+                    ? s.assign_employees.length
+                    : "-"}
+                </TableCell>
+                <TableCell>
+                  {s.created_at ? formatDateTime(s.created_at) : "-"}
+                </TableCell>
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
       {/* Pagination */}
