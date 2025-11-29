@@ -54,7 +54,7 @@ const SalonsCard: React.FC = () => {
             {salons?.map((salon: SalonProps) => (
               <Link
                 key={salon.uid}
-                href={`/admin/accounts/${accountuid}/salons/${salon.uid}`}
+                href={`/dashboard/admin-panel/accounts/${accountuid}/salons/${salon.uid}`}
                 className="block w-full"
                 aria-label={`Open salon ${salon.name ?? salon.uid}`}
               >
