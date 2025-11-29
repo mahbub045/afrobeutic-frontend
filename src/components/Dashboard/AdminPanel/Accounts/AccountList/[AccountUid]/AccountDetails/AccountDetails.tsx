@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { AccountDetailsProps } from "@/Types/AdminPanel/AccountsTypes/AccountsTypes";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import SalonsCard from "./Cards/SalonsCard";
-import UsersCard from "./Cards/UsersCard";
+import SalonsCard from "./Salons/SalonsCard";
+import UsersCard from "./Users/UsersCard";
 
 const AccountDetails: React.FC<AccountDetailsProps> = ({
   accountDetails,
