@@ -14,3 +14,7 @@ export interface AccountListProps {
     | null;
   created_at: string | null;
 }
+export interface AccountDetailsProps {
+  accountDetails: AccountListProps | undefined;
+  isLoading: boolean;
+}
