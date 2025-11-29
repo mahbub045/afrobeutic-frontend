@@ -1,15 +1,10 @@
 "use client";
-
 import Breadcrumbs from "@/components/Dashboard/CommonComponents/Breadcrumbs";
-import { useGetAccountDetailsQuery } from "@/Redux/Reducers/AdminPanel/Accounts/AccountsApi";
 import { useParams } from "next/navigation";
-import AccountDetails from "./AccountDetails/AccountDetails";
+import SalonDetails from "./SalonDetails/SalonDetails";
 
-const AccountDetailsContainer: React.FC = () => {
-  const { accountuid } = useParams();
-  const { data: accountDetails, isLoading } =
-    useGetAccountDetailsQuery(accountuid);
-
+const SalonDetailsContainer: React.FC = () => {
+  const { accountuid, salonuid } = useParams();
   return (
     <div>
       <Breadcrumbs
@@ -23,11 +18,15 @@ const AccountDetailsContainer: React.FC = () => {
             label: " Account Details",
             href: `/dashboard/admin-panel/accounts/${accountuid}`,
           },
+          {
+            label: `Salon Details`,
+            href: `/dashboard/admin-panel/accounts/${accountuid}/salons/${salonuid}`,
+          },
         ]}
       />
-      <AccountDetails accountDetails={accountDetails} isLoading={isLoading} />
+      <SalonDetails />
     </div>
   );
 };
 
-export default AccountDetailsContainer;
+export default SalonDetailsContainer;

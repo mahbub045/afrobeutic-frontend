@@ -148,9 +148,11 @@ export const baseApi = createApi({
     "LeadsAndCustomers",
     "Enquiries",
     "SupportTickets",
-    "AccountsList",
+    // Admin Panel Tags
     "ManagementsList",
     "UsersList",
+    "AccountsList",
+    "SalonsList",
   ],
   endpoints: () => ({}),
 });
