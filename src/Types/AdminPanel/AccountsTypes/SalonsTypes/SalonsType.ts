@@ -36,3 +36,13 @@ export interface SalonProductsProps {
   description?: string | null;
   created_at?: string | null;
 }
+
+export interface SalonEmployeesProps {
+  uid: string;
+  employee_id?: string | null;
+  name?: string | null;
+  phone?: string | null;
+  designation?: string | null;
+  image?: string | null;
+  created_at?: string | null;
+}

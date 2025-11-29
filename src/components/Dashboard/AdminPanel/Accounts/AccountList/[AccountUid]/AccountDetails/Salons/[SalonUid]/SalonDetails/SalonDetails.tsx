@@ -9,6 +9,7 @@ import { Check, Copy, LoaderPinwheel } from "lucide-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
+import Employees from "./Employees/Employees";
 import Products from "./Products/Products";
 import Services from "./Services/Services";
 
@@ -181,6 +182,9 @@ const SalonDetails: React.FC = () => {
       </div>
       <div className="pt-10">
         <Products />
+      </div>
+      <div className="pt-10">
+        <Employees />
       </div>
     </>
   );
