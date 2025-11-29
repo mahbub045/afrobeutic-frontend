@@ -1,5 +1,6 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatChoiceFieldValue, getCountryName } from "@/lib/utils";
 import {
@@ -8,6 +9,7 @@ import {
 } from "@/Types/AdminPanel/AccountsTypes/AccountsTypes";
 import { Bot, LoaderPinwheel } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 const UsersCard: React.FC<AccountDetailsProps> = ({
   accountDetails,
@@ -53,7 +55,7 @@ const UsersCard: React.FC<AccountDetailsProps> = ({
           </div>
         ) : (
           <div className="max-h-[340px] space-y-4 overflow-y-auto pr-2 pb-4">
-            {users.map((user: User) => (
+            {users.slice(0, 7).map((user: User) => (
               <div
                 key={user.uid}
                 className="bg-card hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-4 shadow-md transition-colors dark:shadow-gray-600"
@@ -92,6 +94,13 @@ const UsersCard: React.FC<AccountDetailsProps> = ({
                 </div>
               </div>
             ))}
+            {users.length > 7 && (
+              <Link href="/dashboard/admin-panel/users">
+                <Button variant="outline" size="sm" className="mt-2 w-full">
+                  View All Users ({users.length})
+                </Button>
+              </Link>
+            )}
           </div>
         )}
       </CardContent>
