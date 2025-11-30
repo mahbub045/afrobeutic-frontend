@@ -2,6 +2,7 @@
 
 import Breadcrumbs from "@/components/Dashboard/CommonComponents/Breadcrumbs";
 import { useParams } from "next/navigation";
+import EnquiryList from "./EnquiryList/EnquiryList";
 
 const EnquiriesContainer: React.FC = () => {
   const { accountuid } = useParams();
@@ -20,6 +21,7 @@ const EnquiriesContainer: React.FC = () => {
           },
         ]}
       />
+      <EnquiryList />
     </div>
   );
 };
