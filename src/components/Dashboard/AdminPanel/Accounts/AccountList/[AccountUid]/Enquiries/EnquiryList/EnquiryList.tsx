@@ -126,7 +126,7 @@ const EnquiryList: React.FC = () => {
                 <TableCell>{formatDateTime(e.created_at)}</TableCell>
                 <TableCell className="text-center">
                   <Link
-                    href={`/dashboard/admin/accounts/${accountuid}/enquiries/${e.uid}`}
+                    href={`/dashboard/admin-panel/accounts/${accountuid}/enquiries/${e.uid}`}
                   >
                     <Button
                       variant="outline"
