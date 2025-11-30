@@ -20,10 +20,15 @@ import {
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import ViewBookingDetailsDialog from "./Dialogs/ViewBookingDetailsDialog";
 
 const Bookings: React.FC = () => {
   const params = useParams() as { accountuid?: string; salonuid?: string };
   const { accountuid, salonuid } = params || {};
+  const [isViewBookingDetailsDialogOpen, setIsViewBookingDetailsDialogOpen] =
+    useState(false);
+  const [selectedBooking, setSelectedBooking] =
+    useState<SalonBookingsProps | null>(null);
 
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize] = useState<number>(10);
@@ -45,8 +50,6 @@ const Bookings: React.FC = () => {
     },
   });
 
-  // don't return early here so hooks run consistently; render loading state below
-
   const services: SalonBookingsProps[] = salonBookings?.results ?? [];
 
   useEffect(() => {
@@ -61,6 +64,11 @@ const Bookings: React.FC = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [debouncedSearch]);
+
+  const openViewBookingDetailsDialog = (booking: SalonBookingsProps) => {
+    setSelectedBooking(booking);
+    setIsViewBookingDetailsDialogOpen(true);
+  };
 
   return (
     <>
@@ -151,6 +159,7 @@ const Bookings: React.FC = () => {
                     variant="outline"
                     size="sm"
                     className="shadow-md dark:shadow-gray-600"
+                    onClick={() => openViewBookingDetailsDialog(b)}
                   >
                     View
                   </Button>
@@ -206,6 +215,13 @@ const Bookings: React.FC = () => {
             </div>
           )}
       </div>
+      {/* View Booking Details Dialog */}
+      {isViewBookingDetailsDialogOpen && selectedBooking && (
+        <ViewBookingDetailsDialog
+          booking={selectedBooking}
+          onClose={() => setIsViewBookingDetailsDialogOpen(false)}
+        />
+      )}
     </>
   );
 };
