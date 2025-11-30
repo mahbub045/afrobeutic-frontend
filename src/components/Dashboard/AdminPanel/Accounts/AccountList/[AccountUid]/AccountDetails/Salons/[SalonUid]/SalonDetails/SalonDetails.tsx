@@ -12,6 +12,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Employees from "./Employees/Employees";
 import Products from "./Products/Products";
 import Services from "./Services/Services";
+import Bookings from "./Bookings/Bookings";
 
 const SalonDetails: React.FC = () => {
   const { accountuid, salonuid } = useParams();
@@ -184,6 +185,9 @@ const SalonDetails: React.FC = () => {
       </div>
       <div className="pt-10">
         <Employees />
+      </div>
+      <div className="pt-10">
+        <Bookings />
       </div>
     </>
   );
