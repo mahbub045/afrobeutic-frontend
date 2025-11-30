@@ -2,10 +2,16 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { formatChoiceFieldValue, formatDateTime } from "@/lib/utils";
 import { useGetEnquiryDetailsQuery } from "@/Redux/Reducers/AdminPanel/Accounts/Enquiries/EnquiriesApi";
 import { EnquiryProps } from "@/Types/AdminPanel/AccountsTypes/EnquiriesTypes/EnquiryType";
-import { LoaderPinwheel } from "lucide-react";
+import { ChevronLeft, ChevronRight, LoaderPinwheel, X } from "lucide-react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import React from "react";
@@ -24,6 +30,47 @@ const EnquiryDetails: React.FC = () => {
   });
 
   const enq = data as EnquiryProps | undefined;
+
+  // Fullscreen image viewer state
+  const [viewerOpen, setViewerOpen] = React.useState(false);
+  const [currentIndex, setCurrentIndex] = React.useState(0);
+  const images = enq?.images ?? [];
+
+  const openViewer = (index: number) => {
+    setCurrentIndex(index);
+    setViewerOpen(true);
+  };
+
+  const closeViewer = () => {
+    setViewerOpen(false);
+  };
+
+  const showNext = () => {
+    if (images.length === 0) return;
+    setCurrentIndex((i) => (i + 1) % images.length);
+  };
+
+  const showPrev = () => {
+    if (images.length === 0) return;
+    setCurrentIndex((i) => (i - 1 + images.length) % images.length);
+  };
+
+  React.useEffect(() => {
+    if (!viewerOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeViewer();
+      if (e.key === "ArrowRight") {
+        if (images.length === 0) return;
+        setCurrentIndex((i) => (i + 1) % images.length);
+      }
+      if (e.key === "ArrowLeft") {
+        if (images.length === 0) return;
+        setCurrentIndex((i) => (i - 1 + images.length) % images.length);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [viewerOpen, images.length]);
 
   const getStatusVariant = (status?: string) => {
     switch ((status || "").toUpperCase()) {
@@ -139,8 +186,15 @@ const EnquiryDetails: React.FC = () => {
         <h3 className="mb-3 text-lg font-medium">Images</h3>
         {enq.images && enq.images.length > 0 ? (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-            {enq.images.map((img) => (
-              <div key={img.uid} className="overflow-hidden rounded border">
+            {enq.images.map((img, idx) => (
+              <button
+                key={img.uid}
+                onClick={() => {
+                  openViewer(idx);
+                }}
+                className="overflow-hidden rounded border p-0"
+                aria-label={`Open image ${idx + 1} in fullscreen`}
+              >
                 <Image
                   src={img.image}
                   alt={img.uid}
@@ -149,7 +203,7 @@ const EnquiryDetails: React.FC = () => {
                   className="h-48 w-full object-cover"
                   unoptimized
                 />
-              </div>
+              </button>
             ))}
           </div>
         ) : (
@@ -158,6 +212,61 @@ const EnquiryDetails: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Fullscreen viewer dialog */}
+      <Dialog open={viewerOpen} onOpenChange={setViewerOpen}>
+        <DialogContent
+          showCloseButton={false}
+          className="fixed inset-0 top-0 left-0 z-50 m-0 translate-x-0 translate-y-0 rounded-none bg-black p-0"
+        >
+          <DialogTitle className="sr-only">Image viewer</DialogTitle>
+          <div className="relative flex h-screen w-full items-center justify-center">
+            <button
+              type="button"
+              onClick={showPrev}
+              aria-label="Previous image"
+              disabled={images.length <= 1}
+              className="absolute top-1/2 left-4 z-50 -translate-y-1/2 rounded-full bg-black/40 p-3 text-white hover:bg-black/60 focus:ring-2 focus:ring-white/40 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+
+            <div className="flex w-full items-center justify-center">
+              <div className="relative flex max-h-[90vh] max-w-[90vw] items-center justify-center">
+                {images[currentIndex] && (
+                  <Image
+                    src={images[currentIndex].image}
+                    alt={images[currentIndex].uid}
+                    width={650}
+                    height={720}
+                    unoptimized
+                    className="mx-auto h-[90vh] w-[90vw] object-contain"
+                  />
+                )}
+
+                {/* Image counter */}
+                <div className="pointer-events-none absolute top-4 left-1/2 -translate-x-1/2 rounded bg-black/50 px-3 py-1 text-sm text-white">
+                  {currentIndex + 1} / {images.length}
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={showNext}
+              aria-label="Next image"
+              disabled={images.length <= 1}
+              className="absolute top-1/2 right-4 z-50 -translate-y-1/2 rounded-full bg-black/40 p-3 text-white hover:bg-black/60 focus:ring-2 focus:ring-white/40 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
+
+            <DialogClose className="absolute top-4 right-4 text-white">
+              <X />
+            </DialogClose>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <div className="flex justify-end">
         <Button onClick={() => router.back()} variant="outline">
