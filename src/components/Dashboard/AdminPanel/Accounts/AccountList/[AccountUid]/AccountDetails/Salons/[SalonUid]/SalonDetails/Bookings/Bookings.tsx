@@ -113,7 +113,7 @@ const Bookings: React.FC = () => {
         <TableBody>
           {isLoading ? (
             <TableRow>
-              <TableCell colSpan={10} className="py-8">
+              <TableCell colSpan={14} className="py-8">
                 <div className="flex items-center justify-center">
                   <LoaderPinwheel className="h-6 w-6 animate-spin" />
                 </div>
@@ -122,7 +122,7 @@ const Bookings: React.FC = () => {
           ) : services.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={10}
+                colSpan={14}
                 className="text-muted-foreground py-8 text-center"
               >
                 No services found.

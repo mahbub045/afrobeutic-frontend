@@ -154,7 +154,7 @@ const EnquiryDetails: React.FC = () => {
           <div className="text-sm">
             <div className="mb-2 flex justify-between">
               <span className="text-muted-foreground">UID</span>
-              <span>{enq.uid}</span>
+              <span className="text-xs">{enq.uid}</span>
             </div>
             <div className="mb-2 flex justify-between">
               <span className="text-muted-foreground">Level</span>
