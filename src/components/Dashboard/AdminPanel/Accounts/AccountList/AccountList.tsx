@@ -108,11 +108,25 @@ const AccountList: React.FC = () => {
                     {a.users ? a.users.length : 0}
                   </TableCell>
                   <TableCell className="text-center">{created}</TableCell>
-                  <TableCell className="text-center">
+                  <TableCell className="flex justify-center gap-2 text-center">
                     <Link href={`/dashboard/admin-panel/accounts/${a.uid}`}>
-                      <Button variant="outline" size="sm">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="shadow-md dark:shadow-gray-600"
+                      >
                         <Eye />
-                        View
+                        Details
+                      </Button>
+                    </Link>
+                    <Link href={`/dashboard/admin-panel/accounts/${a.uid}/enquiries`}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="shadow-md dark:shadow-gray-600"
+                      >
+                        <Eye />
+                        Enquiries
                       </Button>
                     </Link>
                   </TableCell>
