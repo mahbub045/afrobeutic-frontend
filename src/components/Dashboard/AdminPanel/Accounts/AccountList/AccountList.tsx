@@ -15,6 +15,7 @@ import {
 import { Eye, LoaderPinwheel, Search } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
+import { formatDateTime } from "../../../../../lib/utils";
 
 const AccountList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -92,10 +93,6 @@ const AccountList: React.FC = () => {
             </TableRow>
           ) : (
             accounts.map((a: AccountListProps, idx: number) => {
-              const created = a.created_at
-                ? new Date(a.created_at).toLocaleDateString()
-                : "—";
-
               return (
                 <TableRow key={a.uid}>
                   <TableCell className="text-start">{idx + 1}</TableCell>
@@ -107,7 +104,9 @@ const AccountList: React.FC = () => {
                   <TableCell className="text-center">
                     {a.users ? a.users.length : 0}
                   </TableCell>
-                  <TableCell className="text-center">{created}</TableCell>
+                  <TableCell className="text-center">
+                    {formatDateTime(a.created_at)}
+                  </TableCell>
                   <TableCell className="flex justify-center gap-2 text-center">
                     <Link href={`/dashboard/admin-panel/accounts/${a.uid}`}>
                       <Button
@@ -119,7 +118,9 @@ const AccountList: React.FC = () => {
                         Details
                       </Button>
                     </Link>
-                    <Link href={`/dashboard/admin-panel/accounts/${a.uid}/enquiries`}>
+                    <Link
+                      href={`/dashboard/admin-panel/accounts/${a.uid}/enquiries`}
+                    >
                       <Button
                         variant="outline"
                         size="sm"
