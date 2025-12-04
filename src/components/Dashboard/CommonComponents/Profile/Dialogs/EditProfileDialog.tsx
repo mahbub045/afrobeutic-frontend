@@ -132,14 +132,14 @@ const EditProfileDialog: React.FC<{
                   Avatar
                 </Label>
                 <div className="flex items-center gap-4">
-                  <div className="relative overflow-hidden h-20 w-20 ">
+                  <div className="relative overflow-hidden">
                     {preview ? (
                       <Image
                         src={preview}
                         alt="avatar-preview"
                         height={80}
                         width={80}
-                        className="h-20 w-20 rounded-full object-cover"
+                        className="h-20 w-28 rounded-full object-cover"
                       />
                     ) : userData?.avatar ? (
                       <Image
@@ -147,7 +147,7 @@ const EditProfileDialog: React.FC<{
                         alt="avatar"
                         height={80}
                         width={80}
-                        className="h-20 w-20 rounded-full object-cover"
+                        className="h-20 w-28 rounded-full object-cover"
                       />
                     ) : (
                       <div className="bg-muted text-muted-foreground flex h-full w-full items-center justify-center">
