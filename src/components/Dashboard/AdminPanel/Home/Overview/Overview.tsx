@@ -7,68 +7,70 @@ const Overview: React.FC = () => {
     <section className="mt-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {/* Total Management User Card */}
-        <Card className="border-0 bg-gradient-to-br from-orange-50 to-orange-100 shadow-md dark:from-orange-950 dark:to-orange-900 dark:shadow-lg dark:shadow-gray-600">
+        <Card className="border-0 bg-gradient-to-br from-orange-500 to-orange-400 shadow-md dark:from-orange-950 dark:to-orange-900 dark:shadow-lg dark:shadow-gray-600">
           <CardHeader>
             <CardTitle className="text-muted-foreground flex items-center justify-between gap-3 text-xs dark:text-orange-200">
-              <span className="font-medium">TOTAL MANAGEMENT USER</span>
+              <span className="font-medium text-white">
+                TOTAL MANAGEMENT USER
+              </span>
               <span className="flex items-center justify-center rounded-lg bg-orange-600 p-2 dark:bg-orange-700">
                 <Users className="size-5 text-white" />
               </span>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-900 dark:text-orange-100">
+            <div className="text-2xl font-bold text-white dark:text-orange-100">
               0
             </div>
           </CardContent>
         </Card>
 
         {/* Total User Card */}
-        <Card className="border-0 bg-gradient-to-br from-green-50 to-green-100 shadow-md dark:from-green-950 dark:to-green-900 dark:shadow-lg dark:shadow-gray-600">
+        <Card className="border-0 bg-gradient-to-br from-green-500 to-green-400 shadow-md dark:from-green-950 dark:to-green-900 dark:shadow-lg dark:shadow-gray-600">
           <CardHeader>
             <CardTitle className="text-muted-foreground flex items-center justify-between gap-3 text-xs dark:text-green-200">
-              <span className="font-medium">TOTAL USER</span>
+              <span className="font-medium text-white">TOTAL USER</span>
               <span className="flex items-center justify-center rounded-lg bg-green-600 p-2 dark:bg-green-700">
                 <User className="size-5 text-white" />
               </span>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-900 dark:text-green-100">
+            <div className="text-2xl font-bold text-white dark:text-green-100">
               0
             </div>
           </CardContent>
         </Card>
 
         {/* Total Account Card */}
-        <Card className="border-0 bg-gradient-to-br from-blue-50 to-blue-100 shadow-md dark:from-blue-950 dark:to-blue-900 dark:shadow-lg dark:shadow-gray-600">
+        <Card className="border-0 bg-gradient-to-br from-blue-500 to-blue-400 shadow-md dark:from-blue-950 dark:to-blue-900 dark:shadow-lg dark:shadow-gray-600">
           <CardHeader>
             <CardTitle className="text-muted-foreground flex items-center justify-between gap-3 text-xs dark:text-blue-200">
-              <span className="font-medium">TOTAL ACCOUNT</span>
+              <span className="font-medium text-white">TOTAL ACCOUNT</span>
               <span className="flex items-center justify-center rounded-lg bg-blue-600 p-2 dark:bg-blue-700">
                 <CreditCard className="size-5 text-white" />
               </span>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">
+            <div className="text-2xl font-bold text-white dark:text-blue-100">
               0
             </div>
           </CardContent>
         </Card>
 
         {/* Total Salon Card */}
-        <Card className="border-0 bg-gradient-to-br from-purple-50 to-purple-100 shadow-md dark:from-purple-950 dark:to-purple-900 dark:shadow-lg dark:shadow-gray-600">
+        <Card className="border-0 bg-gradient-to-br from-purple-500 to-purple-400 shadow-md dark:from-purple-950 dark:to-purple-900 dark:shadow-lg dark:shadow-gray-600">
           <CardHeader>
             <CardTitle className="text-muted-foreground flex items-center justify-between gap-3 text-xs dark:text-purple-200">
-              <span className="font-medium">TOTAL SALON</span>
+              <span className="font-medium text-white">TOTAL SALON</span>
               <span className="flex items-center justify-center rounded-lg bg-purple-600 p-2 dark:bg-purple-700">
                 <Scissors className="size-5 text-white" />
               </span>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-purple-900 dark:text-purple-100">
+            <div className="text-2xl font-bold text-white dark:text-purple-100">
               0
             </div>
           </CardContent>
