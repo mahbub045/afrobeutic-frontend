@@ -149,7 +149,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         const userWithToken = user as UserWithToken;
         if (userWithToken.accessToken) {
@@ -180,6 +180,23 @@ export const authOptions: NextAuthOptions = {
           token.role = userWithToken.role;
         }
       }
+
+      // Handle session updates (e.g., when profile is edited)
+      if (trigger === "update" && session?.user) {
+        if (session.user.first_name !== undefined) {
+          token.first_name = session.user.first_name;
+        }
+        if (session.user.last_name !== undefined) {
+          token.last_name = session.user.last_name;
+        }
+        if (session.user.country !== undefined) {
+          token.country = session.user.country;
+        }
+        if (session.user.avatar !== undefined) {
+          token.avatar = session.user.avatar;
+        }
+      }
+
       return token;
     },
 

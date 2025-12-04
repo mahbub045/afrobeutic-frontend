@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { countries } from "@/data/countries";
-import { useAcceptInvitationMutation } from "@/Redux/Reducers/CommonApi/AcceptInvitationApi";
+import { useAcceptInvitationMutation } from "@/Redux/Reducers/ClientPanel/AcceptInvitation/AcceptInvitationApi";
 import { FormikHelpers, SignUpFormValues } from "@/Types/SignUp/SignUpTypes";
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import { Eye, EyeOff, LoaderPinwheel, Moon, Sun } from "lucide-react";

@@ -1,7 +1,5 @@
-import UserProfileConatiner from '@/components/Dashboard/CommonComponents/UserProfile'
+import ProfileConatiner from "@/components/Dashboard/CommonComponents/Profile";
 
-export default function AdminUserProfilePage() {
-  return (
-    <UserProfileConatiner />
-  )
+export default function AdminProfilePage() {
+  return <ProfileConatiner />;
 }
