@@ -1,3 +1,4 @@
+import { countries } from "@/data/countries";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -54,3 +55,11 @@ export const formatChoiceFieldValue = (v: unknown): string => {
     )
     .join(" ");
 };
+
+export   const getCountryName = (code?: string | null) => {
+    if (!code) return null;
+    const found = countries.find(
+      (c) => c.code === code || c.code.toLowerCase() === code.toLowerCase(),
+    );
+    return found?.name ?? code;
+  };

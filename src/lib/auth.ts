@@ -6,6 +6,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 // Extend NextAuth's user type to include all API response data
 interface UserWithToken extends NextAuthUser {
   accessToken?: string;
+  refreshToken?: string;
   uid?: string;
   account_id?: string; // Added account id from login response
   avatar?: string | null;
@@ -28,12 +29,14 @@ declare module "next-auth" {
       last_name?: string;
       country?: string;
       accessToken?: string;
+      refreshToken?: string;
       role?: string;
     };
   }
 
   interface User {
     accessToken?: string;
+    refreshToken?: string;
     uid?: string;
     account_id?: string;
     avatar?: string | null;
@@ -45,6 +48,7 @@ declare module "next-auth" {
 
   interface JWT {
     accessToken?: string;
+    refreshToken?: string;
     uid?: string;
     account_id?: string;
     avatar?: string | null;
@@ -115,6 +119,8 @@ export const authOptions: NextAuthOptions = {
               country: userInfo.country,
               role: userInfo.role,
               accessToken: loginResponse.data.access,
+              refreshToken:
+                loginResponse.data.refresh || loginResponse.data.refreshToken,
               account_id: loginResponse.data.account_id,
             };
           }
@@ -143,11 +149,14 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         const userWithToken = user as UserWithToken;
         if (userWithToken.accessToken) {
           token.accessToken = userWithToken.accessToken;
+        }
+        if (userWithToken.refreshToken) {
+          token.refreshToken = userWithToken.refreshToken;
         }
         if (userWithToken.uid) {
           token.uid = userWithToken.uid;
@@ -171,6 +180,23 @@ export const authOptions: NextAuthOptions = {
           token.role = userWithToken.role;
         }
       }
+
+      // Handle session updates (e.g., when profile is edited)
+      if (trigger === "update" && session?.user) {
+        if (session.user.first_name !== undefined) {
+          token.first_name = session.user.first_name;
+        }
+        if (session.user.last_name !== undefined) {
+          token.last_name = session.user.last_name;
+        }
+        if (session.user.country !== undefined) {
+          token.country = session.user.country;
+        }
+        if (session.user.avatar !== undefined) {
+          token.avatar = session.user.avatar;
+        }
+      }
+
       return token;
     },
 
@@ -185,6 +211,7 @@ export const authOptions: NextAuthOptions = {
         country: token.country as string | undefined,
         role: token.role as string | undefined,
         accessToken: token.accessToken as string | undefined,
+        refreshToken: token.refreshToken as string | undefined,
       };
       return session;
     },

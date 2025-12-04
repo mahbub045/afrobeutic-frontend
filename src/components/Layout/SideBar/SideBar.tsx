@@ -10,6 +10,7 @@ import {
   BadgeQuestionMark,
   BookOpen,
   ChevronRight,
+  CircleUserRound,
   Headphones,
   HelpCircle,
   Home,
@@ -18,6 +19,7 @@ import {
   Megaphone,
   MessageSquare,
   ShieldUser,
+  UserCog,
   Users,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -73,21 +75,19 @@ const SideBar: React.FC<SideBarProps> = ({
       return [
         { label: "Home", href: "/dashboard/admin-panel", Icon: Home },
         {
-          label: "Manage Salons",
-          href: "/dashboard/admin-panel/manage-salons",
-          Icon: LifeBuoy,
+          label: "Managements",
+          href: "/dashboard/admin-panel/managements",
+          Icon: UserCog,
         },
         {
-          label: "Help",
-          Icon: HelpCircle,
-          children: [
-            {
-              label: "Support",
-              href: "/dashboard/admin-panel/support-tickets",
-              Icon: Headphones,
-            },
-            { label: "User Guide", href: "/user-guide", Icon: BookOpen },
-          ],
+          label: "Users",
+          href: "/dashboard/admin-panel/users",
+          Icon: Users,
+        },
+        {
+          label: "Accounts",
+          href: "/dashboard/admin-panel/accounts",
+          Icon: CircleUserRound,
         },
       ];
     }

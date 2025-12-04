@@ -22,7 +22,7 @@ export const countries: Country[] = [
   { code: "BB", name: "Barbados" },
   { code: "BD", name: "Bangladesh" },
   { code: "BE", name: "Belgium" },
-  { code: "BF", name: "Burkina Faso" }, // Not in original, but left for completeness
+  { code: "BF", name: "Burkina Faso" },
   { code: "BG", name: "Bulgaria" },
   { code: "BH", name: "Bahrain" },
   { code: "BI", name: "Burundi" },
@@ -77,7 +77,7 @@ export const countries: Country[] = [
   { code: "GE", name: "Georgia" },
   { code: "GF", name: "French Guiana" },
   { code: "GH", name: "Ghana" },
-  { code: "GI", name: "Gibraltar" }, // Not in original, but left for completeness
+  { code: "GI", name: "Gibraltar" },
   { code: "GL", name: "Greenland" },
   { code: "GM", name: "Gambia" },
   { code: "GN", name: "Guinea" },
@@ -109,7 +109,7 @@ export const countries: Country[] = [
   { code: "KI", name: "Kiribati" },
   { code: "KM", name: "Comoros" },
   { code: "KN", name: "Saint Kitts and Nevis" },
-  { code: "KP", name: "North Korea" }, // Not in original, but left for completeness
+  { code: "KP", name: "North Korea" },
   { code: "KR", name: "South Korea" },
   { code: "KW", name: "Kuwait" },
   { code: "KY", name: "Cayman Islands" },
@@ -132,10 +132,10 @@ export const countries: Country[] = [
   { code: "MG", name: "Madagascar" },
   { code: "MH", name: "Marshall Islands" },
   { code: "MK", name: "North Macedonia" },
-  { code: "ML", name: "Mali" }, // Not in original, but left for completeness
+  { code: "ML", name: "Mali" },
   { code: "MM", name: "Myanmar" },
   { code: "MN", name: "Mongolia" },
-  { code: "MO", name: "Macau" }, // Not in original, but left for completeness
+  { code: "MO", name: "Macau" },
   { code: "MP", name: "Northern Mariana Islands" },
   { code: "MR", name: "Mauritania" },
   { code: "MS", name: "Montserrat" },
@@ -166,7 +166,7 @@ export const countries: Country[] = [
   { code: "PK", name: "Pakistan" },
   { code: "PL", name: "Poland" },
   { code: "PM", name: "Saint Pierre and Miquelon" },
-  { code: "PN", name: "Pitcairn Islands" }, // Not in original, but left for completeness
+  { code: "PN", name: "Pitcairn Islands" },
   { code: "PR", name: "Puerto Rico" },
   { code: "PS", name: "Palestine" },
   { code: "PT", name: "Portugal" },
@@ -176,7 +176,7 @@ export const countries: Country[] = [
   { code: "RE", name: "Réunion" },
   { code: "RO", name: "Romania" },
   { code: "RS", name: "Serbia" },
-  { code: "RU", name: "Russia" }, // Not in original, but left for completeness
+  { code: "RU", name: "Russia" },
   { code: "RW", name: "Rwanda" },
   { code: "SA", name: "Saudi Arabia" },
   { code: "SB", name: "Solomon Islands" },
@@ -184,9 +184,9 @@ export const countries: Country[] = [
   { code: "SD", name: "Sudan" },
   { code: "SE", name: "Sweden" },
   { code: "SG", name: "Singapore" },
-  { code: "SH", name: "Saint Helena" }, // Not in original, but left for completeness
+  { code: "SH", name: "Saint Helena" },
   { code: "SI", name: "Slovenia" },
-  { code: "SJ", name: "Svalbard and Jan Mayen" }, // Not in original, but left for completeness
+  { code: "SJ", name: "Svalbard and Jan Mayen" },
   { code: "SK", name: "Slovakia" },
   { code: "SL", name: "Sierra Leone" },
   { code: "SM", name: "San Marino" },
@@ -201,7 +201,7 @@ export const countries: Country[] = [
   { code: "SZ", name: "Eswatini" },
   { code: "TC", name: "Turks and Caicos Islands" },
   { code: "TD", name: "Chad" },
-  { code: "TF", name: "French Southern Territories" }, // Not in original, but left for completeness
+  { code: "TF", name: "French Southern Territories" },
   { code: "TG", name: "Togo" },
   { code: "TH", name: "Thailand" },
   { code: "TJ", name: "Tajikistan" },
@@ -234,4 +234,4 @@ export const countries: Country[] = [
   { code: "ZA", name: "South Africa" },
   { code: "ZM", name: "Zambia" },
   { code: "ZW", name: "Zimbabwe" },
-];
+].sort((a, b) => a.name.localeCompare(b.name));
