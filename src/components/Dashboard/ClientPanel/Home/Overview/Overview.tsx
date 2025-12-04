@@ -22,7 +22,7 @@ const Overview: React.FC = () => {
     <section className="mt-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {/* Bookings Card */}
-        <Card className="border-0 bg-gradient-to-br from-orange-500 to-orange-400 shadow-md dark:from-orange-950 dark:to-orange-900 dark:shadow-lg dark:shadow-orange-900/30">
+        <Card className="border-0 bg-gradient-to-br from-orange-500 to-orange-400 shadow-md dark:from-orange-950 dark:to-orange-900 dark:shadow-lg dark:shadow-gray-600">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-muted-foreground flex items-center gap-2 text-xs dark:text-orange-200">
               <span className="flex items-center justify-center rounded-lg bg-orange-600 p-2 dark:bg-orange-700">
@@ -67,7 +67,7 @@ const Overview: React.FC = () => {
         </Card>
 
         {/* Total Income Card */}
-        <Card className="border-0 bg-gradient-to-br from-green-500 to-green-400 shadow-md dark:from-green-950 dark:to-green-900 dark:shadow-lg dark:shadow-green-900/30">
+        <Card className="border-0 bg-gradient-to-br from-green-500 to-green-400 shadow-md dark:from-green-950 dark:to-green-900 dark:shadow-lg dark:shadow-gray-600">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-muted-foreground flex items-center gap-2 text-xs dark:text-green-200">
               <span className="flex items-center justify-center rounded-lg bg-green-600 p-2 dark:bg-green-700">
@@ -108,7 +108,7 @@ const Overview: React.FC = () => {
         </Card>
 
         {/* Client Requests Card */}
-        <Card className="border-0 bg-gradient-to-br from-blue-500 to-blue-400 shadow-md dark:from-blue-950 dark:to-blue-900 dark:shadow-lg dark:shadow-blue-900/30">
+        <Card className="border-0 bg-gradient-to-br from-blue-500 to-blue-400 shadow-md dark:from-blue-950 dark:to-blue-900 dark:shadow-lg dark:shadow-gray-600">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-muted-foreground flex items-center gap-2 text-xs dark:text-blue-200">
               <span className="flex items-center justify-center rounded-lg bg-blue-600 p-2 dark:bg-blue-700">
@@ -149,7 +149,7 @@ const Overview: React.FC = () => {
         </Card>
 
         {/* Total Clients Card */}
-        <Card className="border-0 bg-gradient-to-br from-purple-500 to-purple-400 shadow-md dark:from-purple-950 dark:to-purple-900 dark:shadow-lg dark:shadow-purple-900/30">
+        <Card className="border-0 bg-gradient-to-br from-purple-500 to-purple-400 shadow-md dark:from-purple-950 dark:to-purple-900 dark:shadow-lg dark:shadow-gray-600">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-muted-foreground flex items-center gap-2 text-xs dark:text-purple-200">
               <span className="flex items-center justify-center rounded-lg bg-purple-600 p-2 dark:bg-purple-700">
