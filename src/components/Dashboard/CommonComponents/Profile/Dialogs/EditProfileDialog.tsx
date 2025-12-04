@@ -16,7 +16,9 @@ import { useEditProfileMutation } from "@/Redux/Reducers/Common/ProfileApi";
 import { ProfileDataProps } from "@/Types/Common/ProfileType";
 
 import { ErrorMessage, Field, FieldProps, Form, Formik } from "formik";
+import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
+import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
@@ -36,6 +38,7 @@ const EditProfileDialog: React.FC<{
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const { resolvedTheme } = useTheme();
+  const { update: updateSession } = useSession();
 
   const [editProfile, { isLoading: isMutating }] = useEditProfileMutation();
 
@@ -66,7 +69,17 @@ const EditProfileDialog: React.FC<{
         form.append("avatar", selectedFile);
       }
 
-      await editProfile(form).unwrap();
+      const result = await editProfile(form).unwrap();
+
+      // Update NextAuth session with new profile data
+      await updateSession({
+        user: {
+          first_name: result.first_name || values.first_name,
+          last_name: result.last_name || values.last_name,
+          country: result.country || values.country,
+          avatar: result.avatar || userData?.avatar,
+        },
+      });
 
       Swal.fire({
         icon: "success",
@@ -112,29 +125,29 @@ const EditProfileDialog: React.FC<{
           validationSchema={schema}
           onSubmit={handleSubmit}
         >
-          {({ values, handleChange, isSubmitting }) => (
+          {({ handleChange, isSubmitting }) => (
             <Form className="space-y-4">
               <div>
                 <Label htmlFor="avatar" className="mb-1">
                   Avatar
                 </Label>
                 <div className="flex items-center gap-4">
-                  <div className="relative h-20 w-20 overflow-hidden rounded border">
+                  <div className="relative overflow-hidden h-20 w-20 ">
                     {preview ? (
-                      // using next/image for consistent rendering
-                      // `preview` is a data URL
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
+                      <Image
                         src={preview}
                         alt="avatar-preview"
-                        className="h-full w-full object-cover"
+                        height={80}
+                        width={80}
+                        className="h-20 w-20 rounded-full object-cover"
                       />
                     ) : userData?.avatar ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={userData.avatar}
+                      <Image
+                        src={userData?.avatar}
                         alt="avatar"
-                        className="h-full w-full object-cover"
+                        height={80}
+                        width={80}
+                        className="h-20 w-20 rounded-full object-cover"
                       />
                     ) : (
                       <div className="bg-muted text-muted-foreground flex h-full w-full items-center justify-center">
