@@ -4,13 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { useAccountSwitch } from "@/hooks/use-account-switch";
 import { useGetAccountAccesserQuery } from "@/Redux/Reducers/ClientPanel/SwitchAccount/SwitchAccountApi";
-import {
-  Calendar,
-  Clock,
-  LoaderPinwheel,
-  TrendingUp,
-  Users,
-} from "lucide-react";
+import { LoaderPinwheel } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useMemo } from "react";
@@ -38,56 +32,8 @@ const WelcomeMessage: React.FC = () => {
       ? `${activeAccount.owner_name}'s account`
       : `${userName}'s account`;
 
-  const stats = [
-    {
-      icon: Calendar,
-      label: "Appointments",
-      value: "24",
-      color: "bg-purple-500",
-    },
-    {
-      icon: Users,
-      label: "Clients",
-      value: "156",
-      color: "bg-blue-500",
-    },
-    {
-      icon: TrendingUp,
-      label: "Growth",
-      value: "+12%",
-      color: "bg-purple-400",
-    },
-    {
-      icon: Clock,
-      label: "Pending",
-      value: "8",
-      color: "bg-gray-400",
-    },
-  ];
-
-  // Mock chart data points
-  const chartPoints = [
-    { x: 10, y: 60 },
-    { x: 25, y: 45 },
-    { x: 40, y: 55 },
-    { x: 55, y: 35 },
-    { x: 70, y: 50 },
-    { x: 85, y: 25 },
-    { x: 100, y: 30 },
-  ];
-
-  // Generate SVG path for chart
-  const generatePath = () => {
-    return chartPoints
-      .map((point, index) => {
-        const command = index === 0 ? "M" : "L";
-        return `${command} ${point.x} ${point.y}`;
-      })
-      .join(" ");
-  };
-
   return (
-    <Card className="relative overflow-hidden border shadow-md dark:shadow-gray-600">
+    <Card className="relative min-h-[200px] overflow-hidden border shadow-md sm:min-h-[250px] dark:shadow-gray-600">
       {/* Background Overlay */}
       <div className="pointer-events-none absolute inset-0">
         {/* World Map Background from SVG file */}
@@ -102,160 +48,213 @@ const WelcomeMessage: React.FC = () => {
         </div>
 
         {/* Top left solid circle */}
-        <div className="absolute top-8 left-8 h-8 w-8 rounded-full bg-cyan-400/60 sm:h-12 sm:w-12" />
+        <div className="absolute top-8 left-8 hidden h-8 w-8 rounded-full bg-cyan-400/60 blur-sm sm:flex sm:h-12 sm:w-12" />
 
         {/* Bottom right large circle with blur */}
         <div className="absolute -right-24 -bottom-24 h-32 w-32 rounded-full bg-cyan-300/50 blur-3xl sm:h-40 sm:w-40" />
 
         {/* Middle right solid circle */}
-        <div className="absolute right-12 bottom-24 h-20 w-20 rounded-full bg-cyan-400/50 sm:right-16 sm:bottom-32 sm:h-24 sm:w-24" />
+        <div className="absolute right-12 bottom-24 hidden h-20 w-20 rounded-full bg-cyan-400/50 blur-md sm:right-16 sm:bottom-32 sm:flex sm:h-24 sm:w-24" />
 
-        {/* Wavy lines - prominent and smooth */}
+        {/* Dynamic flowing curves that intersect and cross like the reference */}
         <svg
           className="absolute top-0 left-0 h-full w-full"
-          viewBox="0 0 1200 500"
+          viewBox="0 0 1400 600"
           preserveAspectRatio="none"
         >
-          {/* Dense flowing wave lines */}
+          <defs>
+            {/* Gradients for transparent flowing ribbons - light mode */}
+            <linearGradient id="flow-grad-1" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop
+                offset="0%"
+                stopColor="rgb(186, 230, 253)"
+                stopOpacity="0"
+                className="dark:[stop-color:rgb(8,51,68)]"
+              />
+              <stop
+                offset="20%"
+                stopColor="rgb(125, 211, 252)"
+                stopOpacity="0.4"
+                className="dark:[stop-color:rgb(14,116,144)]"
+              />
+              <stop
+                offset="50%"
+                stopColor="rgb(56, 189, 248)"
+                stopOpacity="0.6"
+                className="dark:[stop-color:rgb(21,94,117)]"
+              />
+              <stop
+                offset="80%"
+                stopColor="rgb(125, 211, 252)"
+                stopOpacity="0.4"
+                className="dark:[stop-color:rgb(14,116,144)]"
+              />
+              <stop
+                offset="100%"
+                stopColor="rgb(186, 230, 253)"
+                stopOpacity="0"
+                className="dark:[stop-color:rgb(8,51,68)]"
+              />
+            </linearGradient>
+
+            <linearGradient id="flow-grad-2" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop
+                offset="0%"
+                stopColor="rgb(224, 242, 254)"
+                stopOpacity="0"
+                className="dark:[stop-color:rgb(12,74,110)]"
+              />
+              <stop
+                offset="25%"
+                stopColor="rgb(186, 230, 253)"
+                stopOpacity="0.35"
+                className="dark:[stop-color:rgb(15,98,131)]"
+              />
+              <stop
+                offset="50%"
+                stopColor="rgb(125, 211, 252)"
+                stopOpacity="0.5"
+                className="dark:[stop-color:rgb(14,116,144)]"
+              />
+              <stop
+                offset="75%"
+                stopColor="rgb(186, 230, 253)"
+                stopOpacity="0.35"
+                className="dark:[stop-color:rgb(15,98,131)]"
+              />
+              <stop
+                offset="100%"
+                stopColor="rgb(224, 242, 254)"
+                stopOpacity="0"
+                className="dark:[stop-color:rgb(12,74,110)]"
+              />
+            </linearGradient>
+
+            <linearGradient id="flow-grad-3" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop
+                offset="0%"
+                stopColor="rgb(240, 249, 255)"
+                stopOpacity="0"
+                className="dark:[stop-color:rgb(8,47,73)]"
+              />
+              <stop
+                offset="30%"
+                stopColor="rgb(224, 242, 254)"
+                stopOpacity="0.3"
+                className="dark:[stop-color:rgb(12,74,110)]"
+              />
+              <stop
+                offset="50%"
+                stopColor="rgb(186, 230, 253)"
+                stopOpacity="0.45"
+                className="dark:[stop-color:rgb(15,98,131)]"
+              />
+              <stop
+                offset="70%"
+                stopColor="rgb(224, 242, 254)"
+                stopOpacity="0.3"
+                className="dark:[stop-color:rgb(12,74,110)]"
+              />
+              <stop
+                offset="100%"
+                stopColor="rgb(240, 249, 255)"
+                stopOpacity="0"
+                className="dark:[stop-color:rgb(8,47,73)]"
+              />
+            </linearGradient>
+          </defs>
+
+          {/* Bottom flowing curve - much bigger amplitude */}
           <path
-            d="M0,160 Q150,100 300,140 T600,125 T900,145 T1200,130"
-            fill="none"
-            stroke="rgb(34, 211, 238)"
-            strokeWidth="1"
-            opacity="0.85"
+            d="M-200,420 Q0,320 200,380 Q400,440 600,340 Q800,240 1000,320 Q1200,400 1400,300 L1600,280 L1600,500 Q1400,480 1200,490 Q1000,500 800,460 Q600,420 400,480 Q200,540 0,500 L-200,530 Z"
+            fill="url(#flow-grad-3)"
+            opacity="0.6"
           />
+
+          {/* Middle-lower curve - dramatic sweeps */}
           <path
-            d="M0,166 Q150,106 300,146 T600,131 T900,151 T1200,136"
-            fill="none"
-            stroke="rgb(34, 211, 238)"
-            strokeWidth="1"
-            opacity="0.83"
-          />
-          <path
-            d="M0,172 Q150,112 300,152 T600,137 T900,157 T1200,142"
-            fill="none"
-            stroke="rgb(34, 211, 238)"
-            strokeWidth="0.95"
-            opacity="0.81"
-          />
-          <path
-            d="M0,178 Q150,118 300,158 T600,143 T900,163 T1200,148"
-            fill="none"
-            stroke="rgb(34, 211, 238)"
-            strokeWidth="0.95"
-            opacity="0.79"
-          />
-          <path
-            d="M0,184 Q150,124 300,164 T600,149 T900,169 T1200,154"
-            fill="none"
-            stroke="rgb(34, 211, 238)"
-            strokeWidth="0.9"
-            opacity="0.77"
-          />
-          <path
-            d="M0,190 Q150,130 300,170 T600,155 T900,175 T1200,160"
-            fill="none"
-            stroke="rgb(34, 211, 238)"
-            strokeWidth="0.9"
-            opacity="0.75"
-          />
-          <path
-            d="M0,196 Q150,136 300,176 T600,161 T900,181 T1200,166"
-            fill="none"
-            stroke="rgb(34, 211, 238)"
-            strokeWidth="0.85"
-            opacity="0.73"
-          />
-          <path
-            d="M0,202 Q150,142 300,182 T600,167 T900,187 T1200,172"
-            fill="none"
-            stroke="rgb(34, 211, 238)"
-            strokeWidth="0.85"
-            opacity="0.71"
-          />
-          <path
-            d="M0,208 Q150,148 300,188 T600,173 T900,193 T1200,178"
-            fill="none"
-            stroke="rgb(34, 211, 238)"
-            strokeWidth="0.8"
-            opacity="0.69"
-          />
-          <path
-            d="M0,214 Q150,154 300,194 T600,179 T900,199 T1200,184"
-            fill="none"
-            stroke="rgb(34, 211, 238)"
-            strokeWidth="0.8"
-            opacity="0.67"
-          />
-          <path
-            d="M0,220 Q150,160 300,200 T600,185 T900,205 T1200,190"
-            fill="none"
-            stroke="rgb(34, 211, 238)"
-            strokeWidth="0.75"
-            opacity="0.65"
-          />
-          <path
-            d="M0,226 Q150,166 300,206 T600,191 T900,211 T1200,196"
-            fill="none"
-            stroke="rgb(34, 211, 238)"
-            strokeWidth="0.75"
-            opacity="0.63"
-          />
-          <path
-            d="M0,232 Q150,172 300,212 T600,197 T900,217 T1200,202"
-            fill="none"
-            stroke="rgb(34, 211, 238)"
-            strokeWidth="0.7"
-            opacity="0.61"
-          />
-          <path
-            d="M0,238 Q150,178 300,218 T600,203 T900,223 T1200,208"
-            fill="none"
-            stroke="rgb(34, 211, 238)"
-            strokeWidth="0.7"
-            opacity="0.59"
-          />
-          <path
-            d="M0,244 Q150,184 300,224 T600,209 T900,229 T1200,214"
-            fill="none"
-            stroke="rgb(34, 211, 238)"
-            strokeWidth="0.65"
-            opacity="0.57"
-          />
-          <path
-            d="M0,250 Q150,190 300,230 T600,215 T900,235 T1200,220"
-            fill="none"
-            stroke="rgb(34, 211, 238)"
-            strokeWidth="0.65"
+            d="M-200,380 Q100,240 300,320 Q500,400 700,260 Q900,120 1100,240 Q1300,360 1500,220 L1600,200 L1600,460 Q1500,420 1300,440 Q1100,460 900,400 Q700,340 500,420 Q300,500 100,460 L-200,490 Z"
+            fill="url(#flow-grad-2)"
             opacity="0.55"
           />
+
+          {/* Central dramatic curve - extreme dips and rises */}
           <path
-            d="M0,256 Q150,196 300,236 T600,221 T900,241 T1200,226"
-            fill="none"
-            stroke="rgb(34, 211, 238)"
-            strokeWidth="0.6"
-            opacity="0.53"
+            d="M-200,340 Q50,160 250,260 Q450,360 650,180 Q850,0 1050,160 Q1250,320 1450,140 L1600,110 L1600,400 Q1450,360 1250,390 Q1050,420 850,340 Q650,260 450,360 Q250,460 50,400 L-200,440 Z"
+            fill="url(#flow-grad-1)"
+            opacity="0.65"
           />
+
+          {/* Upper-middle curve - big flowing movements */}
           <path
-            d="M0,262 Q150,202 300,242 T600,227 T900,247 T1200,232"
-            fill="none"
-            stroke="rgb(34, 211, 238)"
-            strokeWidth="0.6"
-            opacity="0.51"
+            d="M-200,300 Q150,140 350,240 Q550,340 750,180 Q950,20 1150,160 Q1350,300 1550,140 L1600,120 L1600,360 Q1550,320 1350,350 Q1150,380 950,310 Q750,240 550,330 Q350,420 150,360 L-200,400 Z"
+            fill="url(#flow-grad-2)"
+            opacity="0.5"
           />
+
+          {/* Upper curve - crossing with large amplitude */}
           <path
-            d="M0,268 Q150,208 300,248 T600,233 T900,253 T1200,238"
-            fill="none"
-            stroke="rgb(34, 211, 238)"
-            strokeWidth="0.55"
-            opacity="0.49"
+            d="M-200,260 Q200,120 400,220 Q600,320 800,160 Q1000,0 1200,140 Q1400,280 1600,120 L1600,320 Q1600,300 1400,320 Q1200,340 1000,270 Q800,200 600,290 Q400,380 200,320 L-200,360 Z"
+            fill="url(#flow-grad-3)"
+            opacity="0.6"
           />
+
+          {/* Top flowing curve - big dramatic sweeps */}
           <path
-            d="M0,274 Q150,214 300,254 T600,239 T900,259 T1200,244"
+            d="M-200,220 Q100,80 300,180 Q500,280 700,120 Q900,-40 1100,100 Q1300,240 1500,80 L1600,60 L1600,280 Q1500,250 1300,270 Q1100,290 900,230 Q700,170 500,260 Q300,350 100,290 L-200,330 Z"
+            fill="url(#flow-grad-1)"
+            opacity="0.5"
+          />
+
+          {/* Thin accent lines - bigger curves */}
+          <path
+            d="M-200,225 Q100,85 300,185 Q500,285 700,125 Q900,-35 1100,105 Q1300,245 1500,85 L1600,65"
             fill="none"
-            stroke="rgb(34, 211, 238)"
-            strokeWidth="0.5"
-            opacity="0.47"
+            stroke="rgb(125, 211, 252)"
+            strokeWidth="2.5"
+            opacity="0.4"
+            strokeLinecap="round"
+            className="dark:stroke-cyan-600"
+          />
+
+          <path
+            d="M-200,305 Q150,145 350,245 Q550,345 750,185 Q950,25 1150,165 Q1350,305 1550,145"
+            fill="none"
+            stroke="rgb(56, 189, 248)"
+            strokeWidth="3"
+            opacity="0.5"
+            strokeLinecap="round"
+            className="dark:stroke-cyan-700"
+          />
+
+          <path
+            d="M-200,345 Q50,165 250,265 Q450,365 650,185 Q850,5 1050,165 Q1250,325 1450,145"
+            fill="none"
+            stroke="rgb(14, 165, 233)"
+            strokeWidth="2.5"
+            opacity="0.55"
+            strokeLinecap="round"
+            className="dark:stroke-cyan-800"
+          />
+
+          <path
+            d="M-200,385 Q100,245 300,325 Q500,405 700,265 Q900,125 1100,245 Q1300,365 1500,225"
+            fill="none"
+            stroke="rgb(125, 211, 252)"
+            strokeWidth="2"
+            opacity="0.45"
+            strokeLinecap="round"
+            className="dark:stroke-cyan-600"
+          />
+
+          <path
+            d="M-200,425 Q0,325 200,385 Q400,445 600,345 Q800,245 1000,325 Q1200,405 1400,305"
+            fill="none"
+            stroke="rgb(186, 230, 253)"
+            strokeWidth="2"
+            opacity="0.4"
+            strokeLinecap="round"
+            className="dark:stroke-cyan-700"
           />
         </svg>
 
@@ -267,12 +266,12 @@ const WelcomeMessage: React.FC = () => {
       <div className="relative flex flex-col gap-6 p-4 sm:p-6 md:p-8 lg:flex-row lg:items-center lg:justify-between">
         {/* Left: Welcome Text Section */}
         <div className="flex-1 space-y-3 sm:space-y-4">
-          <h1 className="text-foreground text-2xl font-bold sm:text-3xl md:text-4xl">
+          <h1 className="text-foreground text-2xl font-semibold sm:text-3xl md:text-4xl">
             Welcome to Afrobeutic!
           </h1>
           <Badge
             variant="secondary"
-            className="bg-secondary hover:bg-secondary/90 inline-flex rounded-md px-3 py-1.5 text-sm font-semibold text-white sm:px-4 sm:py-2 sm:text-base"
+            className="bg-secondary hover:bg-secondary/90 inline-flex rounded-md px-4 py-1 text-sm font-semibold text-white sm:px-3 sm:py-1 sm:text-base"
           >
             {status === "loading" ? (
               <div className="flex items-center gap-2">
@@ -285,74 +284,6 @@ const WelcomeMessage: React.FC = () => {
         </div>
 
         {/* Right: Monitor/Dashboard Display */}
-        <div className="flex-shrink-0 self-center">
-          {/* Monitor Frame */}
-          <div className="relative">
-            {/* Monitor Screen */}
-            <div className="border-foreground bg-background h-32 w-56 rounded-t-lg border-2 p-4 sm:h-40 sm:w-64 sm:border-3 sm:p-5 lg:h-44 lg:w-72 lg:border-4 lg:p-6">
-              {/* Stats Grid (2x2) */}
-              <div className="mb-3 grid grid-cols-2 gap-2 sm:mb-4 sm:gap-3">
-                {stats.map((stat, index) => {
-                  const Icon = stat.icon;
-                  return (
-                    <div
-                      key={index}
-                      className="flex items-center gap-1.5 sm:gap-2"
-                    >
-                      <div
-                        className={`${stat.color} flex items-center justify-center rounded-full p-1 sm:p-1.5`}
-                      >
-                        <Icon className="h-3 w-3 text-white sm:h-4 sm:w-4" />
-                      </div>
-                      <div className="bg-muted/40 h-1.5 flex-1 rounded-full sm:h-2">
-                        <div
-                          className={`${stat.color} h-full rounded-full`}
-                          style={{ width: "70%" }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Chart */}
-              <div className="bg-muted/20 relative h-12 rounded sm:h-14 lg:h-16">
-                <svg
-                  className="h-full w-full"
-                  viewBox="0 0 120 80"
-                  preserveAspectRatio="none"
-                >
-                  {/* Chart line */}
-                  <path
-                    d={generatePath()}
-                    fill="none"
-                    stroke="rgb(124, 58, 237)"
-                    strokeWidth="2"
-                    className="drop-shadow-md"
-                  />
-                  {/* Data points */}
-                  {chartPoints.map((point, index) => (
-                    <circle
-                      key={index}
-                      cx={point.x}
-                      cy={point.y}
-                      r="2"
-                      fill="rgb(124, 58, 237)"
-                    />
-                  ))}
-                </svg>
-              </div>
-            </div>
-
-            {/* Monitor Stand */}
-            <div className="flex justify-center">
-              <div className="h-4 w-12 bg-gray-300 sm:h-5 sm:w-14 lg:h-6 lg:w-16 dark:bg-gray-700" />
-            </div>
-            <div className="flex justify-center">
-              <div className="h-0.5 w-16 rounded-full bg-gray-400 sm:h-1 sm:w-20 lg:w-24 dark:bg-gray-600" />
-            </div>
-          </div>
-        </div>
       </div>
     </Card>
   );
