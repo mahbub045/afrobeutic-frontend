@@ -1,6 +1,7 @@
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,27 +10,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { countries } from "@/data/countries";
+import { formatChoiceFieldValue, getCountryName } from "@/lib/utils";
+import { useGetUserProfileQuery } from "@/Redux/Reducers/CommonApi/UserProfileApi";
+import { LoaderPinwheel } from "lucide-react";
 import * as React from "react";
 import Breadcrumbs from "../Breadcrumbs";
-
-type User = {
-  avatar: string | null;
-  first_name: string;
-  last_name: string;
-  email: string;
-  role: string;
-  country: string;
-};
-
-const sampleUser: User = {
-  avatar: null,
-  first_name: "Md Mahbub",
-  last_name: "Rahman",
-  email: "mahbub.official045@gmail.com",
-  role: "OWNER",
-  country: "BD",
-};
 
 function initials(name = "") {
   const parts = name.split(" ").filter(Boolean);
@@ -38,18 +23,36 @@ function initials(name = "") {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-const UserProfileConatiner: React.FC<{ data?: User }> = ({ data }) => {
-  const user = data ?? sampleUser;
-  const fullName = `${user.first_name} ${user.last_name}`.trim();
-  const countryName =
-    countries.find((c) => c.code === user.country)?.name ?? user.country;
+const UserProfileConatiner: React.FC = () => {
+  const { data: userData, isLoading } = useGetUserProfileQuery(undefined);
+
+  const fullName = `${userData?.first_name} ${userData?.last_name}`.trim();
+
+  // Determine which dashboard panel link to show based on user role
+  // Roles that should see the client panel
+  const clientRoles = ["OWNER", "ADMIN", "STAFF"];
+  const adminRoles = ["MANAGEMENT_ADMIN", "MANAGEMENT_STAFF"];
+
+  const panelHref = clientRoles.includes(userData?.role)
+    ? "/dashboard/client-panel"
+    : adminRoles.includes(userData?.role)
+      ? "/dashboard/admin-panel"
+      : "/dashboard/client-panel";
+
+  if (isLoading) {
+    return (
+      <div>
+        <LoaderPinwheel className="mx-auto my-20 h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full">
       <Breadcrumbs
         items={[
-          { label: "Home", href: "/dashboard/client-panel" },
-          { label: "User Profile", href: "/dashboard/client-panel/profile" },
+          { label: "Home", href: panelHref },
+          { label: "User Profile", href: `${panelHref}/profile` },
         ]}
       />
       <div className="mx-auto">
@@ -59,8 +62,8 @@ const UserProfileConatiner: React.FC<{ data?: User }> = ({ data }) => {
               <div className="flex flex-col items-center gap-4 text-center">
                 <div className="from-primary/20 via-secondary/10 to-accent/10 rounded-full bg-gradient-to-br p-1">
                   <Avatar className="size-24">
-                    {user.avatar ? (
-                      <AvatarImage src={user.avatar} alt={fullName} />
+                    {userData?.avatar ? (
+                      <AvatarImage src={userData?.avatar} alt={fullName} />
                     ) : (
                       <AvatarFallback>
                         <span className="text-lg font-semibold">
@@ -73,7 +76,9 @@ const UserProfileConatiner: React.FC<{ data?: User }> = ({ data }) => {
 
                 <div>
                   <h2 className="text-2xl font-semibold">{fullName}</h2>
-                  <p className="text-muted-foreground text-sm">{user.role}</p>
+                  <Badge variant="secondary" className="text-sm">
+                    {formatChoiceFieldValue(userData?.role || "-")}
+                  </Badge>
                 </div>
 
                 <div className="mt-2 flex gap-2">
@@ -100,22 +105,24 @@ const UserProfileConatiner: React.FC<{ data?: User }> = ({ data }) => {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="space-y-1">
                     <p className="text-muted-foreground text-sm">First name</p>
-                    <p className="font-medium">{user.first_name}</p>
+                    <p className="font-medium">{userData?.first_name || "-"}</p>
                   </div>
 
                   <div className="space-y-1">
                     <p className="text-muted-foreground text-sm">Last name</p>
-                    <p className="font-medium">{user.last_name}</p>
+                    <p className="font-medium">{userData?.last_name || "-"}</p>
                   </div>
 
                   <div className="space-y-1">
                     <p className="text-muted-foreground text-sm">Email</p>
-                    <p className="font-medium">{user.email}</p>
+                    <p className="font-medium">{userData?.email || "-"}</p>
                   </div>
 
                   <div className="space-y-1">
                     <p className="text-muted-foreground text-sm">Country</p>
-                    <p className="font-medium">{countryName}</p>
+                    <p className="font-medium">
+                      {getCountryName(userData?.country || "-")}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -130,14 +137,18 @@ const UserProfileConatiner: React.FC<{ data?: User }> = ({ data }) => {
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-muted-foreground text-sm">Role</p>
-                    <p className="font-medium">{user.role}</p>
+                     <Badge variant="secondary" className="text-sm">
+                    {formatChoiceFieldValue(userData?.role || "-")}
+                  </Badge>
                   </div>
 
                   <div>
                     <p className="text-muted-foreground text-sm">
                       Member since
                     </p>
-                    <p className="font-medium">2024</p>
+                    <p className="font-medium">
+                      {userData?.created_at || "Not Available"}
+                    </p>
                   </div>
                 </div>
               </CardContent>

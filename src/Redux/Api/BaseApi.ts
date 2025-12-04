@@ -130,6 +130,9 @@ export const baseApi = createApi({
   reducerPath: "baseApi",
   baseQuery: baseQueryWithReauth,
   tagTypes: [
+    // Common Tags 
+    "UserProfile",
+    // Client Panlel Tags
     "AcceptInvitation",
     "CommonCategories",
     "Members",
