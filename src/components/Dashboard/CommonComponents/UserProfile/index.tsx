@@ -137,9 +137,9 @@ const UserProfileConatiner: React.FC = () => {
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-muted-foreground text-sm">Role</p>
-                     <Badge variant="secondary" className="text-sm">
-                    {formatChoiceFieldValue(userData?.role || "-")}
-                  </Badge>
+                    <Badge variant="secondary" className="text-sm">
+                      {formatChoiceFieldValue(userData?.role || "-")}
+                    </Badge>
                   </div>
 
                   <div>
@@ -147,7 +147,13 @@ const UserProfileConatiner: React.FC = () => {
                       Member since
                     </p>
                     <p className="font-medium">
-                      {userData?.created_at || "Not Available"}
+                      {userData?.created_at ? (
+                        userData?.created_at
+                      ) : (
+                        <small className="text-muted-foreground">
+                          Not Available
+                        </small>
+                      )}
                     </p>
                   </div>
                 </div>
