@@ -11,10 +11,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { formatChoiceFieldValue, getCountryName } from "@/lib/utils";
-import { useGetProfileDataQuery } from "@/Redux/Reducers/CommonApi/ProfileApi";
+import { useGetProfileDataQuery } from "@/Redux/Reducers/Common/ProfileApi";
 import { LoaderPinwheel } from "lucide-react";
 import * as React from "react";
 import Breadcrumbs from "../Breadcrumbs";
+import EditProfileDialog from "./Dialogs/EditProfileDialog";
 
 function initials(name = "") {
   const parts = name.split(" ").filter(Boolean);
@@ -57,7 +58,7 @@ const ProfileConatiner: React.FC = () => {
       />
       <div className="mx-auto">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <Card className="col-span-1">
+          <Card className="col-span-1 shadow-md dark:shadow-gray-500">
             <CardContent>
               <div className="flex flex-col items-center gap-4 text-center">
                 <div className="from-primary/20 via-secondary/10 to-accent/10 rounded-full bg-gradient-to-br p-1">
@@ -82,9 +83,7 @@ const ProfileConatiner: React.FC = () => {
                 </div>
 
                 <div className="mt-2 flex gap-2">
-                  <Button variant="default" size="sm">
-                    Edit Profile
-                  </Button>
+                  <EditProfileDialog data={userData} isFetching={isLoading} />
                   <Button variant="outline" size="sm">
                     Change Password
                   </Button>
@@ -94,7 +93,7 @@ const ProfileConatiner: React.FC = () => {
           </Card>
 
           <div className="flex flex-col gap-6 lg:col-span-2">
-            <Card>
+            <Card className="shadow-md dark:shadow-gray-500">
               <CardHeader>
                 <CardTitle>Profile Details</CardTitle>
                 <CardDescription>
@@ -128,7 +127,7 @@ const ProfileConatiner: React.FC = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="shadow-md dark:shadow-gray-500">
               <CardHeader>
                 <CardTitle>Account</CardTitle>
                 <CardDescription>Role and access</CardDescription>

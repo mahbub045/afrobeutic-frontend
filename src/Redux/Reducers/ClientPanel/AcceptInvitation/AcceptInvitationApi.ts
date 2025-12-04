@@ -1,5 +1,5 @@
 import { baseApi } from "@/Redux/Api/BaseApi";
-import { AcceptInvitationPayloadProps } from "@/Types/CommonType/AcceptInvitationType";
+import { AcceptInvitationPayloadProps } from "@/Types/ClientPanel/AcceptInvitationTypes/AcceptInvitationType";
 
 export const AcceptInvitationApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
