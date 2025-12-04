@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { formatChoiceFieldValue, getCountryName } from "@/lib/utils";
-import { useGetUserProfileQuery } from "@/Redux/Reducers/CommonApi/UserProfileApi";
+import { useGetProfileDataQuery } from "@/Redux/Reducers/CommonApi/ProfileApi";
 import { LoaderPinwheel } from "lucide-react";
 import * as React from "react";
 import Breadcrumbs from "../Breadcrumbs";
@@ -23,8 +23,8 @@ function initials(name = "") {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-const UserProfileConatiner: React.FC = () => {
-  const { data: userData, isLoading } = useGetUserProfileQuery(undefined);
+const ProfileConatiner: React.FC = () => {
+  const { data: userData, isLoading } = useGetProfileDataQuery(undefined);
 
   const fullName = `${userData?.first_name} ${userData?.last_name}`.trim();
 
@@ -166,4 +166,4 @@ const UserProfileConatiner: React.FC = () => {
   );
 };
 
-export default UserProfileConatiner;
+export default ProfileConatiner;
