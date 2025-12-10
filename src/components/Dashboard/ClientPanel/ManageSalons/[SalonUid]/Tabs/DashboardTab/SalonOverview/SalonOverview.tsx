@@ -1,8 +1,18 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, DollarSign, Scissors, Users } from "lucide-react";
+import { SalonOverviewProps } from "@/Types/ClientPanel/ManageSalonTypes/DashboardTypes/SalonOverviewType";
+import {
+  Calendar,
+  DollarSign,
+  LoaderPinwheel,
+  Scissors,
+  Users,
+} from "lucide-react";
 import React from "react";
 
-const SalonOverview: React.FC = () => {
+const SalonOverview: React.FC<SalonOverviewProps> = ({
+  isLoading,
+  salonOverviewData,
+}) => {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
       {/* Employees Card */}
@@ -17,7 +27,11 @@ const SalonOverview: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">
-            1
+            {isLoading ? (
+              <LoaderPinwheel className="animate-spin" />
+            ) : (
+              salonOverviewData?.total_employees || 0
+            )}
           </div>
         </CardContent>
       </Card>
@@ -34,7 +48,13 @@ const SalonOverview: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-purple-900 dark:text-purple-100">
-            1
+            <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">
+              {isLoading ? (
+                <LoaderPinwheel className="animate-spin" />
+              ) : (
+                salonOverviewData?.total_services || 0
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -51,7 +71,13 @@ const SalonOverview: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-green-900 dark:text-green-100">
-            8
+            <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">
+              {isLoading ? (
+                <LoaderPinwheel className="animate-spin" />
+              ) : (
+                salonOverviewData?.total_products || 0
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -68,7 +94,13 @@ const SalonOverview: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-orange-900 dark:text-orange-100">
-            5
+            <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">
+              {isLoading ? (
+                <LoaderPinwheel className="animate-spin" />
+              ) : (
+                salonOverviewData?.total_chairs || 0
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
