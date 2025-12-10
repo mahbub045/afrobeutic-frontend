@@ -196,18 +196,26 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
                 <TableCell>
                   {booking.customer.first_name} {booking.customer.last_name}
                 </TableCell>
-                <TableCell>{booking.customer.phone}</TableCell>
-                <TableCell>{booking.employee.name}</TableCell>
+                <TableCell>{booking.customer?.phone}</TableCell>
+                <TableCell>
+                  {booking.employee?.name ? (
+                    booking.employee.name
+                  ) : (
+                    <small className="text-muted-foreground">
+                      Not Assigned
+                    </small>
+                  )}
+                </TableCell>
                 <TableCell>{formatDate(booking.booking_date)}</TableCell>
                 <TableCell>{formatTime(booking.booking_time)}</TableCell>
                 <TableCell>{formatTime(booking.booking_duration)}</TableCell>
                 <TableCell>
-                  <Badge variant={getStatusVariant(booking.status)}>
-                    {formatChoiceFieldValue(booking.status)}
+                  <Badge variant={getStatusVariant(booking?.status)}>
+                    {formatChoiceFieldValue(booking?.status)}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  ${calculateTotalPrice(booking.services, booking.products)}
+                  ${calculateTotalPrice(booking?.services, booking?.products)}
                 </TableCell>
                 <TableCell className="flex items-center justify-center gap-2">
                   <Button
@@ -334,7 +342,13 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
                   </p>
                   <p className="text-sm">
                     <span className="font-medium">Employee:</span>{" "}
-                    {selectedBooking.employee.name}
+                    {selectedBooking?.employee?.name ? (
+                      selectedBooking?.employee?.name
+                    ) : (
+                      <small className="text-muted-foreground">
+                        Not Assigned
+                      </small>
+                    )}
                   </p>
                   {selectedBooking.notes && (
                     <p className="text-sm">
@@ -346,13 +360,13 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
               </div>
 
               {/* Services */}
-              {selectedBooking.services.length > 0 && (
+              {selectedBooking.services.length > 0 ? (
                 <div className="space-y-2">
                   <h3 className="text-muted-foreground text-sm font-semibold">
                     Services
                   </h3>
                   <div className="space-y-2">
-                    {selectedBooking.services.map((service) => (
+                    {selectedBooking?.services?.map((service) => (
                       <div
                         key={service.uid}
                         className="flex items-start justify-between rounded-md border p-2"
@@ -374,6 +388,13 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
                       </div>
                     ))}
                   </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <h3 className="text-muted-foreground text-sm font-semibold">
+                    Services
+                  </h3>
+                  <p className="text-sm">No services booked.</p>
                 </div>
               )}
 
