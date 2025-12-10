@@ -48,9 +48,9 @@ const BookingSchema = Yup.object().shape({
   booking_date: Yup.string().required("Booking date is required"),
   booking_time: Yup.string().required("Booking time is required"),
   notes: Yup.string(),
-  services: Yup.array().min(1, "At least one service is required"),
+  services: Yup.array(),
   products: Yup.array(),
-  employee: Yup.string().required("Employee is required"),
+  employee: Yup.string(),
 });
 
 const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
@@ -425,7 +425,7 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="relative">
                     <Label htmlFor="services" className="mb-2">
-                      Services<span className="text-danger">*</span>
+                      Services
                     </Label>
                     <div className="relative">
                       <div
@@ -741,7 +741,7 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
 
                 <div>
                   <Label htmlFor="employee" className="mb-2">
-                    Employee<span className="text-danger">*</span>
+                    Employee
                   </Label>
                   {isLoadingEmployees ? (
                     <div className="flex items-center justify-center rounded-lg border border-dashed p-6">
