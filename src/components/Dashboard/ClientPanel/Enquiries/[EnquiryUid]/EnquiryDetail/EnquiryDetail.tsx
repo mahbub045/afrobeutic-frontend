@@ -203,9 +203,9 @@ const EnquiryDetails: React.FC = () => {
               <div className="text-sm">
                 <div className="font-semibold">{safe(enq.salon.name)}</div>
                 <div className="text-muted-foreground text-xs">
-                  <small className="bg-secondary/60 rounded-md p-1">
+                  <Badge variant="secondary">
                     {formatChoiceFieldValue(enq.salon.salon_type)}
-                  </small>
+                  </Badge>
                 </div>
                 <div className="text-muted-foreground text-xs">
                   {enq.salon.email}
