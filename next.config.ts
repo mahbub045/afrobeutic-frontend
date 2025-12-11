@@ -4,7 +4,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   images: {
-    domains: ["194.164.93.88", "api.afrobeutic.com"],
+    domains: ["api.afrobeutic.com"],
   },
 };
 
