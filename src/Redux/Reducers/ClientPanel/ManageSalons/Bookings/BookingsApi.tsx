@@ -49,7 +49,7 @@ export const BookingsApi = baseApi.injectEndpoints({
       query: ({ salonUid, bookingUid, data }) => {
         return {
           url: `/salons/${salonUid}/booking-calendar/${bookingUid}`,
-          method: "PUT",
+          method: "PATCH",
           body: data,
         };
       },

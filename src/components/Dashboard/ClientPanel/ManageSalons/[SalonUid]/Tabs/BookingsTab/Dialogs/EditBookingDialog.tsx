@@ -133,30 +133,77 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
     { setSubmitting }: FormikHelpers<typeof initialValues>,
   ) => {
     try {
-      const formData = new FormData();
-      formData.append("booking_date", values.booking_date);
-      formData.append("booking_time", values.booking_time);
-      formData.append("booking_duration", values.booking_duration);
-      formData.append("status", values.status);
+      // Build a base payload that matches the JSON structure the API expects
+      const basePayload: {
+        booking_date: string;
+        booking_time: string;
+        booking_duration: string;
+        status: string;
+        notes: string;
+        employee: string;
+        services: string[];
+        products: string[];
+        cancellation_reason?: string;
+      } = {
+        booking_date: values.booking_date,
+        booking_time: values.booking_time,
+        booking_duration: values.booking_duration,
+        status: values.status,
+        notes: values.notes,
+        employee: values.employee,
+        services: values.services,
+        products: values.products,
+      };
+
       if (values.cancellation_reason) {
-        formData.append("cancellation_reason", values.cancellation_reason);
+        basePayload.cancellation_reason = values.cancellation_reason;
       }
-      formData.append("notes", values.notes);
-      formData.append("employee", values.employee);
-      values.services.forEach((serviceId) => {
-        formData.append("services", serviceId);
-      });
-      values.products.forEach((productId) => {
-        formData.append("products", productId);
-      });
-      values.images.forEach((image) => {
-        formData.append("images", image);
-      });
+
+      // If there are images, send multipart FormData; otherwise send JSON.
+      // This allows us to send services: [] and products: [] like in Postman
+      // when clearing all services/products.
+      let requestBody: FormData | typeof basePayload = basePayload;
+
+      if (values.images.length > 0) {
+        const formData = new FormData();
+
+        // Append scalar and array fields
+        formData.append("booking_date", basePayload.booking_date);
+        formData.append("booking_time", basePayload.booking_time);
+        formData.append("booking_duration", basePayload.booking_duration);
+        formData.append("status", basePayload.status);
+        formData.append("notes", basePayload.notes);
+        formData.append("employee", basePayload.employee);
+
+        if (basePayload.cancellation_reason) {
+          formData.append(
+            "cancellation_reason",
+            basePayload.cancellation_reason,
+          );
+        }
+
+        // Handle services array
+        basePayload.services.forEach((serviceId) => {
+          formData.append("services", serviceId);
+        });
+
+        // Handle products array
+        basePayload.products.forEach((productId) => {
+          formData.append("products", productId);
+        });
+
+        // Append images
+        values.images.forEach((image) => {
+          formData.append("images", image);
+        });
+
+        requestBody = formData;
+      }
 
       await editBooking({
         salonUid: salonUid,
         bookingUid: bookingData?.uid || "",
-        data: formData,
+        data: requestBody,
       }).unwrap();
 
       // Invalidate ChairsBooking tag to force refetch for useGetChairsBookingDataQuery
