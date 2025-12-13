@@ -338,7 +338,7 @@ const ManageSalonsContainer: React.FC = () => {
           </div>
         )}
       </div>
-      <div className="flex justify-between">
+      <div className="mt-6 flex justify-between">
         <div>
           {salonListData && salonListData.count > 0 && (
             <div className="text-sm text-gray-600 dark:text-gray-400">

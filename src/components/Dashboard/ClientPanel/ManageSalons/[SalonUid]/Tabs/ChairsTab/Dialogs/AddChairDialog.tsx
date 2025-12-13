@@ -139,7 +139,7 @@ const AddChairDialog: React.FC<ChairDialogsProps> = ({ isOpen, onClose }) => {
   };
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="max-h-[90vh] overflow-auto shadow-md sm:max-w-lg dark:shadow-gray-700">
         <DialogHeader>
           <DialogTitle className="text-primary">Add New Chair</DialogTitle>
           <DialogDescription>

@@ -109,6 +109,17 @@ export interface EditBookingDialogProps {
   };
 }
 
+export interface EditBookingStatusDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  bookingData?: {
+    uid: string;
+    status: string;
+    cancellation_reason?: string;
+    images?: string[];
+  };
+}
+
 export interface Appointment {
   id: string;
   service: string;

@@ -171,7 +171,7 @@ const EditProductBasicInfoDialog: React.FC<EditProductBasicInfoDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="shadow-md sm:max-w-lg dark:shadow-gray-700">
+      <DialogContent className="max-h-[90vh] overflow-auto shadow-md sm:max-w-lg dark:shadow-gray-700">
         <DialogHeader>
           <DialogTitle className="text-primary">
             Edit Product Basic Info

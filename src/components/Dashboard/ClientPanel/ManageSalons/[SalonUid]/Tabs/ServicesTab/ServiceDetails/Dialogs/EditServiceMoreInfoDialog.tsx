@@ -140,7 +140,7 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="shadow-md sm:max-w-lg md:max-w-xl dark:shadow-gray-600">
+      <DialogContent className="max-h-[90vh] overflow-auto shadow-md sm:max-w-lg md:max-w-xl dark:shadow-gray-600">
         <DialogHeader>
           <DialogTitle className="text-primary">
             Edit Service More Info
