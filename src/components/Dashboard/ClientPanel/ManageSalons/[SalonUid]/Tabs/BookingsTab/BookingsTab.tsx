@@ -429,7 +429,7 @@ const BookingsTab: React.FC = () => {
                     <div
                       className="grid flex-1"
                       style={{
-                        gridTemplateColumns: `repeat(${staffMembers.length}, minmax(150px, 200px))`,
+                        gridTemplateColumns: `repeat(${staffMembers.length}, minmax(250px, 300px))`,
                       }}
                     >
                       {staffMembers.map((staff, colIndex) => {
@@ -478,7 +478,7 @@ const BookingsTab: React.FC = () => {
                                 <span className="text-foreground text-[10px] font-medium whitespace-nowrap sm:text-xs lg:text-sm">
                                   {staff.name}
                                 </span>
-                                <ChevronDown className="text-muted-foreground hidden h-3 w-3 sm:h-4 sm:w-4 lg:block" />
+                                <ChevronDown className="text-muted-foreground h-3 w-3 sm:h-4 sm:w-4 " />
                               </div>
                             )}
 
