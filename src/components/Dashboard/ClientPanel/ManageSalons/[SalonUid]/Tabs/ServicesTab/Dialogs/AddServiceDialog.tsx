@@ -182,7 +182,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md shadow-md dark:shadow-gray-600">
+      <DialogContent className="max-h-[90vh] max-w-md overflow-auto shadow-md dark:shadow-gray-600">
         <DialogHeader>
           <DialogTitle className="text-primary">Add New Service</DialogTitle>
           <DialogDescription>Add a new service to the salon</DialogDescription>
