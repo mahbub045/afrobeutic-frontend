@@ -34,7 +34,7 @@ export const EmployeesApi = baseApi.injectEndpoints({
         method: "POST",
         body: employeeData,
       }),
-      invalidatesTags: ["Employees"],
+      invalidatesTags: ["Employees", "Bookings"],
     }),
     editEmployee: builder.mutation({
       query: ({ salonUid, employeeData, employeeUid }) => ({
@@ -42,14 +42,14 @@ export const EmployeesApi = baseApi.injectEndpoints({
         method: "PATCH",
         body: employeeData,
       }),
-      invalidatesTags: ["Employees"],
+      invalidatesTags: ["Employees", "Bookings"],
     }),
     deleteEmployee: builder.mutation({
       query: ({ salonUid, employeeUid }) => ({
         url: `/salons/${salonUid}/employees/${employeeUid}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Employees"],
+      invalidatesTags: ["Employees", "Bookings"],
     }),
   }),
 });

@@ -25,6 +25,7 @@ import {
 import {
   ChevronLeft,
   ChevronRight,
+  EditIcon,
   EyeIcon,
   LoaderPinwheel,
   Search,
@@ -46,10 +47,10 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isEditBookingDialogOpen, setIsEditBookingDialogOpen] = useState(false);
 
-  // const handleEditBooking = (booking: ChairBookingProps) => {
-  //   setSelectedBooking(booking);
-  //   setIsEditBookingDialogOpen(true);
-  // };
+  const handleEditBooking = (booking: ChairBookingProps) => {
+    setSelectedBooking(booking);
+    setIsEditBookingDialogOpen(true);
+  };
 
   const {
     data: chairsBookingData,
@@ -224,15 +225,14 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
                     onClick={() => handleViewDetails(booking)}
                   >
                     <EyeIcon className="size-4" />
-                    View
                   </Button>
-                  {/* <Button
+                  <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleEditBooking(booking)}
                   >
                     <EditIcon className="size-4" />
-                  </Button> */}
+                  </Button>
                 </TableCell>
               </TableRow>
             ),
