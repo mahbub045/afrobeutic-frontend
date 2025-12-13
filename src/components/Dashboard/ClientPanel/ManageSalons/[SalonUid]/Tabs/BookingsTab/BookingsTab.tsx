@@ -298,7 +298,7 @@ const BookingsTab: React.FC = () => {
         .join(", ")
         .toUpperCase();
     }
-    return selectedAppointment ? selectedAppointment.service : "Appointment";
+    return "No Services Specified";
   };
 
   return (
@@ -478,7 +478,7 @@ const BookingsTab: React.FC = () => {
                                 <span className="text-foreground text-[10px] font-medium whitespace-nowrap sm:text-xs lg:text-sm">
                                   {staff.name}
                                 </span>
-                                <ChevronDown className="text-muted-foreground h-3 w-3 sm:h-4 sm:w-4 " />
+                                <ChevronDown className="text-muted-foreground h-3 w-3 sm:h-4 sm:w-4" />
                               </div>
                             )}
 
@@ -504,8 +504,12 @@ const BookingsTab: React.FC = () => {
                                 >
                                   <div className="mb-0.5 flex items-center justify-between gap-2">
                                     <div className="truncate text-[8px] font-extrabold tracking-wide text-gray-700 sm:text-[9px] lg:text-[10px] dark:text-gray-800">
-                                      {formatChoiceFieldValue(
-                                        appointment.service,
+                                      {appointment.service ? (
+                                        formatChoiceFieldValue(
+                                          appointment.service,
+                                        )
+                                      ) : (
+                                        <small>No Services Specified</small>
                                       )}
                                     </div>
                                     <div className="text-[8px] font-extrabold tracking-wide whitespace-nowrap text-gray-700 sm:text-[9px] lg:text-[10px] dark:text-gray-800">

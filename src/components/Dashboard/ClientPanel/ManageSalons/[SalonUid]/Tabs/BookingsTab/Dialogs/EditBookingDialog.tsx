@@ -110,9 +110,7 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
     }),
     notes: Yup.string(),
     employee: Yup.string().required("Employee is required"),
-    services: Yup.array()
-      .min(1, "At least one service is required")
-      .required("Services are required"),
+    services: Yup.array(),
     products: Yup.array(),
     images: Yup.array().max(3, "Maximum 3 images allowed"),
   });
@@ -438,7 +436,7 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
                       {/* Services Selection */}
                       <div className="relative">
                         <Label htmlFor="services" className="mb-2">
-                          Services <span className="text-red-500">*</span>
+                          Services
                         </Label>
                         <div className="relative">
                           <div

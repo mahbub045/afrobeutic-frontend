@@ -4,7 +4,16 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   images: {
-    domains: ["api.afrobeutic.com"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "api.afrobeutic.com",
+      },
+      {
+        protocol: "http",
+        hostname: "api.afrobeutic.com",
+      },
+    ],
   },
 };
 
