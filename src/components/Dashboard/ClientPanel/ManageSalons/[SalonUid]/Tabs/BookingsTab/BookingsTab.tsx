@@ -46,6 +46,7 @@ import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import EditBookingDialog from "./Dialogs/EditBookingDialog";
+import EditBookingStatusDialog from "./Dialogs/EditBookingStatusDialog";
 
 const BookingsTab: React.FC = () => {
   const { salonuid } = useParams();
@@ -56,6 +57,7 @@ const BookingsTab: React.FC = () => {
     useState<Appointment | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isEditStatusDialogOpen, setIsEditStatusDialogOpen] = useState(false);
   const [selectedBookingUid, setSelectedBookingUid] = useState<string | null>(
     null,
   );
@@ -65,6 +67,10 @@ const BookingsTab: React.FC = () => {
 
   const handleIsEditDialogOpen = (open: boolean) => {
     setIsEditDialogOpen(open);
+  };
+
+  const handleIsEditStatusDialogOpen = (open: boolean) => {
+    setIsEditStatusDialogOpen(open);
   };
 
   // Convert selected date to local YYYY-MM-DD to avoid UTC shift (off-by-one)
@@ -585,6 +591,15 @@ const BookingsTab: React.FC = () => {
                     <span className="text-xs font-medium capitalize">
                       {(effectiveStatus || "").replace("-", " ")}
                     </span>
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 p-0"
+                      onClick={() => handleIsEditStatusDialogOpen(true)}
+                    >
+                      <Edit size={14} />
+                    </Button>
                   </div>
                   <Button
                     variant="outline"
@@ -1297,6 +1312,40 @@ const BookingsTab: React.FC = () => {
                   singleBookingData?.products ||
                   selectedAppointment.fullBookingData?.products ||
                   [],
+                images: [],
+              }
+            : undefined
+        }
+      />
+
+      <EditBookingStatusDialog
+        isOpen={isEditStatusDialogOpen}
+        onClose={() => handleIsEditStatusDialogOpen(false)}
+        bookingData={
+          selectedAppointment
+            ? {
+                uid: selectedAppointment.id,
+                status:
+                  (singleBookingData as unknown as { status?: string })
+                    ?.status ||
+                  (
+                    selectedAppointment.fullBookingData as unknown as {
+                      status?: string;
+                    }
+                  )?.status ||
+                  "PLACED",
+                cancellation_reason:
+                  (
+                    singleBookingData as unknown as {
+                      cancellation_reason?: string;
+                    }
+                  )?.cancellation_reason ||
+                  (
+                    selectedAppointment.fullBookingData as unknown as {
+                      cancellation_reason?: string;
+                    }
+                  )?.cancellation_reason ||
+                  "",
                 images: [],
               }
             : undefined
