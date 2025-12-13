@@ -27,8 +27,10 @@ import {
   FormikHelpers,
   FormikProps,
 } from "formik";
+import { X } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import PhoneInput from "react-phone-input-2";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
@@ -37,7 +39,8 @@ import * as Yup from "yup";
 const BookingSchema = Yup.object().shape({
   customer: Yup.object()
     .shape({
-      name: Yup.string().required("Customer name is required"),
+      first_name: Yup.string().required("Customer first name is required"),
+      last_name: Yup.string().required("Customer last name is required"),
       phone: Yup.string()
         .required("Customer phone is required")
         .matches(/^\+?[1-9]\d{1,14}$/, "Please enter a valid phone number"),
@@ -47,9 +50,9 @@ const BookingSchema = Yup.object().shape({
   booking_time: Yup.string().required("Booking time is required"),
   status: Yup.string().required("Booking status is required"),
   notes: Yup.string(),
-  services: Yup.array().min(1, "At least one service is required"),
+  services: Yup.array(),
   products: Yup.array(),
-  employee: Yup.string().required("Employee is required"),
+  employee: Yup.string(),
 });
 
 const EditChairBookingDialog: React.FC<EditChairBookingDialogProps> = ({
@@ -61,6 +64,15 @@ const EditChairBookingDialog: React.FC<EditChairBookingDialogProps> = ({
   const { salonuid } = useParams();
   const { resolvedTheme } = useTheme();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
+
+  const [showServices, setShowServices] = useState(false);
+  const [showProducts, setShowProducts] = useState(false);
+  const [serviceSearch, setServiceSearch] = useState("");
+  const [productSearch, setProductSearch] = useState("");
+  const servicesInputRef = useRef<HTMLInputElement>(null);
+  const productsInputRef = useRef<HTMLInputElement>(null);
+  const servicesDropdownRef = useRef<HTMLDivElement>(null);
+  const productsDropdownRef = useRef<HTMLDivElement>(null);
 
   // RTK Hooks
   const { data: servicesData, isLoading: isLoadingServices } =
@@ -91,6 +103,39 @@ const EditChairBookingDialog: React.FC<EditChairBookingDialogProps> = ({
       ? employeesData
       : [];
 
+  const initialBookingTime = (() => {
+    const raw = selectedChairBookingData?.booking_time;
+    if (!raw) return "08:00";
+    const match = raw.match(/\d{2}:\d{2}/);
+    return match ? match[0] : "08:00";
+  })();
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        servicesDropdownRef.current &&
+        !servicesDropdownRef.current.contains(event.target as Node) &&
+        servicesInputRef.current &&
+        !servicesInputRef.current.contains(event.target as Node)
+      ) {
+        setShowServices(false);
+      }
+      if (
+        productsDropdownRef.current &&
+        !productsDropdownRef.current.contains(event.target as Node) &&
+        productsInputRef.current &&
+        !productsInputRef.current.contains(event.target as Node)
+      ) {
+        setShowProducts(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const handleAddBooking = async (
     values: BookingFormValues,
     helpers: FormikHelpers<BookingFormValues>,
@@ -102,7 +147,7 @@ const EditChairBookingDialog: React.FC<EditChairBookingDialogProps> = ({
       // Format booking_time to ISO timestamp format (HH:MM:SS.SSSZ)
       const formattedTime = values.booking_time.includes(".")
         ? values.booking_time
-        : `${values.booking_time}.000Z`;
+        : `${values.booking_time}:00.000Z`;
 
       const bookingPayload = {
         customer: values.customer,
@@ -174,9 +219,7 @@ const EditChairBookingDialog: React.FC<EditChairBookingDialogProps> = ({
               booking_date:
                 selectedChairBookingData?.booking_date ||
                 new Date().toISOString().split("T")[0],
-              booking_time:
-                selectedChairBookingData?.booking_time ||
-                new Date().toTimeString().slice(0, 8),
+              booking_time: initialBookingTime,
               status: selectedChairBookingData?.status || "PLACED",
               notes: selectedChairBookingData?.notes || "",
               // ensure services/products are arrays of uids (strings) as expected by BookingFormValues
@@ -197,7 +240,7 @@ const EditChairBookingDialog: React.FC<EditChairBookingDialogProps> = ({
               {/* Customer Information */}
               <div className="space-y-4 rounded-lg border p-4">
                 <h3 className="font-semibold">Customer Information</h3>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div>
                     <Label htmlFor="customer.first_name" className="mb-2">
                       Customer First Name<span className="text-danger">*</span>
@@ -239,7 +282,7 @@ const EditChairBookingDialog: React.FC<EditChairBookingDialogProps> = ({
                     <Label htmlFor="customer.phone" className="mb-2">
                       Customer Phone<span className="text-danger">*</span>
                     </Label>
-                    <Field name="customer.phone">
+                    <Field name="customer.phone" required>
                       {({
                         field,
                         form,
@@ -289,7 +332,7 @@ const EditChairBookingDialog: React.FC<EditChairBookingDialogProps> = ({
                             searchClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100"
                           />
                           <ErrorMessage
-                            name="phone"
+                            name="customer.phone"
                             component="div"
                             className="text-danger mt-1 text-xs"
                           />
@@ -329,11 +372,24 @@ const EditChairBookingDialog: React.FC<EditChairBookingDialogProps> = ({
                     <Field
                       id="booking_time"
                       name="booking_time"
-                      as="input"
-                      type="time"
-                      step="1"
+                      as="select"
                       required
-                    />
+                      className="dark:bg-[#181818]"
+                    >
+                      <option value="" disabled>
+                        Select time
+                      </option>
+                      {Array.from({ length: 96 }, (_, i) => {
+                        const hours = Math.floor(i / 4);
+                        const minutes = (i % 4) * 15;
+                        const timeString = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+                        return (
+                          <option key={timeString} value={timeString}>
+                            {timeString}
+                          </option>
+                        );
+                      })}
+                    </Field>
                     <ErrorMessage
                       name="booking_time"
                       component="p"
@@ -365,8 +421,7 @@ const EditChairBookingDialog: React.FC<EditChairBookingDialogProps> = ({
                     <Field
                       id="notes"
                       name="notes"
-                      type="text"
-                      as="input"
+                      as="textarea"
                       placeholder="Enter booking notes (optional)"
                     />
                     <ErrorMessage
@@ -382,45 +437,154 @@ const EditChairBookingDialog: React.FC<EditChairBookingDialogProps> = ({
               <div className="space-y-4 rounded-lg border p-4">
                 <h3 className="font-semibold">Services & Products</h3>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div>
+                  <div className="relative">
                     <Label htmlFor="services" className="mb-2">
-                      Services<span className="text-danger">*</span>
+                      Services
                     </Label>
-                    {isLoadingServices ? (
-                      <p className="text-muted text-sm">Loading services...</p>
-                    ) : services.length > 0 ? (
-                      <div className="max-h-36 space-y-2 overflow-y-auto">
-                        {services.map((service: ServiceProps) => (
-                          <label
-                            key={service.uid}
-                            className="flex items-center gap-2"
-                          >
+                    <div className="relative">
+                      <div
+                        onClick={() => {
+                          setShowServices(true);
+                          servicesInputRef.current?.focus();
+                        }}
+                        className="flex min-h-[42px] w-full cursor-text flex-wrap gap-2 rounded-md border px-3 py-2 dark:bg-[#181818]"
+                      >
+                        {values.services.length > 0 ? (
+                          <>
+                            {values.services.map((serviceUid) => {
+                              const service = services.find(
+                                (s: ServiceProps) => s.uid === serviceUid,
+                              );
+                              return service ? (
+                                <span
+                                  key={serviceUid}
+                                  className="bg-primary/10 text-primary inline-flex items-center gap-1 rounded-md px-2 py-1 text-sm"
+                                >
+                                  {service.name}
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setFieldValue(
+                                        "services",
+                                        values.services.filter(
+                                          (s) => s !== serviceUid,
+                                        ),
+                                      );
+                                    }}
+                                    className="hover:bg-primary/20 rounded-full"
+                                  >
+                                    <X size={14} />
+                                  </button>
+                                </span>
+                              ) : null;
+                            })}
                             <input
-                              type="checkbox"
-                              name="services"
-                              value={service.uid}
-                              checked={values.services.includes(service.uid)}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                setFieldValue(
-                                  "services",
-                                  e.target.checked
-                                    ? [...values.services, val]
-                                    : values.services.filter((s) => s !== val),
-                                );
-                              }}
-                              className="h-4 w-4 cursor-pointer"
-                              style={{
-                                accentColor: "#027f81",
-                              }}
+                              ref={servicesInputRef}
+                              type="text"
+                              placeholder="Search..."
+                              value={serviceSearch}
+                              onChange={(e) => setServiceSearch(e.target.value)}
+                              onFocus={() => setShowServices(true)}
+                              className="min-w-[120px] flex-1 border-none bg-transparent outline-none"
                             />
-                            <span className="text-sm">{service.name}</span>
-                          </label>
-                        ))}
+                          </>
+                        ) : (
+                          <input
+                            ref={servicesInputRef}
+                            type="text"
+                            placeholder="Search and select services..."
+                            value={serviceSearch}
+                            onChange={(e) => setServiceSearch(e.target.value)}
+                            onFocus={() => setShowServices(true)}
+                            className="w-full border-none bg-transparent outline-none"
+                          />
+                        )}
                       </div>
-                    ) : (
-                      <p className="text-muted text-sm">No services found</p>
-                    )}
+
+                      {showServices && (
+                        <div
+                          ref={servicesDropdownRef}
+                          className="absolute right-0 left-0 z-50 mt-1 max-h-60 overflow-auto rounded border bg-white shadow-lg dark:bg-[#0b1116]"
+                        >
+                          {isLoadingServices ? (
+                            <div className="p-2 text-sm text-gray-500">
+                              Loading services...
+                            </div>
+                          ) : (
+                            (() => {
+                              const searchTerm = serviceSearch
+                                .toLowerCase()
+                                .trim();
+                              const filteredServices = searchTerm
+                                ? services
+                                    .filter((service: ServiceProps) =>
+                                      service.name
+                                        .toLowerCase()
+                                        .includes(searchTerm),
+                                    )
+                                    .sort(
+                                      (a: ServiceProps, b: ServiceProps) => {
+                                        const aStarts = a.name
+                                          .toLowerCase()
+                                          .startsWith(searchTerm);
+                                        const bStarts = b.name
+                                          .toLowerCase()
+                                          .startsWith(searchTerm);
+                                        if (aStarts && !bStarts) return -1;
+                                        if (!aStarts && bStarts) return 1;
+                                        return 0;
+                                      },
+                                    )
+                                : services;
+
+                              return filteredServices.length > 0 ? (
+                                <ul className="divide-y p-2">
+                                  {filteredServices.map(
+                                    (service: ServiceProps) => (
+                                      <li key={service.uid}>
+                                        <label className="my-1 flex w-full cursor-pointer items-center gap-2 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-800">
+                                          <input
+                                            type="checkbox"
+                                            checked={values.services.includes(
+                                              service.uid,
+                                            )}
+                                            onChange={(e) => {
+                                              setFieldValue(
+                                                "services",
+                                                e.target.checked
+                                                  ? [
+                                                      ...values.services,
+                                                      service.uid,
+                                                    ]
+                                                  : values.services.filter(
+                                                      (s) => s !== service.uid,
+                                                    ),
+                                              );
+                                            }}
+                                            className="h-4 w-4 cursor-pointer"
+                                            style={{
+                                              accentColor: "#027f81",
+                                            }}
+                                          />
+                                          <span className="text-sm">
+                                            {service.name}
+                                          </span>
+                                        </label>
+                                      </li>
+                                    ),
+                                  )}
+                                </ul>
+                              ) : (
+                                <div className="p-2 text-sm text-gray-500">
+                                  No services found
+                                </div>
+                              );
+                            })()
+                          )}
+                        </div>
+                      )}
+                    </div>
                     <ErrorMessage
                       name="services"
                       component="p"
@@ -428,45 +592,154 @@ const EditChairBookingDialog: React.FC<EditChairBookingDialogProps> = ({
                     />
                   </div>
 
-                  <div>
+                  <div className="relative">
                     <Label htmlFor="products" className="mb-2">
                       Products
                     </Label>
-                    {isLoadingProducts ? (
-                      <p className="text-muted text-sm">Loading products...</p>
-                    ) : products.length > 0 ? (
-                      <div className="max-h-36 space-y-2 overflow-y-auto">
-                        {products.map((product: ProductProps) => (
-                          <label
-                            key={product.uid}
-                            className="flex items-center gap-2"
-                          >
+                    <div className="relative">
+                      <div
+                        onClick={() => {
+                          setShowProducts(true);
+                          productsInputRef.current?.focus();
+                        }}
+                        className="flex min-h-[42px] w-full cursor-text flex-wrap gap-2 rounded-md border px-3 py-2 dark:bg-[#181818]"
+                      >
+                        {values.products.length > 0 ? (
+                          <>
+                            {values.products.map((productUid) => {
+                              const product = products.find(
+                                (p: ProductProps) => p.uid === productUid,
+                              );
+                              return product ? (
+                                <span
+                                  key={productUid}
+                                  className="bg-primary/10 text-primary inline-flex items-center gap-1 rounded-md px-2 py-1 text-sm"
+                                >
+                                  {product.name}
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setFieldValue(
+                                        "products",
+                                        values.products.filter(
+                                          (p) => p !== productUid,
+                                        ),
+                                      );
+                                    }}
+                                    className="hover:bg-primary/20 rounded-full"
+                                  >
+                                    <X size={14} />
+                                  </button>
+                                </span>
+                              ) : null;
+                            })}
                             <input
-                              type="checkbox"
-                              name="products"
-                              value={product.uid}
-                              checked={values.products.includes(product.uid)}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                setFieldValue(
-                                  "products",
-                                  e.target.checked
-                                    ? [...values.products, val]
-                                    : values.products.filter((p) => p !== val),
-                                );
-                              }}
-                              className="h-4 w-4 cursor-pointer"
-                              style={{
-                                accentColor: "#027f81",
-                              }}
+                              ref={productsInputRef}
+                              type="text"
+                              placeholder="Search..."
+                              value={productSearch}
+                              onChange={(e) => setProductSearch(e.target.value)}
+                              onFocus={() => setShowProducts(true)}
+                              className="min-w-[120px] flex-1 border-none bg-transparent outline-none"
                             />
-                            <span className="text-sm">{product.name}</span>
-                          </label>
-                        ))}
+                          </>
+                        ) : (
+                          <input
+                            ref={productsInputRef}
+                            type="text"
+                            placeholder="Search and select products..."
+                            value={productSearch}
+                            onChange={(e) => setProductSearch(e.target.value)}
+                            onFocus={() => setShowProducts(true)}
+                            className="w-full border-none bg-transparent outline-none"
+                          />
+                        )}
                       </div>
-                    ) : (
-                      <p className="text-muted text-sm">No products found</p>
-                    )}
+
+                      {showProducts && (
+                        <div
+                          ref={productsDropdownRef}
+                          className="absolute right-0 left-0 z-50 mt-1 max-h-60 overflow-auto rounded border bg-white shadow-lg dark:bg-[#0b1116]"
+                        >
+                          {isLoadingProducts ? (
+                            <div className="p-2 text-sm text-gray-500">
+                              Loading products...
+                            </div>
+                          ) : (
+                            (() => {
+                              const searchTerm = productSearch
+                                .toLowerCase()
+                                .trim();
+                              const filteredProducts = searchTerm
+                                ? products
+                                    .filter((product: ProductProps) =>
+                                      product.name
+                                        .toLowerCase()
+                                        .includes(searchTerm),
+                                    )
+                                    .sort(
+                                      (a: ProductProps, b: ProductProps) => {
+                                        const aStarts = a.name
+                                          .toLowerCase()
+                                          .startsWith(searchTerm);
+                                        const bStarts = b.name
+                                          .toLowerCase()
+                                          .startsWith(searchTerm);
+                                        if (aStarts && !bStarts) return -1;
+                                        if (!aStarts && bStarts) return 1;
+                                        return 0;
+                                      },
+                                    )
+                                : products;
+
+                              return filteredProducts.length > 0 ? (
+                                <ul className="divide-y p-2">
+                                  {filteredProducts.map(
+                                    (product: ProductProps) => (
+                                      <li key={product.uid}>
+                                        <label className="my-1 flex w-full cursor-pointer items-center gap-2 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-800">
+                                          <input
+                                            type="checkbox"
+                                            checked={values.products.includes(
+                                              product.uid,
+                                            )}
+                                            onChange={(e) => {
+                                              setFieldValue(
+                                                "products",
+                                                e.target.checked
+                                                  ? [
+                                                      ...values.products,
+                                                      product.uid,
+                                                    ]
+                                                  : values.products.filter(
+                                                      (p) => p !== product.uid,
+                                                    ),
+                                              );
+                                            }}
+                                            className="h-4 w-4 cursor-pointer"
+                                            style={{
+                                              accentColor: "#027f81",
+                                            }}
+                                          />
+                                          <span className="text-sm">
+                                            {product.name}
+                                          </span>
+                                        </label>
+                                      </li>
+                                    ),
+                                  )}
+                                </ul>
+                              ) : (
+                                <div className="p-2 text-sm text-gray-500">
+                                  No products found
+                                </div>
+                              );
+                            })()
+                          )}
+                        </div>
+                      )}
+                    </div>
                     <ErrorMessage
                       name="products"
                       component="p"
@@ -482,7 +755,7 @@ const EditChairBookingDialog: React.FC<EditChairBookingDialogProps> = ({
 
                 <div>
                   <Label htmlFor="employee" className="mb-2">
-                    Employee<span className="text-danger">*</span>
+                    Employee
                   </Label>
                   {isLoadingEmployees ? (
                     <div className="flex items-center justify-center rounded-lg border border-dashed p-6">
