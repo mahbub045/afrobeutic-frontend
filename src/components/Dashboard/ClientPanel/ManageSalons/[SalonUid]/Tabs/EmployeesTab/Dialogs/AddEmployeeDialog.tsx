@@ -236,7 +236,7 @@ const AddEmployeeDialog: React.FC<AddEmployeeDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md shadow-md dark:shadow-gray-600">
+      <DialogContent className="max-h-[90vh] max-w-md overflow-auto shadow-md dark:shadow-gray-600">
         <DialogHeader>
           <DialogTitle className="text-primary">Add New Employee</DialogTitle>
           <DialogDescription>Add a new employee to the salon</DialogDescription>
