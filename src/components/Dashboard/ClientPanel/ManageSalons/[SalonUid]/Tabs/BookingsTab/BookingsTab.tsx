@@ -412,10 +412,10 @@ const BookingsTab: React.FC = () => {
           {/* Calendar View */}
           <div className="bg-card flex flex-col overflow-hidden lg:border-r">
             {/* Time Slots with Appointments */}
-            <div className="max-h-[600px] flex-1 overflow-auto">
-              <div className="relative">
+            <div className="max-h-[600px] flex-1 overflow-x-auto overflow-y-auto">
+              <div className="relative min-w-max">
                 {timeSlots.map((slot, index) => (
-                  <div key={index} className="flex border-b">
+                  <div key={index} className="flex border-b last:border-b-0">
                     <div className="bg-muted/50 text-muted-foreground w-10 flex-shrink-0 border-r text-[10px] sm:w-12 sm:text-xs lg:w-16">
                       {index === 0 && (
                         <div className="border-b px-1 py-2 sm:px-2 sm:py-[22px] lg:px-3">
@@ -427,13 +427,10 @@ const BookingsTab: React.FC = () => {
                       </div>
                     </div>
                     <div
-                      className={cn(
-                        "grid min-w-max flex-1",
-                        staffMembers.length === 1 && "grid-cols-1",
-                        staffMembers.length === 2 && "grid-cols-2",
-                        staffMembers.length === 3 && "grid-cols-3",
-                        staffMembers.length >= 4 && "grid-cols-4",
-                      )}
+                      className="grid flex-1"
+                      style={{
+                        gridTemplateColumns: `repeat(${staffMembers.length}, minmax(150px, 200px))`,
+                      }}
                     >
                       {staffMembers.map((staff, colIndex) => {
                         const staffAppointments = appointments.filter((apt) => {
@@ -450,7 +447,7 @@ const BookingsTab: React.FC = () => {
                           <div
                             key={`${staff.id}-${slot.time}`}
                             className={cn(
-                              "relative min-w-[120px] sm:min-w-[140px] lg:min-w-0",
+                              "relative",
                               colIndex < staffMembers.length - 1 && "border-r",
                             )}
                           >
@@ -466,7 +463,13 @@ const BookingsTab: React.FC = () => {
                                       colIndex === 1 && "bg-purple-400",
                                       colIndex === 2 && "bg-indigo-400",
                                       colIndex === 3 && "bg-pink-400",
-                                      colIndex >= 4 && "bg-cyan-400",
+                                      colIndex === 4 && "bg-cyan-400",
+                                      colIndex === 5 && "bg-emerald-400",
+                                      colIndex === 6 && "bg-red-400",
+                                      colIndex === 7 && "bg-amber-400",
+                                      colIndex === 8 && "bg-teal-400",
+                                      colIndex === 9 && "bg-rose-400",
+                                      colIndex >= 10 && "bg-blue-400",
                                     )}
                                   >
                                     {staff.name.charAt(0)}
