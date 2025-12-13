@@ -199,19 +199,37 @@ const EditChairBookingDialog: React.FC<EditChairBookingDialogProps> = ({
                 <h3 className="font-semibold">Customer Information</h3>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
-                    <Label htmlFor="customer.name" className="mb-2">
-                      Customer Name<span className="text-danger">*</span>
+                    <Label htmlFor="customer.first_name" className="mb-2">
+                      Customer First Name<span className="text-danger">*</span>
                     </Label>
                     <Field
-                      id="customer.name"
-                      name="customer.name"
+                      id="customer.first_name"
+                      name="customer.first_name"
                       as="input"
                       type="text"
                       required
-                      placeholder="Enter customer name"
+                      placeholder="Enter customer first name"
                     />
                     <ErrorMessage
-                      name="customer.name"
+                      name="customer.first_name"
+                      component="p"
+                      className="mt-1 text-sm text-red-500"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="customer.last_name" className="mb-2">
+                      Customer Last Name<span className="text-danger">*</span>
+                    </Label>
+                    <Field
+                      id="customer.last_name"
+                      name="customer.last_name"
+                      as="input"
+                      type="text"
+                      required
+                      placeholder="Enter customer last name"
+                    />
+                    <ErrorMessage
+                      name="customer.last_name"
                       component="p"
                       className="mt-1 text-sm text-red-500"
                     />
