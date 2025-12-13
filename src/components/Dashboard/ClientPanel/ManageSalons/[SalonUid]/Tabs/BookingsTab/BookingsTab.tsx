@@ -471,7 +471,7 @@ const BookingsTab: React.FC = () => {
                                       colIndex >= 10 && "bg-blue-400",
                                     )}
                                   >
-                                    {staff.name.charAt(0)}
+                                    {staff.name.charAt(0).toUpperCase()}
                                   </AvatarFallback>
                                 </Avatar>
                                 <span className="text-foreground text-[10px] font-medium whitespace-nowrap sm:text-xs lg:text-sm">
