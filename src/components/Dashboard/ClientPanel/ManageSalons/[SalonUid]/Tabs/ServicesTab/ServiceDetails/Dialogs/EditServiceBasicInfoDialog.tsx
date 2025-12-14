@@ -302,7 +302,7 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
               </div>
               <div>
                 <Label htmlFor="service-price" className="mb-2">
-                  Price
+                  Price($)
                 </Label>
                 <Field
                   as="input"
