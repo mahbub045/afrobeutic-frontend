@@ -6,13 +6,13 @@ import Footer from "./Footer/Footer";
 import NavBar from "./NavBar/NavBar";
 import SideBar from "./SideBar/SideBar";
 
-interface DashboardLayoutClientProps {
+interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
-export default function DashboardLayoutClient({
+export default function DashboardLayoutComponent({
   children,
-}: DashboardLayoutClientProps) {
+}: DashboardLayoutProps) {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   const handleMobileMenuToggle = () => {
@@ -32,7 +32,7 @@ export default function DashboardLayoutClient({
           onMobileClose={handleMobileMenuClose}
         />
         {/* Main content */}
-        <main className="container mx-auto min-h-screen flex-1 space-y-6 overflow-y-auto px-4 py-6 md:px-6 lg:px-8">
+        <main className="mx-auto min-h-screen flex-1 space-y-6 overflow-y-auto px-4 py-6 md:px-6 lg:px-8">
           {children}
         </main>
       </div>
