@@ -422,7 +422,7 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
                   <div className="space-y-4">
                     <div>
                       <Label htmlFor="employee" className="mb-2">
-                        Assign Employee <span className="text-red-500">*</span>
+                        Change Employee <span className="text-red-500">*</span>
                       </Label>
                       {isLoadingEmployees ? (
                         <div className="flex items-center justify-center rounded-lg border border-dashed p-6">
