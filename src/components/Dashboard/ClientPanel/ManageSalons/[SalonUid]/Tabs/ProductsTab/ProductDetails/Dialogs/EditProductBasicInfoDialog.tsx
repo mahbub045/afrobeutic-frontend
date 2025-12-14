@@ -158,7 +158,7 @@ const EditProductBasicInfoDialog: React.FC<EditProductBasicInfoDialogProps> = ({
         background: resolvedTheme === "dark" ? "#0f1724" : undefined,
         color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
         confirmButtonColor: "#037375",
-        timer: 3000,
+        timer: 2000,
       });
       onEditSuccess?.();
       refetch();
