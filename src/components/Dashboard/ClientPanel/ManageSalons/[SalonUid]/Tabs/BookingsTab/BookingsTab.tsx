@@ -36,7 +36,7 @@ import {
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AppointmentDetailsPanel from "./AppointmentDetailsPanel";
 import EditBookingDialog from "./Dialogs/EditBookingDialog";
 import EditBookingStatusDialog from "./Dialogs/EditBookingStatusDialog";
@@ -57,6 +57,9 @@ const BookingsTab: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<
     "ALL" | "PLACED" | "INPROGRESS" | "COMPLETED" | "RESCHEDULED" | "CANCELLED"
   >("ALL");
+
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const middleSlotRef = useRef<HTMLDivElement | null>(null);
 
   const handleIsEditDialogOpen = (open: boolean) => {
     setIsEditDialogOpen(open);
@@ -237,6 +240,14 @@ const BookingsTab: React.FC = () => {
     setSelectedDate(newDate);
   };
 
+  // On first load (and when date changes), scroll so the middle time slot is centered
+  useEffect(() => {
+    if (!middleSlotRef.current) return;
+
+    // Use scrollIntoView on the middle row; it will scroll the nearest scrollable container (our calendar)
+    middleSlotRef.current.scrollIntoView({ block: "center", behavior: "auto" });
+  }, [selectedDate]);
+
   // Helpers to safely handle cancelled status and reason from possibly under-typed API shapes
   const isCancelled = (() => {
     const selectedAptCancelled = selectedAppointment?.status === "cancelled";
@@ -411,10 +422,21 @@ const BookingsTab: React.FC = () => {
           {/* Calendar View */}
           <div className="bg-card flex flex-col overflow-hidden lg:border-r">
             {/* Time Slots with Appointments */}
-            <div className="max-h-[600px] flex-1 overflow-x-auto overflow-y-auto">
+            <div
+              ref={scrollContainerRef}
+              className="max-h-[600px] flex-1 overflow-x-auto overflow-y-scroll"
+            >
               <div className="relative min-w-max">
                 {timeSlots.map((slot, index) => (
-                  <div key={index} className="flex border-b last:border-b-0">
+                  <div
+                    key={index}
+                    ref={
+                      index === Math.floor(timeSlots.length / 2)
+                        ? middleSlotRef
+                        : undefined
+                    }
+                    className="flex border-b last:border-b-0"
+                  >
                     <div className="bg-muted/50 text-muted-foreground w-10 flex-shrink-0 border-r text-[10px] sm:w-12 sm:text-xs lg:w-16">
                       {index === 0 && (
                         <div className="border-b px-1 py-2 sm:px-2 sm:py-[22px] lg:px-3">

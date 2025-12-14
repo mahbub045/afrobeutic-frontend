@@ -308,7 +308,7 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
 
               <div>
                 <Label htmlFor="price" className="mb-2">
-                  Price<span className="text-danger">*</span>
+                  Price($)<span className="text-danger">*</span>
                 </Label>
                 <Field
                   id="price"
