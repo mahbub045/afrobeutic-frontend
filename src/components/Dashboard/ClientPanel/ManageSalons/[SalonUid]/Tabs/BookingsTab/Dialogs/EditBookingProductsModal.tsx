@@ -40,15 +40,20 @@ const EditBookingProductsModal: React.FC<Props> = ({
   const { data: productsData, isLoading: isLoadingProducts } =
     useGetProductsDataQuery({ salonUid });
 
-  const [localSelection, setLocalSelection] = useState<string[]>(
-    bookingData?.products?.map((p) => p.uid) || [],
-  );
+  const [localSelection, setLocalSelection] = useState<string[]>([]);
   const [search, setSearch] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const [editBooking, { isLoading }] = useEditBookingMutation();
+
+  // Sync localSelection with bookingData when modal opens or data changes
+  useEffect(() => {
+    if (isOpen && bookingData) {
+      setLocalSelection(bookingData?.products?.map((p) => p.uid) || []);
+    }
+  }, [isOpen, bookingData]);
 
   // Handle click outside to close dropdown
   useEffect(() => {
