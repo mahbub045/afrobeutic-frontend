@@ -10,15 +10,11 @@ import { Label } from "@/components/ui/label";
 import { baseApi } from "@/Redux/Api/BaseApi";
 import { useEditBookingMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/BookingsApi";
 import { useGetEmployeesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Employees/EmployeesApi";
-import {
-  EditBookingDialogProps,
-  Employee,
-} from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
+import { EditBookingDialogProps } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
 import { Loader2 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useParams } from "next/navigation";
-import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
 import Swal from "sweetalert2";
@@ -33,9 +29,6 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
   const { salonuid } = useParams();
   const { resolvedTheme } = useTheme();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
-  const [imagePreviews, setImagePreviews] = useState<string[]>(
-    bookingData?.images || [],
-  );
 
   // RTK hooks
   const { data: employeesData, isLoading: isLoadingEmployees } =
@@ -54,8 +47,6 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
     booking_time: Yup.string().required("Booking time is required"),
     booking_duration: Yup.string().required("Duration is required"),
     notes: Yup.string(),
-    employee: Yup.string().required("Employee is required"),
-    images: Yup.array().max(3, "Maximum 3 images allowed"),
   });
 
   const initialValues = {
@@ -63,8 +54,6 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
     booking_time: bookingData?.booking_time?.slice(0, 5) || "",
     booking_duration: bookingData?.booking_duration || "",
     notes: bookingData?.notes || "",
-    employee: bookingData?.employee?.uid || "",
-    images: [] as File[],
   };
 
   const handleSubmit = async (
@@ -72,48 +61,15 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
     { setSubmitting }: FormikHelpers<typeof initialValues>,
   ) => {
     try {
-      // Build a base payload that matches the JSON structure the API expects
-      const basePayload: {
-        booking_date: string;
-        booking_time: string;
-        booking_duration: string;
-        notes: string;
-        employee: string;
-      } = {
-        booking_date: values.booking_date,
-        booking_time: values.booking_time,
-        booking_duration: values.booking_duration,
-        notes: values.notes,
-        employee: values.employee,
-      };
-
-      // If there are images, send multipart FormData; otherwise send JSON.
-      // This allows us to send services: [] and products: [] like in Postman
-      // when clearing all services/products.
-      let requestBody: FormData | typeof basePayload = basePayload;
-
-      if (values.images.length > 0) {
-        const formData = new FormData();
-
-        // Append scalar and array fields
-        formData.append("booking_date", basePayload.booking_date);
-        formData.append("booking_time", basePayload.booking_time);
-        formData.append("booking_duration", basePayload.booking_duration);
-        formData.append("notes", basePayload.notes);
-        formData.append("employee", basePayload.employee);
-
-        // Append images
-        values.images.forEach((image) => {
-          formData.append("images", image);
-        });
-
-        requestBody = formData;
-      }
-
       await editBooking({
         salonUid: salonUid,
         bookingUid: bookingData?.uid || "",
-        data: requestBody,
+        data: {
+          booking_date: values.booking_date,
+          booking_time: values.booking_time,
+          booking_duration: values.booking_duration,
+          notes: values.notes,
+        },
       }).unwrap();
 
       // Invalidate ChairsBooking tag to force refetch for useGetChairsBookingDataQuery
@@ -148,52 +104,9 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
     }
   };
 
-  // Handle image upload
-  const handleImageChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    setFieldValue: (
-      field: string,
-      value: File[],
-      shouldValidate?: boolean,
-    ) => void,
-    currentImages: File[],
-  ) => {
-    const files = e.target.files;
-    if (!files) return;
-
-    const availableSlots = 3 - currentImages.length;
-
-    if (files.length > availableSlots) {
-      return;
-    }
-
-    const newImages = Array.from(files);
-    setFieldValue("images", [...currentImages, ...newImages]);
-
-    // Create preview URLs
-    const newPreviews = newImages.map((file) => URL.createObjectURL(file));
-    setImagePreviews([...imagePreviews, ...newPreviews]);
-  };
-
-  // Remove image
-  const removeImage = (
-    index: number,
-    setFieldValue: (
-      field: string,
-      value: File[],
-      shouldValidate?: boolean,
-    ) => void,
-    images: File[],
-  ) => {
-    const newImages = images.filter((_, i) => i !== index);
-    const newPreviews = imagePreviews.filter((_, i) => i !== index);
-    setFieldValue("images", newImages);
-    setImagePreviews(newPreviews);
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-h-[80vh] !max-w-4xl overflow-y-auto shadow-md sm:!max-w-4xl md:!max-w-5xl dark:shadow-gray-600">
+      <DialogContent className="max-h-[80vh] !max-w-xl overflow-y-auto shadow-md md:!max-w-2xl dark:shadow-gray-600">
         <div className="flex max-h-[95vh] flex-col">
           <div className="pb-6">
             <DialogHeader>
@@ -280,62 +193,6 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
                       component="p"
                       className="text-xs text-red-500"
                     />
-                  </div>
-
-                  {/* Employee Selection */}
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="employee" className="mb-2">
-                        Change Employee <span className="text-red-500">*</span>
-                      </Label>
-                      {isLoadingEmployees ? (
-                        <div className="flex items-center justify-center rounded-lg border border-dashed p-6">
-                          <p className="text-muted-foreground text-sm">
-                            Loading employees...
-                          </p>
-                        </div>
-                      ) : employeesData?.results &&
-                        employeesData.results.length > 0 ? (
-                        <div className="max-h-52 overflow-y-auto rounded-lg border p-3">
-                          <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                            {employeesData.results.map((employee: Employee) => (
-                              <label
-                                key={employee.uid}
-                                className="hover:border-primary hover:bg-primary/5 flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-all"
-                              >
-                                <input
-                                  type="radio"
-                                  name="employee"
-                                  value={employee.uid}
-                                  checked={values.employee === employee.uid}
-                                  onChange={(e) =>
-                                    setFieldValue("employee", e.target.value)
-                                  }
-                                  className="h-4 w-4 cursor-pointer"
-                                  style={{
-                                    accentColor: "#027f81",
-                                  }}
-                                />
-                                <span className="flex-1 text-sm font-medium">
-                                  {employee.name}
-                                </span>
-                              </label>
-                            ))}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-center rounded-lg border border-dashed p-6">
-                          <p className="text-muted-foreground text-sm">
-                            No employees found
-                          </p>
-                        </div>
-                      )}
-                      <ErrorMessage
-                        name="employee"
-                        component="p"
-                        className="mt-1 text-xs text-red-500"
-                      />
-                    </div>
                   </div>
 
                   {/* Notes */}

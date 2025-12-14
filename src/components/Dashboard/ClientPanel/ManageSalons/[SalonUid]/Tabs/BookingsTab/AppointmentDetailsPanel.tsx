@@ -17,6 +17,7 @@ import type {
 import { Calendar as CalendarIcon, Edit, LoaderPinwheel } from "lucide-react";
 import type { Session } from "next-auth";
 import { SetStateAction, useState, type Dispatch } from "react";
+import EditBookingEmployeeModal from "./Dialogs/EditBookingEmployeeModal";
 import EditBookingProductsModal from "./Dialogs/EditBookingProductsModal";
 import EditBookingServicesModal from "./Dialogs/EditBookingServicesModal";
 
@@ -58,6 +59,7 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
 }) => {
   const [isEditServicesOpen, setIsEditServicesOpen] = useState(false);
   const [isEditProductsOpen, setIsEditProductsOpen] = useState(false);
+  const [isEditEmployeeOpen, setIsEditEmployeeOpen] = useState(false);
   return (
     <>
       {/* Appointment Details Sidebar - Desktop */}
@@ -228,7 +230,7 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                       )}
                     </div>
                   ))}
-                  <div className="text-muted-foreground flex items-center gap-3 pt-2 text-sm">
+                  <div className="text-primary flex items-center justify-between gap-3 pt-2 text-sm">
                     <span>
                       with{" "}
                       {(
@@ -237,6 +239,14 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                         }
                       )?.employee?.name || selectedAppointment.staff}
                     </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-5 w-5 p-0"
+                      onClick={() => setIsEditEmployeeOpen(true)}
+                    >
+                      <Edit size={12} />
+                    </Button>
                   </div>
                 </div>
 
@@ -576,7 +586,7 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                             )}
                           </div>
                         ))}
-                        <div className="text-muted-foreground flex items-center gap-3 pt-2 text-sm">
+                        <div className="text-primary flex items-center justify-between gap-3 pt-2 text-sm">
                           <span>
                             with{" "}
                             {(
@@ -585,6 +595,14 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                               }
                             )?.employee?.name || selectedAppointment.staff}
                           </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-5 w-5 p-0"
+                            onClick={() => setIsEditEmployeeOpen(true)}
+                          >
+                            <Edit size={12} />
+                          </Button>
                         </div>
                       </div>
 
@@ -772,6 +790,11 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
       <EditBookingProductsModal
         isOpen={isEditProductsOpen}
         onOpenChange={setIsEditProductsOpen}
+        bookingData={singleBookingData}
+      />
+      <EditBookingEmployeeModal
+        isOpen={isEditEmployeeOpen}
+        onOpenChange={setIsEditEmployeeOpen}
         bookingData={singleBookingData}
       />
     </>

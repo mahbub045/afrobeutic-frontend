@@ -1,20 +1,20 @@
 import { Button } from "@/components/ui/button";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { baseApi } from "@/Redux/Api/BaseApi";
 import { useEditBookingMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/BookingsApi";
 import { useGetServicesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
 import type {
-    Booking,
-    Service,
+  Booking,
+  Service,
 } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
-import { Loader2, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -103,7 +103,7 @@ const EditBookingServicesModal: React.FC<Props> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[80vh] !max-w-4xl overflow-y-auto shadow-md">
+      <DialogContent className="max-h-[80vh] !max-w-2xl overflow-y-auto shadow-md">
         <DialogHeader>
           <DialogTitle>Edit Services</DialogTitle>
           <DialogDescription>
@@ -245,13 +245,7 @@ const EditBookingServicesModal: React.FC<Props> = ({
             Cancel
           </Button>
           <Button disabled={isLoading} onClick={handleSave}>
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...
-              </>
-            ) : (
-              "Save"
-            )}
+            {isLoading ? "Saving..." : "Save"}
           </Button>
         </div>
       </DialogContent>

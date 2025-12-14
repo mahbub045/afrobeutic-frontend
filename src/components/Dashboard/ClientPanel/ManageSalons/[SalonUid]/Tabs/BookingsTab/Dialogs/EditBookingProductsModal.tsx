@@ -14,7 +14,7 @@ import type {
   Booking,
   Product,
 } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
-import { Loader2, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -103,9 +103,9 @@ const EditBookingProductsModal: React.FC<Props> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[80vh] !max-w-4xl overflow-y-auto shadow-md">
+      <DialogContent className="max-h-[80vh] !max-w-2xl overflow-y-auto shadow-md">
         <DialogHeader>
-          <DialogTitle>Edit Products</DialogTitle>
+          <DialogTitle className="text-primary">Edit Products</DialogTitle>
           <DialogDescription>
             Update products attached to this booking.
           </DialogDescription>
@@ -245,13 +245,7 @@ const EditBookingProductsModal: React.FC<Props> = ({
             Cancel
           </Button>
           <Button disabled={isLoading} onClick={handleSave}>
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...
-              </>
-            ) : (
-              "Save"
-            )}
+            {isLoading ? "Saving..." : "Save"}
           </Button>
         </div>
       </DialogContent>
