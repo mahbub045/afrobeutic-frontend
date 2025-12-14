@@ -126,7 +126,7 @@ const EditBookingStatusDialog: React.FC<EditBookingStatusDialogProps> = ({
         background: resolvedTheme === "dark" ? "#0f1724" : undefined,
         color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
         confirmButtonColor: "#037375",
-        timer: 3000,
+        timer: 2000,
       });
 
       onClose();
@@ -188,12 +188,9 @@ const EditBookingStatusDialog: React.FC<EditBookingStatusDialogProps> = ({
           <div className="pb-6">
             <DialogHeader>
               <DialogTitle className="text-primary">
-                Update Booking Status
+                Edit Booking Status
               </DialogTitle>
-              <DialogDescription>
-                Update the booking status, cancellation reason, and completion
-                images.
-              </DialogDescription>
+              <DialogDescription>Edit the booking status.</DialogDescription>
             </DialogHeader>
           </div>
 

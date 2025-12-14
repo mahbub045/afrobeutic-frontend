@@ -110,7 +110,7 @@ const EditManagementUserDialog: React.FC<ManagementsListDialogsProps> = ({
         background: resolvedTheme === "dark" ? "#0f1724" : undefined,
         color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
         confirmButtonColor: "#037375",
-        timer: 3000,
+        timer: 2000,
       });
 
       resetForm();
@@ -308,7 +308,7 @@ const EditManagementUserDialog: React.FC<ManagementsListDialogsProps> = ({
                         alt="avatar preview"
                         width={64}
                         height={64}
-                        className="rounded-full object-cover w-16 h-16"
+                        className="h-16 w-16 rounded-full object-cover"
                         unoptimized
                       />
                     </div>
