@@ -304,7 +304,7 @@ const EditProductBasicInfoDialog: React.FC<EditProductBasicInfoDialogProps> = ({
               </div>
               <div>
                 <Label htmlFor="product-price" className="mb-2">
-                  Price
+                  Price($)
                 </Label>
                 <Field
                   as="input"

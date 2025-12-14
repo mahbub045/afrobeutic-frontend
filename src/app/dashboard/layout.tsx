@@ -1,4 +1,4 @@
-import DashboardLayoutClient from "@/components/Layout/DashboardLayoutClient";
+import DashboardLayoutComponent from "@/components/Layout/DashboardLayoutComponent";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
@@ -15,5 +15,5 @@ export default async function DashboardLayout({
     redirect("/auth/login");
   }
 
-  return <DashboardLayoutClient>{children}</DashboardLayoutClient>;
+  return <DashboardLayoutComponent>{children}</DashboardLayoutComponent>;
 }
