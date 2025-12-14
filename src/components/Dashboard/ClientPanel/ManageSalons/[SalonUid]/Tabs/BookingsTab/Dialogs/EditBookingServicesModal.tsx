@@ -40,15 +40,20 @@ const EditBookingServicesModal: React.FC<Props> = ({
   const { data: servicesData, isLoading: isLoadingServices } =
     useGetServicesDataQuery({ salonUid });
 
-  const [localSelection, setLocalSelection] = useState<string[]>(
-    bookingData?.services?.map((s) => s.uid) || [],
-  );
+  const [localSelection, setLocalSelection] = useState<string[]>([]);
   const [search, setSearch] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const [editBooking, { isLoading }] = useEditBookingMutation();
+
+  // Sync localSelection with bookingData when modal opens or data changes
+  useEffect(() => {
+    if (isOpen && bookingData) {
+      setLocalSelection(bookingData?.services?.map((s) => s.uid) || []);
+    }
+  }, [isOpen, bookingData]);
 
   // Handle click outside to close dropdown
   useEffect(() => {
@@ -105,7 +110,7 @@ const EditBookingServicesModal: React.FC<Props> = ({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[80vh] !max-w-2xl overflow-y-auto shadow-md">
         <DialogHeader>
-          <DialogTitle>Edit Services</DialogTitle>
+          <DialogTitle className="text-primary">Edit Services</DialogTitle>
           <DialogDescription>
             Edit services attached to this booking.
           </DialogDescription>
