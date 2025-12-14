@@ -107,7 +107,7 @@ const EditBookingProductsModal: React.FC<Props> = ({
         <DialogHeader>
           <DialogTitle className="text-primary">Edit Products</DialogTitle>
           <DialogDescription>
-            Update products attached to this booking.
+            Edit products attached to this booking.
           </DialogDescription>
         </DialogHeader>
 

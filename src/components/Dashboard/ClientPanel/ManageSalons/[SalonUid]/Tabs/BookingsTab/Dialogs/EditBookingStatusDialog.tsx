@@ -188,12 +188,9 @@ const EditBookingStatusDialog: React.FC<EditBookingStatusDialogProps> = ({
           <div className="pb-6">
             <DialogHeader>
               <DialogTitle className="text-primary">
-                Update Booking Status
+                Edit Booking Status
               </DialogTitle>
-              <DialogDescription>
-                Update the booking status, cancellation reason, and completion
-                images.
-              </DialogDescription>
+              <DialogDescription>Edit the booking status.</DialogDescription>
             </DialogHeader>
           </div>
 

@@ -112,7 +112,7 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
             <DialogHeader>
               <DialogTitle className="text-primary">Edit Booking</DialogTitle>
               <DialogDescription>
-                Please edit the booking details below.
+                Edit the booking details below.
               </DialogDescription>
             </DialogHeader>
           </div>
