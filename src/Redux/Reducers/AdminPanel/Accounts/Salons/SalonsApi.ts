@@ -49,6 +49,14 @@ export const SalonsListApi = baseApi.injectEndpoints({
       }),
       providesTags: ["SalonsList"],
     }),
+    getSalonCustomers: build.query({
+      query: ({ accountUid, salonUid, params }) => ({
+        url: `/admin/accounts/${accountUid}/salons/${salonUid}/customers`,
+        method: "GET",
+        params,
+      }),
+      providesTags: ["SalonsList"],
+    }),
     getSalonOverview: build.query({
       query: ({ accountUid, salonUid }) => ({
         url: `/admin/accounts/${accountUid}/salons/${salonUid}/dashboard`,
@@ -66,5 +74,6 @@ export const {
   useGetSalonProductsQuery,
   useGetSalonEmployeesQuery,
   useGetSalonBookingsQuery,
+  useGetSalonCustomersQuery,
   useGetSalonOverviewQuery,
 } = SalonsListApi;

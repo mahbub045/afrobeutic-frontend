@@ -14,6 +14,16 @@ export interface SalonProps {
   status?: string | null;
   created_at?: string | null;
 }
+
+export interface SalonCustomersProps{
+  uid: string;
+  first_name?: string | null;
+  last_name?: string | null;
+  email?: string | null;
+  source?: string | null;
+  phone?: string | null;
+  created_at?: string | null;
+}
 export interface SalonServicesProps {
   uid: string;
   name?: string | null;
@@ -27,6 +37,7 @@ export interface SalonServicesProps {
   assign_employees?: string[] | null;
   created_at?: string | null;
 }
+
 
 export interface SalonProductsProps {
   uid: string;
