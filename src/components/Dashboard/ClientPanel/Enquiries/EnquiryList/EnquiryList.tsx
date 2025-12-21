@@ -184,8 +184,9 @@ const EnquiryList: React.FC = () => {
       case "NEW":
         return "danger";
       case "IN_REVIEW":
-      case "OPEN":
         return "warning";
+      case "CANCELLED":
+        return "destructive";
       case "RESOLVED":
         return "default";
       default:
@@ -262,7 +263,7 @@ const EnquiryList: React.FC = () => {
                   <SelectContent>
                     <SelectItem value="NEW">New</SelectItem>
                     <SelectItem value="IN_REVIEW">In Review</SelectItem>
-                    <SelectItem value="OPEN">Open</SelectItem>
+                    <SelectItem value="CANCELLED">Cancelled</SelectItem>
                     <SelectItem value="RESOLVED">Resolved</SelectItem>
                   </SelectContent>
                 </Select>
