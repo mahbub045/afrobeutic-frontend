@@ -120,7 +120,7 @@ const Products: React.FC = () => {
                 <TableCell>
                   {p.created_at ? formatDateTime(p.created_at) : "-"}
                 </TableCell>
-                <TableCell>{p.description ?? "-"}</TableCell>
+                <TableCell>{p.description || "Not Found"}</TableCell>
               </TableRow>
             ))
           )}

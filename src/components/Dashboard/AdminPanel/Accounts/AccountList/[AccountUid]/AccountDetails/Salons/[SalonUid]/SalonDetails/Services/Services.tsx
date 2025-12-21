@@ -94,7 +94,7 @@ const Services: React.FC = () => {
             <TableHead className="text-primary">Time Slots</TableHead>
             <TableHead className="text-primary">Gender</TableHead>
             <TableHead className="text-primary">Discount</TableHead>
-            <TableHead className="text-primary">Assigned Employees</TableHead>
+            <TableHead className="text-primary text-center">Assigned Employees</TableHead>
             <TableHead className="text-primary">Created</TableHead>
           </tr>
         </TableHeader>
@@ -135,7 +135,7 @@ const Services: React.FC = () => {
                 <TableCell>
                   {s.discount_percentage ? `${s.discount_percentage}%` : "-"}
                 </TableCell>
-                <TableCell>
+                <TableCell className="text-center">
                   {s.assign_employees && s.assign_employees.length
                     ? s.assign_employees.length
                     : "-"}

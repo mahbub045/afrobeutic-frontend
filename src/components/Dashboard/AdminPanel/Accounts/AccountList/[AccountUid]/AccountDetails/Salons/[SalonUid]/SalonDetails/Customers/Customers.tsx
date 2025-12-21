@@ -114,16 +114,16 @@ const Customers: React.FC = () => {
               </TableCell>
             </TableRow>
           ) : (
-            services.map((s, index) => (
-              <TableRow key={s.uid}>
+            services.map((c, index) => (
+              <TableRow key={c.uid}>
                 <TableCell className="font-medium">{index + 1}</TableCell>
-                <TableCell className="font-medium">{s.first_name}</TableCell>
-                <TableCell className="font-medium">{s.last_name}</TableCell>
-                <TableCell>{s.email ?? "-"}</TableCell>
-                <TableCell>{s.phone ?? "-"}</TableCell>
-                <TableCell>{formatChoiceFieldValue(s.source) ?? "-"}</TableCell>
+                <TableCell className="font-medium">{c.first_name}</TableCell>
+                <TableCell className="font-medium">{c.last_name}</TableCell>
+                <TableCell>{c.email ?? "-"}</TableCell>
+                <TableCell>{c.phone ?? "-"}</TableCell>
+                <TableCell>{formatChoiceFieldValue(c.source) ?? "-"}</TableCell>
                 <TableCell>
-                  {s.created_at ? formatDateTime(s.created_at) : "-"}
+                  {c.created_at ? formatDateTime(c.created_at) : "-"}
                 </TableCell>
               </TableRow>
             ))
