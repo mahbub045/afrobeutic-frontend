@@ -38,7 +38,7 @@ const CustomerDetails: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-slate-900 dark:text-gray-100">
-          User Details
+          Customer Details
         </h2>
         <div>
           <Link href="/dashboard/admin-panel/users">
@@ -59,7 +59,9 @@ const CustomerDetails: React.FC = () => {
           {customerDetails.avatar ? (
             <Image
               src={
-                typeof customerDetails.avatar === "string" ? customerDetails.avatar : ""
+                typeof customerDetails.avatar === "string"
+                  ? customerDetails.avatar
+                  : ""
               }
               alt={`${customerDetails.first_name ?? ""} ${customerDetails.last_name ?? ""}`}
               width={120}
