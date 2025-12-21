@@ -125,7 +125,7 @@ const AddLeadDialog: React.FC<LeadDialogProps> = ({ isOpen, onClose }) => {
     first_name: Yup.string().required("First name is required"),
     last_name: Yup.string().required("Last name is required"),
     email: Yup.string().email("Invalid email address").nullable(),
-    phone: Yup.string().nullable(),
+    phone: Yup.string().required("Phone is required"),
     salon: Yup.string().required("Salon is required"),
     source: Yup.string().required("Source is required"),
   });
@@ -257,7 +257,7 @@ const AddLeadDialog: React.FC<LeadDialogProps> = ({ isOpen, onClose }) => {
 
               <div>
                 <Label htmlFor="phone" className="mb-2">
-                  Phone
+                  Phone<span className="text-danger">*</span>
                 </Label>
                 <Field name="phone">
                   {({ field, form }: FieldProps) => (
