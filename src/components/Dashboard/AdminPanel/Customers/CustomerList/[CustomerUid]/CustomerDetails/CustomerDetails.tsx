@@ -2,18 +2,18 @@
 
 import { Button } from "@/components/ui/button";
 import { getCountryName } from "@/lib/utils";
-import { useGetUserDetailsQuery } from "@/Redux/Reducers/AdminPanel/Users/UsersApi";
-import { AccountProps } from "@/Types/AdminPanel/UsersTypes/UsersType";
+import { useGetCustomerDetailsQuery } from "@/Redux/Reducers/AdminPanel/Customers/CustomersApi";
+import { AccountProps } from "@/Types/AdminPanel/CustomersTypes/CustomersTypes";
 import { ArrowLeft, LoaderPinwheel } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import React from "react";
 
-const UserDetails: React.FC = () => {
-  const { useruid } = useParams();
-  const { data: userDetails, isLoading } = useGetUserDetailsQuery({
-    userUid: useruid,
+const CustomerDetails: React.FC = () => {
+  const { customeruid } = useParams();
+  const { data: customerDetails, isLoading } = useGetCustomerDetailsQuery({
+    customerUid: customeruid,
   });
 
   if (isLoading) {
@@ -24,15 +24,15 @@ const UserDetails: React.FC = () => {
     );
   }
 
-  if (!userDetails) {
+  if (!customerDetails) {
     return (
       <div className="py-12 text-center text-gray-400">
-        No user details available.
+        No customer details available.
       </div>
     );
   }
 
-  const accounts = (userDetails.accounts || []) as AccountProps[];
+  const accounts = (customerDetails.accounts || []) as AccountProps[];
 
   return (
     <div className="space-y-6">
@@ -56,12 +56,12 @@ const UserDetails: React.FC = () => {
       {/* Profile banner*/}
       <div className="flex flex-col items-center gap-6 rounded-lg bg-white px-6 py-8 text-slate-900 shadow-md sm:flex-row sm:items-stretch dark:bg-slate-900 dark:text-slate-100 dark:shadow-gray-600">
         <div className="flex-shrink-0">
-          {userDetails.avatar ? (
+          {customerDetails.avatar ? (
             <Image
               src={
-                typeof userDetails.avatar === "string" ? userDetails.avatar : ""
+                typeof customerDetails.avatar === "string" ? customerDetails.avatar : ""
               }
-              alt={`${userDetails.first_name ?? ""} ${userDetails.last_name ?? ""}`}
+              alt={`${customerDetails.first_name ?? ""} ${customerDetails.last_name ?? ""}`}
               width={120}
               height={120}
               className="h-28 w-28 rounded-full object-cover shadow-inner"
@@ -69,8 +69,8 @@ const UserDetails: React.FC = () => {
           ) : (
             <div className="flex h-28 w-28 items-center justify-center rounded-full bg-indigo-100 text-2xl font-semibold text-indigo-700">
               {(
-                (userDetails.first_name?.[0] ?? "") +
-                (userDetails.last_name?.[0] ?? "")
+                (customerDetails.first_name?.[0] ?? "") +
+                (customerDetails.last_name?.[0] ?? "")
               ).toUpperCase()}
             </div>
           )}
@@ -78,10 +78,10 @@ const UserDetails: React.FC = () => {
 
         <div className="flex flex-1 flex-col justify-center">
           <div className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
-            {`${userDetails.first_name ?? ""} ${userDetails.last_name ?? ""}`.trim()}
+            {`${customerDetails.first_name ?? ""} ${customerDetails.last_name ?? ""}`.trim()}
           </div>
           <div className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            {userDetails.email}
+            {customerDetails.email}
           </div>
         </div>
 
@@ -90,12 +90,12 @@ const UserDetails: React.FC = () => {
             Country
           </div>
           <div className="text-sm font-medium text-slate-700 dark:text-slate-100">
-            {getCountryName(userDetails.country) ?? "—"}
+            {getCountryName(customerDetails.country) ?? "—"}
           </div>
           <hr className="my-2 border-dashed" />
           <div className="text-sm text-slate-500 dark:text-slate-400">UID</div>
           <div className="text-sm font-medium text-slate-700 dark:text-slate-100">
-            {userDetails.uid}
+            {customerDetails.uid}
           </div>
         </div>
       </div>
@@ -141,4 +141,4 @@ const UserDetails: React.FC = () => {
   );
 };
 
-export default UserDetails;
+export default CustomerDetails;

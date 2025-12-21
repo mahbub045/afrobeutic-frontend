@@ -9,8 +9,8 @@ const CustomerContainer: React.FC = () => {
         items={[
           { label: "Home", href: "/dashboard/admin-panel" },
           {
-            label: "Users",
-            href: "/dashboard/admin-panel/users",
+            label: "Customers",
+            href: "/dashboard/admin-panel/customers",
           },
         ]}
       />
