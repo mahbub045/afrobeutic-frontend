@@ -127,12 +127,12 @@ const EditLeadDialog: React.FC<LeadDialogProps> = ({
     })) ?? [];
 
   const validationSchema = Yup.object().shape({
-    first_name: Yup.string().nullable(),
-    last_name: Yup.string().nullable(),
+    first_name: Yup.string().required("First name is required"),
+    last_name: Yup.string().required("Last name is required"),
     email: Yup.string().email("Invalid email address").nullable(),
-    phone: Yup.string().nullable(),
-    salon: Yup.string().nullable(),
-    source: Yup.string().nullable(),
+    phone: Yup.string().required("Phone is required"),
+    salon: Yup.string().required("Salon is required"),
+    source: Yup.string().required("Source is required"),
   });
 
   const handleSubmit = (
@@ -213,13 +213,14 @@ const EditLeadDialog: React.FC<LeadDialogProps> = ({
             <div className="grid gap-3">
               <div>
                 <Label htmlFor="first_name" className="mb-2">
-                  First Name
+                  First Name<span className="text-danger">*</span>
                 </Label>
                 <Field
                   id="first_name"
                   name="first_name"
                   as="input"
                   type="text"
+                  required
                 />
                 <ErrorMessage
                   name="first_name"
@@ -230,9 +231,15 @@ const EditLeadDialog: React.FC<LeadDialogProps> = ({
 
               <div>
                 <Label htmlFor="last_name" className="mb-2">
-                  Last Name
+                  Last Name<span className="text-danger">*</span>
                 </Label>
-                <Field id="last_name" name="last_name" as="input" type="text" />
+                <Field
+                  id="last_name"
+                  name="last_name"
+                  as="input"
+                  type="text"
+                  required
+                />
                 <ErrorMessage
                   name="last_name"
                   component="div"
@@ -254,9 +261,9 @@ const EditLeadDialog: React.FC<LeadDialogProps> = ({
 
               <div>
                 <Label htmlFor="phone" className="mb-2">
-                  Phone
+                  Phone<span className="text-danger">*</span>
                 </Label>
-                <Field name="phone">
+                <Field name="phone" required>
                   {({ field, form }: FieldProps) => (
                     <div>
                       <PhoneInput
@@ -309,13 +316,14 @@ const EditLeadDialog: React.FC<LeadDialogProps> = ({
 
               <div>
                 <Label htmlFor="salon" className="mb-2">
-                  Salon
+                  Salon<span className="text-danger">*</span>
                 </Label>
                 <Field
                   id="salon"
                   name="salon"
                   as="select"
                   className="w-full rounded-md px-3 py-2"
+                  required
                 >
                   <option value="">Select salon</option>
                   {salonOptions.map((s) => (
@@ -333,9 +341,9 @@ const EditLeadDialog: React.FC<LeadDialogProps> = ({
 
               <div className="relative">
                 <Label htmlFor="source" className="mb-2">
-                  Source
+                  Source<span className="text-danger">*</span>
                 </Label>
-                <Field name="source">
+                <Field name="source" required>
                   {({ field, form }: FieldProps) => (
                     <>
                       <input

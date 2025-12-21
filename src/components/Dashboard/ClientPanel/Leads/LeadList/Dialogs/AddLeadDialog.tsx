@@ -259,7 +259,7 @@ const AddLeadDialog: React.FC<LeadDialogProps> = ({ isOpen, onClose }) => {
                 <Label htmlFor="phone" className="mb-2">
                   Phone<span className="text-danger">*</span>
                 </Label>
-                <Field name="phone">
+                <Field name="phone" required>
                   {({ field, form }: FieldProps) => (
                     <div>
                       <PhoneInput
