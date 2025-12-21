@@ -1,10 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useGetSalonOverviewQuery } from "@/Redux/Reducers/AdminPanel/Accounts/Salons/SalonsApi";
 import {
   Armchair,
   BookOpen,
   DollarSign,
+  LoaderPinwheel,
   Package,
   User,
   Users,
@@ -45,7 +45,7 @@ const SalonOverviews: React.FC = () => {
       </CardHeader>
       <CardContent className="flex-1">
         {cardLoading ? (
-          <Skeleton className="h-8 w-16" />
+          <LoaderPinwheel className="animate-spin text-white" />
         ) : (
           <div className="text-3xl font-bold text-white">{value}</div>
         )}
