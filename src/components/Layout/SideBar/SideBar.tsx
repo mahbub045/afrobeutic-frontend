@@ -80,8 +80,8 @@ const SideBar: React.FC<SideBarProps> = ({
           Icon: UserCog,
         },
         {
-          label: "Users",
-          href: "/dashboard/admin-panel/users",
+          label: "Customers",
+          href: "/dashboard/admin-panel/customers",
           Icon: Users,
         },
         {

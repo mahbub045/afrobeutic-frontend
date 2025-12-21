@@ -9,9 +9,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatDateTime } from "@/lib/utils";
-import { useGetSalonProductsQuery } from "@/Redux/Reducers/AdminPanel/Accounts/Salons/SalonsApi";
-import { SalonProductsProps } from "@/Types/AdminPanel/AccountsTypes/SalonsTypes/SalonsType";
+import { formatChoiceFieldValue, formatDateTime } from "@/lib/utils";
+import { useGetSalonCustomersQuery } from "@/Redux/Reducers/AdminPanel/Accounts/Salons/SalonsApi";
+import { SalonCustomersProps } from "@/Types/AdminPanel/AccountsTypes/SalonsTypes/SalonsType";
 import {
   ChevronLeft,
   ChevronRight,
@@ -21,7 +21,7 @@ import {
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-const Products: React.FC = () => {
+const Customers: React.FC = () => {
   const params = useParams() as { accountuid?: string; salonuid?: string };
   const { accountuid, salonuid } = params || {};
 
@@ -32,10 +32,10 @@ const Products: React.FC = () => {
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
 
   const {
-    data: salonProducts,
+    data: salonCustomers,
     isLoading,
     isFetching,
-  } = useGetSalonProductsQuery({
+  } = useGetSalonCustomersQuery({
     accountUid: accountuid,
     salonUid: salonuid,
     params: {
@@ -45,7 +45,9 @@ const Products: React.FC = () => {
     },
   });
 
-  const products: SalonProductsProps[] = salonProducts?.results ?? [];
+  // don't return early here so hooks run consistently; render loading state below
+
+  const services: SalonCustomersProps[] = salonCustomers?.results ?? [];
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -63,7 +65,7 @@ const Products: React.FC = () => {
   return (
     <>
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-primary text-xl font-semibold">Products</h3>
+        <h3 className="text-primary text-xl font-semibold">Customers</h3>
         <div className="relative mx-4 max-w-xs flex-1">
           <Search
             size={18}
@@ -75,7 +77,7 @@ const Products: React.FC = () => {
               setSearchTerm((e.target as HTMLInputElement).value)
             }
             className="focus:!border-primary pl-7 shadow-md focus:!ring-0 dark:shadow-gray-600"
-            placeholder="Search products..."
+            placeholder="Search customers..."
           />
         </div>
         <div />
@@ -85,42 +87,44 @@ const Products: React.FC = () => {
         <TableHeader>
           <tr>
             <TableHead className="text-primary">#</TableHead>
-            <TableHead className="text-primary">Name</TableHead>
-            <TableHead className="text-primary">Category</TableHead>
-            <TableHead className="text-primary">Price</TableHead>
+            <TableHead className="text-primary">First Name</TableHead>
+            <TableHead className="text-primary">Last Name</TableHead>
+            <TableHead className="text-primary">Email</TableHead>
+            <TableHead className="text-primary">Phone</TableHead>
+            <TableHead className="text-primary">Source</TableHead>
             <TableHead className="text-primary">Created</TableHead>
-            <TableHead className="text-primary">Description</TableHead>
           </tr>
         </TableHeader>
         <TableBody>
           {isLoading ? (
             <TableRow>
-              <TableCell colSpan={6} className="py-8">
+              <TableCell colSpan={7} className="py-8">
                 <div className="flex items-center justify-center">
                   <LoaderPinwheel className="h-6 w-6 animate-spin" />
                 </div>
               </TableCell>
             </TableRow>
-          ) : products.length === 0 ? (
+          ) : services.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={6}
+                colSpan={7}
                 className="text-muted-foreground py-8 text-center"
               >
-                No products found.
+                No customers found.
               </TableCell>
             </TableRow>
           ) : (
-            products.map((p, index) => (
-              <TableRow key={p.uid}>
+            services.map((c, index) => (
+              <TableRow key={c.uid}>
                 <TableCell className="font-medium">{index + 1}</TableCell>
-                <TableCell className="font-medium">{p.name}</TableCell>
-                <TableCell>{p.category ?? "-"}</TableCell>
-                <TableCell>{p.price ? `$${p.price}` : "-"}</TableCell>
+                <TableCell className="font-medium">{c.first_name}</TableCell>
+                <TableCell className="font-medium">{c.last_name}</TableCell>
+                <TableCell>{c.email ?? "-"}</TableCell>
+                <TableCell>{c.phone ?? "-"}</TableCell>
+                <TableCell>{formatChoiceFieldValue(c.source) ?? "-"}</TableCell>
                 <TableCell>
-                  {p.created_at ? formatDateTime(p.created_at) : "-"}
+                  {c.created_at ? formatDateTime(c.created_at) : "-"}
                 </TableCell>
-                <TableCell>{p.description || "Not Found"}</TableCell>
               </TableRow>
             ))
           )}
@@ -129,20 +133,21 @@ const Products: React.FC = () => {
       {/* Pagination */}
       <div className="flex justify-between px-2 py-4">
         <div>
-          {salonProducts && salonProducts.count > 0 && (
+          {salonCustomers && salonCustomers.count > 0 && (
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              Total: {salonProducts.count} Products
+              Total: {salonCustomers.count} Customers
             </div>
           )}
         </div>
-        {salonProducts &&
-          (salonProducts.count ?? 0) > (salonProducts.results?.length ?? 0) && (
+        {salonCustomers &&
+          (salonCustomers.count ?? 0) >
+            (salonCustomers.results?.length ?? 0) && (
             <div className="flex items-center justify-center gap-4 pt-4">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={!salonProducts.previous || isFetching}
+                disabled={!salonCustomers.previous || isFetching}
                 className="flex items-center gap-2"
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -154,7 +159,7 @@ const Products: React.FC = () => {
                   Page {currentPage} of{" "}
                   {Math.max(
                     1,
-                    Math.ceil((salonProducts.count ?? 0) / pageSize),
+                    Math.ceil((salonCustomers.count ?? 0) / pageSize),
                   )}
                 </span>
               </div>
@@ -163,7 +168,7 @@ const Products: React.FC = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => setCurrentPage((p) => p + 1)}
-                disabled={!salonProducts.next || isFetching}
+                disabled={!salonCustomers.next || isFetching}
                 className="flex items-center gap-2"
               >
                 Next
@@ -176,4 +181,4 @@ const Products: React.FC = () => {
   );
 };
 
-export default Products;
+export default Customers;

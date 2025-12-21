@@ -108,8 +108,9 @@ const EditEnquiryDialog: React.FC<EnquiryDialogsProps> = ({
                 </Label>
                 <Field as="select" id="status" name="status">
                   <option value="NEW">New</option>
-                  <option value="IN_PROGRESS">In Progress</option>
-                  <option value="CLOSED">Closed</option>
+                  <option value="IN_REVIEW">In Review</option>
+                  <option value="CANCELLED">Cancelled</option>
+                  <option value="RESOLVED">Resolved</option>
                 </Field>
                 <div className="text-destructive text-sm">
                   <ErrorMessage name="status" />
