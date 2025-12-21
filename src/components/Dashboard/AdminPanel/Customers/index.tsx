@@ -1,22 +1,22 @@
 "use client";
 import Breadcrumbs from "../../CommonComponents/Breadcrumbs";
-import UserList from "./UserList/UserList";
+import CustomerList from "./CustomerList/CustomerList";
 
-const UsersContainer: React.FC = () => {
+const CustomerContainer: React.FC = () => {
   return (
     <div>
       <Breadcrumbs
         items={[
           { label: "Home", href: "/dashboard/admin-panel" },
           {
-            label: "Users",
-            href: "/dashboard/admin-panel/users",
+            label: "Customers",
+            href: "/dashboard/admin-panel/customers",
           },
         ]}
       />
-      <UserList />
+      <CustomerList />
     </div>
   );
 };
 
-export default UsersContainer;
+export default CustomerContainer;

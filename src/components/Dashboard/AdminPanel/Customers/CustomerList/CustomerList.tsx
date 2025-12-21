@@ -18,9 +18,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { countries } from "@/data/countries";
 import { getCountryName } from "@/lib/utils";
-import { useGetUserListQuery } from "@/Redux/Reducers/AdminPanel/Users/UsersApi";
-import { UserProps } from "@/Types/AdminPanel/UsersTypes/UsersType";
+import { useGetCustomerListQuery } from "@/Redux/Reducers/AdminPanel/Customers/CustomersApi";
+import { CustomerProps } from "@/Types/AdminPanel/CustomersTypes/CustomersTypes";
 import {
   ChevronLeft,
   ChevronRight,
@@ -33,11 +34,17 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
-const UserList: React.FC = () => {
+const CustomerList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [roleFilter, setRoleFilter] = useState<string | undefined>(undefined);
+  const [orderingFilter, setOrderingFilter] = useState<string | undefined>(
+    undefined,
+  );
+  const [countryFilter, setCountryFilter] = useState<string | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(searchTerm.trim()), 400);
@@ -48,18 +55,20 @@ const UserList: React.FC = () => {
     data: usersData,
     isLoading,
     isFetching,
-  } = useGetUserListQuery({
+  } = useGetCustomerListQuery({
     page: currentPage,
     search: debouncedSearch || undefined,
     role: roleFilter || undefined,
+    ordering: orderingFilter || undefined,
+    country: countryFilter || undefined,
   });
 
-  const users: UserProps[] = usersData?.results || [];
+  const users: CustomerProps[] = usersData?.results || [];
 
   return (
     <>
       <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-        <h2 className="text-lg font-semibold md:w-auto">Users</h2>
+        <h2 className="text-lg font-semibold md:w-auto">Customers</h2>
 
         <div className="relative flex-1 md:max-w-xs">
           <Search
@@ -76,7 +85,7 @@ const UserList: React.FC = () => {
           />
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <Select
               value={roleFilter}
@@ -103,7 +112,6 @@ const UserList: React.FC = () => {
               </SelectContent>
             </Select>
 
-            {/* Clear Button */}
             {roleFilter && (
               <Button
                 variant="outline"
@@ -115,7 +123,89 @@ const UserList: React.FC = () => {
                 className="!border !border-red-500 text-red-500 hover:!bg-red-500 hover:text-white"
               >
                 <X />
-                Clear
+              </Button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Select
+              value={orderingFilter}
+              onValueChange={(v: string) => {
+                setOrderingFilter(v);
+                setCurrentPage(1);
+              }}
+            >
+              <SelectTrigger
+                size="sm"
+                className="flex w-[130px] items-center justify-between gap-2"
+              >
+                <div className="flex items-center gap-2">
+                  <SelectValue placeholder="Order by" />
+                </div>
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="-created_at">Newest First</SelectItem>
+                  <SelectItem value="created_at">Oldest First</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+
+            {orderingFilter && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setOrderingFilter("");
+                  setCurrentPage(1);
+                }}
+                className="!border !border-red-500 text-red-500 hover:!bg-red-500 hover:text-white"
+              >
+                <X />
+              </Button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Select
+              value={countryFilter}
+              onValueChange={(v: string) => {
+                setCountryFilter(v);
+                setCurrentPage(1);
+              }}
+            >
+              <SelectTrigger
+                size="sm"
+                className="flex w-[130px] items-center justify-between gap-2"
+              >
+                <div className="flex items-center gap-2">
+                  <SelectValue placeholder="Select country" />
+                </div>
+              </SelectTrigger>
+
+              <SelectContent className="max-h-60 overflow-auto">
+                <SelectGroup>
+                  {countries.map((country) => (
+                    <SelectItem key={country.code} value={country.code}>
+                      {country.name}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+
+            {countryFilter && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setCountryFilter("");
+                  setCurrentPage(1);
+                }}
+                className="!border !border-red-500 text-red-500 hover:!bg-red-500 hover:text-white"
+              >
+                <X />
               </Button>
             )}
           </div>
@@ -152,15 +242,19 @@ const UserList: React.FC = () => {
               </TableCell>
             </TableRow>
           ) : (
-            users.map((u, index) => (
-              <TableRow key={u.uid}>
+            users.map((customer, index) => (
+              <TableRow key={customer.uid}>
                 <TableCell className="text-start">{index + 1}</TableCell>
                 <TableCell className="text-start">
                   <div className="flex items-center gap-3">
-                    {u.avatar ? (
+                    {customer.avatar ? (
                       <Image
-                        src={typeof u.avatar === "string" ? u.avatar : ""}
-                        alt={`${u.first_name ?? ""} ${u.last_name ?? ""}`}
+                        src={
+                          typeof customer.avatar === "string"
+                            ? customer.avatar
+                            : ""
+                        }
+                        alt={`${customer.first_name ?? ""} ${customer.last_name ?? ""}`}
                         width={32}
                         height={32}
                         className="h-8 w-8 rounded-full object-cover"
@@ -168,24 +262,29 @@ const UserList: React.FC = () => {
                     ) : (
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 font-medium text-indigo-700">
                         {(
-                          (u.first_name?.[0] ?? "") + (u.last_name?.[0] ?? "")
+                          (customer.first_name?.[0] ?? "") +
+                          (customer.last_name?.[0] ?? "")
                         ).toUpperCase()}
                       </div>
                     )}
                     <div>
                       <div className="font-medium text-gray-800 dark:text-gray-100">
-                        {`${u.first_name ?? ""} ${u.last_name ?? ""}`.trim()}
+                        {`${customer.first_name ?? ""} ${customer.last_name ?? ""}`.trim()}
                       </div>
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="text-start">{u.email ?? "—"}</TableCell>
-                <TableCell>{getCountryName(u.country) ?? "—"}</TableCell>
+                <TableCell className="text-start">
+                  {customer.email ?? "—"}
+                </TableCell>
+                <TableCell>{getCountryName(customer.country) ?? "—"}</TableCell>
                 <TableCell className="text-center">
-                  {u.accounts?.length ?? 0}
+                  {customer.accounts?.length ?? 0}
                 </TableCell>
                 <TableCell className="text-center">
-                  <Link href={`/dashboard/admin-panel/users/${u.uid}`}>
+                  <Link
+                    href={`/dashboard/admin-panel/customers/${customer.uid}`}
+                  >
                     <Button variant="outline" size="sm">
                       <Eye />
                       View
@@ -252,4 +351,4 @@ const UserList: React.FC = () => {
   );
 };
 
-export default UserList;
+export default CustomerList;

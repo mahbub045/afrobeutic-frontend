@@ -9,8 +9,9 @@ import {
 } from "@/components/ui/dialog";
 import { formatChoiceFieldValue } from "@/lib/utils";
 import { SalonBookingsProps } from "@/Types/AdminPanel/AccountsTypes/SalonsTypes/SalonsType";
+import { X } from "lucide-react";
 import Image from "next/image";
-import React from "react";
+import React, { useState } from "react";
 
 type ViewBookingDetailsDialogProps = {
   booking: SalonBookingsProps;
@@ -31,6 +32,8 @@ const ViewBookingDetailsDialog: React.FC<ViewBookingDetailsDialogProps> = ({
   booking,
   onClose,
 }) => {
+  const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
+
   if (!booking) return null;
 
   return (
@@ -171,14 +174,15 @@ const ViewBookingDetailsDialog: React.FC<ViewBookingDetailsDialogProps> = ({
             <div className="rounded-md border p-3">
               {booking.images && booking.images.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
-                  {booking.images.map((img, idx) => (
+                  {booking.images.map((img) => (
                     <div
-                      key={`${img}-${idx}`}
-                      className="h-24 w-24 overflow-hidden rounded border"
+                      key={img.uid}
+                      className="h-24 w-24 cursor-pointer overflow-hidden rounded border transition-transform hover:scale-105"
+                      onClick={() => setFullScreenImage(img.image)}
                     >
                       <Image
-                        src={img}
-                        alt={`booking-image-${idx}`}
+                        src={img.image}
+                        alt={`booking-image-${img.uid}`}
                         width={96}
                         height={96}
                         className="object-cover"
@@ -211,6 +215,33 @@ const ViewBookingDetailsDialog: React.FC<ViewBookingDetailsDialogProps> = ({
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      {/* Full Screen Image Viewer */}
+      {fullScreenImage && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95"
+          onClick={() => setFullScreenImage(null)}
+        >
+          <Button
+            variant="outline"
+            size="icon"
+            className="absolute top-4 right-4 !cursor-pointer text-white shadow-md hover:bg-white/20 dark:shadow-gray-600"
+            onClick={() => setFullScreenImage(null)}
+          >
+            <X className="h-6 w-6" />
+          </Button>
+          <div className="relative h-[90vh] w-[90vw]">
+            <Image
+              src={fullScreenImage}
+              alt="Full screen view"
+              fill
+              className="object-contain"
+              unoptimized
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
     </Dialog>
   );
 };

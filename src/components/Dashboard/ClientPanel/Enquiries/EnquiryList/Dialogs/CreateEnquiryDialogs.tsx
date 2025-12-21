@@ -70,10 +70,8 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
     useGetLeadsAndCustomersQuery(
       searchParam ? { search: searchParam } : undefined,
     );
-  const {
-    data: commonCategoriesData,
-    refetch,
-  } = useGetCommonCategoriesDataQuery({ category_type: CATEGORY_TYPE_FILTER });
+  const { data: commonCategoriesData, refetch } =
+    useGetCommonCategoriesDataQuery({ category_type: CATEGORY_TYPE_FILTER });
   const { data: salonsData, isLoading: isSalonsLoading } =
     useGetSalonListQuery();
   const [createEnquiry, { isLoading }] = useCreateEnquiryMutation();
@@ -417,7 +415,7 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                   as="input"
                   placeholder="First name"
                   required
-                  disabled={!!selectedContact}
+                  disabled={!!selectedContact && !!selectedContact.first_name}
                 />
                 <div className="text-destructive text-sm">
                   <ErrorMessage name="first_name" />
@@ -435,7 +433,7 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                   as="input"
                   placeholder="Last name"
                   required
-                  disabled={!!selectedContact}
+                  disabled={!!selectedContact && !!selectedContact.last_name}
                 />
               </div>
 
@@ -450,7 +448,7 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                   as="input"
                   placeholder="Email"
                   required
-                  disabled={!!selectedContact}
+                  disabled={!!selectedContact && !!selectedContact.email}
                 />
                 <div className="text-destructive text-sm">
                   <ErrorMessage name="email" />
@@ -548,7 +546,9 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                           autoComplete="off"
                           placeholder='e.g. "Instagram", "Google", "Walk-in"'
                           required
-                          disabled={!!selectedContact}
+                          disabled={
+                            !!selectedContact && !!selectedContact.source
+                          }
                           className="w-full rounded-md border bg-white px-3 py-2 text-black dark:bg-[#181818] dark:text-gray-100"
                           {...field}
                           onFocus={() =>

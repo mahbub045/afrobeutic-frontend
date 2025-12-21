@@ -14,6 +14,16 @@ export interface SalonProps {
   status?: string | null;
   created_at?: string | null;
 }
+
+export interface SalonCustomersProps {
+  uid: string;
+  first_name?: string | null;
+  last_name?: string | null;
+  email?: string | null;
+  source?: string | null;
+  phone?: string | null;
+  created_at?: string | null;
+}
 export interface SalonServicesProps {
   uid: string;
   name?: string | null;
@@ -35,6 +45,13 @@ export interface SalonProductsProps {
   price?: string | null;
   description?: string | null;
   created_at?: string | null;
+}
+
+export interface BookingImageProps {
+  uid: string;
+  image: string;
+  created_at?: string | null;
+  updated_at?: string | null;
 }
 
 export interface SalonEmployeesProps {
@@ -86,7 +103,7 @@ export interface SalonBookingsProps {
     gender_specific?: string | null;
   }> | null;
   products?: SalonProductsProps[] | null;
-  images?: string[] | null;
+  images?: BookingImageProps[] | null;
   total_amount?: string | null;
   created_at?: string | null;
 }

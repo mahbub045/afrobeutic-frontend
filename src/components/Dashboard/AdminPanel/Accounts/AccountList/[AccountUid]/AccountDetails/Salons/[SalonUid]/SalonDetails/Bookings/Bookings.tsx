@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatChoiceFieldValue } from "@/lib/utils";
+import { formatChoiceFieldValue, formatDateTime } from "@/lib/utils";
 import { useGetSalonBookingsQuery } from "@/Redux/Reducers/AdminPanel/Accounts/Salons/SalonsApi";
 import { SalonBookingsProps } from "@/Types/AdminPanel/AccountsTypes/SalonsTypes/SalonsType";
 import {
@@ -138,7 +138,7 @@ const Bookings: React.FC = () => {
                 <TableCell>{formatChoiceFieldValue(b.status) ?? "-"}</TableCell>
                 <TableCell>{b.booking_duration ?? "-"}</TableCell>
                 <TableCell>{b.cancelled_by ?? "-"}</TableCell>
-                <TableCell>{b.completed_at ?? "-"}</TableCell>
+                <TableCell>{formatDateTime(b.completed_at) ?? "-"}</TableCell>
                 <TableCell>
                   {b.customer
                     ? `${b.customer.first_name ?? ""} ${

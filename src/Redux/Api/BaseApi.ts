@@ -153,7 +153,7 @@ export const baseApi = createApi({
     "SupportTickets",
     // Admin Panel Tags
     "ManagementsList",
-    "UsersList",
+    "CustomersList",
     "AccountsList",
     "SalonsList",
     "EnquiryList",
