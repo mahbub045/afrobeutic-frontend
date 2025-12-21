@@ -1,4 +1,4 @@
-export interface UserProps {
+export interface CustomerProps {
   uid: string;
   avatar: string | null;
   first_name: string | null;
