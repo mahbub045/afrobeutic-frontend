@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { countries } from "@/data/countries";
 import { getCountryName } from "@/lib/utils";
 import { useGetCustomerListQuery } from "@/Redux/Reducers/AdminPanel/Customers/CustomersApi";
 import { CustomerProps } from "@/Types/AdminPanel/CustomersTypes/CustomersTypes";
@@ -38,6 +39,12 @@ const CustomerList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [roleFilter, setRoleFilter] = useState<string | undefined>(undefined);
+  const [orderingFilter, setOrderingFilter] = useState<string | undefined>(
+    undefined,
+  );
+  const [countryFilter, setCountryFilter] = useState<string | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(searchTerm.trim()), 400);
@@ -52,6 +59,8 @@ const CustomerList: React.FC = () => {
     page: currentPage,
     search: debouncedSearch || undefined,
     role: roleFilter || undefined,
+    ordering: orderingFilter || undefined,
+    country: countryFilter || undefined,
   });
 
   const users: CustomerProps[] = usersData?.results || [];
@@ -76,7 +85,7 @@ const CustomerList: React.FC = () => {
           />
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <Select
               value={roleFilter}
@@ -103,7 +112,6 @@ const CustomerList: React.FC = () => {
               </SelectContent>
             </Select>
 
-            {/* Clear Button */}
             {roleFilter && (
               <Button
                 variant="outline"
@@ -115,7 +123,89 @@ const CustomerList: React.FC = () => {
                 className="!border !border-red-500 text-red-500 hover:!bg-red-500 hover:text-white"
               >
                 <X />
-                Clear
+              </Button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Select
+              value={orderingFilter}
+              onValueChange={(v: string) => {
+                setOrderingFilter(v);
+                setCurrentPage(1);
+              }}
+            >
+              <SelectTrigger
+                size="sm"
+                className="flex w-[130px] items-center justify-between gap-2"
+              >
+                <div className="flex items-center gap-2">
+                  <SelectValue placeholder="Order by" />
+                </div>
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="-created_at">Newest First</SelectItem>
+                  <SelectItem value="created_at">Oldest First</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+
+            {orderingFilter && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setOrderingFilter("");
+                  setCurrentPage(1);
+                }}
+                className="!border !border-red-500 text-red-500 hover:!bg-red-500 hover:text-white"
+              >
+                <X />
+              </Button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Select
+              value={countryFilter}
+              onValueChange={(v: string) => {
+                setCountryFilter(v);
+                setCurrentPage(1);
+              }}
+            >
+              <SelectTrigger
+                size="sm"
+                className="flex w-[130px] items-center justify-between gap-2"
+              >
+                <div className="flex items-center gap-2">
+                  <SelectValue placeholder="Select country" />
+                </div>
+              </SelectTrigger>
+
+              <SelectContent className="max-h-60 overflow-auto">
+                <SelectGroup>
+                  {countries.map((country) => (
+                    <SelectItem key={country.code} value={country.code}>
+                      {country.name}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+
+            {countryFilter && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setCountryFilter("");
+                  setCurrentPage(1);
+                }}
+                className="!border !border-red-500 text-red-500 hover:!bg-red-500 hover:text-white"
+              >
+                <X />
               </Button>
             )}
           </div>
@@ -192,7 +282,9 @@ const CustomerList: React.FC = () => {
                   {customer.accounts?.length ?? 0}
                 </TableCell>
                 <TableCell className="text-center">
-                  <Link href={`/dashboard/admin-panel/customers/${customer.uid}`}>
+                  <Link
+                    href={`/dashboard/admin-panel/customers/${customer.uid}`}
+                  >
                     <Button variant="outline" size="sm">
                       <Eye />
                       View
