@@ -115,9 +115,22 @@ const SalonOverviews: React.FC = () => {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat, index) => (
+        {stats.slice(0, 4).map((stat, index) => (
           <StatCard
             key={index}
+            icon={stat.icon}
+            label={stat.label}
+            value={stat.value}
+            isLoading={isLoading}
+            colorClass={stat.color}
+          />
+        ))}
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {stats.slice(4).map((stat, index) => (
+          <StatCard
+            key={index + 4}
             icon={stat.icon}
             label={stat.label}
             value={stat.value}
