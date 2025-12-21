@@ -264,7 +264,7 @@ const ManagementList: React.FC = () => {
                       </div>
                     </TableCell>
                   ) : (
-                    <TableCell className="text-warning/80 py-4 text-[7px]">
+                    <TableCell className="text-warning/80 py-4 text-[10px]">
                       Can&apos;t perform this action
                     </TableCell>
                   ))}

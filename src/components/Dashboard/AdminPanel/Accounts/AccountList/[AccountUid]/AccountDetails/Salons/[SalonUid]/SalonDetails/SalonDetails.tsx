@@ -9,10 +9,11 @@ import { Check, Copy, LoaderPinwheel } from "lucide-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
+import Bookings from "./Bookings/Bookings";
 import Employees from "./Employees/Employees";
 import Products from "./Products/Products";
+import SalonOverviews from "./SalonOverviews/SalonOverviews";
 import Services from "./Services/Services";
-import Bookings from "./Bookings/Bookings";
 
 const SalonDetails: React.FC = () => {
   const { accountuid, salonuid } = useParams();
@@ -177,6 +178,9 @@ const SalonDetails: React.FC = () => {
         </div>
       </div>
       {/* Add additional salon details below */}
+      <div className="pt-10">
+        <SalonOverviews />
+      </div>
       <div className="pt-10">
         <Services />
       </div>
