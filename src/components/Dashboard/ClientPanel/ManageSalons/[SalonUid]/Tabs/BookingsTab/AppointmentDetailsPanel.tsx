@@ -17,6 +17,7 @@ import type {
 import { Calendar as CalendarIcon, Edit, LoaderPinwheel } from "lucide-react";
 import type { Session } from "next-auth";
 import { SetStateAction, useState, type Dispatch } from "react";
+import EditBookingCheckoutDialog from "./Dialogs/EditBookingCheckoutDialog";
 import EditBookingEmployeeModal from "./Dialogs/EditBookingEmployeeModal";
 import EditBookingProductsModal from "./Dialogs/EditBookingProductsModal";
 import EditBookingServicesModal from "./Dialogs/EditBookingServicesModal";
@@ -57,6 +58,7 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
   onOpenEditStatus,
   session,
 }) => {
+  const [isEditCheckoutOpen, setIsEditCheckoutOpen] = useState(false);
   const [isEditServicesOpen, setIsEditServicesOpen] = useState(false);
   const [isEditProductsOpen, setIsEditProductsOpen] = useState(false);
   const [isEditEmployeeOpen, setIsEditEmployeeOpen] = useState(false);
@@ -123,9 +125,10 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                className="ml-auto text-xs font-semibold"
+                className="ml-auto text-xs font-semibold uppercase"
+                onClick={() => setIsEditCheckoutOpen(true)}
               >
-                CHECKOUT
+                Checkout
               </Button>
             </div>
           )}
@@ -813,6 +816,11 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
           </SheetContent>
         </Sheet>
       </div>
+      <EditBookingCheckoutDialog
+        isOpen={isEditCheckoutOpen}
+        onOpenChange={setIsEditCheckoutOpen}
+        bookingData={singleBookingData}
+      />
       <EditBookingServicesModal
         isOpen={isEditServicesOpen}
         onOpenChange={setIsEditServicesOpen}

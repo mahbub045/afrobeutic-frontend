@@ -141,3 +141,9 @@ export interface StaffMember {
   name: string;
   avatar?: string;
 }
+
+export interface CommonEditBookingDataProps {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  bookingData?: Booking | null;
+}

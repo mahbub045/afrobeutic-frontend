@@ -11,7 +11,7 @@ import { baseApi } from "@/Redux/Api/BaseApi";
 import { useEditBookingMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/BookingsApi";
 import { useGetProductsDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Products/ProductsApi";
 import type {
-  Booking,
+  CommonEditBookingDataProps,
   Product,
 } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
 import { X } from "lucide-react";
@@ -21,13 +21,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import Swal from "sweetalert2";
 
-interface Props {
-  isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
-  bookingData?: Booking | null;
-}
-
-const EditBookingProductsModal: React.FC<Props> = ({
+const EditBookingProductsModal: React.FC<CommonEditBookingDataProps> = ({
   isOpen,
   onOpenChange,
   bookingData,
