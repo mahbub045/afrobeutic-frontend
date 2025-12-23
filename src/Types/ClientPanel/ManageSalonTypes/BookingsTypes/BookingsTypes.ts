@@ -56,6 +56,8 @@ export interface Booking {
   total_products: number;
   created_at: string;
   employee: BookingEmployee;
+  tips_amount: number;
+  payment_type: string;
 }
 
 export interface StaffMemberWithBookings {

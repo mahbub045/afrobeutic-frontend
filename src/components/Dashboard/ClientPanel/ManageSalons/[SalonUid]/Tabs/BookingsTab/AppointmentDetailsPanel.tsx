@@ -347,6 +347,14 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                       )}
                     <div className="mt-1.5 border-t pt-1.5">
                       <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Tips</span>
+                        <span className="text-muted-foreground font-medium">
+                          ${singleBookingData?.tips_amount ?? 0}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="mt-1.5 border-t pt-1.5">
+                      <div className="flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">
                           Total Price
                         </span>
