@@ -9,7 +9,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { cn } from "@/lib/utils";
+import { cn, formatChoiceFieldValue } from "@/lib/utils";
 import type {
   Appointment,
   Booking,
@@ -376,6 +376,19 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
 
                 <Separator />
 
+                <div className="mt-1.5 px-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Payment Type</span>
+                    <span className="text-muted-foreground font-medium">
+                      {formatChoiceFieldValue(
+                        singleBookingData?.payment_type,
+                      ) ?? "Not Specified"}
+                    </span>
+                  </div>
+                </div>
+
+                <Separator />
+
                 <div>
                   <h4 className="text-foreground mb-2 text-sm font-semibold">
                     Notes:
@@ -714,6 +727,16 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                               </span>
                             </div>
                           )}
+                          <div className="mt-1.5 border-t pt-1.5">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-muted-foreground">
+                                Tips
+                              </span>
+                              <span className="text-muted-foreground font-medium">
+                                ${singleBookingData?.tips_amount ?? 0}
+                              </span>
+                            </div>
+                          </div>
                           <div className="mt-1.5 border-t pt-1.5">
                             <div className="flex items-center justify-between text-sm">
                               <span className="text-muted-foreground">
