@@ -84,10 +84,29 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
         bookingUid: singleBookingData.uid,
       }).unwrap();
 
-      // TODO: Open receipt in new tab or download
-      // For now, log the response
-      console.log("Receipt data:", response);
-      toast.success("Receipt loaded successfully");
+      if (typeof window === "undefined") {
+        toast.error("Unable to download receipt on server side");
+        return;
+      }
+
+      const { url, fileName } = response;
+
+      if (!url) {
+        toast.error("Failed to create receipt link");
+        return;
+      }
+      const link = document.createElement("a");
+      link.href = url;
+      link.download =
+        fileName || `receipt-${singleBookingData.uid || "booking"}.pdf`;
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      window.URL.revokeObjectURL(url);
+
+      toast.success("Receipt download started");
     } catch (error) {
       console.error("Failed to load receipt:", error);
       toast.error("Failed to load receipt");
@@ -462,13 +481,13 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="w-full"
+                      className="w-full shadow dark:shadow-gray-600"
                       onClick={handleViewReceipt}
                       disabled={isViewReceiptLoading}
                     >
                       {isViewReceiptLoading
                         ? "Loading Receipt..."
-                        : "View Receipt"}
+                        : "Download Receipt"}
                     </Button>
                   )}
                 </div>
@@ -848,6 +867,21 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                           </div>
                         </>
                       )}
+                      <div>
+                        {selectedAppointment.status === "completed" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full shadow dark:shadow-gray-600"
+                            onClick={handleViewReceipt}
+                            disabled={isViewReceiptLoading}
+                          >
+                            {isViewReceiptLoading
+                              ? "Loading Receipt..."
+                              : "Download Receipt"}
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   )
                 ) : (
