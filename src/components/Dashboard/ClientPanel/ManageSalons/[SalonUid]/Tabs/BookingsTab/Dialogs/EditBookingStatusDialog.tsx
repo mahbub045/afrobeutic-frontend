@@ -11,9 +11,8 @@ import { baseApi } from "@/Redux/Api/BaseApi";
 import { useEditBookingMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/BookingsApi";
 import { EditBookingStatusDialogProps } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
-import { Loader2, Upload, X } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useTheme } from "next-themes";
-import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
@@ -141,46 +140,6 @@ const EditBookingStatusDialog: React.FC<EditBookingStatusDialogProps> = ({
     }
   };
 
-  const handleImageChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    setFieldValue: (
-      field: string,
-      value: File[],
-      shouldValidate?: boolean,
-    ) => void,
-    currentImages: File[],
-  ) => {
-    const files = e.target.files;
-    if (!files) return;
-
-    const availableSlots = 3 - currentImages.length;
-
-    if (files.length > availableSlots) {
-      return;
-    }
-
-    const newImages = Array.from(files);
-    setFieldValue("images", [...currentImages, ...newImages]);
-
-    const newPreviews = newImages.map((file) => URL.createObjectURL(file));
-    setImagePreviews([...imagePreviews, ...newPreviews]);
-  };
-
-  const removeImage = (
-    index: number,
-    setFieldValue: (
-      field: string,
-      value: File[],
-      shouldValidate?: boolean,
-    ) => void,
-    images: File[],
-  ) => {
-    const newImages = images.filter((_, i) => i !== index);
-    const newPreviews = imagePreviews.filter((_, i) => i !== index);
-    setFieldValue("images", newImages);
-    setImagePreviews(newPreviews);
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-h-[80vh] !max-w-lg overflow-y-auto shadow-md sm:!max-w-lg md:!max-w-xl dark:shadow-gray-600">
@@ -200,7 +159,7 @@ const EditBookingStatusDialog: React.FC<EditBookingStatusDialogProps> = ({
             onSubmit={handleSubmit}
             enableReinitialize
           >
-            {({ values, setFieldValue, isSubmitting }) => (
+            {({ values, isSubmitting }) => (
               <Form className="flex flex-1 flex-col">
                 <div className="space-y-4">
                   <div className="space-y-2">
@@ -213,7 +172,6 @@ const EditBookingStatusDialog: React.FC<EditBookingStatusDialogProps> = ({
                       </option>
                       <option value="PLACED">Placed</option>
                       <option value="INPROGRESS">In-progress</option>
-                      <option value="COMPLETED">Completed</option>
                       <option value="RESCHEDULED">Rescheduled</option>
                       <option value="CANCELLED">Cancelled</option>
                     </Field>
@@ -243,81 +201,6 @@ const EditBookingStatusDialog: React.FC<EditBookingStatusDialogProps> = ({
                         component="p"
                         className="text-xs text-red-500"
                       />
-                    </div>
-                  )}
-
-                  {values.status === "COMPLETED" && (
-                    <div className="space-y-2">
-                      <Label htmlFor="images">Images (Max 3)</Label>
-                      <div className="space-y-3">
-                        {imagePreviews.length < 3 && (
-                          <div className="flex items-center gap-2">
-                            <input
-                              id="status-images"
-                              name="images"
-                              type="file"
-                              accept="image/*"
-                              multiple
-                              onChange={(e) =>
-                                handleImageChange(
-                                  e,
-                                  setFieldValue,
-                                  values.images,
-                                )
-                              }
-                              className="hidden"
-                            />
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() =>
-                                document
-                                  .getElementById("status-images")
-                                  ?.click()
-                              }
-                            >
-                              <Upload className="mr-2 h-4 w-4" />
-                              Upload Images ({imagePreviews.length}/3)
-                            </Button>
-                          </div>
-                        )}
-                        <ErrorMessage
-                          name="images"
-                          component="p"
-                          className="text-xs text-red-500"
-                        />
-                        {imagePreviews.length > 0 && (
-                          <div className="grid grid-cols-3 gap-2">
-                            {imagePreviews.map((preview, index) => (
-                              <div key={index} className="relative">
-                                <Image
-                                  src={preview}
-                                  alt={`Preview ${index + 1}`}
-                                  width={96}
-                                  height={96}
-                                  className="h-24 w-full rounded-md object-cover"
-                                />
-                                <Button
-                                  type="button"
-                                  variant="destructive"
-                                  size="icon"
-                                  className="absolute -top-2 -right-2 h-6 w-6"
-                                  onClick={() =>
-                                    removeImage(
-                                      index,
-                                      setFieldValue,
-                                      values.images,
-                                    )
-                                  }
-                                >
-                                  <X className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
                     </div>
                   )}
                 </div>

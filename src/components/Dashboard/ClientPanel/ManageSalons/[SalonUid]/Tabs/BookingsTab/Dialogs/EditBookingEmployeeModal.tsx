@@ -11,7 +11,7 @@ import { baseApi } from "@/Redux/Api/BaseApi";
 import { useEditBookingMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/BookingsApi";
 import { useGetEmployeesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Employees/EmployeesApi";
 import type {
-  Booking,
+  CommonEditBookingDataProps,
   Employee,
 } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
 import { Loader2 } from "lucide-react";
@@ -21,13 +21,7 @@ import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import Swal from "sweetalert2";
 
-interface Props {
-  isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
-  bookingData?: Booking | null;
-}
-
-const EditBookingEmployeeModal: React.FC<Props> = ({
+const EditBookingEmployeeModal: React.FC<CommonEditBookingDataProps> = ({
   isOpen,
   onOpenChange,
   bookingData,

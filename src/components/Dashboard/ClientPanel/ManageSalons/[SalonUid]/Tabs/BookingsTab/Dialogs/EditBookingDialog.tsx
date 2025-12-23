@@ -9,7 +9,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { baseApi } from "@/Redux/Api/BaseApi";
 import { useEditBookingMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/BookingsApi";
-import { useGetEmployeesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Employees/EmployeesApi";
 import { EditBookingDialogProps } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
 import { Loader2 } from "lucide-react";
@@ -31,8 +30,6 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
 
   // RTK hooks
-  const { data: employeesData, isLoading: isLoadingEmployees } =
-    useGetEmployeesDataQuery({ salonUid: salonUid });
   const dispatch = useDispatch();
   const [editBooking, { isLoading }] = useEditBookingMutation();
 
@@ -123,7 +120,7 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
             onSubmit={handleSubmit}
             enableReinitialize
           >
-            {({ values, setFieldValue, isSubmitting }) => (
+            {({ isSubmitting }) => (
               <Form className="flex flex-1 flex-col">
                 <div className="space-y-4">
                   {/* Booking Date and Time */}
