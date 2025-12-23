@@ -140,46 +140,6 @@ const EditBookingStatusDialog: React.FC<EditBookingStatusDialogProps> = ({
     }
   };
 
-  const handleImageChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    setFieldValue: (
-      field: string,
-      value: File[],
-      shouldValidate?: boolean,
-    ) => void,
-    currentImages: File[],
-  ) => {
-    const files = e.target.files;
-    if (!files) return;
-
-    const availableSlots = 3 - currentImages.length;
-
-    if (files.length > availableSlots) {
-      return;
-    }
-
-    const newImages = Array.from(files);
-    setFieldValue("images", [...currentImages, ...newImages]);
-
-    const newPreviews = newImages.map((file) => URL.createObjectURL(file));
-    setImagePreviews([...imagePreviews, ...newPreviews]);
-  };
-
-  const removeImage = (
-    index: number,
-    setFieldValue: (
-      field: string,
-      value: File[],
-      shouldValidate?: boolean,
-    ) => void,
-    images: File[],
-  ) => {
-    const newImages = images.filter((_, i) => i !== index);
-    const newPreviews = imagePreviews.filter((_, i) => i !== index);
-    setFieldValue("images", newImages);
-    setImagePreviews(newPreviews);
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-h-[80vh] !max-w-lg overflow-y-auto shadow-md sm:!max-w-lg md:!max-w-xl dark:shadow-gray-600">
@@ -199,7 +159,7 @@ const EditBookingStatusDialog: React.FC<EditBookingStatusDialogProps> = ({
             onSubmit={handleSubmit}
             enableReinitialize
           >
-            {({ values, setFieldValue, isSubmitting }) => (
+            {({ values, isSubmitting }) => (
               <Form className="flex flex-1 flex-col">
                 <div className="space-y-4">
                   <div className="space-y-2">
