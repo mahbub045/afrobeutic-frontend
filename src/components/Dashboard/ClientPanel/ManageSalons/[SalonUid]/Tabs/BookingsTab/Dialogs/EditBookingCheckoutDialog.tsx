@@ -16,6 +16,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import Swal from "sweetalert2";
+import AddLookBookImageDialog from "./AddLookBookImageDialog";
 
 const PAYMENT_TYPES = [
   { value: "FRONT_DESK", label: "Front Desk" },
@@ -40,6 +41,7 @@ const EditBookingCheckoutDialog: React.FC<CommonEditBookingDataProps> = ({
 
   const [tipsAmount, setTipsAmount] = useState<string>("");
   const [paymentType, setPaymentType] = useState<string>("");
+  const [showImageDialog, setShowImageDialog] = useState(false);
 
   const [editBooking, { isLoading }] = useEditBookingMutation();
 
@@ -80,7 +82,9 @@ const EditBookingCheckoutDialog: React.FC<CommonEditBookingDataProps> = ({
         timer: 2000,
       });
 
+      // Close checkout dialog and open image dialog
       onOpenChange(false);
+      setShowImageDialog(true);
     } catch (err) {
       console.error(err);
       Swal.fire({ icon: "error", title: "Failed to update checkout details" });
@@ -88,92 +92,101 @@ const EditBookingCheckoutDialog: React.FC<CommonEditBookingDataProps> = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[80vh] !max-w-xl overflow-y-auto shadow-md">
-        <DialogHeader>
-          <DialogTitle className="text-primary">Checkout</DialogTitle>
-          <DialogDescription>
-            Modify checkout details for the booking.
-          </DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog open={isOpen} onOpenChange={onOpenChange}>
+        <DialogContent className="max-h-[80vh] !max-w-xl overflow-y-auto shadow-md">
+          <DialogHeader>
+            <DialogTitle className="text-primary">Checkout</DialogTitle>
+            <DialogDescription>
+              Modify checkout details for the booking.
+            </DialogDescription>
+          </DialogHeader>
 
-        <div className="space-y-4">
-          {/* Tips Amount */}
-          <div className="space-y-2">
-            <Label htmlFor="tips-amount">Tips Amount</Label>
-            <Input
-              id="tips-amount"
-              type="number"
-              placeholder="Enter tips amount"
-              value={tipsAmount}
-              onChange={(e) => setTipsAmount(e.target.value)}
-              step="0.01"
-              min="0"
-            />
-          </div>
+          <div className="space-y-4">
+            {/* Tips Amount */}
+            <div className="space-y-2">
+              <Label htmlFor="tips-amount">Tips Amount</Label>
+              <Input
+                id="tips-amount"
+                type="number"
+                placeholder="Enter tips amount"
+                value={tipsAmount}
+                onChange={(e) => setTipsAmount(e.target.value)}
+                step="0.01"
+                min="0"
+              />
+            </div>
 
-          {/* Summary */}
-          <div className="bg-muted space-y-1 rounded-lg border p-3">
-            <div className="flex justify-between text-sm">
-              <span>Final Price:</span>
-              <span className="font-medium">
-                ${bookingData?.final_price.toFixed(2) || "0.00"}
-              </span>
+            {/* Summary */}
+            <div className="bg-muted space-y-1 rounded-lg border p-3">
+              <div className="flex justify-between text-sm">
+                <span>Final Price:</span>
+                <span className="font-medium">
+                  ${bookingData?.final_price.toFixed(2) || "0.00"}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>Tips:</span>
+                <span className="font-medium">
+                  ${parseFloat(tipsAmount || "0").toFixed(2)}
+                </span>
+              </div>
+              <div className="flex justify-between border-t pt-2 text-base">
+                <span className="font-semibold">Total:</span>
+                <span className="text-primary font-semibold">
+                  $
+                  {(
+                    (bookingData?.final_price || 0) +
+                    parseFloat(tipsAmount || "0")
+                  ).toFixed(2)}
+                </span>
+              </div>
             </div>
-            <div className="flex justify-between text-sm">
-              <span>Tips:</span>
-              <span className="font-medium">
-                ${parseFloat(tipsAmount || "0").toFixed(2)}
-              </span>
-            </div>
-            <div className="flex justify-between border-t pt-2 text-base">
-              <span className="font-semibold">Total:</span>
-              <span className="text-primary font-semibold">
-                $
-                {(
-                  (bookingData?.final_price || 0) +
-                  parseFloat(tipsAmount || "0")
-                ).toFixed(2)}
-              </span>
-            </div>
-          </div>
 
-          {/* Payment Type */}
-          <div className="space-y-2">
-            <Label>Payment Type</Label>
-            <div className="grid grid-cols-2 gap-2">
-              {PAYMENT_TYPES.map((type) => (
-                <button
-                  key={type.value}
-                  onClick={() => setPaymentType(type.value)}
-                  className={`rounded-lg px-4 py-3 text-sm font-medium transition-all ${
-                    paymentType === type.value
-                      ? "bg-primary text-white shadow-md"
-                      : "bg-slate-200 text-gray-800 hover:bg-slate-300 dark:bg-slate-700 dark:text-gray-200 dark:hover:bg-slate-600"
-                  }`}
-                >
-                  {type.label}
-                </button>
-              ))}
+            {/* Payment Type */}
+            <div className="space-y-2">
+              <Label>Payment Type</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {PAYMENT_TYPES.map((type) => (
+                  <button
+                    key={type.value}
+                    onClick={() => setPaymentType(type.value)}
+                    className={`rounded-lg px-4 py-3 text-sm font-medium transition-all ${
+                      paymentType === type.value
+                        ? "bg-primary text-white shadow-md"
+                        : "bg-slate-200 text-gray-800 hover:bg-slate-300 dark:bg-slate-700 dark:text-gray-200 dark:hover:bg-slate-600"
+                    }`}
+                  >
+                    {type.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-2 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleSave} disabled={isLoading}>
+                {isLoading ? "Watting..." : "Checkout"}
+              </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
 
-          {/* Action Buttons */}
-          <div className="flex justify-end gap-2 pt-4">
-            <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isLoading}
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleSave} disabled={isLoading}>
-              {isLoading ? "Saving..." : "Save Changes"}
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+      {/* Image Upload Dialog */}
+      <AddLookBookImageDialog
+        isOpen={showImageDialog}
+        onOpenChange={setShowImageDialog}
+        bookingUid={bookingData?.uid}
+      />
+    </>
   );
 };
 
