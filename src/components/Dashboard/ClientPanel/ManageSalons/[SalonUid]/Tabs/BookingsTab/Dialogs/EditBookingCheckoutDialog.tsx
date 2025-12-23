@@ -67,6 +67,7 @@ const EditBookingCheckoutDialog: React.FC<CommonEditBookingDataProps> = ({
         data: {
           tips_amount: parseFloat(tipsAmount) || 0,
           payment_type: paymentType,
+          status: "COMPLETED",
         },
       }).unwrap();
 
