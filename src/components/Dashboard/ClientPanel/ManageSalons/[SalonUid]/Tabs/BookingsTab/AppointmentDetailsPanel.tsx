@@ -10,13 +10,16 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { cn, formatChoiceFieldValue } from "@/lib/utils";
+import { useViewReceiptMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/ViewReceiptApi";
 import type {
   Appointment,
   Booking,
 } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
 import { Calendar as CalendarIcon, Edit, LoaderPinwheel } from "lucide-react";
 import type { Session } from "next-auth";
+import { useParams } from "next/navigation";
 import { SetStateAction, useState, type Dispatch } from "react";
+import { toast } from "sonner";
 import EditBookingCheckoutDialog from "./Dialogs/EditBookingCheckoutDialog";
 import EditBookingEmployeeModal from "./Dialogs/EditBookingEmployeeModal";
 import EditBookingProductsModal from "./Dialogs/EditBookingProductsModal";
@@ -58,10 +61,38 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
   onOpenEditStatus,
   session,
 }) => {
+  const { salonuid } = useParams();
+  const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
+
   const [isEditCheckoutOpen, setIsEditCheckoutOpen] = useState(false);
   const [isEditServicesOpen, setIsEditServicesOpen] = useState(false);
   const [isEditProductsOpen, setIsEditProductsOpen] = useState(false);
   const [isEditEmployeeOpen, setIsEditEmployeeOpen] = useState(false);
+
+  const [viewReceipt, { isLoading: isViewReceiptLoading }] =
+    useViewReceiptMutation();
+
+  const handleViewReceipt = async () => {
+    if (!singleBookingData?.uid) {
+      toast.error("Booking ID is missing");
+      return;
+    }
+
+    try {
+      const response = await viewReceipt({
+        salonUid,
+        bookingUid: singleBookingData.uid,
+      }).unwrap();
+
+      // TODO: Open receipt in new tab or download
+      // For now, log the response
+      console.log("Receipt data:", response);
+      toast.success("Receipt loaded successfully");
+    } catch (error) {
+      console.error("Failed to load receipt:", error);
+      toast.error("Failed to load receipt");
+    }
+  };
   return (
     <>
       {/* Appointment Details Sidebar - Desktop */}
@@ -426,6 +457,21 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                     </div>
                   </>
                 )}
+                <div>
+                  {selectedAppointment.status === "completed" && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={handleViewReceipt}
+                      disabled={isViewReceiptLoading}
+                    >
+                      {isViewReceiptLoading
+                        ? "Loading Receipt..."
+                        : "View Receipt"}
+                    </Button>
+                  )}
+                </div>
               </div>
             )
           ) : (
@@ -503,9 +549,10 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="ml-auto text-xs font-semibold"
+                      className="ml-auto text-xs font-semibold uppercase"
+                      onClick={() => setIsEditCheckoutOpen(true)}
                     >
-                      CHECKOUT
+                      Checkout
                     </Button>
                   </div>
                 )}
