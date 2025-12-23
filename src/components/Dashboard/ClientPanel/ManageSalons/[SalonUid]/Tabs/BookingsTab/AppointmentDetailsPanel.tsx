@@ -9,14 +9,18 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { cn } from "@/lib/utils";
+import { cn, formatChoiceFieldValue } from "@/lib/utils";
+import { useViewReceiptMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/ViewReceiptApi";
 import type {
   Appointment,
   Booking,
 } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
 import { Calendar as CalendarIcon, Edit, LoaderPinwheel } from "lucide-react";
 import type { Session } from "next-auth";
+import { useParams } from "next/navigation";
 import { SetStateAction, useState, type Dispatch } from "react";
+import { toast } from "sonner";
+import EditBookingCheckoutDialog from "./Dialogs/EditBookingCheckoutDialog";
 import EditBookingEmployeeModal from "./Dialogs/EditBookingEmployeeModal";
 import EditBookingProductsModal from "./Dialogs/EditBookingProductsModal";
 import EditBookingServicesModal from "./Dialogs/EditBookingServicesModal";
@@ -57,9 +61,38 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
   onOpenEditStatus,
   session,
 }) => {
+  const { salonuid } = useParams();
+  const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
+
+  const [isEditCheckoutOpen, setIsEditCheckoutOpen] = useState(false);
   const [isEditServicesOpen, setIsEditServicesOpen] = useState(false);
   const [isEditProductsOpen, setIsEditProductsOpen] = useState(false);
   const [isEditEmployeeOpen, setIsEditEmployeeOpen] = useState(false);
+
+  const [viewReceipt, { isLoading: isViewReceiptLoading }] =
+    useViewReceiptMutation();
+
+  const handleViewReceipt = async () => {
+    if (!singleBookingData?.uid) {
+      toast.error("Booking ID is missing");
+      return;
+    }
+
+    try {
+      const response = await viewReceipt({
+        salonUid,
+        bookingUid: singleBookingData.uid,
+      }).unwrap();
+
+      // TODO: Open receipt in new tab or download
+      // For now, log the response
+      console.log("Receipt data:", response);
+      toast.success("Receipt loaded successfully");
+    } catch (error) {
+      console.error("Failed to load receipt:", error);
+      toast.error("Failed to load receipt");
+    }
+  };
   return (
     <>
       {/* Appointment Details Sidebar - Desktop */}
@@ -123,9 +156,10 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                className="ml-auto text-xs font-semibold"
+                className="ml-auto text-xs font-semibold uppercase"
+                onClick={() => setIsEditCheckoutOpen(true)}
               >
-                CHECKOUT
+                Checkout
               </Button>
             </div>
           )}
@@ -347,6 +381,14 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                       )}
                     <div className="mt-1.5 border-t pt-1.5">
                       <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Tips</span>
+                        <span className="text-muted-foreground font-medium">
+                          ${singleBookingData?.tips_amount ?? 0}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="mt-1.5 border-t pt-1.5">
+                      <div className="flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">
                           Total Price
                         </span>
@@ -363,6 +405,19 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                         ${(singleBookingData?.final_price ?? 0).toFixed(2)}
                       </span>
                     </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="mt-1.5 px-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Payment Type</span>
+                    <span className="text-muted-foreground font-medium">
+                      {formatChoiceFieldValue(
+                        singleBookingData?.payment_type,
+                      ) ?? "Not Specified"}
+                    </span>
                   </div>
                 </div>
 
@@ -402,6 +457,21 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                     </div>
                   </>
                 )}
+                <div>
+                  {selectedAppointment.status === "completed" && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={handleViewReceipt}
+                      disabled={isViewReceiptLoading}
+                    >
+                      {isViewReceiptLoading
+                        ? "Loading Receipt..."
+                        : "View Receipt"}
+                    </Button>
+                  )}
+                </div>
               </div>
             )
           ) : (
@@ -479,9 +549,10 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="ml-auto text-xs font-semibold"
+                      className="ml-auto text-xs font-semibold uppercase"
+                      onClick={() => setIsEditCheckoutOpen(true)}
                     >
-                      CHECKOUT
+                      Checkout
                     </Button>
                   </div>
                 )}
@@ -709,6 +780,16 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                           <div className="mt-1.5 border-t pt-1.5">
                             <div className="flex items-center justify-between text-sm">
                               <span className="text-muted-foreground">
+                                Tips
+                              </span>
+                              <span className="text-muted-foreground font-medium">
+                                ${singleBookingData?.tips_amount ?? 0}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="mt-1.5 border-t pt-1.5">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-muted-foreground">
                                 Total Price
                               </span>
                               <del className="text-muted-foreground font-medium">
@@ -782,6 +863,11 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
           </SheetContent>
         </Sheet>
       </div>
+      <EditBookingCheckoutDialog
+        isOpen={isEditCheckoutOpen}
+        onOpenChange={setIsEditCheckoutOpen}
+        bookingData={singleBookingData}
+      />
       <EditBookingServicesModal
         isOpen={isEditServicesOpen}
         onOpenChange={setIsEditServicesOpen}

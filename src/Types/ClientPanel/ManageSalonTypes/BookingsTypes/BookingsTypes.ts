@@ -56,6 +56,8 @@ export interface Booking {
   total_products: number;
   created_at: string;
   employee: BookingEmployee;
+  tips_amount: number;
+  payment_type: string;
 }
 
 export interface StaffMemberWithBookings {
@@ -138,4 +140,10 @@ export interface StaffMember {
   id: string;
   name: string;
   avatar?: string;
+}
+
+export interface CommonEditBookingDataProps {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  bookingData?: Booking | null;
 }
