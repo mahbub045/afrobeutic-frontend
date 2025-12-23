@@ -8,13 +8,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { baseApi } from "@/Redux/Api/BaseApi";
 import { useEditBookingMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/BookingsApi";
 import { CommonEditBookingDataProps } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
@@ -79,10 +72,12 @@ const EditBookingCheckoutDialog: React.FC<CommonEditBookingDataProps> = ({
 
       Swal.fire({
         icon: "success",
+        iconColor: "#037375",
         title: "Checkout updated",
         background: resolvedTheme === "dark" ? "#0f1724" : undefined,
         color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
-        timer: 1800,
+        confirmButtonColor: "#037375",
+        timer: 2000,
       });
 
       onOpenChange(false);
@@ -145,19 +140,22 @@ const EditBookingCheckoutDialog: React.FC<CommonEditBookingDataProps> = ({
 
           {/* Payment Type */}
           <div className="space-y-2">
-            <Label htmlFor="payment-type">Payment Type</Label>
-            <Select value={paymentType} onValueChange={setPaymentType}>
-              <SelectTrigger id="payment-type">
-                <SelectValue placeholder="Select payment type" />
-              </SelectTrigger>
-              <SelectContent>
-                {PAYMENT_TYPES.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label>Payment Type</Label>
+            <div className="grid grid-cols-2 gap-2">
+              {PAYMENT_TYPES.map((type) => (
+                <button
+                  key={type.value}
+                  onClick={() => setPaymentType(type.value)}
+                  className={`rounded-lg px-4 py-3 text-sm font-medium transition-all ${
+                    paymentType === type.value
+                      ? "bg-primary text-white shadow-md"
+                      : "bg-slate-200 text-gray-800 hover:bg-slate-300 dark:bg-slate-700 dark:text-gray-200 dark:hover:bg-slate-600"
+                  }`}
+                >
+                  {type.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Action Buttons */}
