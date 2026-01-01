@@ -13,9 +13,15 @@ import UserDropdown from "./UserDropdown";
 
 interface NavBarProps {
   onMobileMenuToggle?: () => void;
+  onSidebarToggle?: () => void;
+  isSidebarCollapsed?: boolean;
 }
 
-const NavBar: React.FC<NavBarProps> = ({ onMobileMenuToggle }) => {
+const NavBar: React.FC<NavBarProps> = ({
+  onMobileMenuToggle,
+  onSidebarToggle,
+  isSidebarCollapsed,
+}) => {
   const { data: session, status } = useSession();
   const { theme, setTheme } = useTheme();
 
@@ -42,15 +48,30 @@ const NavBar: React.FC<NavBarProps> = ({ onMobileMenuToggle }) => {
                 variant="ghost"
                 size="icon"
                 onClick={onMobileMenuToggle}
-                className="lg:hidden dark:shadow-gray-600"
+                className="md:hidden dark:shadow-gray-600"
               >
-                <Menu className="h-5 w-5" />
+                <Menu className="text-primary h-5 w-5" />
                 <span className="sr-only">Toggle menu</span>
               </Button>
             )}
 
+            {/* Desktop/Tablet Sidebar Collapse Toggle */}
+            {onSidebarToggle && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onSidebarToggle}
+                className="hidden md:inline-flex dark:shadow-gray-600"
+              >
+                <Menu className="text-primary h-5 w-5" />
+                <span className="sr-only">
+                  {isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                </span>
+              </Button>
+            )}
+
             <Link href="/" className="flex items-center space-x-2">
-              <div className="relative h-14 w-28">
+              <div className="relative h-18 w-20">
                 {/* Light logo (shown in light mode) */}
                 <Image
                   src="/images/logo-light.png"

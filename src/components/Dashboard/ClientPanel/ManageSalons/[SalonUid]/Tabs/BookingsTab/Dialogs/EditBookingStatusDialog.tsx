@@ -14,7 +14,6 @@ import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
 import { Loader2 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useParams } from "next/navigation";
-import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
 import Swal from "sweetalert2";
@@ -31,10 +30,6 @@ const EditBookingStatusDialog: React.FC<EditBookingStatusDialogProps> = ({
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
   const dispatch = useDispatch();
   const [editBooking, { isLoading }] = useEditBookingMutation();
-
-  const [imagePreviews, setImagePreviews] = useState<string[]>(
-    bookingData?.images || [],
-  );
 
   const validationSchema = Yup.object({
     status: Yup.string()
