@@ -71,7 +71,7 @@ const NavBar: React.FC<NavBarProps> = ({
             )}
 
             <Link href="/" className="flex items-center space-x-2">
-              <div className="relative h-14 w-28">
+              <div className="relative h-18 w-20">
                 {/* Light logo (shown in light mode) */}
                 <Image
                   src="/images/logo-light.png"
