@@ -44,11 +44,13 @@ type NavItem = {
 interface SideBarProps {
   isMobileOpen?: boolean;
   onMobileClose?: () => void;
+  isCollapsed?: boolean;
 }
 
 const SideBar: React.FC<SideBarProps> = ({
   isMobileOpen = false,
   onMobileClose = () => {},
+  isCollapsed = false,
 }) => {
   const pathname = usePathname();
   const { data: session, status } = useSession();
@@ -277,7 +279,11 @@ const SideBar: React.FC<SideBarProps> = ({
   return (
     <>
       {/* Desktop Sidebar - hidden on small screens, visible from md and up */}
-      <aside className="bg-background/50 hidden w-56 border-r lg:block">
+      <aside
+        className={`bg-background/50 border-r ${
+          isCollapsed ? "hidden md:hidden" : "hidden md:block"
+        } w-56`}
+      >
         <nav className="fixed top-16 h-[calc(100vh-4rem)] w-56 overflow-auto">
           {renderNavContent()}
         </nav>

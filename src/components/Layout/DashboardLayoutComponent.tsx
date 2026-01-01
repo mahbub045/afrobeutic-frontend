@@ -14,6 +14,7 @@ export default function DashboardLayoutComponent({
   children,
 }: DashboardLayoutProps) {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const handleMobileMenuToggle = () => {
     setIsMobileSidebarOpen(!isMobileSidebarOpen);
@@ -23,13 +24,22 @@ export default function DashboardLayoutComponent({
     setIsMobileSidebarOpen(false);
   };
 
+  const handleSidebarToggle = () => {
+    setIsSidebarCollapsed((prev) => !prev);
+  };
+
   return (
     <div className="bg-background min-h-screen">
-      <NavBar onMobileMenuToggle={handleMobileMenuToggle} />
+      <NavBar
+        onMobileMenuToggle={handleMobileMenuToggle}
+        onSidebarToggle={handleSidebarToggle}
+        isSidebarCollapsed={isSidebarCollapsed}
+      />
       <div className="flex">
         <SideBar
           isMobileOpen={isMobileSidebarOpen}
           onMobileClose={handleMobileMenuClose}
+          isCollapsed={isSidebarCollapsed}
         />
         {/* Main content */}
         <main className="mx-auto min-h-screen flex-1 space-y-6 overflow-y-auto px-4 py-6 md:px-6 lg:px-8">
