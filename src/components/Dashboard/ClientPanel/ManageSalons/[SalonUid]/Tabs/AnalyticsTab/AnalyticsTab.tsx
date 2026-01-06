@@ -1,12 +1,48 @@
 "use client";
+import Bookings from "./Bookings/Bookings";
+import CustomerAnalysis from "./CustomerAnalysis/CustomerAnalysis";
+import PeakDaysWeek from "./PeakDaysWeek/PeakDaysWeek";
+import PeakHours from "./PeakHours/PeakHours";
+import ProductCategoriesRevenue from "./ProductCategoriesRevenue/ProductCategoriesRevenue";
+import ProductSales from "./ProductSales/ProductSales";
+import ProductsRevenue from "./ProductsRevenue/ProductsRevenue";
+import Revenue from "./Revenue/Revenue";
+import ServiceCategoriesRevenue from "./ServiceCategoriesRevenue/ServiceCategoriesRevenue";
+import ServicesPerformance from "./ServicesPerformance/ServicesPerformance";
+import ServicesRevenue from "./ServicesRevenue/ServicesRevenue";
+import StaffPerformance from "./StaffPerformance/StaffPerformance";
+
 const AnalyticsTab: React.FC = () => {
   return (
     <div>
-      {/* JSX here */}
-      <h2 className="text-lg font-semibold">Analytics</h2>
-      <p className="text-muted-foreground mt-2">
-        Salon analytics and performance metrics.
-      </p>
+      <div>
+        <Revenue />
+      </div>
+      <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-2">
+        <ServiceCategoriesRevenue />
+        <ProductCategoriesRevenue />
+      </div>
+      <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-2">
+        <ServicesRevenue />
+        <ProductsRevenue />
+      </div>
+      <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-2">
+        <Bookings />
+        <PeakHours />
+      </div>
+      <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-2">
+        <PeakDaysWeek />
+        <CustomerAnalysis />
+      </div>
+      <div className="mt-10 grid grid-cols-1">
+        <StaffPerformance />
+      </div>
+      <div className="mt-10 grid grid-cols-1">
+        <ServicesPerformance />
+      </div>
+      <div className="mt-10 grid grid-cols-1">
+        <ProductSales />
+      </div>
     </div>
   );
 };
