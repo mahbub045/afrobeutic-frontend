@@ -1,4 +1,5 @@
 "use client";
+import Bookings from "./Bookings/Bookings";
 import ProductCategoriesRevenue from "./ProductCategoriesRevenue/ProductCategoriesRevenue";
 import ProductsRevenue from "./ProductsRevenue/ProductsRevenue";
 import Revenue from "./Revenue/Revenue";
@@ -17,6 +18,10 @@ const AnalyticsTab: React.FC = () => {
       </div>
       <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-2">
         <ServicesRevenue />
+        <ProductsRevenue />
+      </div>
+      <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-2">
+        <Bookings />
         <ProductsRevenue />
       </div>
     </div>
