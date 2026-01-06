@@ -11,29 +11,29 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const ServicesRevenue: React.FC = () => {
+const ProductsRevenue: React.FC = () => {
   const [range, setRange] = useState<string>("week");
 
   const data = useMemo(() => {
     // sample datasets for different ranges; replace with real data from API
     const datasets: Record<string, (string | number)[][]> = {
       day: [
-        ["Date", "Massage", "Makeup Application"],
-        ["2026-01-01", 80, 70],
-        ["2026-01-02", 120, 95],
-        ["2026-01-03", 90, 60],
+        ["Date", "Makeup", "Shampoo", "Skincare"],
+        ["2026-01-01", 40, 30, 20],
+        ["2026-01-02", 60, 45, 35],
+        ["2026-01-03", 50, 40, 30],
       ],
       week: [
-        ["Week", "Massage", "Makeup Application", "Facial"],
-        ["2026-01", 220, 180, 140],
-        ["2026-02", 240, 200, 160],
-        ["2026-03", 260, 210, 170],
+        ["Week", "Makeup", "Shampoo", "Skincare", "Fragrance"],
+        ["2026-01", 420, 280, 210, 140],
+        ["2026-02", 460, 300, 240, 160],
+        ["2026-03", 490, 330, 260, 180],
       ],
       month: [
-        ["Month", "Massage", "Makeup Application", "Facial", "Nails"],
-        ["2025-10", 600, 480, 380, 210],
-        ["2025-11", 720, 520, 410, 260],
-        ["2025-12", 810, 590, 480, 310],
+        ["Month", "Makeup", "Shampoo", "Skincare", "Fragrance", "Wellness"],
+        ["2025-10", 1700, 980, 640, 420, 210],
+        ["2025-11", 1900, 1050, 720, 460, 240],
+        ["2025-12", 2150, 1180, 840, 520, 280],
       ],
     };
 
@@ -54,12 +54,11 @@ const ServicesRevenue: React.FC = () => {
     pointSize: 6,
     tooltip: { trigger: "both" },
   };
-
   return (
     <section className="space-y-4">
       <header className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">
-          Top 5 Revenue Earner Services (Individual)
+          Top 5 Revenue Earner Products (Individual)
         </h3>
         <div className="flex items-center gap-2">
           <Select defaultValue={range} onValueChange={(val) => setRange(val)}>
@@ -95,4 +94,4 @@ const ServicesRevenue: React.FC = () => {
   );
 };
 
-export default ServicesRevenue;
+export default ProductsRevenue;
