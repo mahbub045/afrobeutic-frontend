@@ -4,6 +4,7 @@ import CustomerAnalysis from "./CustomerAnalysis/CustomerAnalysis";
 import PeakDaysWeek from "./PeakDaysWeek/PeakDaysWeek";
 import PeakHours from "./PeakHours/PeakHours";
 import ProductCategoriesRevenue from "./ProductCategoriesRevenue/ProductCategoriesRevenue";
+import ProductSales from "./ProductSales/ProductSales";
 import ProductsRevenue from "./ProductsRevenue/ProductsRevenue";
 import Revenue from "./Revenue/Revenue";
 import ServiceCategoriesRevenue from "./ServiceCategoriesRevenue/ServiceCategoriesRevenue";
@@ -38,6 +39,9 @@ const AnalyticsTab: React.FC = () => {
       </div>
       <div className="mt-10 grid grid-cols-1">
         <ServicesPerformance />
+      </div>
+      <div className="mt-10 grid grid-cols-1">
+        <ProductSales />
       </div>
     </div>
   );
