@@ -8,6 +8,7 @@ import ProductsRevenue from "./ProductsRevenue/ProductsRevenue";
 import Revenue from "./Revenue/Revenue";
 import ServiceCategoriesRevenue from "./ServiceCategoriesRevenue/ServiceCategoriesRevenue";
 import ServicesRevenue from "./ServicesRevenue/ServicesRevenue";
+import StaffPerformance from "./StaffPerformance/StaffPerformance";
 
 const AnalyticsTab: React.FC = () => {
   return (
@@ -30,6 +31,9 @@ const AnalyticsTab: React.FC = () => {
       <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-2">
         <PeakDaysWeek />
         <CustomerAnalysis />
+      </div>
+      <div className="mt-10 grid grid-cols-1">
+        <StaffPerformance />
       </div>
     </div>
   );
