@@ -18,31 +18,31 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const StaffPerformance: React.FC = () => {
+const ServicesPerformance: React.FC = () => {
   const [range, setRange] = useState<string>("week");
 
   const topServices = useMemo(() => {
     const datasets: Record<string, { name: string; amount: number }[]> = {
       day: [
-        { name: "Diana", amount: 68.34 },
-        { name: "Edward", amount: 42.11 },
-        { name: "Fiona", amount: 21.25 },
-        { name: "George", amount: 15.0 },
-        { name: "Hannah", amount: 10.5 },
+        { name: "Facial", amount: 68.34 },
+        { name: "Haircut", amount: 42.11 },
+        { name: "Makeup Application", amount: 21.25 },
+        { name: "Massage", amount: 15.0 },
+        { name: "Manicure", amount: 10.5 },
       ],
       week: [
-        { name: "Diana", amount: 204.57 },
-        { name: "Edward", amount: 114.72 },
-        { name: "Fiona", amount: 63.55 },
-        { name: "George", amount: 45.0 },
-        { name: "Hannah", amount: 30.5 },
+        { name: "Facial", amount: 204.57 },
+        { name: "Haircut", amount: 114.72 },
+        { name: "Makeup Application", amount: 63.55 },
+        { name: "Massage", amount: 45.0 },
+        { name: "Manicure", amount: 30.5 },
       ],
       month: [
-        { name: "Diana", amount: 850.2 },
-        { name: "Edward", amount: 480.75 },
-        { name: "Fiona", amount: 270.6 },
-        { name: "George", amount: 180.0 },
-        { name: "Hannah", amount: 122.0 },
+        { name: "Facial", amount: 850.2 },
+        { name: "Haircut", amount: 480.75 },
+        { name: "Makeup Application", amount: 270.6 },
+        { name: "Massage", amount: 180.0 },
+        { name: "Manicure", amount: 122.0 },
       ],
     };
 
@@ -53,9 +53,9 @@ const StaffPerformance: React.FC = () => {
     <Card className="space-y-4 shadow-md dark:shadow-gray-600">
       <CardHeader className="items-start">
         <div>
-          <CardTitle>Staff Performance</CardTitle>
+          <CardTitle>Services/Styles Performance</CardTitle>
           <CardDescription className="mt-2">
-            Top 5 Revenue Generating Staff
+            Top 5 Selected Services/Styles
           </CardDescription>
         </div>
 
@@ -100,4 +100,4 @@ const StaffPerformance: React.FC = () => {
   );
 };
 
-export default StaffPerformance;
+export default ServicesPerformance;

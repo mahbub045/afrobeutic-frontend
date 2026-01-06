@@ -7,6 +7,7 @@ import ProductCategoriesRevenue from "./ProductCategoriesRevenue/ProductCategori
 import ProductsRevenue from "./ProductsRevenue/ProductsRevenue";
 import Revenue from "./Revenue/Revenue";
 import ServiceCategoriesRevenue from "./ServiceCategoriesRevenue/ServiceCategoriesRevenue";
+import ServicesPerformance from "./ServicesPerformance/ServicesPerformance";
 import ServicesRevenue from "./ServicesRevenue/ServicesRevenue";
 import StaffPerformance from "./StaffPerformance/StaffPerformance";
 
@@ -34,6 +35,9 @@ const AnalyticsTab: React.FC = () => {
       </div>
       <div className="mt-10 grid grid-cols-1">
         <StaffPerformance />
+      </div>
+      <div className="mt-10 grid grid-cols-1">
+        <ServicesPerformance />
       </div>
     </div>
   );
