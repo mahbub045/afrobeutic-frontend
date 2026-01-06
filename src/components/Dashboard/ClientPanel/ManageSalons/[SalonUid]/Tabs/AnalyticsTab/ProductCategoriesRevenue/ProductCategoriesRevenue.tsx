@@ -11,33 +11,33 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const ServiceRevenue: React.FC = () => {
+const ProductCategoriesRevenue: React.FC = () => {
   const [range, setRange] = useState<string>("week");
 
   const data = useMemo(() => {
     // sample datasets for different ranges; replace with real data from API
     const datasets: Record<string, (string | number)[][]> = {
       day: [
-        ["Service", "Revenue"],
-        ["Skin", 120],
-        ["Massage", 80],
-        ["Hair", 50],
+        ["Product", "Revenue"],
+        ["Makeup", 80],
+        ["Shampoo", 60],
+        ["Skincare", 40],
       ],
       week: [
-        ["Service", "Revenue"],
-        ["Skin", 420],
-        ["Massage", 290],
-        ["Hair", 160],
-        ["Nails", 120],
-        ["Makeup", 90],
+        ["Product", "Revenue"],
+        ["Makeup", 420],
+        ["Shampoo", 280],
+        ["Skincare", 210],
+        ["Fragrance", 140],
+        ["Wellness", 70],
       ],
       month: [
-        ["Service", "Revenue"],
-        ["Skin", 1800],
-        ["Massage", 1200],
-        ["Hair", 650],
-        ["Nails", 480],
-        ["Makeup", 310],
+        ["Product", "Revenue"],
+        ["Makeup", 1750],
+        ["Shampoo", 980],
+        ["Skincare", 640],
+        ["Fragrance", 420],
+        ["Wellness", 210],
       ],
     };
 
@@ -62,7 +62,7 @@ const ServiceRevenue: React.FC = () => {
     <section className="space-y-4">
       <header className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">
-          Top 5 Revenue Earner Service Categories
+          Top 5 Revenue Earner Product Categories
         </h3>
         <div className="flex items-center gap-2">
           <Select defaultValue={range} onValueChange={(val) => setRange(val)}>
@@ -100,4 +100,4 @@ const ServiceRevenue: React.FC = () => {
   );
 };
 
-export default ServiceRevenue;
+export default ProductCategoriesRevenue;
