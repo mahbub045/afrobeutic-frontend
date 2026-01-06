@@ -122,7 +122,7 @@ const PeakHours: React.FC = () => {
         <Chart
           chartType="ColumnChart"
           width="100%"
-          height="360px"
+          height="390px"
           data={data}
           options={options}
           loader={<div className="p-8 text-center">Loading chart…</div>}

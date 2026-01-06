@@ -1,5 +1,6 @@
 "use client";
 import Bookings from "./Bookings/Bookings";
+import PeakDaysWeek from "./PeakDaysWeek/PeakDaysWeek";
 import PeakHours from "./PeakHours/PeakHours";
 import ProductCategoriesRevenue from "./ProductCategoriesRevenue/ProductCategoriesRevenue";
 import ProductsRevenue from "./ProductsRevenue/ProductsRevenue";
@@ -23,6 +24,10 @@ const AnalyticsTab: React.FC = () => {
       </div>
       <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-2">
         <Bookings />
+        <PeakHours />
+      </div>
+      <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-2">
+        <PeakDaysWeek />
         <PeakHours />
       </div>
     </div>
