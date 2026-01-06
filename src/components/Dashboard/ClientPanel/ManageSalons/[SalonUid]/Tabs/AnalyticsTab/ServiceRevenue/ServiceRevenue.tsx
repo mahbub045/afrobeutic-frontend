@@ -59,7 +59,7 @@ const ServiceRevenue: React.FC = () => {
   };
 
   return (
-    <section className="mt-10 space-y-4">
+    <section className="space-y-4">
       <header className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">
           Top 5 Revenue Earner Service Categories

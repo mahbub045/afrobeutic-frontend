@@ -9,14 +9,14 @@ const AnalyticsTab: React.FC = () => {
       <div>
         <Revenue />
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+      <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-2">
         <ServiceRevenue />
         <ProductRevenue />
       </div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
+      <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-2">
+        <ServiceRevenue />
+        <ProductRevenue />
+      </div>
     </div>
   );
 };
