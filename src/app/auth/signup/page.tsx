@@ -13,13 +13,28 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import * as Yup from "yup";
 
+// Account Type Choices (matching Django backend)
+const ACCOUNT_TYPES = [
+  { value: "SALON_SHOP", label: "Salon Shop" },
+  { value: "INDIVIDUAL_STYLIST", label: "Individual Stylist" },
+];
+
+// Timezone Choices (matching Django backend)
+const TIMEZONES = [
+  { value: "UTC", label: "UTC (Coordinated Universal Time)" },
+  { value: "EST", label: "EST (Eastern Standard Time)" },
+  { value: "CST", label: "CST (Central Standard Time)" },
+  { value: "MST", label: "MST (Mountain Standard Time)" },
+  { value: "PST", label: "PST (Pacific Standard Time)" },
+];
+
 const validationSchema = Yup.object({
   firstName: Yup.string().required("Required"),
   lastName: Yup.string().required("Required"),
   email: Yup.string().email("Invalid email address").required("Required"),
   country: Yup.string(),
-  timezone: Yup.string().required("Required"),
-  accountType: Yup.string().required("Required"),
+  account_timezone: Yup.string().required("Required"),
+  account_type: Yup.string().required("Required"),
   // gender: Yup.string().required("Required"),
   password: Yup.string()
     .min(8, "Password must be at least 8 characters")
@@ -44,23 +59,8 @@ const SignUp: React.FC = () => {
   // hydration mismatches (checklist and confirm message can differ between
   // server and client). We'll only show them after mount.
   const [mounted, setMounted] = useState(false);
-  const [timezones, setTimezones] = useState<string[]>([]);
   useEffect(() => {
     setMounted(true);
-    // Populate timezone list on client only
-    try {
-      const intlObject = Intl as unknown as {
-        supportedValuesOf?: (category: string) => string[];
-      };
-      if (typeof intlObject !== "undefined" && intlObject.supportedValuesOf) {
-        const tzs = intlObject.supportedValuesOf("timeZone");
-        setTimezones(Array.isArray(tzs) && tzs.length ? tzs : ["UTC"]);
-      } else {
-        setTimezones(["UTC"]);
-      }
-    } catch {
-      setTimezones(["UTC"]);
-    }
   }, []);
   const router = useRouter();
 
@@ -402,14 +402,14 @@ const SignUp: React.FC = () => {
                         {/* Timezone */}
                         <div className="flex flex-col">
                           <label
-                            htmlFor="timezone"
+                            htmlFor="account_timezone"
                             className="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-200"
                           >
                             Time Zone <span className="text-red-500">*</span>
                           </label>
                           <Field
                             as="select"
-                            name="timezone"
+                            name="account_timezone"
                             id="account_timezone"
                             className={`rounded-lg border-2 bg-white px-4 py-3 text-gray-900 transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:focus:ring-blue-900 ${
                               touched.account_timezone &&
@@ -419,15 +419,14 @@ const SignUp: React.FC = () => {
                             }`}
                           >
                             <option value="">Select a time zone</option>
-                            {mounted &&
-                              timezones.map((tz) => (
-                                <option key={tz} value={tz}>
-                                  {tz}
-                                </option>
-                              ))}
+                            {TIMEZONES.map((tz) => (
+                              <option key={tz.value} value={tz.value}>
+                                {tz.label}
+                              </option>
+                            ))}
                           </Field>
                           <ErrorMessage
-                            name="timezone"
+                            name="account_timezone"
                             component="div"
                             className="mt-1 text-xs font-medium text-red-500"
                           />
@@ -617,58 +616,36 @@ const SignUp: React.FC = () => {
                           Account Type <span className="text-red-500">*</span>
                         </label>
                         <div className="space-y-3">
-                          {/* Salon Shop Option */}
-                          <label
-                            className={`flex cursor-pointer items-start rounded-lg border-2 p-4 transition-all ${
-                              values.account_type === "salon"
-                                ? "border-blue-500 bg-blue-50 dark:border-blue-500 dark:bg-slate-800"
-                                : "border-gray-300 hover:border-gray-400 dark:border-slate-600 dark:hover:border-slate-500"
-                            }`}
-                          >
-                            <Field
-                              type="radio"
-                              name="accountType"
-                              value="salon"
-                              className="mt-1 h-5 w-5 cursor-pointer accent-blue-600"
-                            />
-                            <div className="ml-3">
-                              <div className="font-semibold text-gray-900 dark:text-white">
-                                Salon Shop
+                          {ACCOUNT_TYPES.map((type) => (
+                            <label
+                              key={type.value}
+                              className={`flex cursor-pointer items-start rounded-lg border-2 p-4 transition-all ${
+                                values.account_type === type.value
+                                  ? "border-blue-500 bg-blue-50 dark:border-blue-500 dark:bg-slate-800"
+                                  : "border-gray-300 hover:border-gray-400 dark:border-slate-600 dark:hover:border-slate-500"
+                              }`}
+                            >
+                              <Field
+                                type="radio"
+                                name="account_type"
+                                value={type.value}
+                                className="mt-1 h-5 w-5 cursor-pointer accent-blue-600"
+                              />
+                              <div className="ml-3">
+                                <div className="font-semibold text-gray-900 dark:text-white">
+                                  {type.label}
+                                </div>
+                                <div className="text-xs text-gray-600 dark:text-gray-400">
+                                  {type.value === "SALON_SHOP"
+                                    ? "Own a salon with multiple chairs and staff. Manage multiple locations in one account."
+                                    : "Provide services as an independent stylist or beautician."}
+                                </div>
                               </div>
-                              <div className="text-xs text-gray-600 dark:text-gray-400">
-                                Own a salon with multiple chairs and staff.
-                                Manage multiple locations in one account.
-                              </div>
-                            </div>
-                          </label>
-
-                          {/* Individual Stylist Option */}
-                          <label
-                            className={`flex cursor-pointer items-start rounded-lg border-2 p-4 transition-all ${
-                              values.account_type === "individual"
-                                ? "border-blue-500 bg-blue-50 dark:border-blue-500 dark:bg-slate-800"
-                                : "border-gray-300 hover:border-gray-400 dark:border-slate-600 dark:hover:border-slate-500"
-                            }`}
-                          >
-                            <Field
-                              type="radio"
-                              name="accountType"
-                              value="individual"
-                              className="mt-1 h-5 w-5 cursor-pointer accent-blue-600"
-                            />
-                            <div className="ml-3">
-                              <div className="font-semibold text-gray-900 dark:text-white">
-                                Individual Stylist
-                              </div>
-                              <div className="text-xs text-gray-600 dark:text-gray-400">
-                                Provide services as an independent stylist or
-                                beautician.
-                              </div>
-                            </div>
-                          </label>
+                            </label>
+                          ))}
                         </div>
                         <ErrorMessage
-                          name="accountType"
+                          name="account_type"
                           component="div"
                           className="mt-2 text-xs font-medium text-red-500"
                         />
