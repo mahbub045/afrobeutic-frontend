@@ -46,10 +46,8 @@ const OpeningHoursTab: React.FC = () => {
     id: number;
     uid: string;
     day: string;
-    opening_start_time: string;
-    opening_end_time: string;
-    break_start_time: string;
-    break_end_time: string;
+    opening_time: string;
+    closing_time: string;
     is_closed: boolean;
   };
 
@@ -165,26 +163,13 @@ const OpeningHoursTab: React.FC = () => {
             </CardHeader>
             <CardContent>
               {!entry.is_closed ? (
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   <Card className="flex flex-col gap-1 rounded-md px-4 py-2 shadow-md dark:shadow-gray-600">
                     <span className="text-xs font-medium opacity-80">
                       Opening
                     </span>
                     <span className="text-sm font-semibold">
-                      {formatTimeShort(entry.opening_start_time)}
-                    </span>
-                  </Card>
-
-                  <Card className="flex flex-col gap-1 rounded-md px-4 py-2 shadow-md dark:shadow-gray-600">
-                    <span className="text-xs font-medium opacity-80">
-                      Break
-                    </span>
-                    <span className="text-sm font-semibold">
-                      {entry.break_start_time &&
-                      entry.break_end_time &&
-                      entry.break_start_time !== "00:00:00"
-                        ? `${formatTimeShort(entry.break_start_time)} - ${formatTimeShort(entry.break_end_time)}`
-                        : "No break"}
+                      {formatTimeShort(entry.opening_time)}
                     </span>
                   </Card>
 
@@ -193,7 +178,7 @@ const OpeningHoursTab: React.FC = () => {
                       Closing
                     </span>
                     <span className="text-sm font-semibold">
-                      {formatTimeShort(entry.opening_end_time)}
+                      {formatTimeShort(entry.closing_time)}
                     </span>
                   </Card>
                 </div>
