@@ -33,10 +33,8 @@ interface EditSingleProps extends EditDashboardProps {
 }
 
 interface SingleFormValues {
-  opening_start_time: string;
-  opening_end_time: string;
-  break_start_time?: string;
-  break_end_time?: string;
+  opening_time: string;
+  closing_time: string;
   is_closed: boolean;
 }
 
@@ -68,21 +66,18 @@ const EditSingleOpeningHoursDialog: React.FC<EditSingleProps> = ({
   const minutes = ["00", "15", "30", "45"];
 
   const initialValues: SingleFormValues = {
-    opening_start_time:
-      selectedOpening?.opening_start_time?.slice(0, 5) || "08:00",
-    opening_end_time: selectedOpening?.opening_end_time?.slice(0, 5) || "17:00",
-    break_start_time: selectedOpening?.break_start_time?.slice(0, 5) || "",
-    break_end_time: selectedOpening?.break_end_time?.slice(0, 5) || "",
+    opening_time: selectedOpening?.opening_time?.slice(0, 5) || "08:00",
+    closing_time: selectedOpening?.closing_time?.slice(0, 5) || "17:00",
     is_closed: !!selectedOpening?.is_closed,
   };
 
   const schema = Yup.object().shape({
-    opening_start_time: Yup.string().when("is_closed", {
+    opening_time: Yup.string().when("is_closed", {
       is: false,
       then: (schema) => schema.required("Opening time is required"),
       otherwise: (schema) => schema.notRequired(),
     }),
-    opening_end_time: Yup.string()
+    closing_time: Yup.string()
       .when("is_closed", {
         is: false,
         then: (schema) => schema.required("Closing time is required"),
@@ -92,9 +87,9 @@ const EditSingleOpeningHoursDialog: React.FC<EditSingleProps> = ({
         "is-after-opening",
         "Closing time must be after opening time",
         function (value) {
-          const { opening_start_time, is_closed } = this.parent;
-          if (is_closed || !opening_start_time || !value) return true;
-          return getTimeDifference(opening_start_time, value) > 0;
+          const { opening_time, is_closed } = this.parent;
+          if (is_closed || !opening_time || !value) return true;
+          return getTimeDifference(opening_time, value) > 0;
         },
       ),
     break_start_time: Yup.string()
@@ -103,12 +98,11 @@ const EditSingleOpeningHoursDialog: React.FC<EditSingleProps> = ({
         "break-within-hours",
         "Break start time must be within opening hours",
         function (value) {
-          const { opening_start_time, opening_end_time, is_closed } =
-            this.parent;
+          const { opening_time, closing_time, is_closed } = this.parent;
           if (is_closed || !value) return true;
           const breakStart = timeToMinutes(value);
-          const openStart = timeToMinutes(opening_start_time);
-          const openEnd = timeToMinutes(opening_end_time);
+          const openStart = timeToMinutes(opening_time);
+          const openEnd = timeToMinutes(closing_time);
           return breakStart >= openStart && breakStart < openEnd;
         },
       ),
@@ -118,12 +112,11 @@ const EditSingleOpeningHoursDialog: React.FC<EditSingleProps> = ({
         "break-within-hours",
         "Break end time must be within opening hours",
         function (value) {
-          const { opening_start_time, opening_end_time, is_closed } =
-            this.parent;
+          const { opening_time, closing_time, is_closed } = this.parent;
           if (is_closed || !value) return true;
           const breakEnd = timeToMinutes(value);
-          const openStart = timeToMinutes(opening_start_time);
-          const openEnd = timeToMinutes(opening_end_time);
+          const openStart = timeToMinutes(opening_time);
+          const openEnd = timeToMinutes(closing_time);
           return breakEnd > openStart && breakEnd <= openEnd;
         },
       )
@@ -161,17 +154,11 @@ const EditSingleOpeningHoursDialog: React.FC<EditSingleProps> = ({
         if (selectedOpening && h.uid === selectedOpening.uid) {
           return {
             ...h,
-            opening_start_time: values.opening_start_time
-              ? `${values.opening_start_time}:00`
+            opening_time: values.opening_time
+              ? `${values.opening_time}:00`
               : "00:00:00",
-            opening_end_time: values.opening_end_time
-              ? `${values.opening_end_time}:00`
-              : "00:00:00",
-            break_start_time: values.break_start_time
-              ? `${values.break_start_time}:00`
-              : "00:00:00",
-            break_end_time: values.break_end_time
-              ? `${values.break_end_time}:00`
+            closing_time: values.closing_time
+              ? `${values.closing_time}:00`
               : "00:00:00",
             is_closed: !!values.is_closed,
           } as OpeningHour;
@@ -228,7 +215,7 @@ const EditSingleOpeningHoursDialog: React.FC<EditSingleProps> = ({
                   </Label>
                   <Field
                     as="select"
-                    name="opening_start_time"
+                    name="opening_time"
                     className="w-full"
                     disabled={values.is_closed}
                   >
@@ -242,7 +229,7 @@ const EditSingleOpeningHoursDialog: React.FC<EditSingleProps> = ({
                     )}
                   </Field>
                   <ErrorMessage
-                    name="opening_start_time"
+                    name="opening_time"
                     component="div"
                     className="text-danger mt-1 text-xs"
                   />
@@ -254,7 +241,7 @@ const EditSingleOpeningHoursDialog: React.FC<EditSingleProps> = ({
                   </Label>
                   <Field
                     as="select"
-                    name="opening_end_time"
+                    name="closing_time"
                     className="w-full"
                     disabled={values.is_closed}
                   >
@@ -268,57 +255,7 @@ const EditSingleOpeningHoursDialog: React.FC<EditSingleProps> = ({
                     )}
                   </Field>
                   <ErrorMessage
-                    name="opening_end_time"
-                    component="div"
-                    className="text-danger mt-1 text-xs"
-                  />
-                </div>
-
-                <div>
-                  <Label className="mb-2">Break Start</Label>
-                  <Field
-                    as="select"
-                    name="break_start_time"
-                    className="w-full"
-                    disabled={values.is_closed}
-                  >
-                    <option value="">-</option>
-                    {hours.map((h) =>
-                      minutes.map((m) => (
-                        <option
-                          key={`bs-${h}:${m}`}
-                          value={`${h}:${m}`}
-                        >{`${h}:${m}`}</option>
-                      )),
-                    )}
-                  </Field>
-                  <ErrorMessage
-                    name="break_start_time"
-                    component="div"
-                    className="text-danger mt-1 text-xs"
-                  />
-                </div>
-
-                <div>
-                  <Label className="mb-2">Break End</Label>
-                  <Field
-                    as="select"
-                    name="break_end_time"
-                    className="w-full"
-                    disabled={values.is_closed}
-                  >
-                    <option value="">-</option>
-                    {hours.map((h) =>
-                      minutes.map((m) => (
-                        <option
-                          key={`be-${h}:${m}`}
-                          value={`${h}:${m}`}
-                        >{`${h}:${m}`}</option>
-                      )),
-                    )}
-                  </Field>
-                  <ErrorMessage
-                    name="break_end_time"
+                    name="closing_time"
                     component="div"
                     className="text-danger mt-1 text-xs"
                   />
@@ -334,34 +271,23 @@ const EditSingleOpeningHoursDialog: React.FC<EditSingleProps> = ({
 
                           if (v) {
                             // When marking closed, set times to 00:00
-                            form.setFieldValue("opening_start_time", "00:00");
-                            form.setFieldValue("opening_end_time", "00:00");
-                            form.setFieldValue("break_start_time", "00:00");
-                            form.setFieldValue("break_end_time", "00:00");
+                            form.setFieldValue("opening_time", "00:00");
+                            form.setFieldValue("closing_time", "00:00");
                           } else {
                             // When reopening, restore defaults
                             if (
-                              !form.values.opening_start_time ||
-                              form.values.opening_start_time === "00:00"
+                              !form.values.opening_time ||
+                              form.values.opening_time === "00:00"
                             ) {
-                              form.setFieldValue("opening_start_time", "08:00");
+                              form.setFieldValue("opening_time", "08:00");
                             }
                             if (
-                              !form.values.opening_end_time ||
-                              form.values.opening_end_time === "00:00"
+                              !form.values.closing_time ||
+                              form.values.closing_time === "00:00"
                             ) {
-                              form.setFieldValue("opening_end_time", "22:00");
+                              form.setFieldValue("closing_time", "22:00");
                             }
-                            if (
-                              !form.values.break_start_time ||
-                              form.values.break_start_time === "00:00"
-                            ) {
-                              form.setFieldValue("break_start_time", "14:00");
-                            }
-                            if (
-                              !form.values.break_end_time ||
-                              form.values.break_end_time === "00:00"
-                            ) {
+                            {
                               form.setFieldValue("break_end_time", "16:00");
                             }
                           }

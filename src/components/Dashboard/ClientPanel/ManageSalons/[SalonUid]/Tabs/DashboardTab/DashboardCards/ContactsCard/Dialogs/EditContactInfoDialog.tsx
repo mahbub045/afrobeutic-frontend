@@ -26,7 +26,7 @@ import Swal from "sweetalert2";
 import * as Yup from "yup";
 
 export interface ContactValues {
-  phone: string;
+  phone_number_one: string;
   email: string;
   website: string;
 }
@@ -50,7 +50,7 @@ const EditContactInfoDialog: React.FC<EditDashboardProps> = ({
     try {
       const payload: Partial<Record<string, unknown>> = {
         website: values.website || null,
-        phone: values.phone || null,
+        phone_number_one: values.phone_number_one || null,
         email: values.email || null,
       };
 
@@ -98,7 +98,7 @@ const EditContactInfoDialog: React.FC<EditDashboardProps> = ({
           enableReinitialize
           initialValues={{
             website: singleSalonData?.website || "",
-            phone: singleSalonData?.phone || "",
+            phone_number_one: singleSalonData?.phone_number_one || "",
             email: singleSalonData?.email || "",
           }}
           validationSchema={schema}
