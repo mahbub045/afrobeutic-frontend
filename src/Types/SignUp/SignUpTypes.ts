@@ -3,6 +3,8 @@ export interface SignUpFormValues {
   lastName: string;
   email: string;
   country: string;
+  account_timezone?: string;
+  account_type?: string;
   password: string;
   confirmPassword: string;
 }

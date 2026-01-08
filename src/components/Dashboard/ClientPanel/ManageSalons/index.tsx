@@ -115,8 +115,8 @@ const ManageSalonsContainer: React.FC = () => {
 
     // Fallback: if opening and closing times are both 00:00:00 treat as closed
     if (
-      todaysEntry.opening_start_time === "00:00:00" &&
-      todaysEntry.opening_end_time === "00:00:00"
+      todaysEntry.opening_time === "00:00:00" &&
+      todaysEntry.closing_time === "00:00:00"
     ) {
       return false;
     }

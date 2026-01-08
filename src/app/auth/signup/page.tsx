@@ -5,7 +5,7 @@ import { countries } from "@/data/countries";
 import apiClient from "@/services/api-client";
 import { FormikHelpers, SignUpFormValues } from "@/Types/SignUp/SignUpTypes";
 import { ErrorMessage, Field, Form, Formik } from "formik";
-import { Eye, EyeOff, LoaderPinwheel, Moon, Sun } from "lucide-react";
+import { Check, Eye, EyeOff, LoaderPinwheel, Moon, Sun, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -13,11 +13,28 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import * as Yup from "yup";
 
+// Account Type Choices (matching Django backend)
+const ACCOUNT_TYPES = [
+  { value: "SALON_SHOP", label: "Salon Shop" },
+  { value: "INDIVIDUAL_STYLIST", label: "Individual Stylist" },
+];
+
+// Timezone Choices (matching Django backend)
+const TIMEZONES = [
+  { value: "UTC", label: "UTC (Coordinated Universal Time)" },
+  { value: "EST", label: "EST (Eastern Standard Time)" },
+  { value: "CST", label: "CST (Central Standard Time)" },
+  { value: "MST", label: "MST (Mountain Standard Time)" },
+  { value: "PST", label: "PST (Pacific Standard Time)" },
+];
+
 const validationSchema = Yup.object({
   firstName: Yup.string().required("Required"),
   lastName: Yup.string().required("Required"),
   email: Yup.string().email("Invalid email address").required("Required"),
   country: Yup.string(),
+  account_timezone: Yup.string().required("Required"),
+  account_type: Yup.string().required("Required"),
   // gender: Yup.string().required("Required"),
   password: Yup.string()
     .min(8, "Password must be at least 8 characters")
@@ -55,6 +72,8 @@ const SignUp: React.FC = () => {
     country: string;
     password: string;
     confirm_password: string;
+    account_timezone?: string;
+    account_type?: string;
   }) => {
     const response = await apiClient.post("/auth/register", userData);
     return response.data;
@@ -75,6 +94,8 @@ const SignUp: React.FC = () => {
         country: values.country,
         password: values.password,
         confirm_password: values.confirmPassword,
+        account_timezone: values.account_timezone,
+        account_type: values.account_type,
       };
 
       console.log("Sending user data to API:", userData);
@@ -176,62 +197,74 @@ const SignUp: React.FC = () => {
       <div className="pointer-events-none absolute -top-24 -left-32 h-96 w-96 rounded-full bg-gradient-to-tr from-blue-700/40 to-indigo-600/30 opacity-60 blur-3xl" />
       <div className="pointer-events-none absolute -right-32 -bottom-24 h-96 w-96 rounded-full bg-gradient-to-br from-purple-700/30 to-pink-600/20 opacity-50 blur-3xl" />
 
-      <div className="flex h-full min-h-screen w-full flex-col items-center justify-center py-5">
-        <div className="relative flex w-full max-w-2xl flex-col items-center justify-center rounded-xl bg-white/60 p-6 shadow-md backdrop-blur-sm dark:bg-white/4 dark:shadow-gray-600">
-          <div className="absolute top-4 right-4">
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className={`cursor-pointer rounded-md p-2 transition ${
-                theme === "dark"
-                  ? "!bg-white/6 !text-white/90 hover:!bg-white/10"
-                  : "!bg-gray-200 !text-gray-700 hover:!bg-gray-300"
-              }`}
-              aria-label="Toggle dark mode"
-              title="Toggle dark mode"
-            >
-              {theme === "dark" ? <Sun /> : <Moon />}
-            </button>
-          </div>
-          <div className="relative my-2 flex h-14 w-48 items-center justify-center">
-            <Image
-              src="/images/logo-light.png"
-              alt="Afrobeutic Logo"
-              fill
-              className="block object-contain dark:hidden"
-            />
+      <div className="flex h-full min-h-screen w-full flex-col items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
+        <div className="w-full max-w-2xl">
+          {/* Card Container */}
+          <div className="relative rounded-2xl border border-white/20 bg-white/70 p-8 shadow-2xl backdrop-blur-md dark:border-slate-700/50 dark:bg-slate-900/40 dark:shadow-2xl dark:shadow-black/50">
+            {/* Theme Toggle */}
+            <div className="absolute top-6 right-6 z-10">
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className={`rounded-lg p-2.5 transition-all duration-300 ${
+                  theme === "dark"
+                    ? "bg-slate-700/40 text-yellow-300 hover:bg-slate-600/60"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+                aria-label="Toggle dark mode"
+                title="Toggle dark mode"
+              >
+                {theme === "dark" ? (
+                  <Sun className="h-5 w-5" />
+                ) : (
+                  <Moon className="h-5 w-5" />
+                )}
+              </button>
+            </div>
 
-            {/* Dark logo (shown in dark mode) */}
-            <Image
-              src="/images/logo-dark.png"
-              alt="Afrobeutic Logo"
-              fill
-              className="hidden object-contain dark:block"
-            />
-          </div>
-          <h1 className="text-3xl font-extrabold text-gray-900 md:text-4xl dark:text-white">
-            Create an Account
-          </h1>
-          <p className="mt-0 mb-6 text-center text-sm text-gray-600 dark:text-white/80">
-            Join Afrobeutic — manage clients, projects and access your
-            dashboard.
-          </p>
+            {/* Logo Section */}
+            <div className="mb-8 flex flex-col items-center">
+              <div className="relative mb-6 h-16 w-56">
+                <Image
+                  src="/images/logo-light.png"
+                  alt="Afrobeutic Logo"
+                  fill
+                  className="block object-contain dark:hidden"
+                  priority
+                />
+                <Image
+                  src="/images/logo-dark.png"
+                  alt="Afrobeutic Logo"
+                  fill
+                  className="hidden object-contain dark:block"
+                  priority
+                />
+              </div>
+              <h1 className="text-center text-3xl font-bold text-gray-900 md:text-4xl dark:text-white">
+                Create Account
+              </h1>
+              <p className="mt-3 text-center text-sm text-gray-600 dark:text-gray-300">
+                Join Afrobeutic and manage your salon business with ease
+              </p>
+            </div>
 
-          <div className="flex flex-1 items-center justify-center">
-            <div className="w-full max-w-3xl">
+            {/* Form Section */}
+            <div className="w-full">
               <Formik
                 initialValues={{
                   firstName: "",
                   lastName: "",
                   email: "",
                   country: "",
+                  account_timezone: "",
+                  account_type: "",
                   password: "",
                   confirmPassword: "",
                 }}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
               >
-                {({ isSubmitting, values }) => {
+                {({ isSubmitting, values, errors, touched }) => {
                   const password = values.password || "";
                   const confirm = values.confirmPassword || "";
                   const lengthOk = password.length >= 8;
@@ -250,239 +283,400 @@ const SignUp: React.FC = () => {
                     : false;
 
                   return (
-                    <Form className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
-                      {/* First Name */}
-                      <div>
-                        <label
-                          htmlFor="firstName"
-                          className="mb-2 block text-sm font-medium text-gray-700 dark:text-white/85"
-                        >
-                          First Name<span className="text-danger">*</span>
-                        </label>
-                        <Field
-                          type="text"
-                          name="firstName"
-                          id="firstName"
-                          placeholder="First Name"
-                          required
-                        />
-                        <ErrorMessage
-                          name="firstName"
-                          component="div"
-                          className="text-danger mt-1 text-xs"
-                        />
-                      </div>
-                      {/* Last Name */}
-                      <div>
-                        <label
-                          htmlFor="lastName"
-                          className="mb-2 block text-sm font-medium text-gray-700 dark:text-white/85"
-                        >
-                          Last Name<span className="text-danger">*</span>
-                        </label>
-                        <Field
-                          type="text"
-                          name="lastName"
-                          id="lastName"
-                          placeholder="Last Name"
-                          required
-                        />
-                        <ErrorMessage
-                          name="lastName"
-                          component="div"
-                          className="text-danger mt-1 text-xs"
-                        />
-                      </div>
-                      {/* Country */}
-                      <div>
-                        <label
-                          htmlFor="country"
-                          className="mb-2 block text-sm font-medium text-gray-700 dark:text-white/85"
-                        >
-                          Country<span className="text-danger">*</span>
-                        </label>
-                        <Field as="select" name="country" id="country" required>
-                          <option value="">Select country</option>
-                          {countries.map((country) => (
-                            <option key={country.code} value={country.code}>
-                              {country.name}
-                            </option>
-                          ))}
-                        </Field>
-                        <ErrorMessage
-                          name="country"
-                          component="div"
-                          className="text-danger mt-1 text-xs"
-                        />
-                      </div>
-                      {/* Email */}
-                      <div>
-                        <label
-                          htmlFor="email"
-                          className="mb-2 block text-sm font-medium text-gray-700 dark:text-white/85"
-                        >
-                          Email<span className="text-danger">*</span>
-                        </label>
-                        <div className="relative">
+                    <Form className="space-y-6">
+                      {/* Name Row */}
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        {/* First Name */}
+                        <div className="flex flex-col">
+                          <label
+                            htmlFor="firstName"
+                            className="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-200"
+                          >
+                            First Name <span className="text-red-500">*</span>
+                          </label>
                           <Field
-                            type="email"
-                            name="email"
-                            id="email"
-                            placeholder="you@company.com"
-                            required
+                            type="text"
+                            name="firstName"
+                            id="firstName"
+                            placeholder="John"
+                            className={`rounded-lg border-2 bg-white px-4 py-3 text-gray-900 transition-all placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-gray-500 dark:focus:ring-blue-900 ${
+                              touched.firstName && errors.firstName
+                                ? "border-red-500"
+                                : "border-gray-300"
+                            }`}
+                          />
+                          <ErrorMessage
+                            name="firstName"
+                            component="div"
+                            className="mt-1 text-xs font-medium text-red-500"
                           />
                         </div>
+
+                        {/* Last Name */}
+                        <div className="flex flex-col">
+                          <label
+                            htmlFor="lastName"
+                            className="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-200"
+                          >
+                            Last Name <span className="text-red-500">*</span>
+                          </label>
+                          <Field
+                            type="text"
+                            name="lastName"
+                            id="lastName"
+                            placeholder="Doe"
+                            className={`rounded-lg border-2 bg-white px-4 py-3 text-gray-900 transition-all placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-gray-500 dark:focus:ring-blue-900 ${
+                              touched.lastName && errors.lastName
+                                ? "border-red-500"
+                                : "border-gray-300"
+                            }`}
+                          />
+                          <ErrorMessage
+                            name="lastName"
+                            component="div"
+                            className="mt-1 text-xs font-medium text-red-500"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Email */}
+                      <div className="flex flex-col">
+                        <label
+                          htmlFor="email"
+                          className="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-200"
+                        >
+                          Email Address <span className="text-red-500">*</span>
+                        </label>
+                        <Field
+                          type="email"
+                          name="email"
+                          id="email"
+                          placeholder="you@company.com"
+                          className={`rounded-lg border-2 bg-white px-4 py-3 text-gray-900 transition-all placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-gray-500 dark:focus:ring-blue-900 ${
+                            touched.email && errors.email
+                              ? "border-red-500"
+                              : "border-gray-300"
+                          }`}
+                        />
                         <ErrorMessage
                           name="email"
                           component="div"
-                          className="text-danger mt-1 text-xs"
+                          className="mt-1 text-xs font-medium text-red-500"
                         />
                       </div>
-                      {/* Password */}
-                      <div>
-                        <label
-                          htmlFor="password"
-                          className="mb-2 block text-sm font-medium text-gray-700 dark:text-white/85"
-                        >
-                          Password<span className="text-danger">*</span>
-                        </label>
-                        <div className="relative">
-                          <Field
-                            type={showPassword ? "text" : "password"}
-                            name="password"
-                            id="password"
-                            placeholder="Choose a secure password"
-                            required
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowPassword((s) => !s)}
-                            className="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer text-sm text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
-                            aria-label={
-                              showPassword ? "Hide password" : "Show password"
-                            }
+
+                      {/* Country & Timezone Row */}
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        {/* Country */}
+                        <div className="flex flex-col">
+                          <label
+                            htmlFor="country"
+                            className="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-200"
                           >
-                            {showPassword ? <EyeOff /> : <Eye />}
-                          </button>
+                            Country <span className="text-red-500">*</span>
+                          </label>
+                          <Field
+                            as="select"
+                            name="country"
+                            id="country"
+                            className={`rounded-lg border-2 bg-white px-4 py-3 text-gray-900 transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:focus:ring-blue-900 ${
+                              touched.country && errors.country
+                                ? "border-red-500"
+                                : "border-gray-300"
+                            }`}
+                          >
+                            <option value="">Select a country</option>
+                            {countries.map((country) => (
+                              <option key={country.code} value={country.code}>
+                                {country.name}
+                              </option>
+                            ))}
+                          </Field>
+                          <ErrorMessage
+                            name="country"
+                            component="div"
+                            className="mt-1 text-xs font-medium text-red-500"
+                          />
                         </div>
-                        <ErrorMessage
-                          name="password"
-                          component="div"
-                          className="text-danger mt-1 text-xs"
-                        />
-                        {/* Live password rule checklist (client-only to avoid hydration mismatch) */}
-                        {mounted && (
-                          <ul className="mt-2 space-y-1 text-xs">
-                            <li className="flex items-center">
+
+                        {/* Timezone */}
+                        <div className="flex flex-col">
+                          <label
+                            htmlFor="account_timezone"
+                            className="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-200"
+                          >
+                            Time Zone <span className="text-red-500">*</span>
+                          </label>
+                          <Field
+                            as="select"
+                            name="account_timezone"
+                            id="account_timezone"
+                            className={`rounded-lg border-2 bg-white px-4 py-3 text-gray-900 transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:focus:ring-blue-900 ${
+                              touched.account_timezone &&
+                              errors.account_timezone
+                                ? "border-red-500"
+                                : "border-gray-300"
+                            }`}
+                          >
+                            <option value="">Select a time zone</option>
+                            {TIMEZONES.map((tz) => (
+                              <option key={tz.value} value={tz.value}>
+                                {tz.label}
+                              </option>
+                            ))}
+                          </Field>
+                          <ErrorMessage
+                            name="account_timezone"
+                            component="div"
+                            className="mt-1 text-xs font-medium text-red-500"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Password Row */}
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        {/* Password */}
+                        <div className="flex flex-col">
+                          <label
+                            htmlFor="password"
+                            className="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-200"
+                          >
+                            Password <span className="text-red-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <Field
+                              type={showPassword ? "text" : "password"}
+                              name="password"
+                              id="password"
+                              placeholder="••••••••"
+                              className={`w-full rounded-lg border-2 bg-white px-4 py-3 pr-12 text-gray-900 transition-all placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-gray-500 dark:focus:ring-blue-900 ${
+                                touched.password && errors.password
+                                  ? "border-red-500"
+                                  : "border-gray-300"
+                              }`}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword((s) => !s)}
+                              className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+                              aria-label={
+                                showPassword ? "Hide password" : "Show password"
+                              }
+                            >
+                              {showPassword ? (
+                                <EyeOff className="h-5 w-5" />
+                              ) : (
+                                <Eye className="h-5 w-5" />
+                              )}
+                            </button>
+                          </div>
+                          <ErrorMessage
+                            name="password"
+                            component="div"
+                            className="mt-1 text-xs font-medium text-red-500"
+                          />
+                        </div>
+
+                        {/* Confirm Password */}
+                        <div className="flex flex-col">
+                          <label
+                            htmlFor="confirmPassword"
+                            className="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-200"
+                          >
+                            Confirm Password{" "}
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <Field
+                              type={showPassword ? "text" : "password"}
+                              name="confirmPassword"
+                              id="confirmPassword"
+                              placeholder="••••••••"
+                              className={`w-full rounded-lg border-2 bg-white px-4 py-3 pr-12 text-gray-900 transition-all placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-gray-500 dark:focus:ring-blue-900 ${
+                                touched.confirmPassword &&
+                                errors.confirmPassword
+                                  ? "border-red-500"
+                                  : password === confirm && confirm.length > 0
+                                    ? "border-green-500"
+                                    : "border-gray-300"
+                              }`}
+                            />
+                            {mounted && confirm.length > 0 && (
+                              <div className="absolute top-1/2 right-3 -translate-y-1/2">
+                                {password === confirm ? (
+                                  <Check className="h-5 w-5 text-green-500" />
+                                ) : (
+                                  <X className="h-5 w-5 text-red-500" />
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          <ErrorMessage
+                            name="confirmPassword"
+                            component="div"
+                            className="mt-1 text-xs font-medium text-red-500"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Password Requirements Checklist */}
+                      {mounted && password.length > 0 && (
+                        <div className="rounded-lg border border-blue-100 bg-blue-50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
+                          <p className="mb-3 text-xs font-semibold tracking-wide text-gray-700 uppercase dark:text-gray-300">
+                            Password Requirements:
+                          </p>
+                          <ul className="space-y-2">
+                            <li className="flex items-center text-xs">
+                              {lengthOk ? (
+                                <Check className="mr-2 h-4 w-4 text-green-600" />
+                              ) : (
+                                <X className="mr-2 h-4 w-4 text-red-500" />
+                              )}
                               <span
-                                className={`mr-2 ${lengthOk ? "text-green-600" : "text-red-500"}`}
+                                className={`${
+                                  lengthOk
+                                    ? "text-green-700 dark:text-green-400"
+                                    : "text-gray-600 dark:text-gray-400"
+                                }`}
                               >
-                                {lengthOk ? "✔" : "✖"}
-                              </span>
-                              <span
-                                className={`${lengthOk ? "text-green-700" : "text-gray-600 dark:text-white/70"}`}
-                              >
-                                Must be at least 8 characters
+                                At least 8 characters
                               </span>
                             </li>
-                            <li className="flex items-center">
+                            <li className="flex items-center text-xs">
+                              {upperOk ? (
+                                <Check className="mr-2 h-4 w-4 text-green-600" />
+                              ) : (
+                                <X className="mr-2 h-4 w-4 text-red-500" />
+                              )}
                               <span
-                                className={`mr-2 ${upperOk ? "text-green-600" : "text-red-500"}`}
+                                className={`${
+                                  upperOk
+                                    ? "text-green-700 dark:text-green-400"
+                                    : "text-gray-600 dark:text-gray-400"
+                                }`}
                               >
-                                {upperOk ? "✔" : "✖"}
-                              </span>
-                              <span
-                                className={`${upperOk ? "text-green-700" : "text-gray-600 dark:text-white/70"}`}
-                              >
-                                Must contain at least 1 capital letter
-                              </span>
-                            </li>
-                            <li className="flex items-center">
-                              <span
-                                className={`mr-2 ${lowerOk ? "text-green-600" : "text-red-500"}`}
-                              >
-                                {lowerOk ? "✔" : "✖"}
-                              </span>
-                              <span
-                                className={`${lowerOk ? "text-green-700" : "text-gray-600 dark:text-white/70"}`}
-                              >
-                                Must contain at least 1 small letter
+                                One uppercase letter
                               </span>
                             </li>
-                            <li className="flex items-center">
+                            <li className="flex items-center text-xs">
+                              {lowerOk ? (
+                                <Check className="mr-2 h-4 w-4 text-green-600" />
+                              ) : (
+                                <X className="mr-2 h-4 w-4 text-red-500" />
+                              )}
                               <span
-                                className={`mr-2 ${numberOk ? "text-green-600" : "text-red-500"}`}
+                                className={`${
+                                  lowerOk
+                                    ? "text-green-700 dark:text-green-400"
+                                    : "text-gray-600 dark:text-gray-400"
+                                }`}
                               >
-                                {numberOk ? "✔" : "✖"}
-                              </span>
-                              <span
-                                className={`${numberOk ? "text-green-700" : "text-gray-600 dark:text-white/70"}`}
-                              >
-                                Must contain at least 1 number
+                                One lowercase letter
                               </span>
                             </li>
-                            <li className="flex items-center">
+                            <li className="flex items-center text-xs">
+                              {numberOk ? (
+                                <Check className="mr-2 h-4 w-4 text-green-600" />
+                              ) : (
+                                <X className="mr-2 h-4 w-4 text-red-500" />
+                              )}
                               <span
-                                className={`mr-2 ${specialOk ? "text-green-600" : "text-red-500"}`}
+                                className={`${
+                                  numberOk
+                                    ? "text-green-700 dark:text-green-400"
+                                    : "text-gray-600 dark:text-gray-400"
+                                }`}
                               >
-                                {specialOk ? "✔" : "✖"}
+                                One number
                               </span>
+                            </li>
+                            <li className="flex items-center text-xs">
+                              {specialOk ? (
+                                <Check className="mr-2 h-4 w-4 text-green-600" />
+                              ) : (
+                                <X className="mr-2 h-4 w-4 text-red-500" />
+                              )}
                               <span
-                                className={`${specialOk ? "text-green-700" : "text-gray-600 dark:text-white/70"}`}
+                                className={`${
+                                  specialOk
+                                    ? "text-green-700 dark:text-green-400"
+                                    : "text-gray-600 dark:text-gray-400"
+                                }`}
                               >
-                                Must contain at least 1 special character
+                                One special character (!@#$%^&*)
                               </span>
                             </li>
                           </ul>
-                        )}
-                      </div>
-                      {/* Confirm Password */}
-                      <div>
-                        <label
-                          htmlFor="confirmPassword"
-                          className="mb-2 block text-sm font-medium text-gray-700 dark:text-white/85"
-                        >
-                          Confirm Password<span className="text-danger">*</span>
+                        </div>
+                      )}
+
+                      {/* Account Type */}
+                      <div className="flex flex-col">
+                        <label className="mb-3 block text-sm font-semibold text-gray-700 dark:text-gray-200">
+                          Account Type <span className="text-red-500">*</span>
                         </label>
-                        <Field
-                          type={showPassword ? "text" : "password"}
-                          name="confirmPassword"
-                          id="confirmPassword"
-                          placeholder="Re-enter password"
-                          required
-                        />
+                        <div className="space-y-3">
+                          {ACCOUNT_TYPES.map((type) => (
+                            <label
+                              key={type.value}
+                              className={`flex cursor-pointer items-start rounded-lg border-2 p-4 transition-all ${
+                                values.account_type === type.value
+                                  ? "border-blue-500 bg-blue-50 dark:border-blue-500 dark:bg-slate-800"
+                                  : "border-gray-300 hover:border-gray-400 dark:border-slate-600 dark:hover:border-slate-500"
+                              }`}
+                            >
+                              <Field
+                                type="radio"
+                                name="account_type"
+                                value={type.value}
+                                className="mt-1 h-5 w-5 cursor-pointer accent-blue-600"
+                              />
+                              <div className="ml-3">
+                                <div className="font-semibold text-gray-900 dark:text-white">
+                                  {type.label}
+                                </div>
+                                <div className="text-xs text-gray-600 dark:text-gray-400">
+                                  {type.value === "SALON_SHOP"
+                                    ? "Own a salon with multiple chairs and staff. Manage multiple locations in one account."
+                                    : "Provide services as an independent stylist or beautician."}
+                                </div>
+                              </div>
+                            </label>
+                          ))}
+                        </div>
                         <ErrorMessage
-                          name="confirmPassword"
+                          name="account_type"
                           component="div"
-                          className="text-danger mt-1 text-xs"
+                          className="mt-2 text-xs font-medium text-red-500"
                         />
-                        {/* Live confirm password match (client-only) */}
-                        {mounted && confirm.length > 0 && (
-                          <div
-                            className={`mt-1 text-xs ${password === confirm ? "text-green-700" : "text-red-500"}`}
-                          >
-                            {password === confirm
-                              ? "Passwords matched"
-                              : "Passwords do not match"}
-                          </div>
-                        )}
                       </div>
+
                       {/* Submit Button */}
-                      <div className="md:col-span-2">
-                        <Button
-                          size="lg"
-                          type="submit"
-                          disabled={submitDisabled}
-                          className="btn-full btn-primary"
+                      <Button
+                        type="submit"
+                        disabled={submitDisabled}
+                        size="lg"
+                        className="from-primary to-primary/90 hover:from-primary/90 hover:to-primary dark:from-primary dark:to-primary/90 w-full rounded-lg bg-gradient-to-r py-3 font-semibold text-white transition-all disabled:opacity-50"
+                      >
+                        {isSubmitting || isLoading ? (
+                          <>
+                            <LoaderPinwheel className="mr-2 inline-block h-5 w-5 animate-spin" />
+                            Creating Account...
+                          </>
+                        ) : (
+                          "Sign Up"
+                        )}
+                      </Button>
+
+                      {/* Login Link */}
+                      <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+                        Already have an account?{" "}
+                        <a
+                          href="/auth/login"
+                          className="font-semibold text-blue-600 hover:underline dark:text-blue-400"
                         >
-                          {isSubmitting || isLoading ? (
-                            <>
-                              <LoaderPinwheel className="mr-2 inline animate-spin text-white" />
-                            </>
-                          ) : (
-                            "Sign Up"
-                          )}
-                        </Button>
+                          Sign in
+                        </a>
                       </div>
                     </Form>
                   );
@@ -490,13 +684,22 @@ const SignUp: React.FC = () => {
               </Formik>
             </div>
           </div>
-          <div className="mt-6 mb-4 text-center text-sm text-gray-700 dark:text-white/70">
-            Already have an account?{" "}
+
+          {/* Footer Note */}
+          <div className="mt-6 text-center text-xs text-gray-600 dark:text-gray-400">
+            By signing up, you agree to our{" "}
             <a
-              href="/auth/login"
-              className="text-primary font-medium hover:underline"
+              href="#"
+              className="text-blue-600 hover:underline dark:text-blue-400"
             >
-              Log in
+              Terms of Service
+            </a>{" "}
+            and{" "}
+            <a
+              href="#"
+              className="text-blue-600 hover:underline dark:text-blue-400"
+            >
+              Privacy Policy
             </a>
           </div>
         </div>

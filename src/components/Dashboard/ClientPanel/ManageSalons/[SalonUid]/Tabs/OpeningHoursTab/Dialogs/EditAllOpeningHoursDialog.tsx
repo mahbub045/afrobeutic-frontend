@@ -29,8 +29,8 @@ import * as Yup from "yup";
 
 interface DayEntry {
   day: string;
-  opening_start_time: string; // HH:MM
-  opening_end_time: string; // HH:MM
+  opening_time: string; // HH:MM
+  closing_time: string; // HH:MM
   break_start_time?: string;
   break_end_time?: string;
   is_closed: boolean;
@@ -80,12 +80,12 @@ const EditAllOpeningHoursDialog: React.FC<EditDashboardProps> = ({
     opening_hours: Yup.array().of(
       Yup.object().shape({
         day: Yup.string().required("Day is required"),
-        opening_start_time: Yup.string().when("is_closed", {
+        opening_time: Yup.string().when("is_closed", {
           is: false,
           then: (schema) => schema.required("Opening time is required"),
           otherwise: (schema) => schema.notRequired(),
         }),
-        opening_end_time: Yup.string()
+        closing_time: Yup.string()
           .when("is_closed", {
             is: false,
             then: (schema) => schema.required("Closing time is required"),
@@ -95,58 +95,9 @@ const EditAllOpeningHoursDialog: React.FC<EditDashboardProps> = ({
             "is-after-opening",
             "Closing time must be after opening time",
             function (value) {
-              const { opening_start_time, is_closed } = this.parent;
-              if (is_closed || !opening_start_time || !value) return true;
-              return getTimeDifference(opening_start_time, value) > 0;
-            },
-          ),
-        break_start_time: Yup.string()
-          .nullable()
-          .test(
-            "break-within-hours",
-            "Break start time must be within opening hours",
-            function (value) {
-              const { opening_start_time, opening_end_time, is_closed } =
-                this.parent;
-              if (is_closed || !value) return true;
-              const breakStart = timeToMinutes(value);
-              const openStart = timeToMinutes(opening_start_time);
-              const openEnd = timeToMinutes(opening_end_time);
-              return breakStart >= openStart && breakStart < openEnd;
-            },
-          ),
-        break_end_time: Yup.string()
-          .nullable()
-          .test(
-            "break-within-hours",
-            "Break end time must be within opening hours",
-            function (value) {
-              const { opening_start_time, opening_end_time, is_closed } =
-                this.parent;
-              if (is_closed || !value) return true;
-              const breakEnd = timeToMinutes(value);
-              const openStart = timeToMinutes(opening_start_time);
-              const openEnd = timeToMinutes(opening_end_time);
-              return breakEnd > openStart && breakEnd <= openEnd;
-            },
-          )
-          .test(
-            "break-end-after-start",
-            "Break end time must be after break start time",
-            function (value) {
-              const { break_start_time, is_closed } = this.parent;
-              if (is_closed || !value || !break_start_time) return true;
-              return getTimeDifference(break_start_time, value) > 0;
-            },
-          )
-          .test(
-            "break-duration",
-            "Break duration cannot exceed 2 hours",
-            function (value) {
-              const { break_start_time, is_closed } = this.parent;
-              if (is_closed || !value || !break_start_time) return true;
-              const duration = getTimeDifference(break_start_time, value);
-              return duration <= 120; // 120 minutes = 2 hours
+              const { opening_time, is_closed } = this.parent;
+              if (is_closed || !opening_time || !value) return true;
+              return getTimeDifference(opening_time, value) > 0;
             },
           ),
         is_closed: Yup.boolean(),
@@ -167,21 +118,16 @@ const EditAllOpeningHoursDialog: React.FC<EditDashboardProps> = ({
       singleSalonData?.opening_hours && singleSalonData.opening_hours.length > 0
         ? singleSalonData?.opening_hours.map((oh) => ({
             day: oh.day,
-            opening_start_time:
-              formatTimeForInput(oh.opening_start_time) || "08:00",
-            opening_end_time:
-              formatTimeForInput(oh.opening_end_time) || "22:00",
-            break_start_time:
-              formatTimeForInput(oh.break_start_time) || "14:00",
-            break_end_time: formatTimeForInput(oh.break_end_time) || "16:00",
+            opening_time:
+              formatTimeForInput(oh.opening_time) || "08:00",
+            closing_time:
+              formatTimeForInput(oh.closing_time) || "22:00",
             is_closed: oh.is_closed || false,
           }))
         : days.map((d) => ({
             day: d,
-            opening_start_time: "08:00",
-            opening_end_time: "22:00",
-            break_start_time: "14:00",
-            break_end_time: "16:00",
+            opening_time: "08:00",
+            closing_time: "22:00",
             is_closed: false,
           })),
   };
@@ -195,17 +141,11 @@ const EditAllOpeningHoursDialog: React.FC<EditDashboardProps> = ({
     try {
       const updated = values.opening_hours.map((d) => ({
         day: d.day,
-        opening_start_time: d.opening_start_time
-          ? `${d.opening_start_time}:00`
+        opening_time: d.opening_time
+          ? `${d.opening_time}:00`
           : "00:00:00",
-        opening_end_time: d.opening_end_time
-          ? `${d.opening_end_time}:00`
-          : "00:00:00",
-        break_start_time: d.break_start_time
-          ? `${d.break_start_time}:00`
-          : "00:00:00",
-        break_end_time: d.break_end_time
-          ? `${d.break_end_time}:00`
+        closing_time: d.closing_time
+          ? `${d.closing_time}:00`
           : "00:00:00",
         is_closed: !!d.is_closed,
       }));
@@ -236,7 +176,7 @@ const EditAllOpeningHoursDialog: React.FC<EditDashboardProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-h-[80vh] !max-w-4xl overflow-y-auto shadow-md sm:!max-w-4xl md:!max-w-5xl dark:shadow-gray-600">
+      <DialogContent className="max-h-[80vh] !max-w-xl overflow-y-auto shadow-md sm:!max-w-2xl md:!max-w-3xl dark:shadow-gray-600">
         <DialogHeader>
           <DialogTitle className="text-primary">
             Edit All Opening Hours
@@ -256,13 +196,11 @@ const EditAllOpeningHoursDialog: React.FC<EditDashboardProps> = ({
             <FormikForm>
               <div className="space-y-3">
                 {/* Header row */}
-                <div className="text-muted-foreground grid grid-cols-12 gap-2 px-2 py-2 text-xs">
-                  <div className="col-span-3">Day</div>
-                  <div className="col-span-2">Opening</div>
-                  <div className="col-span-2">Closing</div>
-                  <div className="col-span-2">Break Start</div>
-                  <div className="col-span-2">Break End</div>
-                  <div className="col-span-1 text-right">Closed</div>
+                <div className="text-muted-foreground bg-muted/50 grid grid-cols-12 gap-2 border-b px-4 py-3 text-xs font-semibold tracking-wide uppercase">
+                  <div className="col-span-2">Day</div>
+                  <div className="col-span-4">Opening</div>
+                  <div className="col-span-4">Closing</div>
+                  <div className="col-span-2 text-center">Closed</div>
                 </div>
 
                 <FieldArray name="opening_hours">
@@ -275,23 +213,19 @@ const EditAllOpeningHoursDialog: React.FC<EditDashboardProps> = ({
                               (oh: DayEntry, idx: number) => (
                                 <div
                                   key={oh.day || idx}
-                                  className="grid grid-cols-12 items-center gap-2 rounded-sm border-t px-2 pt-2"
+                                  className="hover:bg-muted/30 grid grid-cols-12 items-center gap-2 border-b px-4 py-4 transition-colors last:border-b-0"
                                 >
-                                  <div className="col-span-3 text-sm">
+                                  <div className="text-foreground col-span-2 text-sm font-medium">
                                     {oh.day}
                                   </div>
 
                                   {/* Opening time */}
-                                  <div className="col-span-2">
+                                  <div className="col-span-4">
                                     <div className="flex items-center gap-1">
                                       <Field
                                         as="select"
-                                        name={`opening_hours.${idx}.opening_start_time`}
-                                        className="w-full focus:ring-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-                                        style={{
-                                          outline: "none",
-                                          boxShadow: "none",
-                                        }}
+                                        name={`opening_hours.${idx}.opening_time`}
+                                        className="border-input bg-background ring-offset-background hover:border-primary/50 focus-visible:ring-primary w-full rounded-md border px-3 py-2 text-sm transition-all focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                                         disabled={oh.is_closed}
                                       >
                                         {hours.map((h) =>
@@ -305,23 +239,19 @@ const EditAllOpeningHoursDialog: React.FC<EditDashboardProps> = ({
                                       </Field>
                                     </div>
                                     <ErrorMessage
-                                      name={`opening_hours.${idx}.opening_start_time`}
+                                      name={`opening_hours.${idx}.opening_time`}
                                       component="div"
                                       className="text-danger mt-1 text-xs"
                                     />
                                   </div>
 
                                   {/* Closing time */}
-                                  <div className="col-span-2">
+                                  <div className="col-span-4">
                                     <div className="flex items-center gap-1">
                                       <Field
                                         as="select"
-                                        name={`opening_hours.${idx}.opening_end_time`}
-                                        className="w-full focus:ring-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-                                        style={{
-                                          outline: "none",
-                                          boxShadow: "none",
-                                        }}
+                                        name={`opening_hours.${idx}.closing_time`}
+                                        className="border-input bg-background ring-offset-background hover:border-primary/50 focus-visible:ring-primary w-full rounded-md border px-3 py-2 text-sm transition-all focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                                         disabled={oh.is_closed}
                                       >
                                         {hours.map((h) =>
@@ -335,76 +265,14 @@ const EditAllOpeningHoursDialog: React.FC<EditDashboardProps> = ({
                                       </Field>
                                     </div>
                                     <ErrorMessage
-                                      name={`opening_hours.${idx}.opening_end_time`}
-                                      component="div"
-                                      className="text-danger mt-1 text-xs"
-                                    />
-                                  </div>
-
-                                  {/* Break start */}
-                                  <div className="col-span-2">
-                                    <div className="flex items-center gap-1">
-                                      <Field
-                                        as="select"
-                                        name={`opening_hours.${idx}.break_start_time`}
-                                        className="w-full focus:ring-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-                                        style={{
-                                          outline: "none",
-                                          boxShadow: "none",
-                                        }}
-                                        disabled={oh.is_closed}
-                                      >
-                                        <option value="">-</option>
-                                        {hours.map((h) =>
-                                          minutes.map((m) => (
-                                            <option
-                                              key={`bs-${h}:${m}`}
-                                              value={`${h}:${m}`}
-                                            >{`${h}:${m}`}</option>
-                                          )),
-                                        )}
-                                      </Field>
-                                    </div>
-                                    <ErrorMessage
-                                      name={`opening_hours.${idx}.break_start_time`}
-                                      component="div"
-                                      className="text-danger mt-1 text-xs"
-                                    />
-                                  </div>
-
-                                  {/* Break end */}
-                                  <div className="col-span-2">
-                                    <div className="flex items-center gap-1">
-                                      <Field
-                                        as="select"
-                                        name={`opening_hours.${idx}.break_end_time`}
-                                        className="w-full focus:ring-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-                                        style={{
-                                          outline: "none",
-                                          boxShadow: "none",
-                                        }}
-                                        disabled={oh.is_closed}
-                                      >
-                                        <option value="">-</option>
-                                        {hours.map((h) =>
-                                          minutes.map((m) => (
-                                            <option
-                                              key={`be-${h}:${m}`}
-                                              value={`${h}:${m}`}
-                                            >{`${h}:${m}`}</option>
-                                          )),
-                                        )}
-                                      </Field>
-                                    </div>
-                                    <ErrorMessage
-                                      name={`opening_hours.${idx}.break_end_time`}
+                                      name={`opening_hours.${idx}.closing_time`}
                                       component="div"
                                       className="text-danger mt-1 text-xs"
                                     />
                                   </div>
 
                                   {/* Closed toggle */}
-                                  <div className="col-span-1 flex justify-end">
+                                  <div className="col-span-2 flex justify-center">
                                     <Field
                                       name={`opening_hours.${idx}.is_closed`}
                                     >
@@ -417,19 +285,11 @@ const EditAllOpeningHoursDialog: React.FC<EditDashboardProps> = ({
                                             if (v) {
                                               // When marking closed, set times to 00:00
                                               form.setFieldValue(
-                                                `opening_hours.${idx}.opening_start_time`,
+                                                `opening_hours.${idx}.opening_time`,
                                                 "00:00",
                                               );
                                               form.setFieldValue(
-                                                `opening_hours.${idx}.opening_end_time`,
-                                                "00:00",
-                                              );
-                                              form.setFieldValue(
-                                                `opening_hours.${idx}.break_start_time`,
-                                                "00:00",
-                                              );
-                                              form.setFieldValue(
-                                                `opening_hours.${idx}.break_end_time`,
+                                                `opening_hours.${idx}.closing_time`,
                                                 "00:00",
                                               );
                                             } else {
@@ -437,43 +297,23 @@ const EditAllOpeningHoursDialog: React.FC<EditDashboardProps> = ({
                                               const current =
                                                 form.values.opening_hours[idx];
                                               if (
-                                                !current.opening_start_time ||
-                                                current.opening_start_time ===
+                                                !current.opening_time ||
+                                                current.opening_time ===
                                                   "00:00"
                                               ) {
                                                 form.setFieldValue(
-                                                  `opening_hours.${idx}.opening_start_time`,
+                                                  `opening_hours.${idx}.opening_time`,
                                                   "08:00",
                                                 );
                                               }
                                               if (
-                                                !current.opening_end_time ||
-                                                current.opening_end_time ===
+                                                !current.closing_time ||
+                                                current.closing_time ===
                                                   "00:00"
                                               ) {
                                                 form.setFieldValue(
-                                                  `opening_hours.${idx}.opening_end_time`,
+                                                  `opening_hours.${idx}.closing_time`,
                                                   "22:00",
-                                                );
-                                              }
-                                              if (
-                                                !current.break_start_time ||
-                                                current.break_start_time ===
-                                                  "00:00"
-                                              ) {
-                                                form.setFieldValue(
-                                                  `opening_hours.${idx}.break_start_time`,
-                                                  "14:00",
-                                                );
-                                              }
-                                              if (
-                                                !current.break_end_time ||
-                                                current.break_end_time ===
-                                                  "00:00"
-                                              ) {
-                                                form.setFieldValue(
-                                                  `opening_hours.${idx}.break_end_time`,
-                                                  "16:00",
                                                 );
                                               }
                                             }
