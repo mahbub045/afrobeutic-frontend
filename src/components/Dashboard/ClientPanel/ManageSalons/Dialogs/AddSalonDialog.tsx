@@ -354,7 +354,6 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
             const success = await handleSubmit(values);
             setSubmitting(false);
             if (success) {
-              // Reset the form to initial values, reset to first tab, and close dialog
               resetForm();
               setActiveTab("basic-info");
               onClose();
