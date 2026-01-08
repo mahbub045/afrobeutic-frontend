@@ -107,55 +107,7 @@ const validationSchema = Yup.object().shape({
             return getTimeDifference(opening_start_time, value) > 0;
           },
         ),
-      break_start_time: Yup.string()
-        .nullable()
-        .test(
-          "break-within-hours",
-          "Break start time must be within opening hours",
-          function (value) {
-            const { opening_start_time, opening_end_time, is_closed } =
-              this.parent;
-            if (is_closed || !value) return true;
-            const breakStart = timeToMinutes(value);
-            const openStart = timeToMinutes(opening_start_time);
-            const openEnd = timeToMinutes(opening_end_time);
-            return breakStart >= openStart && breakStart < openEnd;
-          },
-        ),
-      break_end_time: Yup.string()
-        .nullable()
-        .test(
-          "break-within-hours",
-          "Break end time must be within opening hours",
-          function (value) {
-            const { opening_start_time, opening_end_time, is_closed } =
-              this.parent;
-            if (is_closed || !value) return true;
-            const breakEnd = timeToMinutes(value);
-            const openStart = timeToMinutes(opening_start_time);
-            const openEnd = timeToMinutes(opening_end_time);
-            return breakEnd > openStart && breakEnd <= openEnd;
-          },
-        )
-        .test(
-          "break-end-after-start",
-          "Break end time must be after break start time",
-          function (value) {
-            const { break_start_time, is_closed } = this.parent;
-            if (is_closed || !value || !break_start_time) return true;
-            return getTimeDifference(break_start_time, value) > 0;
-          },
-        )
-        .test(
-          "break-duration",
-          "Break duration cannot exceed 2 hours",
-          function (value) {
-            const { break_start_time, is_closed } = this.parent;
-            if (is_closed || !value || !break_start_time) return true;
-            const duration = getTimeDifference(break_start_time, value);
-            return duration <= 120; // 120 minutes = 2 hours
-          },
-        ),
+
       is_closed: Yup.boolean(),
     }),
   ),
@@ -201,12 +153,6 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
           day: oh.day,
           opening_start_time: convertTimeToAPIFormat(oh.opening_start_time),
           opening_end_time: convertTimeToAPIFormat(oh.opening_end_time),
-          break_start_time: oh.break_start_time
-            ? convertTimeToAPIFormat(oh.break_start_time)
-            : undefined,
-          break_end_time: oh.break_end_time
-            ? convertTimeToAPIFormat(oh.break_end_time)
-            : undefined,
           is_closed: oh.is_closed,
         })),
       };
@@ -344,7 +290,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       {/* Make the dialog vertically scrollable when content exceeds the viewport */}
-      <DialogContent className="max-h-[80vh] !max-w-xl overflow-y-auto shadow-md sm:!max-w-4xl md:!max-w-5xl dark:shadow-gray-600">
+      <DialogContent className="max-h-[80vh] !max-w-xl overflow-y-auto shadow-md sm:!max-w-2xl md:!max-w-3xl dark:shadow-gray-600">
         <DialogHeader>
           <DialogTitle className="text-primary text-2xl">
             Add New Salon
@@ -399,8 +345,6 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
               day: d,
               opening_start_time: "08:00",
               opening_end_time: "22:00",
-              break_start_time: "14:00",
-              break_end_time: "16:00",
               is_closed: false,
             })),
           }}
@@ -814,19 +758,19 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                 <TabsContent value="opening-hours" className="space-y-4">
                   {/* Opening hours editor */}
                   <div className="mb-6">
-                    <h3 className="mb-3 text-sm font-medium">Opening Hours</h3>
-                    <div className="bg-card rounded-md border p-4">
+                    <h3 className="mb-4 text-base font-semibold tracking-tight">
+                      Opening Hours
+                    </h3>
+                    <div className="bg-card rounded-lg border p-0 shadow-sm">
                       <FieldArray name="opening_hours">
                         {() => (
-                          <div className="space-y-3">
+                          <div className="space-y-0">
                             {/** header row */}
-                            <div className="text-muted-foreground grid grid-cols-12 gap-2 px-2 py-2 text-xs">
-                              <div className="col-span-3">Day</div>
-                              <div className="col-span-2">Opening</div>
-                              <div className="col-span-2">Closing</div>
-                              <div className="col-span-2">Break Start</div>
-                              <div className="col-span-2">Break End</div>
-                              <div className="col-span-1 text-right">
+                            <div className="text-muted-foreground bg-muted/50 grid grid-cols-12 gap-2 border-b px-4 py-3 text-xs font-semibold tracking-wide uppercase">
+                              <div className="col-span-2">Day</div>
+                              <div className="col-span-4">Opening</div>
+                              <div className="col-span-4">Closing</div>
+                              <div className="col-span-2 text-center">
                                 Closed
                               </div>
                             </div>
@@ -842,23 +786,19 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                     (oh: OpeningHour, idx: number) => (
                                       <div
                                         key={oh.day || idx}
-                                        className="grid grid-cols-12 items-center gap-2 rounded-sm border-t px-2 pt-2"
+                                        className="hover:bg-muted/30 grid grid-cols-12 items-center gap-2 border-b px-4 py-4 transition-colors last:border-b-0"
                                       >
-                                        <div className="col-span-3 text-sm">
+                                        <div className="text-foreground col-span-2 text-sm font-medium">
                                           {oh.day}
                                         </div>
 
                                         {/* Opening time */}
-                                        <div className="col-span-2">
-                                          <div className="flex items-center gap-1">
+                                        <div className="col-span-4">
+                                          <div className="flex items-center justify-center gap-1">
                                             <Field
                                               as="select"
                                               name={`opening_hours.${idx}.opening_start_time`}
-                                              className="w-full focus:ring-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-                                              style={{
-                                                outline: "none",
-                                                boxShadow: "none",
-                                              }}
+                                              className="border-input bg-background ring-offset-background hover:border-primary/50 focus-visible:ring-primary w-full rounded-md border px-3 py-2 text-sm transition-all focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                                               disabled={oh.is_closed}
                                             >
                                               {hours.map((h) =>
@@ -879,16 +819,12 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                         </div>
 
                                         {/* Closing time */}
-                                        <div className="col-span-2">
+                                        <div className="col-span-4">
                                           <div className="flex items-center gap-1">
                                             <Field
                                               as="select"
                                               name={`opening_hours.${idx}.opening_end_time`}
-                                              className="w-full focus:ring-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-                                              style={{
-                                                outline: "none",
-                                                boxShadow: "none",
-                                              }}
+                                              className="border-input bg-background ring-offset-background hover:border-primary/50 focus-visible:ring-primary w-full rounded-md border px-3 py-2 text-sm transition-all focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                                               disabled={oh.is_closed}
                                             >
                                               {hours.map((h) =>
@@ -908,69 +844,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                           />
                                         </div>
 
-                                        {/* Break start */}
-                                        <div className="col-span-2">
-                                          <div className="flex items-center gap-1">
-                                            <Field
-                                              as="select"
-                                              name={`opening_hours.${idx}.break_start_time`}
-                                              className="w-full focus:ring-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-                                              style={{
-                                                outline: "none",
-                                                boxShadow: "none",
-                                              }}
-                                              disabled={oh.is_closed}
-                                            >
-                                              <option value="">-</option>
-                                              {hours.map((h) =>
-                                                minutes.map((m) => (
-                                                  <option
-                                                    key={`bs-${h}:${m}`}
-                                                    value={`${h}:${m}`}
-                                                  >{`${h}:${m}`}</option>
-                                                )),
-                                              )}
-                                            </Field>
-                                          </div>
-                                          <ErrorMessage
-                                            name={`opening_hours.${idx}.break_start_time`}
-                                            component="div"
-                                            className="text-danger mt-1 text-xs"
-                                          />
-                                        </div>
-
-                                        {/* Break end */}
-                                        <div className="col-span-2">
-                                          <div className="flex items-center gap-1">
-                                            <Field
-                                              as="select"
-                                              name={`opening_hours.${idx}.break_end_time`}
-                                              className="w-full focus:ring-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-                                              style={{
-                                                outline: "none",
-                                                boxShadow: "none",
-                                              }}
-                                              disabled={oh.is_closed}
-                                            >
-                                              <option value="">-</option>
-                                              {hours.map((h) =>
-                                                minutes.map((m) => (
-                                                  <option
-                                                    key={`be-${h}:${m}`}
-                                                    value={`${h}:${m}`}
-                                                  >{`${h}:${m}`}</option>
-                                                )),
-                                              )}
-                                            </Field>
-                                          </div>
-                                          <ErrorMessage
-                                            name={`opening_hours.${idx}.break_end_time`}
-                                            component="div"
-                                            className="text-danger mt-1 text-xs"
-                                          />
-                                        </div>
-
-                                        <div className="col-span-1 flex justify-end">
+                                        <div className="col-span-2 flex justify-center">
                                           <Field
                                             name={`opening_hours.${idx}.is_closed`}
                                           >
@@ -994,14 +868,6 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                                     );
                                                     form.setFieldValue(
                                                       `opening_hours.${idx}.opening_end_time`,
-                                                      "00:00",
-                                                    );
-                                                    form.setFieldValue(
-                                                      `opening_hours.${idx}.break_start_time`,
-                                                      "00:00",
-                                                    );
-                                                    form.setFieldValue(
-                                                      `opening_hours.${idx}.break_end_time`,
                                                       "00:00",
                                                     );
                                                   } else {
@@ -1029,26 +895,6 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                                       form.setFieldValue(
                                                         `opening_hours.${idx}.opening_end_time`,
                                                         "22:00",
-                                                      );
-                                                    }
-                                                    if (
-                                                      !current.break_start_time ||
-                                                      current.break_start_time ===
-                                                        "00:00"
-                                                    ) {
-                                                      form.setFieldValue(
-                                                        `opening_hours.${idx}.break_start_time`,
-                                                        "14:00",
-                                                      );
-                                                    }
-                                                    if (
-                                                      !current.break_end_time ||
-                                                      current.break_end_time ===
-                                                        "00:00"
-                                                    ) {
-                                                      form.setFieldValue(
-                                                        `opening_hours.${idx}.break_end_time`,
-                                                        "16:00",
                                                       );
                                                     }
                                                   }
