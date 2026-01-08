@@ -67,7 +67,7 @@ export interface FormValues {
   name: string;
   salon_type: string;
   email: string;
-  phone: string;
+  phone_number_one: string;
   country_dial_code?: string;
   website: string;
   street: string;

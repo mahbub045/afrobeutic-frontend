@@ -135,13 +135,13 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
         name: string;
         salon_type: string;
         email: string;
-        phone: string;
+        phone_number_one: string;
         country_dial_code?: string;
       } = {
         name: formData.name,
         salon_type: formData.salon_type,
         email: formData.email,
-        phone: formData.phone,
+        phone_number_one: formData.phone_number_one,
         country_dial_code: formData.country_dial_code,
         website: formData.website,
         street: formData.street,
@@ -258,7 +258,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
       await contactsValidationSchema.validate(
         {
           email: values.email,
-          phone: values.phone,
+          phone: values.phone_number_one,
           website: values.website,
         },
         { abortEarly: false },
@@ -333,7 +333,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
             name: "",
             salon_type: "",
             email: "",
-            phone: "",
+            phone_number_one: "",
             country_dial_code: "",
             website: "",
             street: "",
@@ -520,13 +520,13 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                   form.values.country_dial_code || "";
                                 if (
                                   dial &&
-                                  !form.values.phone?.startsWith(dial)
+                                  !form.values.phone_number_one?.startsWith(dial)
                                 ) {
                                   const numeric = (
-                                    form.values.phone || ""
+                                    form.values.phone_number_one || ""
                                   ).replace(/[^0-9]/g, "");
                                   form.setFieldValue(
-                                    "phone",
+                                    "phone_number_one",
                                     `${dial}${numeric}`,
                                   );
                                 }

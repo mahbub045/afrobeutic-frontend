@@ -30,7 +30,7 @@ const ContactsCard: React.FC<DashboardTabProps> = ({
 
   // Replace these with props or data from store
   const website = singleSalonData?.website || "";
-  const phone = singleSalonData?.phone || "";
+  const phone_number_one = singleSalonData?.phone_number_one || "";
   const email = singleSalonData?.email || "";
 
   const [copied, setCopied] = useState<string | null>(null);
@@ -166,9 +166,9 @@ const ContactsCard: React.FC<DashboardTabProps> = ({
                 </p>
                 <a
                   className="text-foreground mt-2 block text-sm"
-                  href={`tel:${singleSalonData?.phone || "#"}`}
+                  href={`tel:${singleSalonData?.phone_number_one || "#"}`}
                 >
-                  {singleSalonData?.phone || "Not Specified"}
+                  {singleSalonData?.phone_number_one || "Not Specified"}
                 </a>
               </div>
 
@@ -176,7 +176,7 @@ const ContactsCard: React.FC<DashboardTabProps> = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => copyToClipboard(phone, "phone")}
+                  onClick={() => copyToClipboard(phone_number_one, "phone")}
                   aria-label="Copy phone"
                 >
                   {copied === "phone" ? (
