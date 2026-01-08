@@ -794,7 +794,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
 
                                         {/* Opening time */}
                                         <div className="col-span-4">
-                                          <div className="flex items-center justify-center gap-1">
+                                          <div className="flex items-center gap-1">
                                             <Field
                                               as="select"
                                               name={`opening_hours.${idx}.opening_start_time`}
