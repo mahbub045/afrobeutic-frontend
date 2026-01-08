@@ -20,11 +20,21 @@ export interface OpeningHour {
 export interface SalonProps {
   uid: string;
   name: string;
+  salon_category?: string;
+  is_provide_hair_styles?: boolean;
+  is_provide_bridal_makeup_services?: boolean;
   description?: string;
   logo?: string;
   salon_type?: string;
+  salon_service_types?: string[];
+  address_one?: string;
+  address_two?: string | null;
   email?: string;
-  phone?: string;
+  phone_number_one?: string;
+  phone_number_two?: string | null;
+  facebook?: string;
+  instagram?: string;
+  youtube?: string | null;
   website?: string;
   street?: string;
   city?: string;
