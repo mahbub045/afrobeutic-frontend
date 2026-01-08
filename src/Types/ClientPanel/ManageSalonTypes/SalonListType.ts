@@ -12,10 +12,8 @@ export interface OpeningHour {
   id?: number;
   uid?: string;
   day: WeekDay;
-  opening_start_time: string;
-  opening_end_time: string;
-  break_start_time?: string;
-  break_end_time?: string;
+  opening_time: string;
+  closing_time: string;
   is_closed: boolean;
 }
 

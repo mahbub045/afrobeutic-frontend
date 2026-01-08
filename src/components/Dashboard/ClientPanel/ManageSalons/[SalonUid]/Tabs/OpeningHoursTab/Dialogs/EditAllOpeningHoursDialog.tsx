@@ -29,8 +29,8 @@ import * as Yup from "yup";
 
 interface DayEntry {
   day: string;
-  opening_start_time: string; // HH:MM
-  opening_end_time: string; // HH:MM
+  opening_time: string; // HH:MM
+  closing_time: string; // HH:MM
   break_start_time?: string;
   break_end_time?: string;
   is_closed: boolean;
@@ -80,12 +80,12 @@ const EditAllOpeningHoursDialog: React.FC<EditDashboardProps> = ({
     opening_hours: Yup.array().of(
       Yup.object().shape({
         day: Yup.string().required("Day is required"),
-        opening_start_time: Yup.string().when("is_closed", {
+        opening_time: Yup.string().when("is_closed", {
           is: false,
           then: (schema) => schema.required("Opening time is required"),
           otherwise: (schema) => schema.notRequired(),
         }),
-        opening_end_time: Yup.string()
+        closing_time: Yup.string()
           .when("is_closed", {
             is: false,
             then: (schema) => schema.required("Closing time is required"),
@@ -95,9 +95,9 @@ const EditAllOpeningHoursDialog: React.FC<EditDashboardProps> = ({
             "is-after-opening",
             "Closing time must be after opening time",
             function (value) {
-              const { opening_start_time, is_closed } = this.parent;
-              if (is_closed || !opening_start_time || !value) return true;
-              return getTimeDifference(opening_start_time, value) > 0;
+              const { opening_time, is_closed } = this.parent;
+              if (is_closed || !opening_time || !value) return true;
+              return getTimeDifference(opening_time, value) > 0;
             },
           ),
         is_closed: Yup.boolean(),
@@ -118,16 +118,16 @@ const EditAllOpeningHoursDialog: React.FC<EditDashboardProps> = ({
       singleSalonData?.opening_hours && singleSalonData.opening_hours.length > 0
         ? singleSalonData?.opening_hours.map((oh) => ({
             day: oh.day,
-            opening_start_time:
-              formatTimeForInput(oh.opening_start_time) || "08:00",
-            opening_end_time:
-              formatTimeForInput(oh.opening_end_time) || "22:00",
+            opening_time:
+              formatTimeForInput(oh.opening_time) || "08:00",
+            closing_time:
+              formatTimeForInput(oh.closing_time) || "22:00",
             is_closed: oh.is_closed || false,
           }))
         : days.map((d) => ({
             day: d,
-            opening_start_time: "08:00",
-            opening_end_time: "22:00",
+            opening_time: "08:00",
+            closing_time: "22:00",
             is_closed: false,
           })),
   };
@@ -141,11 +141,11 @@ const EditAllOpeningHoursDialog: React.FC<EditDashboardProps> = ({
     try {
       const updated = values.opening_hours.map((d) => ({
         day: d.day,
-        opening_start_time: d.opening_start_time
-          ? `${d.opening_start_time}:00`
+        opening_time: d.opening_time
+          ? `${d.opening_time}:00`
           : "00:00:00",
-        opening_end_time: d.opening_end_time
-          ? `${d.opening_end_time}:00`
+        closing_time: d.closing_time
+          ? `${d.closing_time}:00`
           : "00:00:00",
         is_closed: !!d.is_closed,
       }));
@@ -224,7 +224,7 @@ const EditAllOpeningHoursDialog: React.FC<EditDashboardProps> = ({
                                     <div className="flex items-center gap-1">
                                       <Field
                                         as="select"
-                                        name={`opening_hours.${idx}.opening_start_time`}
+                                        name={`opening_hours.${idx}.opening_time`}
                                         className="border-input bg-background ring-offset-background hover:border-primary/50 focus-visible:ring-primary w-full rounded-md border px-3 py-2 text-sm transition-all focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                                         disabled={oh.is_closed}
                                       >
@@ -239,7 +239,7 @@ const EditAllOpeningHoursDialog: React.FC<EditDashboardProps> = ({
                                       </Field>
                                     </div>
                                     <ErrorMessage
-                                      name={`opening_hours.${idx}.opening_start_time`}
+                                      name={`opening_hours.${idx}.opening_time`}
                                       component="div"
                                       className="text-danger mt-1 text-xs"
                                     />
@@ -250,7 +250,7 @@ const EditAllOpeningHoursDialog: React.FC<EditDashboardProps> = ({
                                     <div className="flex items-center gap-1">
                                       <Field
                                         as="select"
-                                        name={`opening_hours.${idx}.opening_end_time`}
+                                        name={`opening_hours.${idx}.closing_time`}
                                         className="border-input bg-background ring-offset-background hover:border-primary/50 focus-visible:ring-primary w-full rounded-md border px-3 py-2 text-sm transition-all focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                                         disabled={oh.is_closed}
                                       >
@@ -265,7 +265,7 @@ const EditAllOpeningHoursDialog: React.FC<EditDashboardProps> = ({
                                       </Field>
                                     </div>
                                     <ErrorMessage
-                                      name={`opening_hours.${idx}.opening_end_time`}
+                                      name={`opening_hours.${idx}.closing_time`}
                                       component="div"
                                       className="text-danger mt-1 text-xs"
                                     />
@@ -285,11 +285,11 @@ const EditAllOpeningHoursDialog: React.FC<EditDashboardProps> = ({
                                             if (v) {
                                               // When marking closed, set times to 00:00
                                               form.setFieldValue(
-                                                `opening_hours.${idx}.opening_start_time`,
+                                                `opening_hours.${idx}.opening_time`,
                                                 "00:00",
                                               );
                                               form.setFieldValue(
-                                                `opening_hours.${idx}.opening_end_time`,
+                                                `opening_hours.${idx}.closing_time`,
                                                 "00:00",
                                               );
                                             } else {
@@ -297,22 +297,22 @@ const EditAllOpeningHoursDialog: React.FC<EditDashboardProps> = ({
                                               const current =
                                                 form.values.opening_hours[idx];
                                               if (
-                                                !current.opening_start_time ||
-                                                current.opening_start_time ===
+                                                !current.opening_time ||
+                                                current.opening_time ===
                                                   "00:00"
                                               ) {
                                                 form.setFieldValue(
-                                                  `opening_hours.${idx}.opening_start_time`,
+                                                  `opening_hours.${idx}.opening_time`,
                                                   "08:00",
                                                 );
                                               }
                                               if (
-                                                !current.opening_end_time ||
-                                                current.opening_end_time ===
+                                                !current.closing_time ||
+                                                current.closing_time ===
                                                   "00:00"
                                               ) {
                                                 form.setFieldValue(
-                                                  `opening_hours.${idx}.opening_end_time`,
+                                                  `opening_hours.${idx}.closing_time`,
                                                   "22:00",
                                                 );
                                               }
