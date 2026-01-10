@@ -46,9 +46,18 @@ const getTimeDifference = (startTime: string, endTime: string): number => {
   return timeToMinutes(endTime) - timeToMinutes(startTime);
 };
 
-// Validation schema for salon details tab
+// Validation schema for salon details tab (now includes all basic info)
 const salonDetailsValidationSchema = Yup.object().shape({
   name: Yup.string().required("Salon name is required"),
+  email: Yup.string().required("Email is required").email("Invalid email"),
+  phone: Yup.string().required("Phone number is required"),
+  website: Yup.string().url("Invalid URL"),
+  address_one: Yup.string().required("Address is required"),
+  address_two: Yup.string(),
+  city: Yup.string().required("City is required"),
+  postal_code: Yup.string().required("Postal code is required"),
+  country: Yup.string().required("Country is required"),
+  address: Yup.string().url("Invalid URL").notRequired(),
 });
 
 // Validation schema for salon type tab
@@ -100,24 +109,6 @@ const servicesValidationSchema = Yup.object().shape({
     }),
 });
 
-// Validation schema for contacts tab
-const contactsValidationSchema = Yup.object().shape({
-  email: Yup.string().required("Email is required").email("Invalid email"),
-  phone: Yup.string().required("Phone number is required"),
-  website: Yup.string().url("Invalid URL"),
-});
-
-// Validation schema for address tab
-const addressValidationSchema = Yup.object().shape({
-  street: Yup.string().required("Street is required"),
-  city: Yup.string().required("City is required"),
-  postal_code: Yup.string().required("Postal code is required"),
-  country: Yup.string().required("Country is required"),
-  // Combined optional address string (not required)
-  // accepts only a valid URL when provided
-  address: Yup.string().url("Invalid URL").notRequired(),
-});
-
 const salonCategoryValidationSchema = Yup.object().shape({
   salon_category: Yup.string().required("Salon category is required"),
 });
@@ -164,12 +155,11 @@ const validationSchema = Yup.object().shape({
   email: Yup.string().required("Email is required").email("Invalid email"),
   phone: Yup.string().required("Phone number is required"),
   website: Yup.string().url("Invalid URL"),
-  street: Yup.string().required("Street is required"),
+  address_one: Yup.string().required("Address is required"),
+  address_two: Yup.string(),
   city: Yup.string().required("City is required"),
   postal_code: Yup.string().required("Postal code is required"),
   country: Yup.string().required("Country is required"),
-  // latitude/longitude removed from form validation — optional address added
-  // address must be a valid URL if provided
   address: Yup.string().url("Invalid URL").notRequired(),
   opening_hours: Yup.array().of(
     Yup.object().shape({
@@ -237,7 +227,8 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
         phone_number_one: formData.phone_number_one,
         country_dial_code: formData.country_dial_code,
         website: formData.website,
-        street: formData.street,
+        address_one: formData.address_one,
+        address_two: formData.address_two || null,
         city: formData.city,
         postal_code: formData.postal_code,
         country: formData.country,
@@ -330,9 +321,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
     { id: "services", label: "Services" },
     { id: "service-options", label: "Service Options" },
     { id: "salon-type", label: "Salon Type" },
-    { id: "salon-details", label: "Salon Details" },
-    { id: "contacts", label: "Contacts" },
-    { id: "address", label: "Address" },
+    { id: "salon-details", label: "Basic Info" },
     { id: "opening-hours", label: "Opening Hours" },
   ];
   const currentIndex = Math.max(
@@ -359,6 +348,15 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
       await salonDetailsValidationSchema.validate(
         {
           name: values.name,
+          email: values.email,
+          phone: values.phone_number_one,
+          website: values.website,
+          address_one: values.address_one,
+          address_two: values.address_two,
+          city: values.city,
+          postal_code: values.postal_code,
+          country: values.country,
+          address: values.address,
         },
         { abortEarly: false },
       );
@@ -495,40 +493,6 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  const validateContacts = async (values: FormValues): Promise<boolean> => {
-    try {
-      await contactsValidationSchema.validate(
-        {
-          email: values.email,
-          phone: values.phone_number_one,
-          website: values.website,
-        },
-        { abortEarly: false },
-      );
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
-  const validateAddress = async (values: FormValues): Promise<boolean> => {
-    try {
-      await addressValidationSchema.validate(
-        {
-          street: values.street,
-          city: values.city,
-          postal_code: values.postal_code,
-          country: values.country,
-          address: values.address,
-        },
-        { abortEarly: false },
-      );
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       {/* Make the dialog vertically scrollable when content exceeds the viewport */}
@@ -563,7 +527,8 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
               phone_number_one: "",
               country_dial_code: "",
               website: "",
-              street: "",
+              address_one: "",
+              address_two: "",
               city: "",
               postal_code: "",
               country: "",
@@ -1251,26 +1216,258 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
 
                   <TabsContent
                     value="salon-details"
-                    className="flex flex-1 flex-col justify-center space-y-4"
+                    className="flex flex-1 flex-col justify-start space-y-4"
                   >
-                    <div className="mb-4 grid grid-cols-1 gap-4">
+                    <h3 className="mb-4 text-lg font-semibold">
+                      Basic Information
+                    </h3>
+
+                    {/* Salon Name */}
+                    <div>
+                      <Label htmlFor="name" className="mb-2">
+                        Salon Name<span className="text-danger">*</span>
+                      </Label>
+                      <Field
+                        name="name"
+                        id="name"
+                        as="input"
+                        type="text"
+                        placeholder="Enter salon name"
+                        className="w-full"
+                      />
+                      <ErrorMessage
+                        name="name"
+                        component="div"
+                        className="text-danger mt-1 text-xs"
+                      />
+                    </div>
+
+                    {/* Address 1 */}
+                    <div>
+                      <Label htmlFor="address_one" className="mb-2">
+                        Address 1<span className="text-danger">*</span>
+                      </Label>
+                      <Field
+                        name="address_one"
+                        id="address_one"
+                        as="input"
+                        type="text"
+                        placeholder="Enter address"
+                        className="w-full"
+                      />
+                      <ErrorMessage
+                        name="address_one"
+                        component="div"
+                        className="text-danger mt-1 text-xs"
+                      />
+                    </div>
+
+                    {/* Address 2 (Optional) */}
+                    <div>
+                      <Label htmlFor="address_two" className="mb-2">
+                        Address 2{" "}
+                        <span className="text-muted-foreground text-xs">
+                          (Optional)
+                        </span>
+                      </Label>
+                      <Field
+                        name="address_two"
+                        id="address_two"
+                        as="input"
+                        type="text"
+                        placeholder="Apartment, suite, etc."
+                        className="w-full"
+                      />
+                      <ErrorMessage
+                        name="address_two"
+                        component="div"
+                        className="text-danger mt-1 text-xs"
+                      />
+                    </div>
+
+                    {/* City and Postal Code */}
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <div>
-                        <Label htmlFor="name" className="mb-2">
-                          Salon Name<span className="text-danger">*</span>
+                        <Label htmlFor="city" className="mb-2">
+                          City / Town<span className="text-danger">*</span>
                         </Label>
                         <Field
-                          name="name"
-                          id="name"
+                          name="city"
+                          id="city"
                           as="input"
                           type="text"
-                          placeholder="Salon Name"
+                          placeholder="Enter city"
                         />
                         <ErrorMessage
-                          name="name"
+                          name="city"
                           component="div"
                           className="text-danger mt-1 text-xs"
                         />
                       </div>
+                      <div>
+                        <Label htmlFor="postal_code" className="mb-2">
+                          Postal Code<span className="text-danger">*</span>
+                        </Label>
+                        <Field
+                          name="postal_code"
+                          id="postal_code"
+                          as="input"
+                          type="text"
+                          placeholder="Enter postal code"
+                        />
+                        <ErrorMessage
+                          name="postal_code"
+                          component="div"
+                          className="text-danger mt-1 text-xs"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Country */}
+                    <div>
+                      <Label htmlFor="country" className="mb-2">
+                        Country<span className="text-danger">*</span>
+                      </Label>
+                      <Field
+                        name="country"
+                        id="country"
+                        as="select"
+                        className="w-full"
+                      >
+                        <option value="" disabled>
+                          Select a country
+                        </option>
+                        {countries.map((country) => (
+                          <option key={country.code} value={country.code}>
+                            {country.name}
+                          </option>
+                        ))}
+                      </Field>
+                      <ErrorMessage
+                        name="country"
+                        component="div"
+                        className="text-danger mt-1 text-xs"
+                      />
+                    </div>
+
+                    {/* Email */}
+                    <div>
+                      <Label htmlFor="email" className="mb-2">
+                        Email<span className="text-danger">*</span>
+                      </Label>
+                      <Field
+                        name="email"
+                        id="email"
+                        as="input"
+                        type="email"
+                        placeholder="Enter email address"
+                        className="w-full"
+                      />
+                      <ErrorMessage
+                        name="email"
+                        component="div"
+                        className="text-danger mt-1 text-xs"
+                      />
+                    </div>
+
+                    {/* Phone and Website */}
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div>
+                        <Label htmlFor="phone" className="mb-2">
+                          Phone<span className="text-danger">*</span>
+                        </Label>
+                        <Field type="hidden" name="country_dial_code" />
+                        <Field name="phone">
+                          {({
+                            field,
+                            form,
+                          }: {
+                            field: FieldInputProps<string>;
+                            form: FormikProps<FormValues>;
+                          }) => (
+                            <div>
+                              <PhoneInput
+                                country={"gb"}
+                                value={field.value}
+                                onChange={(
+                                  value: string,
+                                  data?: { dialCode?: string },
+                                ) => {
+                                  form.setFieldValue("phone_number_one", value);
+                                  if (data?.dialCode) {
+                                    form.setFieldValue(
+                                      "country_dial_code",
+                                      `+${data.dialCode}`,
+                                    );
+                                  }
+                                }}
+                                onBlur={() =>
+                                  form.setFieldTouched("phone_number_one", true)
+                                }
+                                inputProps={{
+                                  name: field.name,
+                                  required: true,
+                                }}
+                                searchPlaceholder="Search"
+                                searchNotFound="No country found"
+                                enableSearch={true}
+                                inputClass="!w-full !h-auto px-3 py-2 rounded-md !bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100"
+                                buttonClass="!bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100 !border-1 dark:!border-gray-700"
+                                dropdownClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100 !px-2"
+                                searchClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100"
+                              />
+                              <ErrorMessage
+                                name="phone"
+                                component="div"
+                                className="text-danger mt-1 text-xs"
+                              />
+                            </div>
+                          )}
+                        </Field>
+                      </div>
+                      <div>
+                        <Label htmlFor="website" className="mb-2">
+                          Website{" "}
+                          <span className="text-muted-foreground text-xs">
+                            (Optional)
+                          </span>
+                        </Label>
+                        <Field
+                          name="website"
+                          id="website"
+                          as="input"
+                          type="text"
+                          placeholder="https://"
+                        />
+                        <ErrorMessage
+                          name="website"
+                          component="div"
+                          className="text-danger mt-1 text-xs"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Google Location Link */}
+                    <div>
+                      <Label htmlFor="address" className="mb-2">
+                        Google Location Link{" "}
+                        <span className="text-muted-foreground text-xs">
+                          (Optional)
+                        </span>
+                      </Label>
+                      <Field
+                        name="address"
+                        id="address"
+                        as="input"
+                        type="text"
+                        placeholder="https://maps.google.com/..."
+                        className="w-full"
+                      />
+                      <ErrorMessage
+                        name="address"
+                        component="div"
+                        className="text-danger mt-1 text-xs"
+                      />
                     </div>
 
                     <div className="mt-6 flex items-center justify-between gap-3">
@@ -1295,328 +1492,16 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                           onClick={async () => {
                             const isValid = await validateSalonDetails(values);
                             if (isValid) {
-                              setActiveTab("contacts");
-                            } else {
-                              setFieldTouched("name", true);
-                              toast.error(
-                                "Please fill in all required fields before proceeding",
-                              );
-                            }
-                          }}
-                          className="w-32 text-white"
-                        >
-                          Next
-                        </Button>
-                      </div>
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent
-                    value="contacts"
-                    className="flex flex-1 flex-col justify-center space-y-4"
-                  >
-                    <div>
-                      <Label htmlFor="email" className="mb-2">
-                        Email<span className="text-danger">*</span>
-                      </Label>
-                      <Field
-                        name="email"
-                        id="email"
-                        as="input"
-                        type="email"
-                        placeholder="Email"
-                      />
-                      <ErrorMessage
-                        name="email"
-                        component="div"
-                        className="text-danger mt-1 text-xs"
-                      />
-                    </div>
-                    <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <div>
-                        <Label htmlFor="phone" className="mb-2">
-                          Phone<span className="text-danger">*</span>
-                        </Label>
-                        {/* Hidden field to store selected dial code */}
-                        <Field type="hidden" name="country_dial_code" />
-                        <Field name="phone">
-                          {({
-                            field,
-                            form,
-                          }: {
-                            field: FieldInputProps<string>;
-                            form: FormikProps<FormValues>;
-                          }) => (
-                            <div>
-                              <PhoneInput
-                                country={"gb"}
-                                value={field.value}
-                                onChange={(
-                                  value: string,
-                                  data?: { dialCode?: string },
-                                ) => {
-                                  // data.dialCode is the numeric dial code without + (e.g. '971')
-                                  const dial =
-                                    data && data.dialCode
-                                      ? `+${data.dialCode}`
-                                      : form.values.country_dial_code || "";
-                                  // Keep only digits from value and prepend dial (with +)
-                                  const numeric = (value || "").replace(
-                                    /[^0-9]/g,
-                                    "",
-                                  );
-                                  if (!numeric) {
-                                    form.setFieldValue(field.name, "");
-                                    return;
-                                  }
-                                  let newVal = numeric;
-                                  if (dial) {
-                                    // ensure numeric does not already contain dial
-                                    if (
-                                      !numeric.startsWith(
-                                        dial.replace(/\D/g, ""),
-                                      )
-                                    ) {
-                                      newVal = `${dial}${numeric}`;
-                                    } else {
-                                      newVal = `+${numeric}`;
-                                    }
-                                  } else if (numeric) {
-                                    newVal = `+${numeric}`;
-                                  }
-                                  form.setFieldValue(field.name, newVal);
-                                  form.setFieldValue("country_dial_code", dial);
-                                }}
-                                onBlur={() => {
-                                  const dial =
-                                    form.values.country_dial_code || "";
-                                  if (
-                                    dial &&
-                                    !form.values.phone_number_one?.startsWith(
-                                      dial,
-                                    )
-                                  ) {
-                                    const numeric = (
-                                      form.values.phone_number_one || ""
-                                    ).replace(/[^0-9]/g, "");
-                                    form.setFieldValue(
-                                      "phone_number_one",
-                                      `${dial}${numeric}`,
-                                    );
-                                  }
-                                }}
-                                inputProps={{
-                                  name: field.name,
-                                  required: true,
-                                }}
-                                // Search functionality
-                                searchPlaceholder="Search"
-                                searchNotFound="No country found"
-                                enableSearch={true}
-                                inputClass="!w-full !h-auto px-3 py-2 rounded-md !bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100"
-                                buttonClass="!bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100 !border-1 dark:!border-gray-700"
-                                dropdownClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100 !px-2"
-                                searchClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100"
-                                // containerClass="w-full"
-                              />
-                              <ErrorMessage
-                                name="phone"
-                                component="div"
-                                className="text-danger !dark:bg-gray-800 mt-1 text-xs"
-                              />
-                            </div>
-                          )}
-                        </Field>
-                      </div>
-                      <div>
-                        <Label htmlFor="website" className="mb-2">
-                          Website
-                        </Label>
-                        <Field
-                          name="website"
-                          id="website"
-                          as="input"
-                          type="text"
-                          placeholder="Website"
-                        />
-                        <ErrorMessage
-                          name="website"
-                          component="div"
-                          className="text-danger mt-1 text-xs"
-                        />
-                      </div>
-                    </div>
-                    {/* Navigation buttons for 2nd tab */}
-                    <div className="mt-6 flex items-center justify-between gap-3">
-                      <div className="">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => setActiveTab("salon-details")}
-                        >
-                          Previous
-                        </Button>
-                      </div>
-                      <div className="flex gap-3">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={onClose}
-                          disabled={isLoading}
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={async () => {
-                            const isValid = await validateContacts(values);
-                            if (isValid) {
-                              setActiveTab("address");
-                            } else {
-                              const basicFields = ["email", "phone", "website"];
-                              basicFields.forEach((field) =>
-                                setFieldTouched(field, true),
-                              );
-                              toast.error(
-                                "Please fill in all required fields before proceeding",
-                              );
-                            }
-                          }}
-                          className="w-32 text-white"
-                        >
-                          Next
-                        </Button>
-                      </div>
-                    </div>
-                  </TabsContent>
-                  <TabsContent
-                    value="address"
-                    className="flex flex-1 flex-col justify-center space-y-4"
-                  >
-                    <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <div>
-                        <Label htmlFor="street" className="mb-2">
-                          Street<span className="text-danger">*</span>
-                        </Label>
-                        <Field
-                          name="street"
-                          id="street"
-                          as="input"
-                          type="text"
-                          placeholder="Street"
-                        />
-                        <ErrorMessage
-                          name="street"
-                          component="div"
-                          className="text-danger mt-1 text-xs"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="city" className="mb-2">
-                          City<span className="text-danger">*</span>
-                        </Label>
-                        <Field
-                          name="city"
-                          id="city"
-                          as="input"
-                          type="text"
-                          placeholder="City"
-                        />
-                        <ErrorMessage
-                          name="city"
-                          component="div"
-                          className="text-danger mt-1 text-xs"
-                        />
-                      </div>
-                    </div>
-                    <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <div>
-                        <Label htmlFor="postal_code" className="mb-2">
-                          Postal Code<span className="text-danger">*</span>
-                        </Label>
-                        <Field
-                          name="postal_code"
-                          id="postal_code"
-                          as="input"
-                          type="text"
-                          placeholder="Postal Code"
-                        />
-                        <ErrorMessage
-                          name="postal_code"
-                          component="div"
-                          className="text-danger mt-1 text-xs"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="country" className="mb-2">
-                          Country<span className="text-danger">*</span>
-                        </Label>
-                        <Field name="country" id="country" as="select">
-                          <option value="" disabled>
-                            Select a country
-                          </option>
-                          {countries.map((country) => (
-                            <option key={country.code} value={country.code}>
-                              {country.name}
-                            </option>
-                          ))}
-                        </Field>
-                        <ErrorMessage
-                          name="country"
-                          component="div"
-                          className="text-danger mt-1 text-xs"
-                        />
-                      </div>
-                    </div>
-                    <div className="mb-4">
-                      <Label htmlFor="address" className="mb-2">
-                        Google Location Link (optional)
-                      </Label>
-                      <Field
-                        name="address"
-                        id="address"
-                        as="input"
-                        type="text"
-                        placeholder="https://maps.google.com/..."
-                      />
-                      <ErrorMessage
-                        name="address"
-                        component="div"
-                        className="text-danger mt-1 text-xs"
-                      />
-                    </div>
-                    {/* Navigation buttons for 3rd tab */}
-                    <div className="mt-6 flex items-center justify-between gap-3">
-                      <div>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => setActiveTab("contacts")}
-                        >
-                          Previous
-                        </Button>
-                      </div>
-                      <div className="flex gap-3">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={onClose}
-                          disabled={isLoading}
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={async () => {
-                            const isValid = await validateAddress(values);
-                            if (isValid) {
                               setActiveTab("opening-hours");
                             } else {
                               const basicFields = [
-                                "street",
+                                "name",
+                                "address_one",
                                 "city",
                                 "postal_code",
                                 "country",
+                                "email",
+                                "phone_number_one",
                               ];
                               basicFields.forEach((field) =>
                                 setFieldTouched(field, true),

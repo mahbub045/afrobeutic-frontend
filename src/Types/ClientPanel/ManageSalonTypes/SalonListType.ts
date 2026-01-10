@@ -76,7 +76,8 @@ export interface FormValues {
   phone_number_one: string;
   country_dial_code?: string;
   website: string;
-  street: string;
+  address_one: string;
+  address_two?: string;
   city: string;
   postal_code: string;
   country: string;
