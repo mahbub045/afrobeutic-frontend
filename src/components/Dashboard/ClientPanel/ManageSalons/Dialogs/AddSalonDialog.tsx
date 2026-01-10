@@ -290,8 +290,8 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       {/* Make the dialog vertically scrollable when content exceeds the viewport */}
-      <DialogContent className="max-h-[80vh] !max-w-xl overflow-y-auto shadow-md sm:!max-w-2xl md:!max-w-3xl dark:shadow-gray-600">
-        <DialogHeader>
+      <DialogContent className="flex !max-w-xl flex-col p-0 shadow-md sm:!max-w-2xl md:!max-w-3xl dark:shadow-gray-600">
+        <DialogHeader className="px-6 pt-6 pb-0">
           <DialogTitle className="text-primary text-2xl">
             Add New Salon
           </DialogTitle>
@@ -299,653 +299,676 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
             Fill in the details to add a new salon.
           </DialogDescription>
         </DialogHeader>
-        {/* Step labels and progress bar (view-only) */}
-        <div className="px-4 pt-2">
-          <div className="mb-2 flex items-center justify-center">
-            <div className="flex items-center gap-4">
-              {tabList.map((tab) => (
-                <div
-                  key={tab.id}
-                  className={`text-xs font-medium ${
-                    activeTab === tab.id
-                      ? "bg-primary rounded-md px-2 py-1 text-white"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  {tab.label}
-                </div>
-              ))}
+        <div className="flex h-[80vh] flex-col items-center justify-start overflow-y-auto px-6 py-4">
+          {/* Step labels and progress bar (view-only) */}
+          <div className="mb-4 w-full">
+            <div className="mb-2 flex items-center justify-center">
+              <div className="flex items-center gap-4">
+                {tabList.map((tab) => (
+                  <div
+                    key={tab.id}
+                    className={`text-xs font-medium ${
+                      activeTab === tab.id
+                        ? "bg-primary rounded-md px-2 py-1 text-white"
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    {tab.label}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="bg-muted h-2 w-full rounded-full">
+              <div
+                className="bg-primary h-2 rounded-full transition-all"
+                style={{ width: `${progressPercent}%` }}
+                aria-valuenow={progressPercent}
+                aria-valuemin={0}
+                aria-valuemax={100}
+              />
             </div>
           </div>
-          <div className="bg-muted h-2 w-full rounded-full">
-            <div
-              className="bg-primary h-2 rounded-full transition-all"
-              style={{ width: `${progressPercent}%` }}
-              aria-valuenow={progressPercent}
-              aria-valuemin={0}
-              aria-valuemax={100}
-            />
-          </div>
-        </div>
-        {/* Formik form for adding a new salon goes here */}
-        <Formik<FormValues>
-          initialValues={{
-            name: "",
-            salon_type: "",
-            email: "",
-            phone_number_one: "",
-            country_dial_code: "",
-            website: "",
-            street: "",
-            city: "",
-            postal_code: "",
-            country: "",
-            address: "",
-            opening_hours: days.map((d) => ({
-              day: d,
-              opening_time: "08:00",
-              closing_time: "22:00",
-              is_closed: false,
-            })),
-          }}
-          validationSchema={validationSchema}
-          onSubmit={async (values, { resetForm, setSubmitting }) => {
-            setSubmitting(true);
-            const success = await handleSubmit(values);
-            setSubmitting(false);
-            if (success) {
-              resetForm();
-              setActiveTab("basic-info");
-              onClose();
-            }
-          }}
-        >
-          {({ values, setFieldTouched }) => (
-            <FormikForm>
-              <Tabs
-                value={activeTab}
-                onValueChange={setActiveTab}
-                className="w-full"
-              >
-                <TabsContent value="basic-info" className="space-y-4">
-                  <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div>
-                      <Label htmlFor="name" className="mb-2">
-                        Salon Name<span className="text-danger">*</span>
-                      </Label>
-                      <Field
-                        name="name"
-                        id="name"
-                        as="input"
-                        type="text"
-                        placeholder="Salon Name"
-                      />
-                      <ErrorMessage
-                        name="name"
-                        component="div"
-                        className="text-danger mt-1 text-xs"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="salon_type" className="mb-2">
-                        Salon Type<span className="text-danger">*</span>
-                      </Label>
-                      <Field
-                        id="salon_type"
-                        name="salon_type"
-                        as="select"
-                        required
-                      >
-                        <option value="" disabled>
-                          Select a salon type
-                        </option>
-                        {salonTypes.map((type) => (
-                          <option key={type.value} value={type.value}>
-                            {type.label}
+          {/* Formik form for adding a new salon goes here */}
+          <Formik<FormValues>
+            initialValues={{
+              name: "",
+              salon_type: "",
+              email: "",
+              phone_number_one: "",
+              country_dial_code: "",
+              website: "",
+              street: "",
+              city: "",
+              postal_code: "",
+              country: "",
+              address: "",
+              opening_hours: days.map((d) => ({
+                day: d,
+                opening_time: "08:00",
+                closing_time: "22:00",
+                is_closed: false,
+              })),
+            }}
+            validationSchema={validationSchema}
+            onSubmit={async (values, { resetForm, setSubmitting }) => {
+              setSubmitting(true);
+              const success = await handleSubmit(values);
+              setSubmitting(false);
+              if (success) {
+                resetForm();
+                setActiveTab("basic-info");
+                onClose();
+              }
+            }}
+          >
+            {({ values, setFieldTouched }) => (
+              <FormikForm className="flex w-full flex-1 flex-col items-center">
+                <Tabs
+                  value={activeTab}
+                  onValueChange={setActiveTab}
+                  className="flex w-full max-w-2xl flex-1 flex-col"
+                >
+                  <TabsContent
+                    value="basic-info"
+                    className="flex flex-1 flex-col justify-center space-y-4"
+                  >
+                    <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div>
+                        <Label htmlFor="name" className="mb-2">
+                          Salon Name<span className="text-danger">*</span>
+                        </Label>
+                        <Field
+                          name="name"
+                          id="name"
+                          as="input"
+                          type="text"
+                          placeholder="Salon Name"
+                        />
+                        <ErrorMessage
+                          name="name"
+                          component="div"
+                          className="text-danger mt-1 text-xs"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="salon_type" className="mb-2">
+                          Salon Type<span className="text-danger">*</span>
+                        </Label>
+                        <Field
+                          id="salon_type"
+                          name="salon_type"
+                          as="select"
+                          required
+                        >
+                          <option value="" disabled>
+                            Select a salon type
                           </option>
-                        ))}
-                      </Field>
+                          {salonTypes.map((type) => (
+                            <option key={type.value} value={type.value}>
+                              {type.label}
+                            </option>
+                          ))}
+                        </Field>
+                        <ErrorMessage
+                          name="salon_type"
+                          component="div"
+                          className="text-danger mt-1 text-xs"
+                        />
+                      </div>
+                    </div>
+                    {/* Navigation buttons for first tab */}
+                    <div className="mt-6 flex justify-end gap-3">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={onClose}
+                        disabled={isLoading}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={async () => {
+                          const isValid = await validateBasicInfo(values);
+                          if (isValid) {
+                            setActiveTab("contacts");
+                          } else {
+                            const basicFields = ["name", "salon_type"];
+                            basicFields.forEach((field) =>
+                              setFieldTouched(field, true),
+                            );
+                            toast.error(
+                              "Please fill in all required fields before proceeding",
+                            );
+                          }
+                        }}
+                        className="w-32 text-white"
+                      >
+                        Next
+                      </Button>
+                    </div>
+                  </TabsContent>
+                  <TabsContent
+                    value="contacts"
+                    className="flex flex-1 flex-col justify-center space-y-4"
+                  >
+                    <div>
+                      <Label htmlFor="email" className="mb-2">
+                        Email<span className="text-danger">*</span>
+                      </Label>
+                      <Field
+                        name="email"
+                        id="email"
+                        as="input"
+                        type="email"
+                        placeholder="Email"
+                      />
                       <ErrorMessage
-                        name="salon_type"
+                        name="email"
                         component="div"
                         className="text-danger mt-1 text-xs"
                       />
                     </div>
-                  </div>
-                  {/* Navigation buttons for first tab */}
-                  <div className="mt-6 flex justify-end gap-3">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={onClose}
-                      disabled={isLoading}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={async () => {
-                        const isValid = await validateBasicInfo(values);
-                        if (isValid) {
-                          setActiveTab("contacts");
-                        } else {
-                          const basicFields = ["name", "salon_type"];
-                          basicFields.forEach((field) =>
-                            setFieldTouched(field, true),
-                          );
-                          toast.error(
-                            "Please fill in all required fields before proceeding",
-                          );
-                        }
-                      }}
-                      className="w-32 text-white"
-                    >
-                      Next
-                    </Button>
-                  </div>
-                </TabsContent>
-                <TabsContent value="contacts" className="space-y-4">
-                  <div>
-                    <Label htmlFor="email" className="mb-2">
-                      Email<span className="text-danger">*</span>
-                    </Label>
-                    <Field
-                      name="email"
-                      id="email"
-                      as="input"
-                      type="email"
-                      placeholder="Email"
-                    />
-                    <ErrorMessage
-                      name="email"
-                      component="div"
-                      className="text-danger mt-1 text-xs"
-                    />
-                  </div>
-                  <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div>
-                      <Label htmlFor="phone" className="mb-2">
-                        Phone<span className="text-danger">*</span>
-                      </Label>
-                      {/* Hidden field to store selected dial code */}
-                      <Field type="hidden" name="country_dial_code" />
-                      <Field name="phone">
-                        {({
-                          field,
-                          form,
-                        }: {
-                          field: FieldInputProps<string>;
-                          form: FormikProps<FormValues>;
-                        }) => (
-                          <div>
-                            <PhoneInput
-                              country={"gb"}
-                              value={field.value}
-                              onChange={(
-                                value: string,
-                                data?: { dialCode?: string },
-                              ) => {
-                                // data.dialCode is the numeric dial code without + (e.g. '971')
-                                const dial =
-                                  data && data.dialCode
-                                    ? `+${data.dialCode}`
-                                    : form.values.country_dial_code || "";
-                                // Keep only digits from value and prepend dial (with +)
-                                const numeric = (value || "").replace(
-                                  /[^0-9]/g,
-                                  "",
-                                );
-                                if (!numeric) {
-                                  form.setFieldValue(field.name, "");
-                                  return;
-                                }
-                                let newVal = numeric;
-                                if (dial) {
-                                  // ensure numeric does not already contain dial
-                                  if (
-                                    !numeric.startsWith(dial.replace(/\D/g, ""))
-                                  ) {
-                                    newVal = `${dial}${numeric}`;
-                                  } else {
+                    <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div>
+                        <Label htmlFor="phone" className="mb-2">
+                          Phone<span className="text-danger">*</span>
+                        </Label>
+                        {/* Hidden field to store selected dial code */}
+                        <Field type="hidden" name="country_dial_code" />
+                        <Field name="phone">
+                          {({
+                            field,
+                            form,
+                          }: {
+                            field: FieldInputProps<string>;
+                            form: FormikProps<FormValues>;
+                          }) => (
+                            <div>
+                              <PhoneInput
+                                country={"gb"}
+                                value={field.value}
+                                onChange={(
+                                  value: string,
+                                  data?: { dialCode?: string },
+                                ) => {
+                                  // data.dialCode is the numeric dial code without + (e.g. '971')
+                                  const dial =
+                                    data && data.dialCode
+                                      ? `+${data.dialCode}`
+                                      : form.values.country_dial_code || "";
+                                  // Keep only digits from value and prepend dial (with +)
+                                  const numeric = (value || "").replace(
+                                    /[^0-9]/g,
+                                    "",
+                                  );
+                                  if (!numeric) {
+                                    form.setFieldValue(field.name, "");
+                                    return;
+                                  }
+                                  let newVal = numeric;
+                                  if (dial) {
+                                    // ensure numeric does not already contain dial
+                                    if (
+                                      !numeric.startsWith(
+                                        dial.replace(/\D/g, ""),
+                                      )
+                                    ) {
+                                      newVal = `${dial}${numeric}`;
+                                    } else {
+                                      newVal = `+${numeric}`;
+                                    }
+                                  } else if (numeric) {
                                     newVal = `+${numeric}`;
                                   }
-                                } else if (numeric) {
-                                  newVal = `+${numeric}`;
-                                }
-                                form.setFieldValue(field.name, newVal);
-                                form.setFieldValue("country_dial_code", dial);
-                              }}
-                              onBlur={() => {
-                                const dial =
-                                  form.values.country_dial_code || "";
-                                if (
-                                  dial &&
-                                  !form.values.phone_number_one?.startsWith(dial)
-                                ) {
-                                  const numeric = (
-                                    form.values.phone_number_one || ""
-                                  ).replace(/[^0-9]/g, "");
-                                  form.setFieldValue(
-                                    "phone_number_one",
-                                    `${dial}${numeric}`,
-                                  );
-                                }
-                              }}
-                              inputProps={{ name: field.name, required: true }}
-                              // Search functionality
-                              searchPlaceholder="Search"
-                              searchNotFound="No country found"
-                              enableSearch={true}
-                              inputClass="!w-full !h-auto px-3 py-2 rounded-md !bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100"
-                              buttonClass="!bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100 !border-1 dark:!border-gray-700"
-                              dropdownClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100 !px-2"
-                              searchClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100"
-                              // containerClass="w-full"
-                            />
-                            <ErrorMessage
-                              name="phone"
-                              component="div"
-                              className="text-danger !dark:bg-gray-800 mt-1 text-xs"
-                            />
-                          </div>
-                        )}
-                      </Field>
-                    </div>
-                    <div>
-                      <Label htmlFor="website" className="mb-2">
-                        Website
-                      </Label>
-                      <Field
-                        name="website"
-                        id="website"
-                        as="input"
-                        type="text"
-                        placeholder="Website"
-                      />
-                      <ErrorMessage
-                        name="website"
-                        component="div"
-                        className="text-danger mt-1 text-xs"
-                      />
-                    </div>
-                  </div>
-                  {/* Navigation buttons for 2nd tab */}
-                  <div className="mt-6 flex items-center justify-between gap-3">
-                    <div className="">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setActiveTab("basic-info")}
-                      >
-                        Previous
-                      </Button>
-                    </div>
-                    <div className="flex gap-3">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={onClose}
-                        disabled={isLoading}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        type="button"
-                        onClick={async () => {
-                          const isValid = await validateContacts(values);
-                          if (isValid) {
-                            setActiveTab("address");
-                          } else {
-                            const basicFields = ["email", "phone", "website"];
-                            basicFields.forEach((field) =>
-                              setFieldTouched(field, true),
-                            );
-                            toast.error(
-                              "Please fill in all required fields before proceeding",
-                            );
-                          }
-                        }}
-                        className="w-32 text-white"
-                      >
-                        Next
-                      </Button>
-                    </div>
-                  </div>
-                </TabsContent>
-                <TabsContent value="address" className="space-y-4">
-                  <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div>
-                      <Label htmlFor="street" className="mb-2">
-                        Street<span className="text-danger">*</span>
-                      </Label>
-                      <Field
-                        name="street"
-                        id="street"
-                        as="input"
-                        type="text"
-                        placeholder="Street"
-                      />
-                      <ErrorMessage
-                        name="street"
-                        component="div"
-                        className="text-danger mt-1 text-xs"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="city" className="mb-2">
-                        City<span className="text-danger">*</span>
-                      </Label>
-                      <Field
-                        name="city"
-                        id="city"
-                        as="input"
-                        type="text"
-                        placeholder="City"
-                      />
-                      <ErrorMessage
-                        name="city"
-                        component="div"
-                        className="text-danger mt-1 text-xs"
-                      />
-                    </div>
-                  </div>
-                  <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div>
-                      <Label htmlFor="postal_code" className="mb-2">
-                        Postal Code<span className="text-danger">*</span>
-                      </Label>
-                      <Field
-                        name="postal_code"
-                        id="postal_code"
-                        as="input"
-                        type="text"
-                        placeholder="Postal Code"
-                      />
-                      <ErrorMessage
-                        name="postal_code"
-                        component="div"
-                        className="text-danger mt-1 text-xs"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="country" className="mb-2">
-                        Country<span className="text-danger">*</span>
-                      </Label>
-                      <Field name="country" id="country" as="select">
-                        <option value="" disabled>
-                          Select a country
-                        </option>
-                        {countries.map((country) => (
-                          <option key={country.code} value={country.code}>
-                            {country.name}
-                          </option>
-                        ))}
-                      </Field>
-                      <ErrorMessage
-                        name="country"
-                        component="div"
-                        className="text-danger mt-1 text-xs"
-                      />
-                    </div>
-                  </div>
-                  <div className="mb-4">
-                    <Label htmlFor="address" className="mb-2">
-                      Google Location Link (optional)
-                    </Label>
-                    <Field
-                      name="address"
-                      id="address"
-                      as="input"
-                      type="text"
-                      placeholder="https://maps.google.com/..."
-                    />
-                    <ErrorMessage
-                      name="address"
-                      component="div"
-                      className="text-danger mt-1 text-xs"
-                    />
-                  </div>
-                  {/* Navigation buttons for 3rd tab */}
-                  <div className="mt-6 flex items-center justify-between gap-3">
-                    <div>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setActiveTab("contacts")}
-                      >
-                        Previous
-                      </Button>
-                    </div>
-                    <div className="flex gap-3">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={onClose}
-                        disabled={isLoading}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        type="button"
-                        onClick={async () => {
-                          const isValid = await validateAddress(values);
-                          if (isValid) {
-                            setActiveTab("opening-hours");
-                          } else {
-                            const basicFields = [
-                              "street",
-                              "city",
-                              "postal_code",
-                              "country",
-                            ];
-                            basicFields.forEach((field) =>
-                              setFieldTouched(field, true),
-                            );
-                            toast.error(
-                              "Please fill in all required fields before proceeding",
-                            );
-                          }
-                        }}
-                        className="w-32 text-white"
-                      >
-                        Next
-                      </Button>
-                    </div>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="opening-hours" className="space-y-4">
-                  {/* Opening hours editor */}
-                  <div className="mb-6">
-                    <h3 className="mb-4 text-base font-semibold tracking-tight">
-                      Opening Hours
-                    </h3>
-                    <div className="bg-card rounded-lg border p-0 shadow-sm">
-                      <FieldArray name="opening_hours">
-                        {() => (
-                          <div className="space-y-0">
-                            {/** header row */}
-                            <div className="text-muted-foreground bg-muted/50 grid grid-cols-12 gap-2 border-b px-4 py-3 text-xs font-semibold tracking-wide uppercase">
-                              <div className="col-span-2">Day</div>
-                              <div className="col-span-4">Opening</div>
-                              <div className="col-span-4">Closing</div>
-                              <div className="col-span-2 text-center">
-                                Closed
-                              </div>
+                                  form.setFieldValue(field.name, newVal);
+                                  form.setFieldValue("country_dial_code", dial);
+                                }}
+                                onBlur={() => {
+                                  const dial =
+                                    form.values.country_dial_code || "";
+                                  if (
+                                    dial &&
+                                    !form.values.phone_number_one?.startsWith(
+                                      dial,
+                                    )
+                                  ) {
+                                    const numeric = (
+                                      form.values.phone_number_one || ""
+                                    ).replace(/[^0-9]/g, "");
+                                    form.setFieldValue(
+                                      "phone_number_one",
+                                      `${dial}${numeric}`,
+                                    );
+                                  }
+                                }}
+                                inputProps={{
+                                  name: field.name,
+                                  required: true,
+                                }}
+                                // Search functionality
+                                searchPlaceholder="Search"
+                                searchNotFound="No country found"
+                                enableSearch={true}
+                                inputClass="!w-full !h-auto px-3 py-2 rounded-md !bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100"
+                                buttonClass="!bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100 !border-1 dark:!border-gray-700"
+                                dropdownClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100 !px-2"
+                                searchClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100"
+                                // containerClass="w-full"
+                              />
+                              <ErrorMessage
+                                name="phone"
+                                component="div"
+                                className="text-danger !dark:bg-gray-800 mt-1 text-xs"
+                              />
                             </div>
+                          )}
+                        </Field>
+                      </div>
+                      <div>
+                        <Label htmlFor="website" className="mb-2">
+                          Website
+                        </Label>
+                        <Field
+                          name="website"
+                          id="website"
+                          as="input"
+                          type="text"
+                          placeholder="Website"
+                        />
+                        <ErrorMessage
+                          name="website"
+                          component="div"
+                          className="text-danger mt-1 text-xs"
+                        />
+                      </div>
+                    </div>
+                    {/* Navigation buttons for 2nd tab */}
+                    <div className="mt-6 flex items-center justify-between gap-3">
+                      <div className="">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setActiveTab("basic-info")}
+                        >
+                          Previous
+                        </Button>
+                      </div>
+                      <div className="flex gap-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={onClose}
+                          disabled={isLoading}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={async () => {
+                            const isValid = await validateContacts(values);
+                            if (isValid) {
+                              setActiveTab("address");
+                            } else {
+                              const basicFields = ["email", "phone", "website"];
+                              basicFields.forEach((field) =>
+                                setFieldTouched(field, true),
+                              );
+                              toast.error(
+                                "Please fill in all required fields before proceeding",
+                              );
+                            }
+                          }}
+                          className="w-32 text-white"
+                        >
+                          Next
+                        </Button>
+                      </div>
+                    </div>
+                  </TabsContent>
+                  <TabsContent
+                    value="address"
+                    className="flex flex-1 flex-col justify-center space-y-4"
+                  >
+                    <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div>
+                        <Label htmlFor="street" className="mb-2">
+                          Street<span className="text-danger">*</span>
+                        </Label>
+                        <Field
+                          name="street"
+                          id="street"
+                          as="input"
+                          type="text"
+                          placeholder="Street"
+                        />
+                        <ErrorMessage
+                          name="street"
+                          component="div"
+                          className="text-danger mt-1 text-xs"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="city" className="mb-2">
+                          City<span className="text-danger">*</span>
+                        </Label>
+                        <Field
+                          name="city"
+                          id="city"
+                          as="input"
+                          type="text"
+                          placeholder="City"
+                        />
+                        <ErrorMessage
+                          name="city"
+                          component="div"
+                          className="text-danger mt-1 text-xs"
+                        />
+                      </div>
+                    </div>
+                    <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div>
+                        <Label htmlFor="postal_code" className="mb-2">
+                          Postal Code<span className="text-danger">*</span>
+                        </Label>
+                        <Field
+                          name="postal_code"
+                          id="postal_code"
+                          as="input"
+                          type="text"
+                          placeholder="Postal Code"
+                        />
+                        <ErrorMessage
+                          name="postal_code"
+                          component="div"
+                          className="text-danger mt-1 text-xs"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="country" className="mb-2">
+                          Country<span className="text-danger">*</span>
+                        </Label>
+                        <Field name="country" id="country" as="select">
+                          <option value="" disabled>
+                            Select a country
+                          </option>
+                          {countries.map((country) => (
+                            <option key={country.code} value={country.code}>
+                              {country.name}
+                            </option>
+                          ))}
+                        </Field>
+                        <ErrorMessage
+                          name="country"
+                          component="div"
+                          className="text-danger mt-1 text-xs"
+                        />
+                      </div>
+                    </div>
+                    <div className="mb-4">
+                      <Label htmlFor="address" className="mb-2">
+                        Google Location Link (optional)
+                      </Label>
+                      <Field
+                        name="address"
+                        id="address"
+                        as="input"
+                        type="text"
+                        placeholder="https://maps.google.com/..."
+                      />
+                      <ErrorMessage
+                        name="address"
+                        component="div"
+                        className="text-danger mt-1 text-xs"
+                      />
+                    </div>
+                    {/* Navigation buttons for 3rd tab */}
+                    <div className="mt-6 flex items-center justify-between gap-3">
+                      <div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setActiveTab("contacts")}
+                        >
+                          Previous
+                        </Button>
+                      </div>
+                      <div className="flex gap-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={onClose}
+                          disabled={isLoading}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={async () => {
+                            const isValid = await validateAddress(values);
+                            if (isValid) {
+                              setActiveTab("opening-hours");
+                            } else {
+                              const basicFields = [
+                                "street",
+                                "city",
+                                "postal_code",
+                                "country",
+                              ];
+                              basicFields.forEach((field) =>
+                                setFieldTouched(field, true),
+                              );
+                              toast.error(
+                                "Please fill in all required fields before proceeding",
+                              );
+                            }
+                          }}
+                          className="w-32 text-white"
+                        >
+                          Next
+                        </Button>
+                      </div>
+                    </div>
+                  </TabsContent>
 
-                            <Field name="opening_hours">
-                              {({
-                                form,
-                              }: {
-                                form: FormikProps<SalonProps>;
-                              }) => (
-                                <>
-                                  {form.values.opening_hours.map(
-                                    (oh: OpeningHour, idx: number) => (
-                                      <div
-                                        key={oh.day || idx}
-                                        className="hover:bg-muted/30 grid grid-cols-12 items-center gap-2 border-b px-4 py-4 transition-colors last:border-b-0"
-                                      >
-                                        <div className="text-foreground col-span-2 text-sm font-medium">
-                                          {oh.day}
-                                        </div>
+                  <TabsContent
+                    value="opening-hours"
+                    className="flex flex-1 flex-col justify-start space-y-4"
+                  >
+                    {/* Opening hours editor */}
+                    <div className="mb-6">
+                      <h3 className="mb-4 text-base font-semibold tracking-tight">
+                        Opening Hours
+                      </h3>
+                      <div className="bg-card rounded-lg border p-0 shadow-sm">
+                        <FieldArray name="opening_hours">
+                          {() => (
+                            <div className="space-y-0">
+                              {/** header row */}
+                              <div className="text-muted-foreground bg-muted/50 grid grid-cols-12 gap-2 border-b px-4 py-3 text-xs font-semibold tracking-wide uppercase">
+                                <div className="col-span-2">Day</div>
+                                <div className="col-span-4">Opening</div>
+                                <div className="col-span-4">Closing</div>
+                                <div className="col-span-2 text-center">
+                                  Closed
+                                </div>
+                              </div>
 
-                                        {/* Opening time */}
-                                        <div className="col-span-4">
-                                          <div className="flex items-center gap-1">
-                                            <Field
-                                              as="select"
+                              <Field name="opening_hours">
+                                {({
+                                  form,
+                                }: {
+                                  form: FormikProps<SalonProps>;
+                                }) => (
+                                  <>
+                                    {form.values.opening_hours.map(
+                                      (oh: OpeningHour, idx: number) => (
+                                        <div
+                                          key={oh.day || idx}
+                                          className="hover:bg-muted/30 grid grid-cols-12 items-center gap-2 border-b px-4 py-4 transition-colors last:border-b-0"
+                                        >
+                                          <div className="text-foreground col-span-2 text-sm font-medium">
+                                            {oh.day}
+                                          </div>
+
+                                          {/* Opening time */}
+                                          <div className="col-span-4">
+                                            <div className="flex items-center gap-1">
+                                              <Field
+                                                as="select"
+                                                name={`opening_hours.${idx}.opening_time`}
+                                                className="border-input bg-background ring-offset-background hover:border-primary/50 focus-visible:ring-primary w-full rounded-md border px-3 py-2 text-sm transition-all focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                                                disabled={oh.is_closed}
+                                              >
+                                                {hours.map((h) =>
+                                                  minutes.map((m) => (
+                                                    <option
+                                                      key={`${h}:${m}`}
+                                                      value={`${h}:${m}`}
+                                                    >{`${h}:${m}`}</option>
+                                                  )),
+                                                )}
+                                              </Field>
+                                            </div>
+                                            <ErrorMessage
                                               name={`opening_hours.${idx}.opening_time`}
-                                              className="border-input bg-background ring-offset-background hover:border-primary/50 focus-visible:ring-primary w-full rounded-md border px-3 py-2 text-sm transition-all focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                                              disabled={oh.is_closed}
-                                            >
-                                              {hours.map((h) =>
-                                                minutes.map((m) => (
-                                                  <option
-                                                    key={`${h}:${m}`}
-                                                    value={`${h}:${m}`}
-                                                  >{`${h}:${m}`}</option>
-                                                )),
-                                              )}
-                                            </Field>
+                                              component="div"
+                                              className="text-danger mt-1 text-xs"
+                                            />
                                           </div>
-                                          <ErrorMessage
-                                            name={`opening_hours.${idx}.opening_time`}
-                                            component="div"
-                                            className="text-danger mt-1 text-xs"
-                                          />
-                                        </div>
 
-                                        {/* Closing time */}
-                                        <div className="col-span-4">
-                                          <div className="flex items-center gap-1">
-                                            <Field
-                                              as="select"
+                                          {/* Closing time */}
+                                          <div className="col-span-4">
+                                            <div className="flex items-center gap-1">
+                                              <Field
+                                                as="select"
+                                                name={`opening_hours.${idx}.closing_time`}
+                                                className="border-input bg-background ring-offset-background hover:border-primary/50 focus-visible:ring-primary w-full rounded-md border px-3 py-2 text-sm transition-all focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                                                disabled={oh.is_closed}
+                                              >
+                                                {hours.map((h) =>
+                                                  minutes.map((m) => (
+                                                    <option
+                                                      key={`${h}:${m}`}
+                                                      value={`${h}:${m}`}
+                                                    >{`${h}:${m}`}</option>
+                                                  )),
+                                                )}
+                                              </Field>
+                                            </div>
+                                            <ErrorMessage
                                               name={`opening_hours.${idx}.closing_time`}
-                                              className="border-input bg-background ring-offset-background hover:border-primary/50 focus-visible:ring-primary w-full rounded-md border px-3 py-2 text-sm transition-all focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                                              disabled={oh.is_closed}
-                                            >
-                                              {hours.map((h) =>
-                                                minutes.map((m) => (
-                                                  <option
-                                                    key={`${h}:${m}`}
-                                                    value={`${h}:${m}`}
-                                                  >{`${h}:${m}`}</option>
-                                                )),
-                                              )}
-                                            </Field>
+                                              component="div"
+                                              className="text-danger mt-1 text-xs"
+                                            />
                                           </div>
-                                          <ErrorMessage
-                                            name={`opening_hours.${idx}.closing_time`}
-                                            component="div"
-                                            className="text-danger mt-1 text-xs"
-                                          />
-                                        </div>
 
-                                        <div className="col-span-2 flex justify-center">
-                                          <Field
-                                            name={`opening_hours.${idx}.is_closed`}
-                                          >
-                                            {({ field, form }: FieldProps) => (
-                                              <Switch
-                                                checked={Boolean(field.value)}
-                                                onCheckedChange={(
-                                                  v: boolean,
-                                                ) => {
-                                                  // Toggle closed flag
-                                                  form.setFieldValue(
-                                                    field.name,
-                                                    v,
-                                                  );
+                                          <div className="col-span-2 flex justify-center">
+                                            <Field
+                                              name={`opening_hours.${idx}.is_closed`}
+                                            >
+                                              {({
+                                                field,
+                                                form,
+                                              }: FieldProps) => (
+                                                <Switch
+                                                  checked={Boolean(field.value)}
+                                                  onCheckedChange={(
+                                                    v: boolean,
+                                                  ) => {
+                                                    // Toggle closed flag
+                                                    form.setFieldValue(
+                                                      field.name,
+                                                      v,
+                                                    );
 
-                                                  if (v) {
-                                                    // When marking closed, set times to 00:00
-                                                    form.setFieldValue(
-                                                      `opening_hours.${idx}.opening_time`,
-                                                      "00:00",
-                                                    );
-                                                    form.setFieldValue(
-                                                      `opening_hours.${idx}.closing_time`,
-                                                      "00:00",
-                                                    );
-                                                  } else {
-                                                    // When reopening, restore sensible defaults
-                                                    const current =
-                                                      form.values.opening_hours[
-                                                        idx
-                                                      ];
-                                                    // Only restore if times are currently 00:00 or falsy
-                                                    if (
-                                                      !current.opening_time ||
-                                                      current.opening_time ===
-                                                        "00:00"
-                                                    ) {
+                                                    if (v) {
+                                                      // When marking closed, set times to 00:00
                                                       form.setFieldValue(
                                                         `opening_hours.${idx}.opening_time`,
-                                                        "08:00",
+                                                        "00:00",
                                                       );
-                                                    }
-                                                    if (
-                                                      !current.closing_time ||
-                                                      current.closing_time ===
-                                                        "00:00"
-                                                    ) {
                                                       form.setFieldValue(
                                                         `opening_hours.${idx}.closing_time`,
-                                                        "22:00",
+                                                        "00:00",
                                                       );
+                                                    } else {
+                                                      // When reopening, restore sensible defaults
+                                                      const current =
+                                                        form.values
+                                                          .opening_hours[idx];
+                                                      // Only restore if times are currently 00:00 or falsy
+                                                      if (
+                                                        !current.opening_time ||
+                                                        current.opening_time ===
+                                                          "00:00"
+                                                      ) {
+                                                        form.setFieldValue(
+                                                          `opening_hours.${idx}.opening_time`,
+                                                          "08:00",
+                                                        );
+                                                      }
+                                                      if (
+                                                        !current.closing_time ||
+                                                        current.closing_time ===
+                                                          "00:00"
+                                                      ) {
+                                                        form.setFieldValue(
+                                                          `opening_hours.${idx}.closing_time`,
+                                                          "22:00",
+                                                        );
+                                                      }
                                                     }
-                                                  }
-                                                }}
-                                              />
-                                            )}
-                                          </Field>
+                                                  }}
+                                                />
+                                              )}
+                                            </Field>
+                                          </div>
                                         </div>
-                                      </div>
-                                    ),
-                                  )}
-                                </>
-                              )}
-                            </Field>
-                          </div>
-                        )}
-                      </FieldArray>
+                                      ),
+                                    )}
+                                  </>
+                                )}
+                              </Field>
+                            </div>
+                          )}
+                        </FieldArray>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Navigation buttons for final tab */}
-                  <div className="mt-6 flex justify-between gap-3">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setActiveTab("address")}
-                    >
-                      Previous
-                    </Button>
-                    <div className="flex gap-3">
+                    {/* Navigation buttons for final tab */}
+                    <div className="mt-6 flex justify-between gap-3">
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={onClose}
-                        disabled={isLoading}
+                        onClick={() => setActiveTab("address")}
                       >
-                        Cancel
+                        Previous
                       </Button>
-                      <Button
-                        type="submit"
-                        disabled={isLoading}
-                        className="w-40 text-white"
-                      >
-                        {isLoading ? "Adding..." : "Add New Salon"}
-                      </Button>
+                      <div className="flex gap-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={onClose}
+                          disabled={isLoading}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="submit"
+                          disabled={isLoading}
+                          className="w-40 text-white"
+                        >
+                          {isLoading ? "Adding..." : "Add New Salon"}
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </FormikForm>
-          )}
-        </Formik>
+                  </TabsContent>
+                </Tabs>
+              </FormikForm>
+            )}
+          </Formik>
+        </div>
       </DialogContent>
     </Dialog>
   );
