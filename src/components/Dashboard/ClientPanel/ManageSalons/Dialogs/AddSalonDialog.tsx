@@ -300,32 +300,10 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
           </DialogDescription>
         </DialogHeader>
         <div className="flex h-[80vh] flex-col items-center justify-start overflow-y-auto px-6 py-4">
-          {/* Step labels and progress bar (view-only) */}
-          <div className="mb-4 w-full">
-            <div className="mb-2 flex items-center justify-center">
-              <div className="flex items-center gap-4">
-                {tabList.map((tab) => (
-                  <div
-                    key={tab.id}
-                    className={`text-xs font-medium ${
-                      activeTab === tab.id
-                        ? "bg-primary rounded-md px-2 py-1 text-white"
-                        : "text-muted-foreground"
-                    }`}
-                  >
-                    {tab.label}
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="bg-muted h-2 w-full rounded-full">
-              <div
-                className="bg-primary h-2 rounded-full transition-all"
-                style={{ width: `${progressPercent}%` }}
-                aria-valuenow={progressPercent}
-                aria-valuemin={0}
-                aria-valuemax={100}
-              />
+          {/* Step indicator (top-right) */}
+          <div className="mb-4 flex w-full justify-end">
+            <div className="text-muted-foreground text-sm font-medium">
+              Step {currentIndex + 1} of {tabList.length}
             </div>
           </div>
           {/* Formik form for adding a new salon goes here */}
