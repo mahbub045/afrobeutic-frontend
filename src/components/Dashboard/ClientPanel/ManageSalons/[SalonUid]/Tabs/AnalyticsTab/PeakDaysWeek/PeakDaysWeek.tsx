@@ -17,16 +17,6 @@ const PeakDaysWeek: React.FC = () => {
   const data = useMemo(() => {
     // sample datasets for different ranges; replace with real data from API
     const datasets: Record<string, (string | number)[][]> = {
-      day: [
-        ["Day", "Peak Days"],
-        ["Mon", 0],
-        ["Tue", 1],
-        ["Wed", 0],
-        ["Thu", 0],
-        ["Fri", 0],
-        ["Sat", 0],
-        ["Sun", 0],
-      ],
       week: [
         ["Day", "Peak Days"],
         ["Mon", 0],
@@ -34,6 +24,16 @@ const PeakDaysWeek: React.FC = () => {
         ["Wed", 0],
         ["Thu", 0],
         ["Fri", 0],
+        ["Sat", 0],
+        ["Sun", 0],
+      ],
+      lastWeek: [
+        ["Day", "Peak Days"],
+        ["Mon", 1],
+        ["Tue", 1],
+        ["Wed", 2],
+        ["Thu", 1],
+        ["Fri", 1],
         ["Sat", 0],
         ["Sun", 0],
       ],
@@ -46,6 +46,16 @@ const PeakDaysWeek: React.FC = () => {
         ["Fri", 2],
         ["Sat", 1],
         ["Sun", 1],
+      ],
+      all: [
+        ["Day", "Peak Days"],
+        ["Mon", 12],
+        ["Tue", 18],
+        ["Wed", 10],
+        ["Thu", 8],
+        ["Fri", 15],
+        ["Sat", 9],
+        ["Sun", 6],
       ],
     };
 
@@ -84,12 +94,20 @@ const PeakDaysWeek: React.FC = () => {
           <Select defaultValue={range} onValueChange={(val) => setRange(val)}>
             <SelectTrigger size="sm" className="w-40">
               <SelectValue>
-                {range === "week" ? "This Week" : "This Month"}
+                {range === "week"
+                  ? "This Week"
+                  : range === "lastWeek"
+                    ? "Last Week"
+                    : range === "all"
+                      ? "All Time"
+                      : "This Month"}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="week">This Week</SelectItem>
+              <SelectItem value="lastWeek">Last Week</SelectItem>
               <SelectItem value="month">This Month</SelectItem>
+              <SelectItem value="all">All Time</SelectItem>
             </SelectContent>
           </Select>
         </div>
