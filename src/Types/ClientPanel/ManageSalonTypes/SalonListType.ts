@@ -64,13 +64,25 @@ export interface AddSalonDialogProps {
 }
 
 export interface FormValues {
+  salon_category: string;
+  is_provide_hair_styles: boolean | null;
+  is_provide_bridal_makeup_services: boolean | null;
+  salon_service_types: string[];
+  bridal_makeup_service_types: string[];
+  additional_service_types: string[];
   name: string;
   salon_type: string;
   email: string;
   phone_number_one: string;
+  phone_number_two?: string | null;
   country_dial_code?: string;
+  country_dial_code_two?: string | null;
   website: string;
-  street: string;
+  facebook?: string;
+  instagram?: string;
+  youtube?: string;
+  address_one: string;
+  address_two?: string;
   city: string;
   postal_code: string;
   country: string;
