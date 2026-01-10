@@ -59,6 +59,18 @@ const basicInfoValidationSchema = Yup.object().shape({
     .required("Please indicate whether the salon provides hair styles"),
 });
 
+const servicesValidationSchema = Yup.object().shape({
+  is_provide_bridal_makeup_services: Yup.boolean()
+    .nullable()
+    .required(
+      "Please indicate whether the salon provides Bridal / Makeup services",
+    ),
+  salon_service_types: Yup.array()
+    .of(Yup.string().required())
+    .min(1, "Please select at least one hair texture")
+    .required("Please select at least one hair texture"),
+});
+
 // Validation schema for contacts tab
 const contactsValidationSchema = Yup.object().shape({
   email: Yup.string().required("Email is required").email("Invalid email"),
@@ -89,6 +101,15 @@ const validationSchema = Yup.object().shape({
   is_provide_hair_styles: Yup.boolean()
     .nullable()
     .required("Please indicate whether the salon provides hair styles"),
+  is_provide_bridal_makeup_services: Yup.boolean()
+    .nullable()
+    .required(
+      "Please indicate whether the salon provides Bridal / Makeup services",
+    ),
+  salon_service_types: Yup.array()
+    .of(Yup.string().required())
+    .min(1, "Please select at least one hair texture")
+    .required("Please select at least one hair texture"),
   email: Yup.string().required("Email is required").email("Invalid email"),
   phone: Yup.string().required("Phone number is required"),
   website: Yup.string().url("Invalid URL"),
@@ -156,6 +177,9 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
         name: formData.name,
         salon_type: formData.salon_type,
         is_provide_hair_styles: formData.is_provide_hair_styles ?? false,
+        is_provide_bridal_makeup_services:
+          formData.is_provide_bridal_makeup_services ?? false,
+        salon_service_types: formData.salon_service_types,
         salon_category: formData.salon_category,
         email: formData.email,
         phone_number_one: formData.phone_number_one,
@@ -251,6 +275,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
   const tabList = [
     { id: "salon-category", label: "Salon Category" },
     { id: "is_provide_hair_styles", label: "Provide Hair Styles" },
+    { id: "services", label: "Services" },
     { id: "salon-details", label: "Salon Details" },
     { id: "contacts", label: "Contacts" },
     { id: "address", label: "Address" },
@@ -295,6 +320,22 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
       await basicInfoValidationSchema.validate(
         {
           is_provide_hair_styles: values.is_provide_hair_styles,
+        },
+        { abortEarly: false },
+      );
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const validateServices = async (values: FormValues): Promise<boolean> => {
+    try {
+      await servicesValidationSchema.validate(
+        {
+          is_provide_bridal_makeup_services:
+            values.is_provide_bridal_makeup_services,
+          salon_service_types: values.salon_service_types,
         },
         { abortEarly: false },
       );
@@ -362,6 +403,8 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
             initialValues={{
               salon_category: "",
               is_provide_hair_styles: null,
+              is_provide_bridal_makeup_services: null,
+              salon_service_types: [],
               name: "",
               salon_type: "",
               email: "",
@@ -530,10 +573,146 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                           onClick={async () => {
                             const isValid = await validateBasicInfo(values);
                             if (isValid) {
-                              setActiveTab("salon-details");
+                              setActiveTab("services");
                             } else {
                               const basicFields = ["is_provide_hair_styles"];
                               basicFields.forEach((field) =>
+                                setFieldTouched(field, true),
+                              );
+                              toast.error(
+                                "Please fill in all required fields before proceeding",
+                              );
+                            }
+                          }}
+                          className="w-32 text-white"
+                        >
+                          Next
+                        </Button>
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent
+                    value="services"
+                    className="flex flex-1 flex-col justify-center space-y-6"
+                  >
+                    <div className="flex justify-center space-y-6">
+                      {values.is_provide_hair_styles === false && (
+                        <div className="flex flex-col justify-center space-y-3">
+                          <Label className="mb-2">
+                            Does this salon provide Bridal / Makeup services?
+                            <span className="text-danger">*</span>
+                          </Label>
+                          <Field name="is_provide_bridal_makeup_services">
+                            {({
+                              field,
+                              form,
+                            }: {
+                              field: FieldInputProps<boolean | null>;
+                              form: FormikProps<FormValues>;
+                            }) => (
+                              <div className="flex flex-wrap items-center gap-4">
+                                {[
+                                  { label: "Yes", value: true },
+                                  { label: "No", value: false },
+                                ].map(({ label, value }) => (
+                                  <label
+                                    key={label}
+                                    className="border-border hover:border-primary flex cursor-pointer items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition"
+                                  >
+                                    <input
+                                      type="radio"
+                                      name={field.name}
+                                      checked={field.value === value}
+                                      onChange={() =>
+                                        form.setFieldValue(field.name, value)
+                                      }
+                                      className="accent-primary h-4 w-4"
+                                    />
+                                    <span>{label}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            )}
+                          </Field>
+                          <ErrorMessage
+                            name="is_provide_bridal_makeup_services"
+                            component="div"
+                            className="text-danger mt-1 text-xs"
+                          />
+                        </div>
+                      )}
+                      {values.is_provide_hair_styles === true && (
+                        <div className="space-y-3">
+                          <Label className="mb-2">
+                            Which hair textures does your salon provide services
+                            for?
+                            <span className="text-danger">*</span>
+                          </Label>
+                          <div className="space-y-2">
+                            {[
+                              {
+                                value: "AFRO_TEXTURED",
+                                label:
+                                  "Afro-textured (kinky / coily / natural hair)",
+                              },
+                              { value: "CURLY", label: "Curly" },
+                              { value: "WAVY", label: "Wavy" },
+                              { value: "STRAIGHT", label: "Straight" },
+                              { value: "NOT_SURE", label: "Not sure" },
+                            ].map((opt) => (
+                              <label
+                                key={opt.value}
+                                className="flex cursor-pointer items-center gap-3 text-sm"
+                              >
+                                <Field
+                                  type="checkbox"
+                                  name="salon_service_types"
+                                  value={opt.value}
+                                  className="accent-primary h-4 w-4"
+                                />
+                                <span>{opt.label}</span>
+                              </label>
+                            ))}
+                          </div>
+                          <ErrorMessage
+                            name="salon_service_types"
+                            component="div"
+                            className="text-danger mt-1 text-xs"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="mt-6 flex items-center justify-between gap-3">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setActiveTab("is_provide_hair_styles")}
+                      >
+                        Previous
+                      </Button>
+                      <div className="flex gap-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={onClose}
+                          disabled={isLoading}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={async () => {
+                            const isValid = await validateServices(values);
+                            if (isValid) {
+                              setActiveTab("salon-details");
+                            } else {
+                              const serviceFields = [
+                                "is_provide_bridal_makeup_services",
+                                "salon_service_types",
+                              ];
+                              serviceFields.forEach((field) =>
                                 setFieldTouched(field, true),
                               );
                               toast.error(
@@ -602,7 +781,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => setActiveTab("is_provide_hair_styles")}
+                        onClick={() => setActiveTab("services")}
                       >
                         Previous
                       </Button>
