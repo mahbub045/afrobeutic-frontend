@@ -161,7 +161,11 @@ const validationSchema = Yup.object().shape({
       otherwise: (schema) => schema.notRequired(),
     }),
   email: Yup.string().required("Email is required").email("Invalid email"),
-  phone: Yup.string().required("Phone number is required"),
+  phone_number_one: Yup.string().required("Phone number is required"),
+  phone_number_two: Yup.string(),
+  facebook: Yup.string().url("Invalid URL"),
+  instagram: Yup.string().url("Invalid URL"),
+  youtube: Yup.string().url("Invalid URL"),
   website: Yup.string().url("Invalid URL"),
   address_one: Yup.string().required("Address is required"),
   address_two: Yup.string(),
@@ -223,6 +227,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
         email: string;
         phone_number_one: string;
         country_dial_code?: string;
+        country_dial_code_two?: string;
       } = {
         name: formData.name,
         salon_type: formData.salon_type,
@@ -232,9 +237,16 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
         salon_service_types: formData.salon_service_types,
         salon_category: formData.salon_category,
         email: formData.email,
-        phone_number_one: formData.phone_number_one,
-        phone_number_two: formData.phone_number_two || null,
+        phone_number_one: formData.phone_number_one.startsWith("+")
+          ? formData.phone_number_one
+          : `+${formData.phone_number_one}`,
+        phone_number_two: formData.phone_number_two
+          ? formData.phone_number_two.startsWith("+")
+            ? formData.phone_number_two
+            : `+${formData.phone_number_two}`
+          : null,
         country_dial_code: formData.country_dial_code,
+        country_dial_code_two: formData.country_dial_code_two || undefined,
         website: formData.website,
         facebook: formData.facebook,
         instagram: formData.instagram,
