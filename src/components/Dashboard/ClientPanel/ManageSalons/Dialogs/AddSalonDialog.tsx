@@ -547,7 +547,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
             Fill in the details to add a new salon.
           </DialogDescription>
         </DialogHeader>
-        <div className="flex h-[80vh] flex-col items-center justify-start overflow-y-auto px-6 py-4">
+        <div className="flex !min-h-[60vh] !max-h-[60vh] flex-col items-center justify-start overflow-y-auto px-6 py-4">
           {/* Step indicator (top-right) */}
           <div className="mb-4 flex w-full justify-end">
             <div className="text-muted-foreground text-sm font-medium">
