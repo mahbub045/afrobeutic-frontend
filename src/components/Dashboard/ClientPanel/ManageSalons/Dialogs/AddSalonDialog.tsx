@@ -60,15 +60,29 @@ const basicInfoValidationSchema = Yup.object().shape({
 });
 
 const servicesValidationSchema = Yup.object().shape({
+  is_provide_hair_styles: Yup.boolean()
+    .nullable()
+    .required("Please indicate whether the salon provides hair styles"),
   is_provide_bridal_makeup_services: Yup.boolean()
     .nullable()
-    .required(
-      "Please indicate whether the salon provides Bridal / Makeup services",
-    ),
+    .when("is_provide_hair_styles", {
+      is: false,
+      then: (schema) =>
+        schema.required(
+          "Please indicate whether the salon provides Bridal / Makeup services",
+        ),
+      otherwise: (schema) => schema.notRequired(),
+    }),
   salon_service_types: Yup.array()
     .of(Yup.string().required())
-    .min(1, "Please select at least one hair texture")
-    .required("Please select at least one hair texture"),
+    .when("is_provide_hair_styles", {
+      is: true,
+      then: (schema) =>
+        schema
+          .min(1, "Please select at least one hair texture")
+          .required("Please select at least one hair texture"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
 });
 
 // Validation schema for contacts tab
@@ -103,13 +117,24 @@ const validationSchema = Yup.object().shape({
     .required("Please indicate whether the salon provides hair styles"),
   is_provide_bridal_makeup_services: Yup.boolean()
     .nullable()
-    .required(
-      "Please indicate whether the salon provides Bridal / Makeup services",
-    ),
+    .when("is_provide_hair_styles", {
+      is: false,
+      then: (schema) =>
+        schema.required(
+          "Please indicate whether the salon provides Bridal / Makeup services",
+        ),
+      otherwise: (schema) => schema.notRequired(),
+    }),
   salon_service_types: Yup.array()
     .of(Yup.string().required())
-    .min(1, "Please select at least one hair texture")
-    .required("Please select at least one hair texture"),
+    .when("is_provide_hair_styles", {
+      is: true,
+      then: (schema) =>
+        schema
+          .min(1, "Please select at least one hair texture")
+          .required("Please select at least one hair texture"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
   email: Yup.string().required("Email is required").email("Invalid email"),
   phone: Yup.string().required("Phone number is required"),
   website: Yup.string().url("Invalid URL"),
@@ -333,6 +358,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
     try {
       await servicesValidationSchema.validate(
         {
+          is_provide_hair_styles: values.is_provide_hair_styles,
           is_provide_bridal_makeup_services:
             values.is_provide_bridal_makeup_services,
           salon_service_types: values.salon_service_types,
@@ -708,10 +734,10 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                             if (isValid) {
                               setActiveTab("salon-details");
                             } else {
-                              const serviceFields = [
-                                "is_provide_bridal_makeup_services",
-                                "salon_service_types",
-                              ];
+                              const serviceFields =
+                                values.is_provide_hair_styles === false
+                                  ? ["is_provide_bridal_makeup_services"]
+                                  : ["salon_service_types"];
                               serviceFields.forEach((field) =>
                                 setFieldTouched(field, true),
                               );
