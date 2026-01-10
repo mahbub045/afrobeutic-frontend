@@ -46,18 +46,26 @@ const getTimeDifference = (startTime: string, endTime: string): number => {
   return timeToMinutes(endTime) - timeToMinutes(startTime);
 };
 
-// Validation schema for salon details tab (now includes all basic info)
+// Validation schema for salon details tab (basic info only)
 const salonDetailsValidationSchema = Yup.object().shape({
   name: Yup.string().required("Salon name is required"),
-  email: Yup.string().required("Email is required").email("Invalid email"),
-  phone: Yup.string().required("Phone number is required"),
-  website: Yup.string().url("Invalid URL"),
   address_one: Yup.string().required("Address is required"),
   address_two: Yup.string(),
   city: Yup.string().required("City is required"),
   postal_code: Yup.string().required("Postal code is required"),
   country: Yup.string().required("Country is required"),
+  website: Yup.string().url("Invalid URL"),
   address: Yup.string().url("Invalid URL").notRequired(),
+});
+
+// Validation schema for contacts and social links tab
+const contactsValidationSchema = Yup.object().shape({
+  email: Yup.string().required("Email is required").email("Invalid email"),
+  phone_number_one: Yup.string().required("Phone number is required"),
+  phone_number_two: Yup.string(),
+  facebook: Yup.string().url("Invalid URL"),
+  instagram: Yup.string().url("Invalid URL"),
+  youtube: Yup.string().url("Invalid URL"),
 });
 
 // Validation schema for salon type tab
@@ -225,8 +233,12 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
         salon_category: formData.salon_category,
         email: formData.email,
         phone_number_one: formData.phone_number_one,
+        phone_number_two: formData.phone_number_two || null,
         country_dial_code: formData.country_dial_code,
         website: formData.website,
+        facebook: formData.facebook,
+        instagram: formData.instagram,
+        youtube: formData.youtube,
         address_one: formData.address_one,
         address_two: formData.address_two || null,
         city: formData.city,
@@ -322,6 +334,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
     { id: "service-options", label: "Service Options" },
     { id: "salon-type", label: "Salon Type" },
     { id: "salon-details", label: "Basic Info" },
+    { id: "contacts", label: "Contacts & Social Links" },
     { id: "opening-hours", label: "Opening Hours" },
   ];
   const currentIndex = Math.max(
@@ -348,15 +361,32 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
       await salonDetailsValidationSchema.validate(
         {
           name: values.name,
-          email: values.email,
-          phone: values.phone_number_one,
-          website: values.website,
           address_one: values.address_one,
           address_two: values.address_two,
           city: values.city,
           postal_code: values.postal_code,
           country: values.country,
+          website: values.website,
           address: values.address,
+        },
+        { abortEarly: false },
+      );
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const validateContacts = async (values: FormValues): Promise<boolean> => {
+    try {
+      await contactsValidationSchema.validate(
+        {
+          email: values.email,
+          phone_number_one: values.phone_number_one,
+          phone_number_two: values.phone_number_two,
+          facebook: values.facebook,
+          instagram: values.instagram,
+          youtube: values.youtube,
         },
         { abortEarly: false },
       );
@@ -525,8 +555,13 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
               salon_type: "",
               email: "",
               phone_number_one: "",
+              phone_number_two: "",
               country_dial_code: "",
+              country_dial_code_two: "",
               website: "",
+              facebook: "",
+              instagram: "",
+              youtube: "",
               address_one: "",
               address_two: "",
               city: "",
@@ -1350,101 +1385,27 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                       />
                     </div>
 
-                    {/* Email */}
+                    {/* Website */}
                     <div>
-                      <Label htmlFor="email" className="mb-2">
-                        Email<span className="text-danger">*</span>
+                      <Label htmlFor="website" className="mb-2">
+                        Website{" "}
+                        <span className="text-muted-foreground text-xs">
+                          (Optional)
+                        </span>
                       </Label>
                       <Field
-                        name="email"
-                        id="email"
+                        name="website"
+                        id="website"
                         as="input"
-                        type="email"
-                        placeholder="Enter email address"
+                        type="text"
+                        placeholder="https://"
                         className="w-full"
                       />
                       <ErrorMessage
-                        name="email"
+                        name="website"
                         component="div"
                         className="text-danger mt-1 text-xs"
                       />
-                    </div>
-
-                    {/* Phone and Website */}
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <div>
-                        <Label htmlFor="phone" className="mb-2">
-                          Phone<span className="text-danger">*</span>
-                        </Label>
-                        <Field type="hidden" name="country_dial_code" />
-                        <Field name="phone">
-                          {({
-                            field,
-                            form,
-                          }: {
-                            field: FieldInputProps<string>;
-                            form: FormikProps<FormValues>;
-                          }) => (
-                            <div>
-                              <PhoneInput
-                                country={"gb"}
-                                value={field.value}
-                                onChange={(
-                                  value: string,
-                                  data?: { dialCode?: string },
-                                ) => {
-                                  form.setFieldValue("phone_number_one", value);
-                                  if (data?.dialCode) {
-                                    form.setFieldValue(
-                                      "country_dial_code",
-                                      `+${data.dialCode}`,
-                                    );
-                                  }
-                                }}
-                                onBlur={() =>
-                                  form.setFieldTouched("phone_number_one", true)
-                                }
-                                inputProps={{
-                                  name: field.name,
-                                  required: true,
-                                }}
-                                searchPlaceholder="Search"
-                                searchNotFound="No country found"
-                                enableSearch={true}
-                                inputClass="!w-full !h-auto px-3 py-2 rounded-md !bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100"
-                                buttonClass="!bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100 !border-1 dark:!border-gray-700"
-                                dropdownClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100 !px-2"
-                                searchClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100"
-                              />
-                              <ErrorMessage
-                                name="phone"
-                                component="div"
-                                className="text-danger mt-1 text-xs"
-                              />
-                            </div>
-                          )}
-                        </Field>
-                      </div>
-                      <div>
-                        <Label htmlFor="website" className="mb-2">
-                          Website{" "}
-                          <span className="text-muted-foreground text-xs">
-                            (Optional)
-                          </span>
-                        </Label>
-                        <Field
-                          name="website"
-                          id="website"
-                          as="input"
-                          type="text"
-                          placeholder="https://"
-                        />
-                        <ErrorMessage
-                          name="website"
-                          component="div"
-                          className="text-danger mt-1 text-xs"
-                        />
-                      </div>
                     </div>
 
                     {/* Google Location Link */}
@@ -1492,7 +1453,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                           onClick={async () => {
                             const isValid = await validateSalonDetails(values);
                             if (isValid) {
-                              setActiveTab("opening-hours");
+                              setActiveTab("contacts");
                             } else {
                               const basicFields = [
                                 "name",
@@ -1500,10 +1461,271 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                 "city",
                                 "postal_code",
                                 "country",
+                              ];
+                              basicFields.forEach((field) =>
+                                setFieldTouched(field, true),
+                              );
+                              toast.error(
+                                "Please fill in all required fields before proceeding",
+                              );
+                            }
+                          }}
+                          className="w-32 text-white"
+                        >
+                          Next
+                        </Button>
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent
+                    value="contacts"
+                    className="flex flex-1 flex-col justify-start space-y-4"
+                  >
+                    <h3 className="mb-4 text-lg font-semibold">
+                      Contacts and social links
+                    </h3>
+                    <p className="text-muted-foreground mb-4 text-sm">
+                      Perfect! Now share contacts and social links of your salon
+                      for the upcoming customers!
+                    </p>
+
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      {" "}
+                      {/* Phone Number 1 */}
+                      <div>
+                        <Label htmlFor="phone_number_one" className="mb-2">
+                          Phone Number 1<span className="text-danger">*</span>
+                        </Label>
+                        <Field type="hidden" name="country_dial_code" />
+                        <Field name="phone_number_one">
+                          {({
+                            field,
+                            form,
+                          }: {
+                            field: FieldInputProps<string>;
+                            form: FormikProps<FormValues>;
+                          }) => (
+                            <div>
+                              <PhoneInput
+                                country={"gb"}
+                                value={field.value}
+                                onChange={(
+                                  value: string,
+                                  data?: { dialCode?: string },
+                                ) => {
+                                  form.setFieldValue("phone_number_one", value);
+                                  if (data?.dialCode) {
+                                    form.setFieldValue(
+                                      "country_dial_code",
+                                      `+${data.dialCode}`,
+                                    );
+                                  }
+                                }}
+                                onBlur={() =>
+                                  form.setFieldTouched("phone_number_one", true)
+                                }
+                                inputProps={{
+                                  name: "phone_number_one",
+                                  required: true,
+                                }}
+                                placeholder="Primary phone number"
+                                searchPlaceholder="Search"
+                                searchNotFound="No country found"
+                                enableSearch={true}
+                                inputClass="!w-full !h-auto px-3 py-2 rounded-md !bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100"
+                                buttonClass="!bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100 !border-1 dark:!border-gray-700"
+                                dropdownClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100 !px-2"
+                                searchClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100"
+                              />
+                              <ErrorMessage
+                                name="phone_number_one"
+                                component="div"
+                                className="text-danger mt-1 text-xs"
+                              />
+                            </div>
+                          )}
+                        </Field>
+                      </div>
+                      {/* Phone Number 2 (Optional) */}
+                      <div>
+                        <Label htmlFor="phone_number_two" className="mb-2">
+                          Phone Number 2{" "}
+                          <span className="text-muted-foreground text-xs">
+                            (optional)
+                          </span>
+                        </Label>
+                        <Field type="hidden" name="country_dial_code_two" />
+                        <Field name="phone_number_two">
+                          {({
+                            field,
+                            form,
+                          }: {
+                            field: FieldInputProps<string>;
+                            form: FormikProps<FormValues>;
+                          }) => (
+                            <div>
+                              <PhoneInput
+                                country={"gb"}
+                                value={field.value}
+                                onChange={(
+                                  value: string,
+                                  data?: { dialCode?: string },
+                                ) => {
+                                  form.setFieldValue("phone_number_two", value);
+                                  if (data?.dialCode) {
+                                    form.setFieldValue(
+                                      "country_dial_code_two",
+                                      `+${data.dialCode}`,
+                                    );
+                                  }
+                                }}
+                                onBlur={() =>
+                                  form.setFieldTouched("phone_number_two", true)
+                                }
+                                inputProps={{
+                                  name: "phone_number_two",
+                                  required: false,
+                                }}
+                                placeholder="Secondary phone number"
+                                searchPlaceholder="Search"
+                                searchNotFound="No country found"
+                                enableSearch={true}
+                                inputClass="!w-full !h-auto px-3 py-2 rounded-md !bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100"
+                                buttonClass="!bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100 !border-1 dark:!border-gray-700"
+                                dropdownClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100 !px-2"
+                                searchClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100"
+                              />
+                              <ErrorMessage
+                                name="phone_number_two"
+                                component="div"
+                                className="text-danger mt-1 text-xs"
+                              />
+                            </div>
+                          )}
+                        </Field>
+                      </div>
+                    </div>
+
+                    {/* Email */}
+                    <div>
+                      <Label htmlFor="email" className="mb-2">
+                        Email<span className="text-danger">*</span>
+                      </Label>
+                      <Field
+                        name="email"
+                        id="email"
+                        as="input"
+                        type="email"
+                        placeholder="example@example.com"
+                        className="w-full"
+                      />
+                      <ErrorMessage
+                        name="email"
+                        component="div"
+                        className="text-danger mt-1 text-xs"
+                      />
+                    </div>
+
+                    {/* Social links heading */}
+                    <div className="mt-4">
+                      <h4 className="text-base font-semibold">
+                        Social links{" "}
+                        <span className="text-muted-foreground text-xs font-normal">
+                          (optional)
+                        </span>
+                      </h4>
+                    </div>
+
+                    {/* Facebook Page Link */}
+                    <div>
+                      <Label htmlFor="facebook" className="mb-2">
+                        Facebook Page Link
+                      </Label>
+                      <Field
+                        name="facebook"
+                        id="facebook"
+                        as="input"
+                        type="text"
+                        placeholder="https://"
+                        className="w-full"
+                      />
+                      <ErrorMessage
+                        name="facebook"
+                        component="div"
+                        className="text-danger mt-1 text-xs"
+                      />
+                    </div>
+
+                    {/* Instagram Page Link */}
+                    <div>
+                      <Label htmlFor="instagram" className="mb-2">
+                        Instagram Page Link
+                      </Label>
+                      <Field
+                        name="instagram"
+                        id="instagram"
+                        as="input"
+                        type="text"
+                        placeholder="https://"
+                        className="w-full"
+                      />
+                      <ErrorMessage
+                        name="instagram"
+                        component="div"
+                        className="text-danger mt-1 text-xs"
+                      />
+                    </div>
+
+                    {/* YouTube Channel Link */}
+                    <div>
+                      <Label htmlFor="youtube" className="mb-2">
+                        YouTube Channel Link
+                      </Label>
+                      <Field
+                        name="youtube"
+                        id="youtube"
+                        as="input"
+                        type="text"
+                        placeholder="https://"
+                        className="w-full"
+                      />
+                      <ErrorMessage
+                        name="youtube"
+                        component="div"
+                        className="text-danger mt-1 text-xs"
+                      />
+                    </div>
+
+                    <div className="mt-6 flex items-center justify-between gap-3">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setActiveTab("salon-details")}
+                      >
+                        Previous
+                      </Button>
+                      <div className="flex gap-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={onClose}
+                          disabled={isLoading}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={async () => {
+                            const isValid = await validateContacts(values);
+                            if (isValid) {
+                              setActiveTab("opening-hours");
+                            } else {
+                              const contactFields = [
                                 "email",
                                 "phone_number_one",
                               ];
-                              basicFields.forEach((field) =>
+                              contactFields.forEach((field) =>
                                 setFieldTouched(field, true),
                               );
                               toast.error(
@@ -1689,7 +1911,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => setActiveTab("address")}
+                        onClick={() => setActiveTab("contacts")}
                       >
                         Previous
                       </Button>

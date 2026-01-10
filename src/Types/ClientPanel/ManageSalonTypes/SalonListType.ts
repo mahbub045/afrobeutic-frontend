@@ -74,8 +74,13 @@ export interface FormValues {
   salon_type: string;
   email: string;
   phone_number_one: string;
+  phone_number_two?: string;
   country_dial_code?: string;
+  country_dial_code_two?: string;
   website: string;
+  facebook?: string;
+  instagram?: string;
+  youtube?: string;
   address_one: string;
   address_two?: string;
   city: string;
