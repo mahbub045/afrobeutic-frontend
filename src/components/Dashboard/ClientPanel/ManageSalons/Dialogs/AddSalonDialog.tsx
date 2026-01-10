@@ -46,9 +46,13 @@ const getTimeDifference = (startTime: string, endTime: string): number => {
   return timeToMinutes(endTime) - timeToMinutes(startTime);
 };
 
-// Validation schema for basic info tab
+// Validation schema for salon details tab
 const salonDetailsValidationSchema = Yup.object().shape({
   name: Yup.string().required("Salon name is required"),
+});
+
+// Validation schema for salon type tab
+const salonTypeValidationSchema = Yup.object().shape({
   salon_type: Yup.string().required("Salon type is required"),
 });
 
@@ -299,9 +303,9 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
     { value: "OCCASIONALLY_BOTH", label: "Occasionally Both" },
   ];
   const salonTypes = [
-    { value: "UNISEX", label: "Unisex Salon" },
-    { value: "MALE", label: "Male Salon" },
-    { value: "FEMALE", label: "Female Salon" },
+    { value: "BARBERSHOP", label: "Barbershop / Men’s Salon" },
+    { value: "UNISEX_SALON", label: "Unisex Salon" },
+    { value: "LADIES_SALON", label: "Ladies Salon" },
   ];
   const days = [
     "MONDAY",
@@ -325,6 +329,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
     { id: "is_provide_hair_styles", label: "Provide Hair Styles" },
     { id: "services", label: "Services" },
     { id: "service-options", label: "Service Options" },
+    { id: "salon-type", label: "Salon Type" },
     { id: "salon-details", label: "Salon Details" },
     { id: "contacts", label: "Contacts" },
     { id: "address", label: "Address" },
@@ -354,6 +359,19 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
       await salonDetailsValidationSchema.validate(
         {
           name: values.name,
+        },
+        { abortEarly: false },
+      );
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const validateSalonType = async (values: FormValues): Promise<boolean> => {
+    try {
+      await salonTypeValidationSchema.validate(
+        {
           salon_type: values.salon_type,
         },
         { abortEarly: false },
@@ -874,20 +892,20 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                           type="radio"
                                           name={field.name}
                                           checked={field.value === value}
-                                            onChange={() => {
-                                              form.setFieldValue(
-                                                field.name,
-                                                value,
-                                              );
-                                              form.setFieldValue(
-                                                "bridal_makeup_service_types",
-                                                [],
-                                              );
-                                              form.setFieldValue(
-                                                "additional_service_types",
-                                                [],
-                                              );
-                                            }}
+                                          onChange={() => {
+                                            form.setFieldValue(
+                                              field.name,
+                                              value,
+                                            );
+                                            form.setFieldValue(
+                                              "bridal_makeup_service_types",
+                                              [],
+                                            );
+                                            form.setFieldValue(
+                                              "additional_service_types",
+                                              [],
+                                            );
+                                          }}
                                           className="accent-primary h-4 w-4"
                                         />
                                         <span>{label}</span>
@@ -1005,7 +1023,10 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                           </h3>
                           <div className="space-y-2">
                             {[
-                              { value: "BRIDAL_MAKEUP", label: "Bridal makeup" },
+                              {
+                                value: "BRIDAL_MAKEUP",
+                                label: "Bridal makeup",
+                              },
                               {
                                 value: "ENGAGEMENT_PRE_WEDDING_MAKEUP",
                                 label: "Engagement / pre-wedding makeup",
@@ -1064,8 +1085,14 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                           </h3>
                           <div className="space-y-2">
                             {[
-                              { value: "BEAUTY_SERVICES", label: "Beauty services" },
-                              { value: "NAIL_SERVICES", label: "Nail services" },
+                              {
+                                value: "BEAUTY_SERVICES",
+                                label: "Beauty services",
+                              },
+                              {
+                                value: "NAIL_SERVICES",
+                                label: "Nail services",
+                              },
                               { value: "SPA_SERVICES", label: "Spa services" },
                               {
                                 value: "NONE_OF_THE_ABOVE",
@@ -1123,9 +1150,12 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                             const isValid =
                               await validateServiceOptionsStep(values);
                             if (isValid) {
-                              setActiveTab("salon-details");
+                              setActiveTab("salon-type");
                             } else {
-                              if (values.is_provide_bridal_makeup_services === true) {
+                              if (
+                                values.is_provide_bridal_makeup_services ===
+                                true
+                              ) {
                                 setFieldTouched(
                                   "bridal_makeup_service_types",
                                   true,
@@ -1150,10 +1180,80 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                   </TabsContent>
 
                   <TabsContent
+                    value="salon-type"
+                    className="flex flex-1 flex-col justify-center space-y-6"
+                  >
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold">
+                        Is this salon a Barbershop / Men’s Salon or a Unisex
+                        Salon?
+                      </h3>
+                      <div className="grid gap-3">
+                        {salonTypes.map((type) => (
+                          <label
+                            key={type.value}
+                            className="border-border hover:border-primary flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 text-sm font-semibold transition"
+                          >
+                            <Field
+                              type="radio"
+                              name="salon_type"
+                              value={type.value}
+                              className="accent-primary h-4 w-4"
+                            />
+                            <span>{type.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                      <ErrorMessage
+                        name="salon_type"
+                        component="div"
+                        className="text-danger mt-1 text-xs"
+                      />
+                    </div>
+
+                    <div className="mt-6 flex items-center justify-between gap-3">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setActiveTab("service-options")}
+                      >
+                        Previous
+                      </Button>
+                      <div className="flex gap-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={onClose}
+                          disabled={isLoading}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={async () => {
+                            const isValid = await validateSalonType(values);
+                            if (isValid) {
+                              setActiveTab("salon-details");
+                            } else {
+                              setFieldTouched("salon_type", true);
+                              toast.error(
+                                "Please select a salon type before proceeding",
+                              );
+                            }
+                          }}
+                          className="w-32 text-white"
+                        >
+                          Next
+                        </Button>
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent
                     value="salon-details"
                     className="flex flex-1 flex-col justify-center space-y-4"
                   >
-                    <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div className="mb-4 grid grid-cols-1 gap-4">
                       <div>
                         <Label htmlFor="name" className="mb-2">
                           Salon Name<span className="text-danger">*</span>
@@ -1171,38 +1271,13 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                           className="text-danger mt-1 text-xs"
                         />
                       </div>
-                      <div>
-                        <Label htmlFor="salon_type" className="mb-2">
-                          Salon Type<span className="text-danger">*</span>
-                        </Label>
-                        <Field
-                          id="salon_type"
-                          name="salon_type"
-                          as="select"
-                          required
-                        >
-                          <option value="" disabled>
-                            Select a salon type
-                          </option>
-                          {salonTypes.map((type) => (
-                            <option key={type.value} value={type.value}>
-                              {type.label}
-                            </option>
-                          ))}
-                        </Field>
-                        <ErrorMessage
-                          name="salon_type"
-                          component="div"
-                          className="text-danger mt-1 text-xs"
-                        />
-                      </div>
                     </div>
 
                     <div className="mt-6 flex items-center justify-between gap-3">
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => setActiveTab("services")}
+                        onClick={() => setActiveTab("salon-type")}
                       >
                         Previous
                       </Button>
@@ -1222,10 +1297,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                             if (isValid) {
                               setActiveTab("contacts");
                             } else {
-                              const detailFields = ["name", "salon_type"];
-                              detailFields.forEach((field) =>
-                                setFieldTouched(field, true),
-                              );
+                              setFieldTouched("name", true);
                               toast.error(
                                 "Please fill in all required fields before proceeding",
                               );
