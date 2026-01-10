@@ -324,6 +324,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
     { id: "salon-category", label: "Salon Category" },
     { id: "is_provide_hair_styles", label: "Provide Hair Styles" },
     { id: "services", label: "Services" },
+    { id: "service-options", label: "Service Options" },
     { id: "salon-details", label: "Salon Details" },
     { id: "contacts", label: "Contacts" },
     { id: "address", label: "Address" },
@@ -438,6 +439,44 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
     }
   };
 
+  const validateServiceOptionsStep = async (
+    values: FormValues,
+  ): Promise<boolean> => {
+    try {
+      if (values.is_provide_bridal_makeup_services === true) {
+        await Yup.object()
+          .shape({
+            bridal_makeup_service_types: Yup.array()
+              .of(Yup.string().required())
+              .min(1, "Please select at least one option")
+              .required("Please select at least one option"),
+          })
+          .validate(
+            {
+              bridal_makeup_service_types: values.bridal_makeup_service_types,
+            },
+            { abortEarly: false },
+          );
+        return true;
+      }
+
+      await Yup.object()
+        .shape({
+          additional_service_types: Yup.array()
+            .of(Yup.string().required())
+            .min(1, "Please select at least one option")
+            .required("Please select at least one option"),
+        })
+        .validate(
+          { additional_service_types: values.additional_service_types },
+          { abortEarly: false },
+        );
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   const validateContacts = async (values: FormValues): Promise<boolean> => {
     try {
       await contactsValidationSchema.validate(
@@ -498,6 +537,8 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
               is_provide_hair_styles: null,
               is_provide_bridal_makeup_services: null,
               salon_service_types: [],
+              bridal_makeup_service_types: [],
+              additional_service_types: [],
               name: "",
               salon_type: "",
               email: "",
@@ -736,9 +777,17 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                       type="radio"
                                       name={field.name}
                                       checked={field.value === value}
-                                      onChange={() =>
-                                        form.setFieldValue(field.name, value)
-                                      }
+                                      onChange={() => {
+                                        form.setFieldValue(field.name, value);
+                                        form.setFieldValue(
+                                          "bridal_makeup_service_types",
+                                          [],
+                                        );
+                                        form.setFieldValue(
+                                          "additional_service_types",
+                                          [],
+                                        );
+                                      }}
                                       className="accent-primary h-4 w-4"
                                     />
                                     <span>{label}</span>
@@ -825,12 +874,20 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                           type="radio"
                                           name={field.name}
                                           checked={field.value === value}
-                                          onChange={() =>
-                                            form.setFieldValue(
-                                              field.name,
-                                              value,
-                                            )
-                                          }
+                                            onChange={() => {
+                                              form.setFieldValue(
+                                                field.name,
+                                                value,
+                                              );
+                                              form.setFieldValue(
+                                                "bridal_makeup_service_types",
+                                                [],
+                                              );
+                                              form.setFieldValue(
+                                                "additional_service_types",
+                                                [],
+                                              );
+                                            }}
                                           className="accent-primary h-4 w-4"
                                         />
                                         <span>{label}</span>
@@ -894,7 +951,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                                 await validateBridalOnly(values);
 
                               if (typesValid && bridalValid) {
-                                setActiveTab("salon-details");
+                                setActiveTab("service-options");
                               } else {
                                 if (!typesValid) {
                                   setFieldTouched("salon_service_types", true);
@@ -914,7 +971,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
 
                             const isValid = await validateServices(values);
                             if (isValid) {
-                              setActiveTab("salon-details");
+                              setActiveTab("service-options");
                             } else {
                               const serviceFields: string[] = [
                                 "is_provide_bridal_makeup_services",
@@ -924,6 +981,163 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                               );
                               toast.error(
                                 "Please fill in all required fields before proceeding",
+                              );
+                            }
+                          }}
+                          className="w-32 text-white"
+                        >
+                          Next
+                        </Button>
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent
+                    value="service-options"
+                    className="flex flex-1 flex-col justify-center space-y-6"
+                  >
+                    <div className="space-y-6">
+                      {values.is_provide_bridal_makeup_services === true ? (
+                        <div className="space-y-3">
+                          <h3 className="text-base font-semibold tracking-tight">
+                            Which Bridal / Makeup services does your salon
+                            provide?
+                          </h3>
+                          <div className="space-y-2">
+                            {[
+                              { value: "BRIDAL_MAKEUP", label: "Bridal makeup" },
+                              {
+                                value: "ENGAGEMENT_PRE_WEDDING_MAKEUP",
+                                label: "Engagement / pre-wedding makeup",
+                              },
+                              {
+                                value: "PARTY_EVENING_MAKEUP",
+                                label: "Party / evening makeup",
+                              },
+                              {
+                                value: "PHOTOSHOOT_EDITORIAL_MAKEUP",
+                                label: "Photoshoot / editorial makeup",
+                              },
+                              {
+                                value: "TRADITIONAL_CULTURAL_BRIDAL_MAKEUP",
+                                label: "Traditional / cultural bridal makeup",
+                              },
+                              {
+                                value: "HD_AIRBRUSH_MAKEUP",
+                                label: "HD / airbrush makeup",
+                              },
+                              {
+                                value: "HAIR_STYLING_FOR_BRIDAL_CLIENTS",
+                                label: "Hair styling for bridal clients",
+                              },
+                              {
+                                value: "GROOM_MAKEUP_GROOMING",
+                                label: "Groom makeup / grooming",
+                              },
+                              { value: "NOT_SURE", label: "Not sure" },
+                            ].map((opt) => (
+                              <label
+                                key={opt.value}
+                                className="flex cursor-pointer items-center gap-3 text-sm"
+                              >
+                                <Field
+                                  type="checkbox"
+                                  name="bridal_makeup_service_types"
+                                  value={opt.value}
+                                  className="accent-primary h-4 w-4"
+                                />
+                                <span>{opt.label}</span>
+                              </label>
+                            ))}
+                          </div>
+                          <ErrorMessage
+                            name="bridal_makeup_service_types"
+                            component="div"
+                            className="text-danger mt-1 text-xs"
+                          />
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <h3 className="text-base font-semibold tracking-tight">
+                            Please confirm which services your salon also
+                            includes
+                          </h3>
+                          <div className="space-y-2">
+                            {[
+                              { value: "BEAUTY_SERVICES", label: "Beauty services" },
+                              { value: "NAIL_SERVICES", label: "Nail services" },
+                              { value: "SPA_SERVICES", label: "Spa services" },
+                              {
+                                value: "NONE_OF_THE_ABOVE",
+                                label: "None of the above",
+                              },
+                            ].map((opt) => (
+                              <label
+                                key={opt.value}
+                                className="flex cursor-pointer items-center gap-3 text-sm"
+                              >
+                                <Field
+                                  type="checkbox"
+                                  name="additional_service_types"
+                                  value={opt.value}
+                                  className="accent-primary h-4 w-4"
+                                />
+                                <span>{opt.label}</span>
+                              </label>
+                            ))}
+                          </div>
+                          <ErrorMessage
+                            name="additional_service_types"
+                            component="div"
+                            className="text-danger mt-1 text-xs"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="mt-6 flex items-center justify-between gap-3">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          if (values.is_provide_hair_styles === true) {
+                            setShowBridalInServicesTab(true);
+                          }
+                          setActiveTab("services");
+                        }}
+                      >
+                        Previous
+                      </Button>
+                      <div className="flex gap-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={onClose}
+                          disabled={isLoading}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={async () => {
+                            const isValid =
+                              await validateServiceOptionsStep(values);
+                            if (isValid) {
+                              setActiveTab("salon-details");
+                            } else {
+                              if (values.is_provide_bridal_makeup_services === true) {
+                                setFieldTouched(
+                                  "bridal_makeup_service_types",
+                                  true,
+                                );
+                              } else {
+                                setFieldTouched(
+                                  "additional_service_types",
+                                  true,
+                                );
+                              }
+                              toast.error(
+                                "Please select at least one option before proceeding",
                               );
                             }
                           }}

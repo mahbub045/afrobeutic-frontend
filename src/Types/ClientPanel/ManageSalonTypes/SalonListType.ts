@@ -68,6 +68,8 @@ export interface FormValues {
   is_provide_hair_styles: boolean | null;
   is_provide_bridal_makeup_services: boolean | null;
   salon_service_types: string[];
+  bridal_makeup_service_types: string[];
+  additional_service_types: string[];
   name: string;
   salon_type: string;
   email: string;
