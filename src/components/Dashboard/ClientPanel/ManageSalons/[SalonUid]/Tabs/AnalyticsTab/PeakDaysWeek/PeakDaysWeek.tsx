@@ -41,7 +41,7 @@ const PeakDaysWeek: React.FC = () => {
         ["Day", "Peak Days"],
         ["Mon", 2],
         ["Tue", 2],
-        ["Wed", 1],
+        ["Wed", 5],
         ["Thu", 1],
         ["Fri", 2],
         ["Sat", 1],
@@ -52,6 +52,11 @@ const PeakDaysWeek: React.FC = () => {
     return datasets[range] ?? datasets.week;
   }, [range]);
 
+  const maxValue = useMemo(() => {
+    const values = data.slice(1).map((row) => Number(row[1]) || 0);
+    return Math.max(...values, 0);
+  }, [data]);
+
   const options = {
     chartArea: { left: 48, top: 48, width: "88%", height: "70%" },
     legend: {
@@ -59,7 +64,11 @@ const PeakDaysWeek: React.FC = () => {
       alignment: "center",
       textStyle: { color: "#027f81" },
     },
-    vAxis: { minValue: 0, textStyle: { color: "#027f81" } },
+    vAxis: {
+      minValue: 0,
+      textStyle: { color: "#027f81" },
+      ticks: Array.from({ length: Math.ceil(maxValue) + 1 }, (_, i) => i),
+    },
     hAxis: { textStyle: { color: "#027f81" } },
     backgroundColor: "transparent",
     colors: ["#2b9cff"],
@@ -75,15 +84,10 @@ const PeakDaysWeek: React.FC = () => {
           <Select defaultValue={range} onValueChange={(val) => setRange(val)}>
             <SelectTrigger size="sm" className="w-40">
               <SelectValue>
-                {range === "day"
-                  ? "Today"
-                  : range === "week"
-                    ? "This Week"
-                    : "This Month"}
+                {range === "week" ? "This Week" : "This Month"}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="day">Today</SelectItem>
               <SelectItem value="week">This Week</SelectItem>
               <SelectItem value="month">This Month</SelectItem>
             </SelectContent>
