@@ -11,6 +11,7 @@ import {
   Info,
   Instagram,
   Mail,
+  MapPin,
   Pause,
   Pencil,
   Phone,
@@ -38,12 +39,12 @@ const SettingsTab: React.FC = () => {
         {/* Left Column - Salon Profile */}
         <div className="space-y-6">
           {/* Salon Profile Card */}
-          <Card className="border-0 bg-gradient-to-br from-slate-50 to-slate-100 shadow-md transition-shadow duration-300 hover:shadow-lg dark:from-slate-900 dark:to-slate-800 dark:shadow-gray-600">
+          <Card className="border-0 bg-gradient-to-br from-slate-50 to-slate-100 shadow-md transition-shadow duration-300 hover:shadow-lg dark:from-slate-950 dark:to-slate-900 dark:shadow-gray-900">
             <CardContent className="p-4">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-5">
                   <div className="relative">
-                    <Avatar className="h-24 w-24 border-4 border-white shadow-md">
+                    <Avatar className="h-24 w-24 border-4 border-white shadow-lg dark:border-slate-800 dark:shadow-gray-800">
                       <AvatarImage src="/images/common/salon-placeholder.jpg" />
                       <AvatarFallback className="text-xl font-bold">
                         S
@@ -62,12 +63,8 @@ const SettingsTab: React.FC = () => {
                     </Badge>
                   </div>
                 </div>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="border-blue-200 hover:bg-blue-50 dark:border-blue-800 dark:hover:bg-blue-900"
-                >
-                  <Pencil className="h-4 w-4" />
+                <Button variant="outline" size="sm">
+                  <Pencil className="h-4 w-4" /> Edit
                 </Button>
               </div>
             </CardContent>
@@ -77,15 +74,11 @@ const SettingsTab: React.FC = () => {
           <Card className="border-0 shadow-md transition-shadow duration-300 hover:shadow-lg dark:shadow-gray-600">
             <CardContent className="p-4">
               <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                  📍 Address
+                <h2 className="flex gap-2 text-xl font-bold text-gray-900 dark:text-white">
+                  <MapPin /> Address
                 </h2>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-900"
-                >
-                  <Pencil className="h-4 w-4" />
+                <Button variant="outline" size="sm">
+                  <Pencil className="h-4 w-4" /> Edit
                 </Button>
               </div>
               <div className="space-y-5">
@@ -134,15 +127,11 @@ const SettingsTab: React.FC = () => {
           <Card className="border-0 shadow-md transition-shadow duration-300 hover:shadow-lg dark:shadow-gray-600">
             <CardContent className="p-4">
               <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                <h2 className="flex gap-2 text-xl font-bold text-gray-900 dark:text-white">
                   <Info /> About Salon
                 </h2>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-900"
-                >
-                  <Pencil className="h-4 w-4" />
+                <Button variant="outline" size="sm">
+                  <Pencil className="h-4 w-4" /> Edit
                 </Button>
               </div>
               <p className="leading-relaxed text-gray-700 dark:text-gray-300">
@@ -161,12 +150,8 @@ const SettingsTab: React.FC = () => {
                 <h2 className="flex gap-2 text-xl font-bold text-gray-900 dark:text-white">
                   <BriefcaseBusiness /> Professional Career
                 </h2>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-900"
-                >
-                  <Pencil className="h-4 w-4" />
+                <Button variant="outline" size="sm">
+                  <Pencil className="h-4 w-4" /> Edit
                 </Button>
               </div>
               <p className="leading-relaxed text-gray-700 dark:text-gray-300">
@@ -187,12 +172,8 @@ const SettingsTab: React.FC = () => {
             <h2 className="flex gap-2 text-xl font-bold text-gray-900 dark:text-white">
               <Phone /> Contact & Social Links
             </h2>
-            <Button
-              variant="outline"
-              size="icon"
-              className="border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-900"
-            >
-              <Pencil className="h-4 w-4" />
+            <Button variant="outline" size="sm">
+              <Pencil className="h-4 w-4" /> Edit
             </Button>
           </div>
 
