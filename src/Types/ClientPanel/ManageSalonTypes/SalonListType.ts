@@ -64,6 +64,7 @@ export interface AddSalonDialogProps {
 }
 
 export interface FormValues {
+  salon_category: string;
   name: string;
   salon_type: string;
   email: string;

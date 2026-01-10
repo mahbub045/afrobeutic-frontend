@@ -70,8 +70,13 @@ const addressValidationSchema = Yup.object().shape({
   address: Yup.string().url("Invalid URL").notRequired(),
 });
 
+const salonCategoryValidationSchema = Yup.object().shape({
+  salon_category: Yup.string().required("Salon category is required"),
+});
+
 // Full validation schema for form submission
 const validationSchema = Yup.object().shape({
+  salon_category: Yup.string().required("Salon category is required"),
   name: Yup.string().required("Salon name is required"),
   salon_type: Yup.string().required("Salon type is required"),
   email: Yup.string().required("Email is required").email("Invalid email"),
@@ -116,7 +121,7 @@ const validationSchema = Yup.object().shape({
 const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
   const { resolvedTheme } = useTheme();
   const [addSalon, { isLoading }] = useAddSalonMutation();
-  const [activeTab, setActiveTab] = useState("basic-info");
+  const [activeTab, setActiveTab] = useState("salon-category");
 
   // Helper function to convert time HH:MM to HH:MM:SS format
   const convertTimeToAPIFormat = (time: string): string => {
@@ -140,6 +145,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
       } = {
         name: formData.name,
         salon_type: formData.salon_type,
+        salon_category: formData.salon_category,
         email: formData.email,
         phone_number_one: formData.phone_number_one,
         country_dial_code: formData.country_dial_code,
@@ -201,6 +207,14 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
       return false;
     }
   };
+  const salonCategories = [
+    { value: "GENERAL_SALON", label: "General Salon" },
+    {
+      value: "MOBILE_OR_HOME_SERVICE_SALON",
+      label: "Mobile or Home Service Salon",
+    },
+    { value: "OCCASIONALLY_BOTH", label: "Occasionally Both" },
+  ];
   const salonTypes = [
     { value: "UNISEX", label: "Unisex Salon" },
     { value: "MALE", label: "Male Salon" },
@@ -224,6 +238,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
 
   // Tab list and progress calculation for UI-only display
   const tabList = [
+    { id: "salon-category", label: "Salon Category" },
     { id: "basic-info", label: "Basic Info" },
     { id: "contacts", label: "Contacts" },
     { id: "address", label: "Address" },
@@ -234,9 +249,20 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
     tabList.findIndex((t) => t.id === activeTab),
   );
 
-  const progressPercent = Math.round(
-    tabList.length > 1 ? (currentIndex / (tabList.length - 1)) * 100 : 100,
-  );
+
+  const validateSalonCategory = async (
+    values: FormValues,
+  ): Promise<boolean> => {
+    try {
+      await salonCategoryValidationSchema.validate(
+        { salon_category: values.salon_category },
+        { abortEarly: false },
+      );
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   const validateBasicInfo = async (values: FormValues): Promise<boolean> => {
     try {
@@ -309,6 +335,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
           {/* Formik form for adding a new salon goes here */}
           <Formik<FormValues>
             initialValues={{
+              salon_category: "",
               name: "",
               salon_type: "",
               email: "",
@@ -334,7 +361,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
               setSubmitting(false);
               if (success) {
                 resetForm();
-                setActiveTab("basic-info");
+                setActiveTab("salon-category");
                 onClose();
               }
             }}
@@ -346,6 +373,65 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                   onValueChange={setActiveTab}
                   className="flex w-full max-w-2xl flex-1 flex-col"
                 >
+                  <TabsContent
+                    value="salon-category"
+                    className="flex flex-1 flex-col justify-center space-y-6"
+                  >
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold">
+                        Please choose which best describes your salon
+                      </h3>
+                      <div className="grid gap-3">
+                        {salonCategories.map((category) => (
+                          <label
+                            key={category.value}
+                            className="border-border hover:border-primary flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 text-sm font-semibold transition"
+                          >
+                            <Field
+                              type="radio"
+                              name="salon_category"
+                              value={category.value}
+                              className="accent-primary h-4 w-4"
+                            />
+                            <span>{category.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                      <ErrorMessage
+                        name="salon_category"
+                        component="div"
+                        className="text-danger mt-1 text-xs"
+                      />
+                    </div>
+                    <div className="mt-6 flex justify-end gap-3">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={onClose}
+                        disabled={isLoading}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={async () => {
+                          const isValid = await validateSalonCategory(values);
+                          if (isValid) {
+                            setActiveTab("basic-info");
+                          } else {
+                            setFieldTouched("salon_category", true);
+                            toast.error(
+                              "Please choose a salon category before proceeding",
+                            );
+                          }
+                        }}
+                        className="w-32 text-white"
+                      >
+                        Next
+                      </Button>
+                    </div>
+                  </TabsContent>
+
                   <TabsContent
                     value="basic-info"
                     className="flex flex-1 flex-col justify-center space-y-4"
@@ -395,35 +481,44 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                       </div>
                     </div>
                     {/* Navigation buttons for first tab */}
-                    <div className="mt-6 flex justify-end gap-3">
+                    <div className="mt-6 flex items-center justify-between gap-3">
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={onClose}
-                        disabled={isLoading}
+                        onClick={() => setActiveTab("salon-category")}
                       >
-                        Cancel
+                        Previous
                       </Button>
-                      <Button
-                        type="button"
-                        onClick={async () => {
-                          const isValid = await validateBasicInfo(values);
-                          if (isValid) {
-                            setActiveTab("contacts");
-                          } else {
-                            const basicFields = ["name", "salon_type"];
-                            basicFields.forEach((field) =>
-                              setFieldTouched(field, true),
-                            );
-                            toast.error(
-                              "Please fill in all required fields before proceeding",
-                            );
-                          }
-                        }}
-                        className="w-32 text-white"
-                      >
-                        Next
-                      </Button>
+                      <div className="flex gap-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={onClose}
+                          disabled={isLoading}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={async () => {
+                            const isValid = await validateBasicInfo(values);
+                            if (isValid) {
+                              setActiveTab("contacts");
+                            } else {
+                              const basicFields = ["name", "salon_type"];
+                              basicFields.forEach((field) =>
+                                setFieldTouched(field, true),
+                              );
+                              toast.error(
+                                "Please fill in all required fields before proceeding",
+                              );
+                            }
+                          }}
+                          className="w-32 text-white"
+                        >
+                          Next
+                        </Button>
+                      </div>
                     </div>
                   </TabsContent>
                   <TabsContent
