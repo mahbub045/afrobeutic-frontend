@@ -107,7 +107,7 @@ const EditContactInfoDialog: React.FC<EditDashboardProps> = ({
           {(): React.ReactNode => (
             <FormikForm>
               <div className="grid gap-4">
-                <div>
+                {/* <div>
                   <Label className="mb-2">Website</Label>
                   <Field id="website" name="website" as="input" type="text" />
                   <ErrorMessage
@@ -115,7 +115,7 @@ const EditContactInfoDialog: React.FC<EditDashboardProps> = ({
                     component="div"
                     className="text-danger mt-1 text-xs"
                   />
-                </div>
+                </div> */}
                 <div>
                   <Label className="mb-2">Phone</Label>
                   <Field name="phone">

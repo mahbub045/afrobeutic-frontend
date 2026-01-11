@@ -125,7 +125,7 @@ const ContactsCard: React.FC<DashboardTabProps> = ({
           </div>
         ) : (
           <div className="grid gap-4">
-            <div className="flex items-start justify-between">
+            {/* <div className="flex items-start justify-between">
               <div className="min-w-0">
                 <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
                   Website
@@ -157,7 +157,7 @@ const ContactsCard: React.FC<DashboardTabProps> = ({
                   )}
                 </Button>
               </div>
-            </div>
+            </div> */}
 
             <div className="flex items-start justify-between">
               <div>

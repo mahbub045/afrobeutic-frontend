@@ -272,7 +272,7 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-1">
+                {/* <div className="grid grid-cols-1">
                   <Label htmlFor="address" className="mb-2">
                     Google Location Link
                   </Label>
@@ -282,7 +282,7 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
                     component="div"
                     className="text-danger mt-1 text-xs"
                   />
-                </div>
+                </div> */}
 
                 <div className="mt-4 flex justify-end gap-3">
                   <Button
