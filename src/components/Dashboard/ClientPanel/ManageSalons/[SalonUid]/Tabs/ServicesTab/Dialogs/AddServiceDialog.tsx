@@ -7,10 +7,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { formatChoiceFieldValue } from "@/lib/utils";
 import { useGetCommonCategoriesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Common/CategoriesApi";
-import { useAddServiceMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
+import {
+  useAddServiceMutation,
+  useGetServiceCategoriesQuery,
+} from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
 import {
   AddServiceDialogProps,
+  ServiceCategory,
   ServiceFormValues,
 } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import { Field, Formik, type FormikHelpers } from "formik";
@@ -27,6 +32,7 @@ import * as Yup from "yup";
 const ServiceSchema = Yup.object().shape({
   name: Yup.string().trim().required("Name is required"),
   category: Yup.string().trim().required("Category is required"),
+  sub_category: Yup.string().trim().required("Category is required"),
   price: Yup.number()
     .typeError("Price must be a number")
     .required("Price is required")
@@ -45,26 +51,28 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
   const [fileError, setFileError] = useState<string | null>(null);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [showCategories, setShowCategories] = useState(false);
-  const categoryInputRef = useRef<HTMLInputElement>(null);
+  const subCategoryInputRef = useRef<HTMLInputElement>(null);
   const categoryDropdownRef = useRef<HTMLDivElement>(null);
-  // default category-type filter for suggestions (sent to the API)
+  // default sub_category-type filter for suggestions (sent to the API)
   const CATEGORY_TYPE_FILTER = "SERVICE";
 
   // rtk hooks
   const [addService, { isLoading }] = useAddServiceMutation();
+  const { data: commonCategoriesData, isLoading: isLoadingCategories } =
+    useGetServiceCategoriesQuery(undefined);
   const {
-    data: commonCategoriesData,
-    isLoading: isLoadingCategories,
+    data: commonSubCategoriesData,
+    isLoading: isLoadingSubCategories,
     refetch,
   } = useGetCommonCategoriesDataQuery({ category_type: CATEGORY_TYPE_FILTER });
 
-  // helpers to safely read category value/label from possible shapes
+  // helpers to safely read sub_category value/label from possible shapes
   const formatCategoryValue = (c: unknown, idx: number) => {
     if (typeof c === "string") return c;
     if (c && typeof c === "object") {
       const obj = c as Record<string, unknown>;
       const val =
-        obj.name ?? obj.category ?? obj.title ?? obj.label ?? obj.id ?? idx;
+        obj.name ?? obj.sub_category ?? obj.title ?? obj.label ?? obj.id ?? idx;
       return String(val);
     }
     return String(c ?? idx);
@@ -72,10 +80,10 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
 
   // build a deduplicated list of suggestion strings (preserve order)
   const categorySuggestions: string[] = (() => {
-    const src: unknown[] = Array.isArray(commonCategoriesData)
-      ? commonCategoriesData
-      : Array.isArray(commonCategoriesData?.data)
-        ? commonCategoriesData!.data
+    const src: unknown[] = Array.isArray(commonSubCategoriesData)
+      ? commonSubCategoriesData
+      : Array.isArray(commonSubCategoriesData?.data)
+        ? commonSubCategoriesData!.data
         : [];
 
     const looksLikeService = (c: unknown) => {
@@ -109,8 +117,8 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
       if (
         categoryDropdownRef.current &&
         !categoryDropdownRef.current.contains(event.target as Node) &&
-        categoryInputRef.current &&
-        !categoryInputRef.current.contains(event.target as Node)
+        subCategoryInputRef.current &&
+        !subCategoryInputRef.current.contains(event.target as Node)
       ) {
         setShowCategories(false);
       }
@@ -148,6 +156,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
       const form = new FormData();
       form.append("name", values.name.trim());
       form.append("category", values.category.trim());
+      form.append("sub_category", values.sub_category.trim());
       form.append("price", String(parseFloat(String(values.price)) || 0));
       form.append("description", values.description?.trim() || "");
 
@@ -193,6 +202,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
             {
               name: "",
               category: "",
+              sub_category: "",
               price: "",
               description: "",
             } as ServiceFormValues
@@ -219,14 +229,39 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                 ) : null}
               </div>
 
-              <div className="relative">
+              <div>
                 <Label htmlFor="category" className="mb-2">
                   Category<span className="text-danger">*</span>
                 </Label>
                 <Field
-                  innerRef={categoryInputRef}
                   id="category"
                   name="category"
+                  as="select"
+                  required
+                  placeholder="Service category"
+                >
+                  <option value="" disabled>
+                    Select category
+                  </option>
+                  {commonCategoriesData?.results.map((cat: ServiceCategory) => (
+                    <option key={cat.uid} value={cat.uid}>
+                      {formatChoiceFieldValue(cat.name)}
+                    </option>
+                  ))}
+                </Field>
+                {touched.category && errors.category ? (
+                  <p className="text-destructive text-sm">{errors.category}</p>
+                ) : null}
+              </div>
+
+              <div className="relative">
+                <Label htmlFor="sub_category" className="mb-2">
+                  Sub Category<span className="text-danger">*</span>
+                </Label>
+                <Field
+                  innerRef={subCategoryInputRef}
+                  id="sub_category"
+                  name="sub_category"
                   as="input"
                   type="text"
                   required
@@ -234,7 +269,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                   placeholder='e.g. "Haircut", "Manicure"'
                   onFocus={() => setShowCategories(true)}
                   onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                    setFieldValue("category", e.target.value)
+                    setFieldValue("sub_category", e.target.value)
                   }
                 />
 
@@ -244,7 +279,8 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                     className="absolute right-0 left-0 z-50 mt-1 max-h-40 overflow-auto rounded border bg-white shadow-lg dark:bg-[#0b1116]"
                   >
                     {(() => {
-                      const inputValue = categoryInputRef.current?.value || "";
+                      const inputValue =
+                        subCategoryInputRef.current?.value || "";
                       const searchTerm = inputValue.toLowerCase().trim();
 
                       // Filter and sort categories: matching ones first
@@ -278,7 +314,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                                 type="button"
                                 className="my-1 w-full px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-800"
                                 onClick={() => {
-                                  setFieldValue("category", v);
+                                  setFieldValue("sub_category", v);
                                   setShowCategories(false);
                                 }}
                               >
@@ -294,18 +330,20 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                   </div>
                 )}
 
-                {isLoadingCategories ? (
+                {isLoadingSubCategories ? (
                   <p className="mt-1 text-sm">Loading categories...</p>
-                ) : !commonCategoriesData ||
-                  (Array.isArray(commonCategoriesData) &&
-                    commonCategoriesData.length === 0) ||
-                  (Array.isArray(commonCategoriesData?.data) &&
-                    commonCategoriesData.data.length === 0) ? (
+                ) : !commonSubCategoriesData ||
+                  (Array.isArray(commonSubCategoriesData) &&
+                    commonSubCategoriesData.length === 0) ||
+                  (Array.isArray(commonSubCategoriesData?.data) &&
+                    commonSubCategoriesData.data.length === 0) ? (
                   <p className="mt-1 text-sm">No categories found</p>
                 ) : null}
 
-                {touched.category && errors.category ? (
-                  <p className="text-destructive text-sm">{errors.category}</p>
+                {touched.sub_category && errors.sub_category ? (
+                  <p className="text-destructive text-sm">
+                    {errors.sub_category}
+                  </p>
                 ) : null}
               </div>
 

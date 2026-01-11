@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { formatDateTime } from "@/lib/utils";
+import { formatChoiceFieldValue, formatDateTime } from "@/lib/utils";
 import { useGetServicesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
 import { ServiceProps } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import {
@@ -202,7 +202,7 @@ const ServicesTab: React.FC = () => {
                 <TableRow key={service.uid}>
                   <TableCell className="font-medium">{index + 1}</TableCell>
                   <TableCell className="font-medium">{service.name}</TableCell>
-                  <TableCell>{service.category}</TableCell>
+                  <TableCell>{formatChoiceFieldValue(service.category) || "-"}</TableCell>
                   <TableCell>${service.price}</TableCell>
                   <TableCell>
                     {formatDateTime(service?.created_at ?? null)}
