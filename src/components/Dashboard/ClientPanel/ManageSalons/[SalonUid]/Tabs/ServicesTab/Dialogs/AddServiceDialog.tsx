@@ -7,19 +7,25 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { useGetCommonCategoriesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Common/CategoriesApi";
-import { useAddServiceMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
+import { formatChoiceFieldValue } from "@/lib/utils";
+import {
+  useAddServiceMutation,
+  useAddServiceSubCategoryMutation,
+  useGetServiceCategoriesQuery,
+  useGetServiceSubCategoriesQuery,
+} from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
 import {
   AddServiceDialogProps,
+  ServiceCategory,
   ServiceFormValues,
 } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import { Field, Formik, type FormikHelpers } from "formik";
-import { X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import type { ChangeEvent } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
@@ -27,6 +33,7 @@ import * as Yup from "yup";
 const ServiceSchema = Yup.object().shape({
   name: Yup.string().trim().required("Name is required"),
   category: Yup.string().trim().required("Category is required"),
+  sub_category: Yup.string().trim().required("Category is required"),
   price: Yup.number()
     .typeError("Price must be a number")
     .required("Price is required")
@@ -44,92 +51,56 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fileError, setFileError] = useState<string | null>(null);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-  const [showCategories, setShowCategories] = useState(false);
-  const categoryInputRef = useRef<HTMLInputElement>(null);
-  const categoryDropdownRef = useRef<HTMLDivElement>(null);
-  // default category-type filter for suggestions (sent to the API)
-  const CATEGORY_TYPE_FILTER = "SERVICE";
+  const [selectedCategoryUid, setSelectedCategoryUid] = useState<string>("");
+  const [showSubCategoryInput, setShowSubCategoryInput] = useState(false);
+  const [newSubCategoryName, setNewSubCategoryName] = useState("");
 
   // rtk hooks
   const [addService, { isLoading }] = useAddServiceMutation();
+  const { data: commonCategoriesData } =
+    useGetServiceCategoriesQuery(undefined);
   const {
-    data: commonCategoriesData,
-    isLoading: isLoadingCategories,
+    data: commonSubCategoriesData,
+    isLoading: isLoadingSubCategories,
     refetch,
-  } = useGetCommonCategoriesDataQuery({ category_type: CATEGORY_TYPE_FILTER });
+  } = useGetServiceSubCategoriesQuery(selectedCategoryUid || "", {
+    skip: !selectedCategoryUid,
+  });
+  const [addServiceSubCategory, { isLoading: isAddingSubCategory }] =
+    useAddServiceSubCategoryMutation();
 
-  // helpers to safely read category value/label from possible shapes
-  const formatCategoryValue = (c: unknown, idx: number) => {
-    if (typeof c === "string") return c;
-    if (c && typeof c === "object") {
-      const obj = c as Record<string, unknown>;
-      const val =
-        obj.name ?? obj.category ?? obj.title ?? obj.label ?? obj.id ?? idx;
-      return String(val);
+  const selectedCategory = commonCategoriesData?.results.find(
+    (cat: ServiceCategory) => cat.uid === selectedCategoryUid,
+  );
+  const canAddCustomSubCategory = selectedCategory?.name === "OTHER_SERVICES";
+
+  async function handleAddSubCategory() {
+    if (!selectedCategoryUid) {
+      toast.error("Please select a category first.");
+      return;
     }
-    return String(c ?? idx);
-  };
 
-  // build a deduplicated list of suggestion strings (preserve order)
-  const categorySuggestions: string[] = (() => {
-    const src: unknown[] = Array.isArray(commonCategoriesData)
-      ? commonCategoriesData
-      : Array.isArray(commonCategoriesData?.data)
-        ? commonCategoriesData!.data
-        : [];
+    const name = newSubCategoryName.trim();
+    if (!name) {
+      toast.error("Please enter a sub-category name.");
+      return;
+    }
 
-    const looksLikeService = (c: unknown) => {
-      if (typeof c === "string") return true;
-      if (c && typeof c === "object") {
-        const obj = c as Record<string, unknown>;
-        const ct =
-          obj.category_type ?? obj.type ?? obj.categoryType ?? obj.kind;
-        if (ct === undefined || ct === null) return true;
-        return String(ct).toLowerCase() === CATEGORY_TYPE_FILTER.toLowerCase();
-      }
-      return false;
-    };
+    try {
+      await addServiceSubCategory({
+        categoryUid: selectedCategoryUid,
+        subCategoryData: { name },
+      }).unwrap();
 
-    const seen = new Set<string>();
-    const out: string[] = [];
-    src.forEach((c, i) => {
-      if (!looksLikeService(c)) return; // skip non-service categories when metadata present
-      const v = formatCategoryValue(c, i);
-      if (v !== "" && !seen.has(v)) {
-        seen.add(v);
-        out.push(v);
-      }
-    });
-    return out;
-  })();
-
-  useEffect(() => {
-    // Handle click outside to close dropdown
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        categoryDropdownRef.current &&
-        !categoryDropdownRef.current.contains(event.target as Node) &&
-        categoryInputRef.current &&
-        !categoryInputRef.current.contains(event.target as Node)
-      ) {
-        setShowCategories(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      // revoke any object URLs on unmount
-      previewUrls.forEach((u) => {
-        try {
-          URL.revokeObjectURL(u);
-        } catch {
-          /* ignore */
-        }
-      });
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+      toast.success("Sub-category added successfully.");
+      setNewSubCategoryName("");
+      setShowSubCategoryInput(false);
+      refetch();
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to add sub-category. Please try again.");
+    }
+  }
 
   async function handleAddService(
     values: ServiceFormValues,
@@ -148,6 +119,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
       const form = new FormData();
       form.append("name", values.name.trim());
       form.append("category", values.category.trim());
+      form.append("sub_category", values.sub_category.trim());
       form.append("price", String(parseFloat(String(values.price)) || 0));
       form.append("description", values.description?.trim() || "");
 
@@ -193,6 +165,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
             {
               name: "",
               category: "",
+              sub_category: "",
               price: "",
               description: "",
             } as ServiceFormValues
@@ -219,94 +192,116 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                 ) : null}
               </div>
 
-              <div className="relative">
+              <div>
                 <Label htmlFor="category" className="mb-2">
                   Category<span className="text-danger">*</span>
                 </Label>
                 <Field
-                  innerRef={categoryInputRef}
                   id="category"
                   name="category"
-                  as="input"
-                  type="text"
+                  as="select"
                   required
-                  autoComplete="off"
-                  placeholder='e.g. "Haircut", "Manicure"'
-                  onFocus={() => setShowCategories(true)}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                    setFieldValue("category", e.target.value)
-                  }
-                />
-
-                {showCategories && (
-                  <div
-                    ref={categoryDropdownRef}
-                    className="absolute right-0 left-0 z-50 mt-1 max-h-40 overflow-auto rounded border bg-white shadow-lg dark:bg-[#0b1116]"
-                  >
-                    {(() => {
-                      const inputValue = categoryInputRef.current?.value || "";
-                      const searchTerm = inputValue.toLowerCase().trim();
-
-                      // Filter and sort categories: matching ones first
-                      const filteredAndSorted = searchTerm
-                        ? categorySuggestions
-                            .map((v) => ({
-                              value: v,
-                              matches: v.toLowerCase().includes(searchTerm),
-                              startsWithMatch: v
-                                .toLowerCase()
-                                .startsWith(searchTerm),
-                            }))
-                            .sort((a, b) => {
-                              // Prioritize: starts with > contains > no match
-                              if (a.startsWithMatch && !b.startsWithMatch)
-                                return -1;
-                              if (!a.startsWithMatch && b.startsWithMatch)
-                                return 1;
-                              if (a.matches && !b.matches) return -1;
-                              if (!a.matches && b.matches) return 1;
-                              return 0;
-                            })
-                            .map((item) => item.value)
-                        : categorySuggestions;
-
-                      return filteredAndSorted.length > 0 ? (
-                        <ul className="divide-y p-2">
-                          {filteredAndSorted.map((v) => (
-                            <li key={v}>
-                              <button
-                                type="button"
-                                className="my-1 w-full px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-800"
-                                onClick={() => {
-                                  setFieldValue("category", v);
-                                  setShowCategories(false);
-                                }}
-                              >
-                                {v}
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <div className="p-2 text-sm">No categories</div>
-                      );
-                    })()}
-                  </div>
-                )}
-
-                {isLoadingCategories ? (
-                  <p className="mt-1 text-sm">Loading categories...</p>
-                ) : !commonCategoriesData ||
-                  (Array.isArray(commonCategoriesData) &&
-                    commonCategoriesData.length === 0) ||
-                  (Array.isArray(commonCategoriesData?.data) &&
-                    commonCategoriesData.data.length === 0) ? (
-                  <p className="mt-1 text-sm">No categories found</p>
-                ) : null}
-
+                  placeholder="Service category"
+                  onChange={(e: ChangeEvent<HTMLSelectElement>) => {
+                    const categoryValue = e.target.value;
+                    setSelectedCategoryUid(categoryValue);
+                    setFieldValue("category", categoryValue);
+                    setFieldValue("sub_category", "");
+                  }}
+                >
+                  <option value="" disabled>
+                    Select category
+                  </option>
+                  {commonCategoriesData?.results.map((cat: ServiceCategory) => (
+                    <option key={cat.uid} value={cat.uid}>
+                      {formatChoiceFieldValue(cat.name)}
+                    </option>
+                  ))}
+                </Field>
                 {touched.category && errors.category ? (
                   <p className="text-destructive text-sm">{errors.category}</p>
                 ) : null}
+              </div>
+
+              <div>
+                <Label htmlFor="sub_category" className="mb-2">
+                  Sub-Category<span className="text-danger">*</span>
+                </Label>
+                <Field
+                  id="sub_category"
+                  name="sub_category"
+                  as="select"
+                  required
+                  placeholder="Service sub-category"
+                  disabled={!selectedCategoryUid || isLoadingSubCategories}
+                >
+                  <option value="" disabled>
+                    Select sub-category
+                  </option>
+                  {commonSubCategoriesData?.results.map(
+                    (subCat: ServiceCategory) => (
+                      <option key={subCat.uid} value={subCat.uid}>
+                        {formatChoiceFieldValue(subCat.name)}
+                      </option>
+                    ),
+                  )}
+                </Field>
+                {touched.sub_category && errors.sub_category ? (
+                  <p className="text-destructive text-sm">
+                    {errors.sub_category}
+                  </p>
+                ) : null}
+                {canAddCustomSubCategory && (
+                  <div className="mt-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        if (!selectedCategoryUid) {
+                          toast.error("Please select a category first.");
+                          return;
+                        }
+                        setShowSubCategoryInput(true);
+                      }}
+                      disabled={isAddingSubCategory}
+                    >
+                      <Plus className="mr-1 h-4 w-4" />
+                      Add New Sub-Category
+                    </Button>
+                    {showSubCategoryInput ? (
+                      <div className="mt-2 flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={newSubCategoryName}
+                          onChange={(e) =>
+                            setNewSubCategoryName(e.target.value)
+                          }
+                          placeholder="e.g. Hair Coloring"
+                          className="bg-background focus-visible:ring-primary flex-1 rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-2"
+                        />
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={handleAddSubCategory}
+                          disabled={isAddingSubCategory}
+                        >
+                          {isAddingSubCategory ? "Saving..." : "Save"}
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setShowSubCategoryInput(false);
+                            setNewSubCategoryName("");
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    ) : null}
+                  </div>
+                )}
               </div>
 
               <div>

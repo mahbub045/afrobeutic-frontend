@@ -2,6 +2,7 @@ export interface ServiceProps {
   uid: string;
   name: string;
   category: string;
+  sub_category: string;
   price: string;
   description?: string;
   images?: string[];
@@ -31,9 +32,15 @@ export interface AddServiceDialogProps {
 export interface ServiceFormValues {
   name: string;
   category: string;
+  sub_category: string;
   price: string;
   description: string;
   uploaded_images?: string;
+}
+
+export interface ServiceCategory{
+  uid: string;
+  name: string;
 }
 
 export interface EditServiceBasicInfoDialogProps {
