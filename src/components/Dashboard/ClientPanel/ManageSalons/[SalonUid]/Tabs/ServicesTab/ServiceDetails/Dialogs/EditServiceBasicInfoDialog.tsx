@@ -27,7 +27,7 @@ import { X } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
@@ -64,39 +64,35 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
   );
   const canAddCustomSubCategory = selectedCategory?.name === "OTHER_SERVICES";
 
-  useEffect(() => {
-    if (!isOpen) return;
-
+  const resolvedCategoryFromService = useMemo(() => {
     const rawCategory = selectedService?.category || "";
-    if (!rawCategory) {
-      setSelectedCategoryUid("");
-      setShowSubCategoryInput(false);
-      setNewSubCategoryName("");
-      return;
-    }
+    if (!rawCategory) return "";
 
     const cats =
       (commonCategoriesData?.results as ServiceCategory[] | undefined) || [];
+    if (cats.length === 0) return rawCategory;
 
     // If the stored value already matches a uid, keep it
-    let resolved = rawCategory;
-    if (!cats.some((c) => c.uid === rawCategory)) {
-      const match = cats.find((c) => {
-        if (c.name === rawCategory) return true;
-        return (
-          formatChoiceFieldValue(c.name) ===
-          formatChoiceFieldValue(rawCategory as string)
-        );
-      });
-      if (match) {
-        resolved = match.uid;
-      }
-    }
+    if (cats.some((c) => c.uid === rawCategory)) return rawCategory;
 
-    setSelectedCategoryUid(resolved);
+    // Otherwise, try to resolve by name / formatted name
+    const match = cats.find((c) => {
+      if (c.name === rawCategory) return true;
+      return (
+        formatChoiceFieldValue(c.name) ===
+        formatChoiceFieldValue(rawCategory as string)
+      );
+    });
+
+    return match ? match.uid : rawCategory;
+  }, [selectedService, commonCategoriesData]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setSelectedCategoryUid(resolvedCategoryFromService || "");
     setShowSubCategoryInput(false);
     setNewSubCategoryName("");
-  }, [isOpen, selectedService, commonCategoriesData]);
+  }, [isOpen, resolvedCategoryFromService]);
 
   const validationSchema = Yup.object().shape({
     name: Yup.string().required("Service name is required"),
@@ -208,7 +204,7 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
           initialValues={
             {
               name: selectedService?.name || "",
-              category: selectedCategoryUid || selectedService?.category || "",
+              category: resolvedCategoryFromService || "",
               sub_category: selectedService?.sub_category || "",
               price: selectedService?.price || "",
               description: selectedService?.description || "",
