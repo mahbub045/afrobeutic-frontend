@@ -155,17 +155,19 @@ const ManageSalonsContainer: React.FC = () => {
 
         <div className="flex flex-col items-end gap-2">
           {(session?.user?.role === "OWNER" ||
-            session?.user?.role === "ADMIN") && (
-            <Button
-              variant="default"
-              size="sm"
-              className="text-white"
-              onClick={handleOpenAddSalonDialog}
-            >
-              <Plus className="h-4 w-4" />
-              Add new Salon
-            </Button>
-          )}
+            session?.user?.role === "ADMIN") &&
+            (session?.user?.account_type !== "INDIVIDUAL_STYLIST" ||
+              (salonListData?.count || 0) < 1) && (
+              <Button
+                variant="default"
+                size="sm"
+                className="text-white"
+                onClick={handleOpenAddSalonDialog}
+              >
+                <Plus className="h-4 w-4" />
+                Add new Salon
+              </Button>
+            )}
 
           {searchTerm && (
             <Button

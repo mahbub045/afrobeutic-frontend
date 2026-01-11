@@ -24,17 +24,19 @@ const SalonsCard: React.FC = () => {
     <Card className="h-full shadow-md dark:shadow-gray-600">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <CardTitle className="text-xl font-semibold">My Salons</CardTitle>
-        {(session?.user?.role === "OWNER" ||
-          session?.user?.role === "ADMIN") && (
-          <Button
-            onClick={handleOpenAddSalonDialog}
-            size="sm"
-            className="gap-1 text-white"
-          >
-            <Plus className="h-4 w-4" />
-            Add salon
-          </Button>
-        )}
+        {(session?.user?.role === "OWNER" || session?.user?.role === "ADMIN") &&
+          (session?.user?.account_type !== "INDIVIDUAL_STYLIST" ||
+            (salonsData?.count || 0) < 1) && (
+            <Button
+              variant="default"
+              size="sm"
+              className="text-white"
+              onClick={handleOpenAddSalonDialog}
+            >
+              <Plus className="h-4 w-4" />
+              Add new Salon
+            </Button>
+          )}
       </CardHeader>
       <CardContent>
         {isLoading ? (
