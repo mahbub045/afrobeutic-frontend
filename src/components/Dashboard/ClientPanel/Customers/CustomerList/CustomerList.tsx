@@ -39,10 +39,12 @@ import {
   Search,
   X,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 const CustomerList: React.FC = () => {
+  const { data: session } = useSession();
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -209,8 +211,16 @@ const CustomerList: React.FC = () => {
             <TableHead className="text-primary">Name</TableHead>
             <TableHead className="text-primary">Email</TableHead>
             <TableHead className="text-primary text-center">Phone</TableHead>
-            <TableHead className="text-primary text-center">Salon</TableHead>
-            <TableHead className="text-primary text-center">Chair</TableHead>
+            {session?.user?.account_type === "INDIVIDUAL_STYLIST" ? null : (
+              <>
+                <TableHead className="text-primary text-center">
+                  Salon
+                </TableHead>
+                <TableHead className="text-primary text-center">
+                  Chair
+                </TableHead>
+              </>
+            )}
             <TableHead className="text-primary text-center">Bookings</TableHead>
             <TableHead className="text-primary text-center">
               Recent booking
@@ -248,8 +258,13 @@ const CustomerList: React.FC = () => {
                   </TableCell>
                   <TableCell className="text-start">{c.email ?? "—"}</TableCell>
                   <TableCell>{c.phone ?? "—"}</TableCell>
-                  <TableCell>{latest?.salon?.name ?? "—"}</TableCell>
-                  <TableCell>{latest?.chair?.name ?? "—"}</TableCell>
+                  {session?.user?.account_type ===
+                  "INDIVIDUAL_STYLIST" ? null : (
+                    <>
+                      <TableCell>{latest?.salon?.name ?? "—"}</TableCell>
+                      <TableCell>{latest?.chair?.name ?? "—"}</TableCell>
+                    </>
+                  )}
                   <TableCell>{c.booking?.length ?? 0}</TableCell>
                   <TableCell>
                     {latest
