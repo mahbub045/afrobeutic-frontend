@@ -26,7 +26,7 @@ export interface SalonProps {
   description?: string;
   logo?: string;
   salon_type?: string;
-  salon_service_types?: string[];
+  hair_service_types?: string[];
   address_one?: string;
   address_two?: string | null;
   email?: string;
@@ -67,7 +67,7 @@ export interface FormValues {
   salon_category: string;
   is_provide_hair_styles: boolean | null;
   is_provide_bridal_makeup_services: boolean | null;
-  salon_service_types: string[];
+  hair_service_types: string[];
   bridal_makeup_service_types: string[];
   additional_service_types: string[];
   name: string;
