@@ -55,7 +55,7 @@ const ProductSales: React.FC = () => {
         <div>
           <CardTitle>Product Sales</CardTitle>
           <CardDescription className="mt-2">
-            Top 5 Selling Products
+            Top 5 Selected Products
           </CardDescription>
         </div>
 

@@ -20,32 +20,37 @@ const PeakHours: React.FC = () => {
     const sample = {
       today: [
         ["Time", "Peak Hours"],
-        ["09-11", 0.2],
-        ["11-13", 0.35],
-        ["13-15", 0.45],
-        ["15-17", 0.25],
-        ["17-19", 0.15],
+        ["09-11", 5],
+        ["11-13", 2],
+        ["13-15", 6],
+        ["15-17", 1],
+        ["17-19", 10],
       ],
       week: [
         ["Time", "Peak Hours"],
-        ["09-11", 0.4],
-        ["11-13", 0.6],
-        ["13-15", 0.7],
-        ["15-17", 0.5],
-        ["17-19", 0.35],
+        ["09-11", 4],
+        ["11-13", 6],
+        ["13-15", 7],
+        ["15-17", 5],
+        ["17-19", 3],
       ],
       month: [
         ["Time", "Peak Hours"],
-        ["09-11", 0.45],
-        ["11-13", 0.55],
-        ["13-15", 0.65],
-        ["15-17", 0.5],
-        ["17-19", 0.4],
+        ["09-11", 5],
+        ["11-13", 5.5],
+        ["13-15", 6.5],
+        ["15-17", 5],
+        ["17-19", 4],
       ],
     };
 
     return sample[timeRange as keyof typeof sample] ?? sample.today;
   }, [timeRange]);
+
+  const maxValue = useMemo(() => {
+    const values = data.slice(1).map((row) => Number(row[1]) || 0);
+    return Math.max(...values, 0);
+  }, [data]);
 
   const options = {
     chartArea: { left: 48, top: 48, width: "88%", height: "70%" },
@@ -54,7 +59,11 @@ const PeakHours: React.FC = () => {
       alignment: "center",
       textStyle: { color: "#027f81" },
     },
-    vAxis: { minValue: 0, textStyle: { color: "#027f81" } },
+    vAxis: {
+      minValue: 0,
+      textStyle: { color: "#027f81" },
+      ticks: Array.from({ length: Math.ceil(maxValue) + 1 }, (_, i) => i),
+    },
     hAxis: { textStyle: { color: "#027f81" } },
     backgroundColor: "transparent",
     colors: ["#2b9cff"],
@@ -68,7 +77,6 @@ const PeakHours: React.FC = () => {
 
         <div className="flex items-center gap-4">
           <label className="flex items-center gap-2">
-            <span className="text-sm">Time Range:</span>
             <Select
               defaultValue={timeRange}
               onValueChange={(val) => setTimeRange(val)}

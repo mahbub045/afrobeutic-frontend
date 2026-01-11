@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const Bookings: React.FC = () => {
+const AppointmentsDistribution: React.FC = () => {
   const [range, setRange] = useState<string>("dayOfWeek");
 
   const data = useMemo(() => {
@@ -69,10 +69,7 @@ const Bookings: React.FC = () => {
     <section className="space-y-4">
       <header className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold">Bookings</h2>
-          <p className="text-muted-foreground text-sm">
-            Appointments Distribution
-          </p>
+          <h3 className="text-2xl font-semibold">Appointments Distribution</h3>
         </div>
 
         <div className="flex items-center gap-2">
@@ -112,4 +109,4 @@ const Bookings: React.FC = () => {
   );
 };
 
-export default Bookings;
+export default AppointmentsDistribution;
