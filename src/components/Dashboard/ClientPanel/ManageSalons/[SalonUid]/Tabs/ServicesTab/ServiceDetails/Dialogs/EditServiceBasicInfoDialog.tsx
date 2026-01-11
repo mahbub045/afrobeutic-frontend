@@ -94,6 +94,28 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
     setNewSubCategoryName("");
   }, [isOpen, resolvedCategoryFromService]);
 
+  const resolvedSubCategoryFromService = useMemo(() => {
+    const rawSub = selectedService?.sub_category || "";
+    if (!rawSub) return "";
+
+    const subs =
+      (commonSubCategoriesData?.results as ServiceCategory[] | undefined) || [];
+    if (subs.length === 0) return "";
+
+    // If already a uid, keep it
+    if (subs.some((s) => s.uid === rawSub)) return rawSub;
+
+    const match = subs.find((s) => {
+      if (s.name === rawSub) return true;
+      return (
+        formatChoiceFieldValue(s.name) ===
+        formatChoiceFieldValue(rawSub as string)
+      );
+    });
+
+    return match ? match.uid : "";
+  }, [selectedService, commonSubCategoriesData]);
+
   const validationSchema = Yup.object().shape({
     name: Yup.string().required("Service name is required"),
     category: Yup.string().required("Category is required"),
@@ -205,7 +227,7 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
             {
               name: selectedService?.name || "",
               category: resolvedCategoryFromService || "",
-              sub_category: selectedService?.sub_category || "",
+              sub_category: resolvedSubCategoryFromService || "",
               price: selectedService?.price || "",
               description: selectedService?.description || "",
             } as ServiceProps
@@ -273,46 +295,26 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
                 <Label htmlFor="service-sub-category" className="mb-2">
                   Sub-Category
                 </Label>
-                {(() => {
-                  const current = values.sub_category;
-                  const subs =
-                    (commonSubCategoriesData?.results as
+                <Field
+                  as="select"
+                  id="service-sub-category"
+                  name="sub_category"
+                  disabled={!selectedCategoryUid || isLoadingSubCategories}
+                >
+                  <option value="" disabled>
+                    Select sub-category
+                  </option>
+                  {(
+                    commonSubCategoriesData?.results as
                       | ServiceCategory[]
-                      | undefined) || [];
-                  const hasCurrentInList = subs.some((s) => s.uid === current);
-                  const currentLabel = current
-                    ? formatChoiceFieldValue(current as string)
-                    : "";
-                  const visibleSubs =
-                    !hasCurrentInList && currentLabel
-                      ? subs.filter(
-                          (s) =>
-                            formatChoiceFieldValue(s.name) !== currentLabel,
-                        )
-                      : subs;
-                  return (
-                    <Field
-                      as="select"
-                      id="service-sub-category"
-                      name="sub_category"
-                      disabled={!selectedCategoryUid || isLoadingSubCategories}
-                    >
-                      <option value="" disabled>
-                        Select sub-category
-                      </option>
-                      {!hasCurrentInList && current ? (
-                        <option value={current}>
-                          {formatChoiceFieldValue(current as string)}
-                        </option>
-                      ) : null}
-                      {visibleSubs.map((subCat: ServiceCategory) => (
-                        <option key={subCat.uid} value={subCat.uid}>
-                          {formatChoiceFieldValue(subCat.name)}
-                        </option>
-                      ))}
-                    </Field>
-                  );
-                })()}
+                      | undefined
+                      | null
+                  )?.map((subCat: ServiceCategory) => (
+                    <option key={subCat.uid} value={subCat.uid}>
+                      {formatChoiceFieldValue(subCat.name)}
+                    </option>
+                  ))}
+                </Field>
                 {touched.sub_category && errors.sub_category ? (
                   <p className="mt-1 text-sm text-red-500">
                     {errors.sub_category as string}
