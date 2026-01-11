@@ -12,7 +12,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DashboardTabProps } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
-import { Check, Copy, ExternalLink, PenSquare } from "lucide-react";
+import { Check, Copy, PenSquare } from "lucide-react";
 import { useSession } from "next-auth/react";
 import React, { useState } from "react";
 import EditContactInfoDialog from "./Dialogs/EditContactInfoDialog";
