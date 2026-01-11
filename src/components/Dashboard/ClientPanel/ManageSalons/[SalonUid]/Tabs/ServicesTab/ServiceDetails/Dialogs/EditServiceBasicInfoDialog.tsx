@@ -41,9 +41,7 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
   const { salonuid } = useParams();
   const { resolvedTheme } = useTheme();
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
-  const [selectedCategoryUid, setSelectedCategoryUid] = useState<string>(
-    selectedService?.category || "",
-  );
+  const [selectedCategoryUid, setSelectedCategoryUid] = useState<string>("");
   const [showSubCategoryInput, setShowSubCategoryInput] = useState(false);
   const [newSubCategoryName, setNewSubCategoryName] = useState("");
   // RTK Hooks
@@ -67,12 +65,38 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
   const canAddCustomSubCategory = selectedCategory?.name === "OTHER_SERVICES";
 
   useEffect(() => {
-    if (isOpen) {
-      setSelectedCategoryUid(selectedService?.category || "");
+    if (!isOpen) return;
+
+    const rawCategory = selectedService?.category || "";
+    if (!rawCategory) {
+      setSelectedCategoryUid("");
       setShowSubCategoryInput(false);
       setNewSubCategoryName("");
+      return;
     }
-  }, [isOpen, selectedService]);
+
+    const cats =
+      (commonCategoriesData?.results as ServiceCategory[] | undefined) || [];
+
+    // If the stored value already matches a uid, keep it
+    let resolved = rawCategory;
+    if (!cats.some((c) => c.uid === rawCategory)) {
+      const match = cats.find((c) => {
+        if (c.name === rawCategory) return true;
+        return (
+          formatChoiceFieldValue(c.name) ===
+          formatChoiceFieldValue(rawCategory as string)
+        );
+      });
+      if (match) {
+        resolved = match.uid;
+      }
+    }
+
+    setSelectedCategoryUid(resolved);
+    setShowSubCategoryInput(false);
+    setNewSubCategoryName("");
+  }, [isOpen, selectedService, commonCategoriesData]);
 
   const validationSchema = Yup.object().shape({
     name: Yup.string().required("Service name is required"),
@@ -180,10 +204,11 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
         </DialogHeader>
 
         <Formik
+          enableReinitialize
           initialValues={
             {
               name: selectedService?.name || "",
-              category: selectedService?.category || "",
+              category: selectedCategoryUid || selectedService?.category || "",
               sub_category: selectedService?.sub_category || "",
               price: selectedService?.price || "",
               description: selectedService?.description || "",
@@ -192,7 +217,14 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
-          {({ handleSubmit, isSubmitting, setFieldValue, errors, touched }) => (
+          {({
+            handleSubmit,
+            isSubmitting,
+            setFieldValue,
+            errors,
+            touched,
+            values,
+          }) => (
             <Form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="service-name" className="mb-2">
@@ -245,23 +277,46 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
                 <Label htmlFor="service-sub-category" className="mb-2">
                   Sub-Category
                 </Label>
-                <Field
-                  as="select"
-                  id="service-sub-category"
-                  name="sub_category"
-                  disabled={!selectedCategoryUid || isLoadingSubCategories}
-                >
-                  <option value="" disabled>
-                    Select sub-category
-                  </option>
-                  {commonSubCategoriesData?.results.map(
-                    (subCat: ServiceCategory) => (
-                      <option key={subCat.uid} value={subCat.uid}>
-                        {formatChoiceFieldValue(subCat.name)}
+                {(() => {
+                  const current = values.sub_category;
+                  const subs =
+                    (commonSubCategoriesData?.results as
+                      | ServiceCategory[]
+                      | undefined) || [];
+                  const hasCurrentInList = subs.some((s) => s.uid === current);
+                  const currentLabel = current
+                    ? formatChoiceFieldValue(current as string)
+                    : "";
+                  const visibleSubs =
+                    !hasCurrentInList && currentLabel
+                      ? subs.filter(
+                          (s) =>
+                            formatChoiceFieldValue(s.name) !== currentLabel,
+                        )
+                      : subs;
+                  return (
+                    <Field
+                      as="select"
+                      id="service-sub-category"
+                      name="sub_category"
+                      disabled={!selectedCategoryUid || isLoadingSubCategories}
+                    >
+                      <option value="" disabled>
+                        Select sub-category
                       </option>
-                    ),
-                  )}
-                </Field>
+                      {!hasCurrentInList && current ? (
+                        <option value={current}>
+                          {formatChoiceFieldValue(current as string)}
+                        </option>
+                      ) : null}
+                      {visibleSubs.map((subCat: ServiceCategory) => (
+                        <option key={subCat.uid} value={subCat.uid}>
+                          {formatChoiceFieldValue(subCat.name)}
+                        </option>
+                      ))}
+                    </Field>
+                  );
+                })()}
                 {touched.sub_category && errors.sub_category ? (
                   <p className="mt-1 text-sm text-red-500">
                     {errors.sub_category as string}
