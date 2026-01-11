@@ -599,7 +599,10 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
               if (success) {
                 resetForm();
                 setActiveTab("salon-category");
-                onClose();
+                // Add a small delay to ensure cache invalidation completes
+                setTimeout(() => {
+                  onClose();
+                }, 100);
               }
             }}
           >

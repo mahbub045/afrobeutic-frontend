@@ -286,7 +286,9 @@ const LeadList: React.FC = () => {
             <TableHead className="text-primary">Name</TableHead>
             <TableHead className="text-primary">Email</TableHead>
             <TableHead className="text-primary">Phone</TableHead>
-            <TableHead className="text-primary">Salon</TableHead>
+            {session?.user?.account_type === "INDIVIDUAL_STYLIST" ? null : (
+              <TableHead className="text-primary">Salon</TableHead>
+            )}
             <TableHead className="text-primary">Source</TableHead>
             <TableHead className="text-primary">Created At</TableHead>
             <TableHead className="text-primary text-center">Actions</TableHead>
@@ -332,13 +334,15 @@ const LeadList: React.FC = () => {
                     <small className="text-muted-foreground">Not Found</small>
                   )}
                 </TableCell>
-                <TableCell>
-                  {lead.salon ? (
-                    lead.salon.name
-                  ) : (
-                    <small className="text-muted-foreground">Not Found</small>
-                  )}
-                </TableCell>
+                {session?.user?.account_type === "INDIVIDUAL_STYLIST" ? null : (
+                  <TableCell>
+                    {lead.salon ? (
+                      lead.salon.name
+                    ) : (
+                      <small className="text-muted-foreground">Not Found</small>
+                    )}
+                  </TableCell>
+                )}
                 <TableCell>
                   {lead.source ? (
                     lead.source

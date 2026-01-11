@@ -227,7 +227,7 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
                   </p>
                 </div>
               </div>
-              <div className="mt-6">
+              {/* <div className="mt-6">
                 <div className="flex justify-between">
                   <p className="text-muted-foreground text-xs uppercase">
                     Google Location Link
@@ -256,7 +256,7 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
                 <p className="text-foreground -mt-4 text-sm">
                   {singleSalonData?.address || "-"}
                 </p>
-              </div>
+              </div> */}
             </>
           )}
         </div>

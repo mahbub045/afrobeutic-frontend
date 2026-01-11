@@ -354,7 +354,9 @@ const EnquiryList: React.FC = () => {
               Created At
             </TableHead>
             <TableHead className="text-primary text-center">Person</TableHead>
-            <TableHead className="text-primary text-center">Salon</TableHead>
+            {session?.user?.account_type === "INDIVIDUAL_STYLIST" ? null : (
+              <TableHead className="text-primary text-center">Salon</TableHead>
+            )}
             <TableHead className="text-primary text-center">Status</TableHead>
             <TableHead className="text-primary text-center">Actions</TableHead>
           </TableRow>
@@ -406,9 +408,12 @@ const EnquiryList: React.FC = () => {
                       <small className="text-muted-foreground">Not Found</small>
                     )}
                   </TableCell>
-                  <TableCell className="text-center">
-                    {enq.salon?.name ? safe(enq.salon.name) : "-"}
-                  </TableCell>
+                  {session?.user?.account_type ===
+                  "INDIVIDUAL_STYLIST" ? null : (
+                    <TableCell className="text-center">
+                      {enq.salon?.name ? safe(enq.salon.name) : "-"}
+                    </TableCell>
+                  )}
                   <TableCell className="text-center">
                     <Badge variant={getColorBasedOnStatus(enq.status)}>
                       {formatChoiceFieldValue(enq.status)}
