@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { formatChoiceFieldValue } from "@/lib/utils";
 import {
   useAddServiceMutation,
+  useAddServiceSubCategoryMutation,
   useGetServiceCategoriesQuery,
   useGetServiceSubCategoriesQuery,
 } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
@@ -19,7 +20,7 @@ import {
   ServiceFormValues,
 } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import { Field, Formik, type FormikHelpers } from "formik";
-import { X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import { useParams } from "next/navigation";
@@ -51,6 +52,8 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
   const [fileError, setFileError] = useState<string | null>(null);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [selectedCategoryUid, setSelectedCategoryUid] = useState<string>("");
+  const [showSubCategoryInput, setShowSubCategoryInput] = useState(false);
+  const [newSubCategoryName, setNewSubCategoryName] = useState("");
 
   // rtk hooks
   const [addService, { isLoading }] = useAddServiceMutation();
@@ -63,6 +66,41 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
   } = useGetServiceSubCategoriesQuery(selectedCategoryUid || "", {
     skip: !selectedCategoryUid,
   });
+  const [addServiceSubCategory, { isLoading: isAddingSubCategory }] =
+    useAddServiceSubCategoryMutation();
+
+  const selectedCategory = commonCategoriesData?.results.find(
+    (cat: ServiceCategory) => cat.uid === selectedCategoryUid,
+  );
+  const canAddCustomSubCategory = selectedCategory?.name === "OTHER_SERVICES";
+
+  async function handleAddSubCategory() {
+    if (!selectedCategoryUid) {
+      toast.error("Please select a category first.");
+      return;
+    }
+
+    const name = newSubCategoryName.trim();
+    if (!name) {
+      toast.error("Please enter a sub-category name.");
+      return;
+    }
+
+    try {
+      await addServiceSubCategory({
+        categoryUid: selectedCategoryUid,
+        subCategoryData: { name },
+      }).unwrap();
+
+      toast.success("Sub-category added successfully.");
+      setNewSubCategoryName("");
+      setShowSubCategoryInput(false);
+      refetch();
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to add sub-category. Please try again.");
+    }
+  }
 
   async function handleAddService(
     values: ServiceFormValues,
@@ -213,6 +251,57 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                     {errors.sub_category}
                   </p>
                 ) : null}
+                {canAddCustomSubCategory && (
+                  <div className="mt-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        if (!selectedCategoryUid) {
+                          toast.error("Please select a category first.");
+                          return;
+                        }
+                        setShowSubCategoryInput(true);
+                      }}
+                      disabled={isAddingSubCategory}
+                    >
+                      <Plus className="mr-1 h-4 w-4" />
+                      Add New Sub-Category
+                    </Button>
+                    {showSubCategoryInput ? (
+                      <div className="mt-2 flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={newSubCategoryName}
+                          onChange={(e) =>
+                            setNewSubCategoryName(e.target.value)
+                          }
+                          placeholder="e.g. Hair Coloring"
+                          className="bg-background focus-visible:ring-primary flex-1 rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-2"
+                        />
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={handleAddSubCategory}
+                          disabled={isAddingSubCategory}
+                        >
+                          {isAddingSubCategory ? "Saving..." : "Save"}
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setShowSubCategoryInput(false);
+                            setNewSubCategoryName("");
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    ) : null}
+                  </div>
+                )}
               </div>
 
               <div>
