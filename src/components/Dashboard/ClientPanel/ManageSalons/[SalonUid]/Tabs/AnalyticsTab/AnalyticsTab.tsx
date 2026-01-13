@@ -1,5 +1,6 @@
 "use client";
-import Bookings from "./Bookings/Bookings";
+import { useSession } from "next-auth/react";
+import AppointmentsDistribution from "./AppointmentsDistribution/AppointmentsDistribution";
 import CustomerAnalysis from "./CustomerAnalysis/CustomerAnalysis";
 import PeakDaysWeek from "./PeakDaysWeek/PeakDaysWeek";
 import PeakHours from "./PeakHours/PeakHours";
@@ -13,6 +14,7 @@ import ServicesRevenue from "./ServicesRevenue/ServicesRevenue";
 import StaffPerformance from "./StaffPerformance/StaffPerformance";
 
 const AnalyticsTab: React.FC = () => {
+  const { data: session } = useSession();
   return (
     <div>
       <div>
@@ -27,16 +29,18 @@ const AnalyticsTab: React.FC = () => {
         <ProductsRevenue />
       </div>
       <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-2">
-        <Bookings />
+        <AppointmentsDistribution />
         <PeakHours />
       </div>
       <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-2">
         <PeakDaysWeek />
         <CustomerAnalysis />
       </div>
-      <div className="mt-10 grid grid-cols-1">
-        <StaffPerformance />
-      </div>
+      {session?.user?.account_type === "INDIVIDUAL_STYLIST" ? null : (
+        <div className="mt-10 grid grid-cols-1">
+          <StaffPerformance />
+        </div>
+      )}
       <div className="mt-10 grid grid-cols-1">
         <ServicesPerformance />
       </div>

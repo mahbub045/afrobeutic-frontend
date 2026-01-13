@@ -21,6 +21,7 @@ import {
   Form as FormikForm,
   FormikHelpers,
 } from "formik";
+import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import PhoneInput from "react-phone-input-2";
@@ -30,6 +31,7 @@ import Swal from "sweetalert2";
 import * as Yup from "yup";
 
 const AddLeadDialog: React.FC<LeadDialogProps> = ({ isOpen, onClose }) => {
+  const { data: session } = useSession();
   const { resolvedTheme } = useTheme();
   const CATEGORY_TYPE_FILTER = "CUSTOMER_SOURCE";
 
@@ -309,31 +311,31 @@ const AddLeadDialog: React.FC<LeadDialogProps> = ({ isOpen, onClose }) => {
                   )}
                 </Field>
               </div>
-
-              <div>
-                <Label htmlFor="salon" className="mb-2">
-                  Salon<span className="text-danger">*</span>
-                </Label>
-                <Field
-                  id="salon"
-                  name="salon"
-                  as="select"
-                  className="w-full rounded-md px-3 py-2"
-                >
-                  <option value="">Select salon</option>
-                  {salonOptions.map((s) => (
-                    <option key={s.uid} value={s.uid}>
-                      {s.name}
-                    </option>
-                  ))}
-                </Field>
-                <ErrorMessage
-                  name="salon"
-                  component="div"
-                  className="text-danger mt-1 text-xs"
-                />
-              </div>
-
+              {session?.user?.account_type === "INDIVIDUAL_STYLIST" ? null : (
+                <div>
+                  <Label htmlFor="salon" className="mb-2">
+                    Salon<span className="text-danger">*</span>
+                  </Label>
+                  <Field
+                    id="salon"
+                    name="salon"
+                    as="select"
+                    className="w-full rounded-md px-3 py-2"
+                  >
+                    <option value="">Select salon</option>
+                    {salonOptions.map((s) => (
+                      <option key={s.uid} value={s.uid}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </Field>
+                  <ErrorMessage
+                    name="salon"
+                    component="div"
+                    className="text-danger mt-1 text-xs"
+                  />
+                </div>
+              )}
               <div className="relative">
                 <Label htmlFor="source" className="mb-2">
                   Source<span className="text-danger">*</span>

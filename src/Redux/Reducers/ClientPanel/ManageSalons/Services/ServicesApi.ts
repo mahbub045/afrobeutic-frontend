@@ -54,6 +54,28 @@ export const ServicesApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Services"],
     }),
+    getServiceCategories: builder.query({
+      query: () => ({
+        url: `/service-categories`,
+        method: "GET",
+      }),
+      providesTags: ["Services"],
+    }),
+    getServiceSubCategories: builder.query({
+      query: (categoryUid: string) => ({
+        url: `/service-categories/${categoryUid}/subcategories`,
+        method: "GET",
+      }),
+      providesTags: ["Services"],
+    }),
+    addServiceSubCategory: builder.mutation({
+      query: ({ categoryUid, subCategoryData }) => ({
+        url: `/service-categories/${categoryUid}/subcategories`,
+        method: "POST",
+        body: subCategoryData,
+      }),
+      invalidatesTags: ["Services"],
+    }),
   }),
 });
 
@@ -62,4 +84,7 @@ export const {
   useAddServiceMutation,
   useEditServiceMutation,
   useDeleteServiceMutation,
+  useGetServiceCategoriesQuery,
+  useGetServiceSubCategoriesQuery,
+  useAddServiceSubCategoryMutation,
 } = ServicesApi;

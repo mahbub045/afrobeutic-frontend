@@ -35,7 +35,7 @@ const SettingsTab: React.FC = () => {
       </div>
 
       {/* Profile Header Section */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Left Column - Salon Profile */}
         <div className="space-y-6">
           {/* Salon Profile Card */}

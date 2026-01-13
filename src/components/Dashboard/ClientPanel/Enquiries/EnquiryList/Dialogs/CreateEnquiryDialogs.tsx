@@ -26,6 +26,7 @@ import {
   FormikHelpers,
   FormikProps,
 } from "formik";
+import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import PhoneInput from "react-phone-input-2";
@@ -38,6 +39,7 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
   isOpen,
   onClose,
 }) => {
+  const { data: session } = useSession();
   const { resolvedTheme } = useTheme();
 
   // RTK Hooks for API calls
@@ -641,7 +643,9 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                 </div>
               </div>
 
-              <div>
+              <div
+                className={`${session?.user?.account_type === "INDIVIDUAL_STYLIST" ? "md:col-span-2" : ""}`}
+              >
                 <Label htmlFor="type" className="mb-2">
                   Type
                 </Label>
@@ -650,25 +654,26 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                   <option value="EMERGENCY">Emergency</option>
                 </Field>
               </div>
-              <div>
-                <Label htmlFor="salon" className="mb-2">
-                  Salon<span className="text-danger">*</span>
-                </Label>
-                <Field as="select" id="salon" name="salon" required>
-                  <option value="">
-                    {isSalonsLoading ? "Loading salons..." : "Select a salon"}
-                  </option>
-                  {salonOptions.map((s) => (
-                    <option key={s.uid} value={s.uid}>
-                      {s.name}
+              {session?.user?.account_type === "INDIVIDUAL_STYLIST" ? null : (
+                <div>
+                  <Label htmlFor="salon" className="mb-2">
+                    Salon<span className="text-danger">*</span>
+                  </Label>
+                  <Field as="select" id="salon" name="salon" required>
+                    <option value="">
+                      {isSalonsLoading ? "Loading salons..." : "Select a salon"}
                     </option>
-                  ))}
-                </Field>
-                <div className="text-destructive text-sm">
-                  <ErrorMessage name="salon" />
+                    {salonOptions.map((s) => (
+                      <option key={s.uid} value={s.uid}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </Field>
+                  <div className="text-destructive text-sm">
+                    <ErrorMessage name="salon" />
+                  </div>
                 </div>
-              </div>
-
+              )}
               <div className="md:col-span-2">
                 <Label htmlFor="summary" className="mb-2">
                   Summary<span className="text-danger">*</span>

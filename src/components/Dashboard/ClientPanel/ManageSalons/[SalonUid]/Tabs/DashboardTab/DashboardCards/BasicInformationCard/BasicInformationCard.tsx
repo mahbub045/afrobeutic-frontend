@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { countries } from "@/data/countries";
 import { formatChoiceFieldValue } from "@/lib/utils";
 import { DashboardTabProps } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
-import { Check, Copy, MapPin, PenSquare, Scissors } from "lucide-react";
+import { MapPin, PenSquare, Scissors } from "lucide-react";
 import { useSession } from "next-auth/react";
 import React, { useState } from "react";
 import EditBasicInfoDialog from "./Dialogs/EditBasicInfoDialog";
@@ -24,40 +24,9 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
 }) => {
   const { data: session } = useSession();
   const [openBasicInfoEditDialog, setOpenBasicInfoEditDialog] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   const handleOpenBasicInfoEditDialog = () => {
     setOpenBasicInfoEditDialog(true);
-  };
-
-  const handleCopyLocation = async () => {
-    const text = singleSalonData?.address || "";
-    if (!text) return;
-
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      // Fallback for older browsers: use a temporary textarea
-      try {
-        const textarea = document.createElement("textarea");
-        textarea.value = text;
-        // avoid showing the element
-        textarea.style.position = "fixed";
-        textarea.style.left = "-9999px";
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textarea);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      } catch (e) {
-        // ignore; copying failed
-        console.error("Failed to copy address:", e);
-      }
-      console.error("Failed to copy address:", err);
-    }
   };
 
   return (
@@ -227,7 +196,7 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
                   </p>
                 </div>
               </div>
-              <div className="mt-6">
+              {/* <div className="mt-6">
                 <div className="flex justify-between">
                   <p className="text-muted-foreground text-xs uppercase">
                     Google Location Link
@@ -256,7 +225,7 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
                 <p className="text-foreground -mt-4 text-sm">
                   {singleSalonData?.address || "-"}
                 </p>
-              </div>
+              </div> */}
             </>
           )}
         </div>

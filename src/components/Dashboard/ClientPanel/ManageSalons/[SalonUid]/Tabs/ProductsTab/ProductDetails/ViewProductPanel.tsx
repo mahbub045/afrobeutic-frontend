@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { safe } from "@/lib/utils";
+import { formatChoiceFieldValue, safe } from "@/lib/utils";
 import { useGetProductsDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Products/ProductsApi";
 import {
   ProductProps,
@@ -225,7 +225,7 @@ const ViewProductPanel: React.FC<ViewProductPanelProps> = ({
               </div>
             </div>
 
-            <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+            <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
               <div>
                 <div className="text-muted-foreground text-xs uppercase">
                   Product name
@@ -239,7 +239,15 @@ const ViewProductPanel: React.FC<ViewProductPanelProps> = ({
                   Category
                 </div>
                 <div className="text-sm font-medium">
-                  {safe(displayedProduct.category)}
+                  {safe(formatChoiceFieldValue(displayedProduct.category))}
+                </div>
+              </div>
+              <div>
+                <div className="text-muted-foreground text-xs uppercase">
+                  Sub Category
+                </div>
+                <div className="text-sm font-medium">
+                  {safe(formatChoiceFieldValue(displayedProduct.sub_category))}
                 </div>
               </div>
               <div>
