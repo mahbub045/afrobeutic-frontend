@@ -10,10 +10,16 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useGetCommonCategoriesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Common/CategoriesApi";
-import { useEditProductMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Products/ProductsApi";
+import { formatChoiceFieldValue } from "@/lib/utils";
+import {
+  useAddProductSubCategoryMutation,
+  useEditProductMutation,
+  useGetProductCategoriesQuery,
+  useGetProductSubCategoriesQuery,
+} from "@/Redux/Reducers/ClientPanel/ManageSalons/Products/ProductsApi";
 import {
   EditProductBasicInfoDialogProps,
+  ProductCategory,
   ProductProps,
 } from "@/Types/ClientPanel/ManageSalonTypes/ProductsTypes/ProductsType";
 import { ErrorMessage, Field, Form, Formik } from "formik";
@@ -21,7 +27,7 @@ import { X } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
@@ -35,86 +41,86 @@ const EditProductBasicInfoDialog: React.FC<EditProductBasicInfoDialogProps> = ({
   const { salonuid } = useParams();
   const { resolvedTheme } = useTheme();
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
-  const [showCategories, setShowCategories] = useState(false);
-  const categoryInputRef = useRef<HTMLInputElement>(null);
-  const categoryDropdownRef = useRef<HTMLDivElement>(null);
-  const CATEGORY_TYPE_FILTER = "PRODUCT";
+  const [selectedCategoryUid, setSelectedCategoryUid] = useState<string>("");
+  const [showSubCategoryInput, setShowSubCategoryInput] = useState(false);
+  const [newSubCategoryName, setNewSubCategoryName] = useState("");
+
   // RTK Hooks
   const [editProduct, { isLoading: isEditingProduct }] =
     useEditProductMutation();
+  const { data: commonCategoriesData } =
+    useGetProductCategoriesQuery(undefined);
   const {
-    data: commonCategoriesData,
-    isLoading: isLoadingCategories,
+    data: commonSubCategoriesData,
+    isLoading: isLoadingSubCategories,
     refetch,
-  } = useGetCommonCategoriesDataQuery({ category_type: CATEGORY_TYPE_FILTER });
+  } = useGetProductSubCategoriesQuery(selectedCategoryUid || "", {
+    skip: !selectedCategoryUid,
+  });
+  const [addProductSubCategory, { isLoading: isAddingSubCategory }] =
+    useAddProductSubCategoryMutation();
 
-  // helpers to safely read category value/label from possible shapes
-  const formatCategoryValue = (c: unknown, idx: number) => {
-    if (typeof c === "string") return c;
-    if (c && typeof c === "object") {
-      const obj = c as Record<string, unknown>;
-      const val =
-        obj.name ?? obj.category ?? obj.title ?? obj.label ?? obj.id ?? idx;
-      return String(val);
-    }
-    return String(c ?? idx);
-  };
+  const selectedCategory = commonCategoriesData?.results.find(
+    (cat: ProductCategory) => cat.uid === selectedCategoryUid,
+  );
+  const canAddCustomSubCategory = selectedCategory?.name === "OTHER_PRODUCTS";
 
-  // build a deduplicated list of suggestion strings (preserve order)
-  const categorySuggestions: string[] = (() => {
-    const src: unknown[] = Array.isArray(commonCategoriesData)
-      ? commonCategoriesData
-      : Array.isArray(commonCategoriesData?.data)
-        ? commonCategoriesData!.data
-        : [];
+  const resolvedCategoryFromProduct = useMemo(() => {
+    const rawCategory = selectedProduct?.category || "";
+    if (!rawCategory) return "";
 
-    const looksLikeProduct = (c: unknown) => {
-      if (typeof c === "string") return true;
-      if (c && typeof c === "object") {
-        const obj = c as Record<string, unknown>;
-        const ct =
-          obj.category_type ?? obj.type ?? obj.categoryType ?? obj.kind;
-        if (ct === undefined || ct === null) return true;
-        return String(ct).toLowerCase() === CATEGORY_TYPE_FILTER.toLowerCase();
-      }
-      return false;
-    };
+    const cats =
+      (commonCategoriesData?.results as ProductCategory[] | undefined) || [];
+    if (cats.length === 0) return rawCategory;
 
-    const seen = new Set<string>();
-    const out: string[] = [];
-    src.forEach((c, i) => {
-      if (!looksLikeProduct(c)) return; // skip non-product categories when metadata present
-      const v = formatCategoryValue(c, i);
-      if (v !== "" && !seen.has(v)) {
-        seen.add(v);
-        out.push(v);
-      }
+    // If the stored value already matches a uid, keep it
+    if (cats.some((c) => c.uid === rawCategory)) return rawCategory;
+
+    // Otherwise, try to resolve by name / formatted name
+    const match = cats.find((c) => {
+      if (c.name === rawCategory) return true;
+      return (
+        formatChoiceFieldValue(c.name) ===
+        formatChoiceFieldValue(rawCategory as string)
+      );
     });
-    return out;
-  })();
+
+    return match ? match.uid : rawCategory;
+  }, [selectedProduct, commonCategoriesData]);
 
   useEffect(() => {
-    // Handle click outside to close dropdown
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        categoryDropdownRef.current &&
-        !categoryDropdownRef.current.contains(event.target as Node) &&
-        categoryInputRef.current &&
-        !categoryInputRef.current.contains(event.target as Node)
-      ) {
-        setShowCategories(false);
-      }
-    };
+    if (!isOpen) return;
+    setSelectedCategoryUid(resolvedCategoryFromProduct || "");
+    setShowSubCategoryInput(false);
+    setNewSubCategoryName("");
+  }, [isOpen, resolvedCategoryFromProduct]);
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  const resolvedSubCategoryFromProduct = useMemo(() => {
+    const rawSub = selectedProduct?.sub_category || "";
+    if (!rawSub) return "";
+
+    const subs =
+      (commonSubCategoriesData?.results as ProductCategory[] | undefined) || [];
+    if (subs.length === 0) return "";
+
+    // If already a uid, keep it
+    if (subs.some((s) => s.uid === rawSub)) return rawSub;
+
+    const match = subs.find((s) => {
+      if (s.name === rawSub) return true;
+      return (
+        formatChoiceFieldValue(s.name) ===
+        formatChoiceFieldValue(rawSub as string)
+      );
+    });
+
+    return match ? match.uid : "";
+  }, [selectedProduct, commonSubCategoriesData]);
 
   const validationSchema = Yup.object().shape({
     name: Yup.string().required("Product name is required"),
     category: Yup.string().required("Category is required"),
+    sub_category: Yup.string().required("Sub-category is required"),
     price: Yup.number()
       .typeError("Price must be a number")
       .required("Price is required"),
@@ -134,11 +140,47 @@ const EditProductBasicInfoDialog: React.FC<EditProductBasicInfoDialogProps> = ({
     setUploadedImages((prev) => prev.filter((_, i) => i !== index));
   };
 
+  async function handleAddSubCategory() {
+    if (!selectedCategoryUid) {
+      toast.error("Please select a category first.");
+      return;
+    }
+
+    if (!canAddCustomSubCategory) {
+      toast.error(
+        "Custom sub-categories can only be created under the 'Other Products' product category.",
+      );
+      return;
+    }
+
+    const name = newSubCategoryName.trim();
+    if (!name) {
+      toast.error("Please enter a sub-category name.");
+      return;
+    }
+
+    try {
+      await addProductSubCategory({
+        categoryUid: selectedCategoryUid,
+        subCategoryData: { name },
+      }).unwrap();
+
+      toast.success("Sub-category added successfully.");
+      setNewSubCategoryName("");
+      setShowSubCategoryInput(false);
+      refetch();
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to add sub-category. Please try again.");
+    }
+  }
+
   const handleSubmit = async (values: ProductProps) => {
     try {
       const formData = new FormData();
       formData.append("name", values.name);
       formData.append("category", values.category);
+      formData.append("sub_category", values.sub_category);
       formData.append("price", String(values.price));
       formData.append("description", values.description || "");
       uploadedImages.forEach((file) =>
@@ -186,6 +228,7 @@ const EditProductBasicInfoDialog: React.FC<EditProductBasicInfoDialogProps> = ({
             {
               name: selectedProduct?.name || "",
               category: selectedProduct?.category || "",
+              sub_category: selectedProduct?.sub_category || "",
               price: selectedProduct?.price || "",
               description: selectedProduct?.description || "",
             } as ProductProps
@@ -217,90 +260,110 @@ const EditProductBasicInfoDialog: React.FC<EditProductBasicInfoDialogProps> = ({
                   Category
                 </Label>
                 <Field
-                  innerRef={categoryInputRef}
-                  as="input"
-                  type="text"
-                  autoComplete="off"
+                  as="select"
                   id="product-category"
                   name="category"
-                  placeholder='e.g. "Shampoo", "Hair Oil"'
-                  onFocus={() => setShowCategories(true)}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                    setFieldValue("category", e.target.value)
-                  }
-                />
-
-                {showCategories && (
-                  <div
-                    ref={categoryDropdownRef}
-                    className="absolute right-0 left-0 z-50 mt-1 max-h-40 overflow-auto rounded border bg-white shadow-lg dark:bg-[#0b1116]"
-                  >
-                    {(() => {
-                      const inputValue = categoryInputRef.current?.value || "";
-                      const searchTerm = inputValue.toLowerCase().trim();
-
-                      // Filter and sort categories: matching ones first
-                      const filteredAndSorted = searchTerm
-                        ? categorySuggestions
-                            .map((v) => ({
-                              value: v,
-                              matches: v.toLowerCase().includes(searchTerm),
-                              startsWithMatch: v
-                                .toLowerCase()
-                                .startsWith(searchTerm),
-                            }))
-                            .sort((a, b) => {
-                              // Prioritize: starts with > contains > no match
-                              if (a.startsWithMatch && !b.startsWithMatch)
-                                return -1;
-                              if (!a.startsWithMatch && b.startsWithMatch)
-                                return 1;
-                              if (a.matches && !b.matches) return -1;
-                              if (!a.matches && b.matches) return 1;
-                              return 0;
-                            })
-                            .map((item) => item.value)
-                        : categorySuggestions;
-
-                      return filteredAndSorted.length > 0 ? (
-                        <ul className="divide-y p-2">
-                          {filteredAndSorted.map((v) => (
-                            <li key={v}>
-                              <button
-                                type="button"
-                                className="my-1 w-full px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-800"
-                                onClick={() => {
-                                  setFieldValue("category", v);
-                                  setShowCategories(false);
-                                }}
-                              >
-                                {v}
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <div className="p-2 text-sm">No categories</div>
-                      );
-                    })()}
-                  </div>
-                )}
-
-                {isLoadingCategories ? (
-                  <p className="mt-1 text-sm">Loading categories...</p>
-                ) : !commonCategoriesData ||
-                  (Array.isArray(commonCategoriesData) &&
-                    commonCategoriesData.length === 0) ||
-                  (Array.isArray(commonCategoriesData?.data) &&
-                    commonCategoriesData.data.length === 0) ? (
-                  <p className="mt-1 text-sm">No categories found</p>
-                ) : null}
-
+                  onChange={(e: ChangeEvent<HTMLSelectElement>) => {
+                    const categoryValue = e.target.value;
+                    setSelectedCategoryUid(categoryValue);
+                    setFieldValue("category", categoryValue);
+                    setFieldValue("sub_category", "");
+                  }}
+                >
+                  <option value="" disabled>
+                    Select category
+                  </option>
+                  {commonCategoriesData?.results.map((cat: ProductCategory) => (
+                    <option key={cat.uid} value={cat.uid}>
+                      {formatChoiceFieldValue(cat.name)}
+                    </option>
+                  ))}
+                </Field>
                 <ErrorMessage
                   name="category"
                   component="p"
                   className="mt-1 text-sm text-red-500"
                 />
+              </div>
+              <div>
+                <Label htmlFor="product-sub-category" className="mb-2">
+                  Sub-Category
+                </Label>
+                <Field
+                  as="select"
+                  id="product-sub-category"
+                  name="sub_category"
+                  disabled={!selectedCategoryUid || isLoadingSubCategories}
+                >
+                  <option value="" disabled>
+                    Select sub-category
+                  </option>
+                  {(
+                    commonSubCategoriesData?.results as
+                      | ProductCategory[]
+                      | undefined
+                      | null
+                  )?.map((subCat: ProductCategory) => (
+                    <option key={subCat.uid} value={subCat.uid}>
+                      {formatChoiceFieldValue(subCat.name)}
+                    </option>
+                  ))}
+                </Field>
+                <ErrorMessage
+                  name="sub_category"
+                  component="p"
+                  className="mt-1 text-sm text-red-500"
+                />
+                {canAddCustomSubCategory && (
+                  <div className="mt-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        if (!selectedCategoryUid) {
+                          toast.error("Please select a category first.");
+                          return;
+                        }
+                        setShowSubCategoryInput(true);
+                      }}
+                      disabled={isAddingSubCategory}
+                    >
+                      Add New Sub-Category
+                    </Button>
+                    {showSubCategoryInput ? (
+                      <div className="mt-2 flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={newSubCategoryName}
+                          onChange={(e) =>
+                            setNewSubCategoryName(e.target.value)
+                          }
+                          placeholder="e.g. Hair Coloring"
+                          className="bg-background focus-visible:ring-primary flex-1 rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-2"
+                        />
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={handleAddSubCategory}
+                          disabled={isAddingSubCategory}
+                        >
+                          {isAddingSubCategory ? "Saving..." : "Save"}
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setShowSubCategoryInput(false);
+                            setNewSubCategoryName("");
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    ) : null}
+                  </div>
+                )}
               </div>
               <div>
                 <Label htmlFor="product-price" className="mb-2">

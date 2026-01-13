@@ -24,7 +24,7 @@ import { Plus, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { ChangeEvent, useRef, useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
@@ -32,6 +32,7 @@ import * as Yup from "yup";
 const ProductSchema = Yup.object().shape({
   name: Yup.string().trim().required("Name is required"),
   category: Yup.string().trim().required("Category is required"),
+  sub_category: Yup.string().trim().required("Sub-category is required"),
   price: Yup.number()
     .typeError("Price must be a number")
     .required("Price is required")
@@ -52,7 +53,6 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
   const [selectedCategoryUid, setSelectedCategoryUid] = useState<string>("");
   const [showSubCategoryInput, setShowSubCategoryInput] = useState(false);
   const [newSubCategoryName, setNewSubCategoryName] = useState("");
-
 
   // RTK hooks
   const [addProduct, { isLoading }] = useAddProductMutation();

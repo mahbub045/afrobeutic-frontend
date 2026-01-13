@@ -2,7 +2,7 @@ export interface ProductProps {
   uid: string;
   name: string;
   category: string;
-  sub_category?: string;
+  sub_category: string;
   price: string;
   description?: string;
   images?: string[];

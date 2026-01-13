@@ -235,14 +235,7 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
-          {({
-            handleSubmit,
-            isSubmitting,
-            setFieldValue,
-            errors,
-            touched,
-            values,
-          }) => (
+          {({ handleSubmit, isSubmitting, setFieldValue, errors, touched }) => (
             <Form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="service-name" className="mb-2">
