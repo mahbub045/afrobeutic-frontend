@@ -235,14 +235,7 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
-          {({
-            handleSubmit,
-            isSubmitting,
-            setFieldValue,
-            errors,
-            touched,
-            values,
-          }) => (
+          {({ handleSubmit, isSubmitting, setFieldValue, errors, touched }) => (
             <Form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="service-name" className="mb-2">
@@ -349,7 +342,7 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
                         />
                         <Button
                           type="button"
-                          size="sm"
+                          size="lg"
                           onClick={handleAddSubCategory}
                           disabled={isAddingSubCategory}
                         >
@@ -357,8 +350,8 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
                         </Button>
                         <Button
                           type="button"
-                          size="sm"
-                          variant="ghost"
+                          size="lg"
+                          variant="danger"
                           onClick={() => {
                             setShowSubCategoryInput(false);
                             setNewSubCategoryName("");

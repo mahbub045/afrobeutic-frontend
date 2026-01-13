@@ -2,6 +2,7 @@ export interface ProductProps {
   uid: string;
   name: string;
   category: string;
+  sub_category: string;
   price: string;
   description?: string;
   images?: string[];
@@ -16,9 +17,15 @@ export interface AddProductDialogProps {
 export interface ProductFormValues {
   name: string;
   category: string;
+  sub_category: string;
   price: string;
   description: string;
   uploaded_images?: string;
+}
+
+export interface ProductCategory {
+  uid: string;
+  name: string;
 }
 
 export interface EditProductBasicInfoDialogProps {

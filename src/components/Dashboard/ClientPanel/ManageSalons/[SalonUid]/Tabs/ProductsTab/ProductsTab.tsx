@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { formatDateTime } from "@/lib/utils";
+import { formatChoiceFieldValue, formatDateTime } from "@/lib/utils";
 import { useGetProductsDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Products/ProductsApi";
 import { ProductProps } from "@/Types/ClientPanel/ManageSalonTypes/ProductsTypes/ProductsType";
 import {
@@ -143,6 +143,7 @@ const ProductsTab: React.FC = () => {
               <TableHead className="text-primary">#</TableHead>
               <TableHead className="text-primary">Product Name</TableHead>
               <TableHead className="text-primary">Category</TableHead>
+              <TableHead className="text-primary">Sub Category</TableHead>
               <TableHead className="text-primary">
                 <div className="flex items-center gap-1">
                   <span>Price</span>
@@ -202,7 +203,12 @@ const ProductsTab: React.FC = () => {
                 <TableRow key={product.uid}>
                   <TableCell className="font-medium">{index + 1}</TableCell>
                   <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell>{product.category}</TableCell>
+                  <TableCell>
+                    {formatChoiceFieldValue(product.category) || "-"}
+                  </TableCell>
+                  <TableCell>
+                    {formatChoiceFieldValue(product.sub_category) || "-"}
+                  </TableCell>
                   <TableCell>${product.price}</TableCell>
                   <TableCell>
                     {formatDateTime(product?.created_at ?? null)}
