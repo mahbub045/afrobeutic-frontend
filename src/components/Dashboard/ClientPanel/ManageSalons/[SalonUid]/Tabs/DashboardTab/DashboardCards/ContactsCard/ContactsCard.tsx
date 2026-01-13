@@ -29,7 +29,6 @@ const ContactsCard: React.FC<DashboardTabProps> = ({
   };
 
   // Replace these with props or data from store
-  const website = singleSalonData?.website || "";
   const phone_number_one = singleSalonData?.phone_number_one || "";
   const email = singleSalonData?.email || "";
 
@@ -125,40 +124,6 @@ const ContactsCard: React.FC<DashboardTabProps> = ({
           </div>
         ) : (
           <div className="grid gap-4">
-            {/* <div className="flex items-start justify-between">
-              <div className="min-w-0">
-                <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-                  Website
-                </p>
-                <a
-                  href={singleSalonData?.website || "#"}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-primary mt-2 inline-flex items-center gap-2 text-sm font-medium"
-                >
-                  <span className="block max-w-[260px] truncate">
-                    {singleSalonData?.website || "Not Specified"}
-                  </span>
-                  <ExternalLink className="text-primary size-3" />
-                </a>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => copyToClipboard(website, "website")}
-                  aria-label="Copy website"
-                >
-                  {copied === "website" ? (
-                    <Check className="size-4 text-green-500" />
-                  ) : (
-                    <Copy className="size-4" />
-                  )}
-                </Button>
-              </div>
-            </div> */}
-
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
