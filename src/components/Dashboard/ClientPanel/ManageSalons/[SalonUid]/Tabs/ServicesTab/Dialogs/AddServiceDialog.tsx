@@ -277,11 +277,11 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                             setNewSubCategoryName(e.target.value)
                           }
                           placeholder="e.g. Hair Coloring"
-                          className="bg-background focus-visible:ring-primary flex-1 rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-2"
+                          className="bg-background focus-visible:ring-primary flex-1 rounded-md border px-3 py-1 text-sm outline-none focus-visible:ring-2"
                         />
                         <Button
                           type="button"
-                          size="sm"
+                          size="lg"
                           onClick={handleAddSubCategory}
                           disabled={isAddingSubCategory}
                         >
@@ -289,8 +289,8 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                         </Button>
                         <Button
                           type="button"
-                          size="sm"
-                          variant="ghost"
+                          size="lg"
+                          variant="danger"
                           onClick={() => {
                             setShowSubCategoryInput(false);
                             setNewSubCategoryName("");

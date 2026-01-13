@@ -23,6 +23,11 @@ export interface ProductFormValues {
   uploaded_images?: string;
 }
 
+export interface ProductCategory {
+  uid: string;
+  name: string;
+}
+
 export interface EditProductBasicInfoDialogProps {
   isOpen: boolean;
   onClose: () => void;

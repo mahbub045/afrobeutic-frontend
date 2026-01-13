@@ -62,15 +62,15 @@ export const ProductsApi = baseApi.injectEndpoints({
       providesTags: ["Products"],
     }),
     getProductSubCategories: builder.query({
-      query: (productUid: string) => ({
-        url: `/product-categories/${productUid}/subcategories`,
+      query: (categoryUid: string) => ({
+        url: `/product-categories/${categoryUid}/subcategories`,
         method: "GET",
       }),
       providesTags: ["Products"],
     }),
     addProductSubCategory: builder.mutation({
-      query: ({ productUid, subCategoryData }) => ({
-        url: `/product-categories/${productUid}/subcategories`,
+      query: ({ categoryUid, subCategoryData }) => ({
+        url: `/product-categories/${categoryUid}/subcategories`,
         method: "POST",
         body: subCategoryData,
       }),
