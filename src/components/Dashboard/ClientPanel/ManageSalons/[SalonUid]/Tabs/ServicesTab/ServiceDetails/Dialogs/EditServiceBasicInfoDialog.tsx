@@ -342,7 +342,7 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
                         />
                         <Button
                           type="button"
-                          size="sm"
+                          size="lg"
                           onClick={handleAddSubCategory}
                           disabled={isAddingSubCategory}
                         >
@@ -350,7 +350,7 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
                         </Button>
                         <Button
                           type="button"
-                          size="sm"
+                          size="lg"
                           variant="ghost"
                           onClick={() => {
                             setShowSubCategoryInput(false);

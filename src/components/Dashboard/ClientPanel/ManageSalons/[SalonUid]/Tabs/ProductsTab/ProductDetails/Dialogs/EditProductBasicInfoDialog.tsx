@@ -348,7 +348,7 @@ const EditProductBasicInfoDialog: React.FC<EditProductBasicInfoDialogProps> = ({
                         />
                         <Button
                           type="button"
-                          size="sm"
+                          size="lg"
                           onClick={handleAddSubCategory}
                           disabled={isAddingSubCategory}
                         >
@@ -356,7 +356,7 @@ const EditProductBasicInfoDialog: React.FC<EditProductBasicInfoDialogProps> = ({
                         </Button>
                         <Button
                           type="button"
-                          size="sm"
+                          size="lg"
                           variant="ghost"
                           onClick={() => {
                             setShowSubCategoryInput(false);
