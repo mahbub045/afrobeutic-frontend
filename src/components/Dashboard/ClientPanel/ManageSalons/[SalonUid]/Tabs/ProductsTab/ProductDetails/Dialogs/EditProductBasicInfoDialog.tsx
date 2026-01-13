@@ -224,11 +224,16 @@ const EditProductBasicInfoDialog: React.FC<EditProductBasicInfoDialogProps> = ({
         </DialogHeader>
 
         <Formik
+          enableReinitialize
           initialValues={
             {
               name: selectedProduct?.name || "",
-              category: selectedProduct?.category || "",
-              sub_category: selectedProduct?.sub_category || "",
+              category:
+                resolvedCategoryFromProduct || selectedProduct?.category || "",
+              sub_category:
+                resolvedSubCategoryFromProduct ||
+                selectedProduct?.sub_category ||
+                "",
               price: selectedProduct?.price || "",
               description: selectedProduct?.description || "",
             } as ProductProps
