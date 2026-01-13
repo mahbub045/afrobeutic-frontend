@@ -351,7 +351,7 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
                         <Button
                           type="button"
                           size="lg"
-                          variant="ghost"
+                          variant="danger"
                           onClick={() => {
                             setShowSubCategoryInput(false);
                             setNewSubCategoryName("");

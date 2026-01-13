@@ -289,7 +289,7 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
                         <Button
                           type="button"
                           size="lg"
-                          variant="ghost"
+                          variant="danger"
                           onClick={() => {
                             setShowSubCategoryInput(false);
                             setNewSubCategoryName("");
