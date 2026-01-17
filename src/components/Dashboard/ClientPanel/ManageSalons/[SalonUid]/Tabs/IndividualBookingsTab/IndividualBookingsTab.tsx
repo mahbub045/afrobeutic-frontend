@@ -323,11 +323,6 @@ const IndividualBookingsTab: React.FC = () => {
                   return (
                     <div key={index} className="flex border-b last:border-b-0">
                       <div className="bg-muted/50 text-muted-foreground w-14 flex-shrink-0 border-r text-[10px] sm:w-16 sm:text-xs lg:w-20">
-                        {index === 0 && (
-                          <div className="border-b px-1 py-2 sm:px-2 sm:py-[22px] lg:px-3">
-                            &nbsp;
-                          </div>
-                        )}
                         <div className="min-h-[80px] px-1 py-2 sm:min-h-[90px] sm:px-2 lg:min-h-[100px] lg:px-3">
                           {slot.time}
                         </div>
