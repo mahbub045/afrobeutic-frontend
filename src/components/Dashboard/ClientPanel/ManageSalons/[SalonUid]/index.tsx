@@ -13,6 +13,7 @@ import {
   Settings,
   Users,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useParams, usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import AnalyticsTab from "./Tabs/AnalyticsTab/AnalyticsTab";
@@ -20,6 +21,7 @@ import BookingsTab from "./Tabs/BookingsTab/BookingsTab";
 import ChairsTab from "./Tabs/ChairsTab/ChairsTab";
 import DashboardTab from "./Tabs/DashboardTab/DashboardTab";
 import EmployeesTab from "./Tabs/EmployeesTab/EmployeesTab";
+import IndividualBookingsTab from "./Tabs/IndBookingsTab/IndividualBookingsTab";
 import LookbookTab from "./Tabs/LookbookTab/LookbookTab";
 import OpeningHoursTab from "./Tabs/OpeningHoursTab/OpeningHoursTab";
 import ProductsTab from "./Tabs/ProductsTab/ProductsTab";
@@ -28,6 +30,7 @@ import SettingsTab from "./Tabs/SettingsTab/SettingsTab";
 
 const SingleSalonContainer: React.FC = () => {
   const { salonuid } = useParams();
+  const { data: session } = useSession();
 
   interface MenuItemProps {
     label: string;
@@ -41,14 +44,22 @@ const SingleSalonContainer: React.FC = () => {
       { label: "Opening Hours", href: `opening-hours`, Icon: Clock },
       { label: "Services", href: `services`, Icon: Scissors },
       { label: "Products", href: `products`, Icon: Box },
-      { label: "Chairs", href: `chairs`, Icon: Armchair },
-      { label: "Bookings", href: `bookings`, Icon: Calendar },
+      ...(session?.user?.account_type !== "INDIVIDUAL_STYLIST"
+        ? [
+            { label: "Chairs", href: `chairs`, Icon: Armchair },
+            { label: "Bookings", href: `bookings`, Icon: Calendar },
+          ]
+        : []),
+      ...(session?.user?.account_type === "INDIVIDUAL_STYLIST"
+        ? [{ label: "Bookings", href: `indBookings`, Icon: Calendar }]
+        : []),
+
       { label: "Lookbooks", href: `lookbooks`, Icon: Image },
       { label: "Employees", href: `employees`, Icon: Users },
       { label: "Analytics", href: `analytics`, Icon: BarChart2 },
       { label: "Settings", href: `settings`, Icon: Settings },
     ],
-    [],
+    [session?.user?.account_type],
   );
 
   const pathname = usePathname();
@@ -119,8 +130,12 @@ const SingleSalonContainer: React.FC = () => {
         {activeTab === "opening-hours" && <OpeningHoursTab />}
         {activeTab === "services" && <ServicesTab />}
         {activeTab === "products" && <ProductsTab />}
-        {activeTab === "chairs" && <ChairsTab />}
-        {activeTab === "bookings" && <BookingsTab />}
+        {session?.user?.account_type !== "INDIVIDUAL_STYLIST" &&
+          activeTab === "chairs" && <ChairsTab />}
+        {session?.user?.account_type !== "INDIVIDUAL_STYLIST" &&
+          activeTab === "bookings" && <BookingsTab />}
+        {session?.user?.account_type === "INDIVIDUAL_STYLIST" &&
+          activeTab === "indBookings" && <IndividualBookingsTab />}
         {activeTab === "lookbooks" && <LookbookTab />}
         {activeTab === "employees" && <EmployeesTab />}
         {activeTab === "analytics" && <AnalyticsTab />}
