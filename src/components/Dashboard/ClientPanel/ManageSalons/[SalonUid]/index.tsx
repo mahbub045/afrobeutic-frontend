@@ -21,7 +21,7 @@ import BookingsTab from "./Tabs/BookingsTab/BookingsTab";
 import ChairsTab from "./Tabs/ChairsTab/ChairsTab";
 import DashboardTab from "./Tabs/DashboardTab/DashboardTab";
 import EmployeesTab from "./Tabs/EmployeesTab/EmployeesTab";
-import IndividualBookingsTab from "./Tabs/IndBookingsTab/IndividualBookingsTab";
+import IndividualBookingsTab from "./Tabs/IndividualBookingsTab/IndividualBookingsTab";
 import LookbookTab from "./Tabs/LookbookTab/LookbookTab";
 import OpeningHoursTab from "./Tabs/OpeningHoursTab/OpeningHoursTab";
 import ProductsTab from "./Tabs/ProductsTab/ProductsTab";
