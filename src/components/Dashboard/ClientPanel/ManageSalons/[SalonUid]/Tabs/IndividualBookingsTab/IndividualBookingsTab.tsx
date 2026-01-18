@@ -58,6 +58,15 @@ interface Appointment {
   services?: IndividualBookingApi["services"];
   products?: IndividualBookingApi["products"];
   notes?: string | null;
+  // Pricing fields used in the details panel
+  total_services?: number;
+  total_services_price?: number;
+  services_discount_price?: number;
+  total_products?: number;
+  total_products_price?: number;
+  total_price?: number;
+  final_price?: number;
+  tips_amount?: number;
   finalPrice?: number;
   tipsAmount?: number;
   paymentType?: string;
@@ -89,6 +98,13 @@ interface IndividualBookingApi {
     price?: string;
   }[];
   notes?: string | null;
+  // Pricing summary fields coming from the API
+  total_services?: number;
+  total_services_price?: number;
+  services_discount_price?: number;
+  total_products?: number;
+  total_products_price?: number;
+  total_price?: number;
   final_price?: number;
   tips_amount?: number;
   payment_type?: string;
@@ -319,6 +335,8 @@ const IndividualBookingsTab: React.FC = () => {
       if (!prev) return prev;
       return {
         ...prev,
+        // Keep both camelCase and snake_case in sync
+        tips_amount: data.tips_amount,
         tipsAmount: data.tips_amount,
         paymentType: data.payment_type,
       };
@@ -349,7 +367,16 @@ const IndividualBookingsTab: React.FC = () => {
       services: booking.services,
       products: booking.products,
       notes: booking.notes,
-      // Keep final price fields; cancellation_reason handled separately
+      // Pricing fields used by the details panel "Pricing Summary" section
+      total_services: booking.total_services,
+      total_services_price: booking.total_services_price,
+      services_discount_price: booking.services_discount_price,
+      total_products: booking.total_products,
+      total_products_price: booking.total_products_price,
+      total_price: booking.total_price,
+      final_price: booking.final_price,
+      tips_amount: booking.tips_amount,
+      // Keep camelCase aliases for dialogs / future use
       finalPrice: booking.final_price,
       tipsAmount: booking.tips_amount,
       paymentType: booking.payment_type,
@@ -506,6 +533,19 @@ const IndividualBookingsTab: React.FC = () => {
                                 services: appointment.services,
                                 products: appointment.products,
                                 notes: appointment.notes,
+                                // Pricing fields from the API / appointment view model
+                                total_services: appointment.total_services,
+                                total_services_price:
+                                  appointment.total_services_price,
+                                services_discount_price:
+                                  appointment.services_discount_price,
+                                total_products: appointment.total_products,
+                                total_products_price:
+                                  appointment.total_products_price,
+                                total_price: appointment.total_price,
+                                final_price: appointment.final_price,
+                                tips_amount: appointment.tips_amount,
+                                // CamelCase aliases used elsewhere (e.g. dialogs)
                                 finalPrice: appointment.finalPrice,
                                 tipsAmount: appointment.tipsAmount,
                                 paymentType: appointment.paymentType,
