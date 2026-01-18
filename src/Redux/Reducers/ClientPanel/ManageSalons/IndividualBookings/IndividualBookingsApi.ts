@@ -4,7 +4,7 @@ export const IndividualBookingsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getIndividualBookings: builder.query({
       query: ({ params, salonUid }) => ({
-        url: `/salon/${salonUid}/bookings`,
+        url: `/salons/${salonUid}/bookings`,
         method: "GET",
         params,
       }),
@@ -12,7 +12,7 @@ export const IndividualBookingsApi = baseApi.injectEndpoints({
     }),
     updateIndividualBookingStatus: builder.mutation({
       query: ({ salonUid, bookingUid, data }) => ({
-        url: `/salon/${salonUid}/bookings/${bookingUid}`,
+        url: `/salons/${salonUid}/bookings/${bookingUid}`,
         method: "PATCH",
         body: data,
       }),

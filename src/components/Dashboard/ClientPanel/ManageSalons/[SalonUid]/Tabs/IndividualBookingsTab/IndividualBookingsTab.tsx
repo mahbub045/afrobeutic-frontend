@@ -42,15 +42,6 @@ type UiStatus =
   | "completed"
   | "cancelled";
 
-interface DummyBooking {
-  id: string;
-  date: string; // YYYY-MM-DD
-  service: string;
-  client: string;
-  startTime: string; // HH:MM or HH:MM:SS
-  status: ApiStatus;
-}
-
 interface Appointment {
   id: string;
   service: string;
@@ -60,49 +51,22 @@ interface Appointment {
   color: string;
 }
 
-// Simple dummy data set for a single staff member
-const DUMMY_BOOKINGS: DummyBooking[] = [
-  {
-    id: "1",
-    date: "2026-01-17",
-    service: "Haircut & Style",
-    client: "Jane Doe",
-    startTime: "10:00",
-    status: "PLACED",
-  },
-  {
-    id: "2",
-    date: "2026-01-17",
-    service: "Hair Coloring",
-    client: "John Smith",
-    startTime: "13:00",
-    status: "INPROGRESS",
-  },
-  {
-    id: "3",
-    date: "2026-01-17",
-    service: "Braids",
-    client: "Amina Yusuf",
-    startTime: "15:30",
-    status: "COMPLETED",
-  },
-  {
-    id: "4",
-    date: "2026-01-18",
-    service: "Beard Trim",
-    client: "Michael Lee",
-    startTime: "11:00",
-    status: "RESCHEDULED",
-  },
-  {
-    id: "5",
-    date: "2026-01-19",
-    service: "Wash & Blow-dry",
-    client: "Sophia K.",
-    startTime: "09:30",
-    status: "CANCELLED",
-  },
-];
+// Shape of a single booking item returned from the API
+interface IndividualBookingApi {
+  uid?: string;
+  booking_id: string;
+  booking_date: string; // YYYY-MM-DD
+  booking_time: string; // HH:MM:SS
+  status: ApiStatus;
+  customer?: {
+    first_name?: string | null;
+    last_name?: string | null;
+    phone?: string | null;
+  } | null;
+  services?: {
+    name: string;
+  }[];
+}
 
 // Generate time slots (e.g. 08:00-09:00, 09:00-10:00 ...)
 const generateTimeSlots = (
@@ -209,20 +173,36 @@ const IndividualBookingsTab: React.FC = () => {
     params: filters,
   });
 
-  const filteredBookings = individualBookingsData?.filter((booking) => {
-    if (booking.date !== dateParam) return false;
+  // Normalize paginated API response into a flat bookings array
+  const bookings: IndividualBookingApi[] =
+    (individualBookingsData as IndividualBookingApi[]) ?? [];
+
+  const filteredBookings = bookings.filter((booking) => {
     if (statusFilter === "ALL") return true;
     return booking.status === statusFilter;
   });
 
-  const appointments: Appointment[] = filteredBookings.map((booking) => ({
-    id: booking.id,
-    service: booking.service.toUpperCase(),
-    client: booking.client,
-    startTime: booking.startTime,
-    status: statusMap[booking.status],
-    color: statusColorMap[booking.status],
-  }));
+  const appointments: Appointment[] = filteredBookings.map((booking) => {
+    const apiStatus = booking.status as ApiStatus;
+
+    const customerName = booking.customer
+      ? `${booking.customer.first_name ?? ""} ${booking.customer.last_name ?? ""}`.trim()
+      : "";
+
+    const serviceName =
+      booking.services && booking.services.length > 0
+        ? booking.services[0].name
+        : "Service";
+
+    return {
+      id: booking.uid ?? booking.booking_id,
+      service: serviceName.toUpperCase(),
+      client: customerName || booking.customer?.phone || "Unknown Customer",
+      startTime: booking.booking_time,
+      status: (statusMap[apiStatus] ?? "placed") as UiStatus,
+      color: statusColorMap[apiStatus] ?? statusColorMap["PLACED"],
+    };
+  });
 
   const navigateDate = (direction: "prev" | "next") => {
     const newDate = new Date(selectedDate.toISOString().slice(0, 10));
