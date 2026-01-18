@@ -25,6 +25,7 @@ const EditBookingProductsDialog: React.FC<CommonEditBookingDataProps> = ({
   isOpen,
   onOpenChange,
   bookingData,
+  onProductsUpdated,
 }) => {
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
@@ -77,6 +78,14 @@ const EditBookingProductsDialog: React.FC<CommonEditBookingDataProps> = ({
         bookingUid: bookingData.uid,
         data: { products: localSelection },
       }).unwrap();
+
+      // Notify parent so it can update local UI state immediately
+      if (onProductsUpdated && productsData?.results) {
+        const updatedProducts = (productsData.results as Product[]).filter(
+          (product) => localSelection.includes(product.uid),
+        );
+        onProductsUpdated(updatedProducts);
+      }
 
       try {
         dispatch(baseApi.util.invalidateTags(["IndividualBookings"]));

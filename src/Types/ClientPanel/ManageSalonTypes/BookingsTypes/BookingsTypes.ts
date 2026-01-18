@@ -153,4 +153,5 @@ export interface CommonEditBookingDataProps {
   onOpenChange: (open: boolean) => void;
   bookingData?: Partial<Booking> | null;
   onServicesUpdated?: (services: Service[]) => void;
+  onProductsUpdated?: (products: Product[]) => void;
 }

@@ -16,7 +16,10 @@ import {
 } from "@/components/ui/select";
 import { cn, formatChoiceFieldValue } from "@/lib/utils";
 import { useGetIndividualBookingsQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/IndividualBookings/IndividualBookingsApi";
-import type { Service } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
+import type {
+  Product,
+  Service,
+} from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
 import {
   Calendar as CalendarIcon,
   CalendarSearch,
@@ -255,6 +258,32 @@ const IndividualBookingsTab: React.FC = () => {
     });
   };
 
+  const handleProductsUpdated = (products: Product[]) => {
+    setSelectedAppointment((prev) => {
+      if (!prev) return prev;
+
+      const prevProductsByUid = new Map(
+        (prev.products ?? [])
+          .filter((p) => p.uid)
+          .map((p) => [p.uid as string, p]),
+      );
+
+      const updatedProducts = products.map((product) => {
+        const prevProd = prevProductsByUid.get(product.uid);
+        return {
+          uid: product.uid,
+          name: product.name,
+          price: product.price ?? prevProd?.price,
+        };
+      });
+
+      return {
+        ...prev,
+        products: updatedProducts,
+      };
+    });
+  };
+
   const appointments: Appointment[] = filteredBookings.map((booking) => {
     const apiStatus = booking.status as ApiStatus;
 
@@ -469,6 +498,7 @@ const IndividualBookingsTab: React.FC = () => {
             onStatusUpdated={handleStatusUpdated}
             onDateTimeUpdated={handleDateTimeUpdated}
             onServicesUpdated={handleServicesUpdated}
+            onProductsUpdated={handleProductsUpdated}
           />
         </div>
       )}

@@ -10,9 +10,13 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { cn, formatChoiceFieldValue } from "@/lib/utils";
-import type { BookingService } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
+import type {
+  BookingProduct,
+  BookingService,
+} from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
 import { Calendar as CalendarIcon, Edit } from "lucide-react";
 import { useState } from "react";
+import EditBookingProductsDialog from "./Dialogs/EditBookingProductsDialog";
 import EditBookingServicesDialog from "./Dialogs/EditBookingServicesDialog";
 import EditBookingStatusDialog from "./Dialogs/EditBookingStatusDialog";
 import EditBookingTimeAndDateDialog from "./Dialogs/EditBookingTimeAndDateDialog";
@@ -62,6 +66,9 @@ interface IndividualAppointmentDetailsPanelProps {
   onServicesUpdated?: (
     services: { uid: string; name: string; price: string }[],
   ) => void;
+  onProductsUpdated?: (
+    products: { uid: string; name: string; price: string }[],
+  ) => void;
 }
 
 const IndividualAppointmentDetailsPanel: React.FC<
@@ -74,9 +81,11 @@ const IndividualAppointmentDetailsPanel: React.FC<
   onStatusUpdated,
   onDateTimeUpdated,
   onServicesUpdated,
+  onProductsUpdated,
 }) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isServicesDialogOpen, setIsServicesDialogOpen] = useState(false);
+  const [isProductsDialogOpen, setIsProductsDialogOpen] = useState(false);
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
   const effectiveStatus: UiStatus | undefined = selectedAppointment?.status;
 
@@ -240,6 +249,7 @@ const IndividualAppointmentDetailsPanel: React.FC<
                 size="icon"
                 className="h-6 w-6 p-0"
                 type="button"
+                onClick={() => setIsProductsDialogOpen(true)}
               >
                 <Edit size={14} />
               </Button>
@@ -434,6 +444,28 @@ const IndividualAppointmentDetailsPanel: React.FC<
                 uid: svc.uid,
                 name: svc.name,
                 price: svc.price,
+              })),
+            );
+          }}
+        />
+      )}
+
+      {/* Edit Booking Products Dialog */}
+      {selectedAppointment && (
+        <EditBookingProductsDialog
+          isOpen={isProductsDialogOpen}
+          onOpenChange={setIsProductsDialogOpen}
+          bookingData={{
+            uid: selectedAppointment.id,
+            products: (selectedAppointment.products ??
+              []) as unknown as BookingProduct[],
+          }}
+          onProductsUpdated={(products) => {
+            onProductsUpdated?.(
+              products.map((prod) => ({
+                uid: prod.uid,
+                name: prod.name,
+                price: prod.price,
               })),
             );
           }}
