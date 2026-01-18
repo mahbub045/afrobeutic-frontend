@@ -71,6 +71,7 @@ interface IndividualBookingApi {
   booking_time: string; // HH:MM:SS
   booking_duration?: string; // HH:MM:SS
   status: ApiStatus;
+  cancellation_reason?: string;
   customer?: {
     first_name?: string | null;
     last_name?: string | null;
@@ -334,11 +335,22 @@ const IndividualBookingsTab: React.FC = () => {
       services: booking.services,
       products: booking.products,
       notes: booking.notes,
+      // Keep final price fields; cancellation_reason handled separately
       finalPrice: booking.final_price,
       tipsAmount: booking.tips_amount,
       paymentType: booking.payment_type,
     };
   });
+
+  const isCancelled = selectedAppointment?.status === "cancelled";
+
+  const cancellationReason = (() => {
+    if (!selectedAppointment) return undefined;
+    const match = bookings.find(
+      (b) => (b.uid ?? b.booking_id) === selectedAppointment.id,
+    );
+    return match?.cancellation_reason;
+  })();
 
   const navigateDate = (direction: "prev" | "next") => {
     const newDate = new Date(selectedDate.toISOString().slice(0, 10));
@@ -527,6 +539,8 @@ const IndividualBookingsTab: React.FC = () => {
             dateLabel={formatDate(selectedDate)}
             isOpen={isDetailsOpen}
             onOpenChange={setIsDetailsOpen}
+            isCancelled={isCancelled}
+            cancellationReason={cancellationReason}
             onStatusUpdated={handleStatusUpdated}
             onDateTimeUpdated={handleDateTimeUpdated}
             onServicesUpdated={handleServicesUpdated}

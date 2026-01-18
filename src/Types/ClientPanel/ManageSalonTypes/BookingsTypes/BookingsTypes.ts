@@ -157,3 +157,5 @@ export interface CommonEditBookingDataProps {
   onProductsUpdated?: (products: Product[]) => void;
   onStatusUpdated?: (status: string) => void;
 }
+
+

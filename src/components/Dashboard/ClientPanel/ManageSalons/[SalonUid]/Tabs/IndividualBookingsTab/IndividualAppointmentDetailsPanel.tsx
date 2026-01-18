@@ -10,12 +10,15 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { cn, formatChoiceFieldValue } from "@/lib/utils";
+import { useViewReceiptMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/ViewReceiptApi";
 import type {
   BookingProduct,
   BookingService,
 } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
 import { Calendar as CalendarIcon, Edit } from "lucide-react";
+import { useParams } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 import EditBookingCheckoutDialog from "./Dialogs/EditBookingCheckoutDialog";
 import EditBookingProductsDialog from "./Dialogs/EditBookingProductsDialog";
 import EditBookingServicesDialog from "./Dialogs/EditBookingServicesDialog";
@@ -61,6 +64,8 @@ interface IndividualAppointmentDetailsPanelProps {
   /** Controls the mobile sheet */
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+  isCancelled?: boolean;
+  cancellationReason?: string;
   onStatusUpdated?: (status: string) => void;
   onDateTimeUpdated?: (data: {
     booking_date: string;
@@ -87,17 +92,65 @@ const IndividualAppointmentDetailsPanel: React.FC<
   dateLabel,
   isOpen,
   onOpenChange,
+  isCancelled,
+  cancellationReason,
   onStatusUpdated,
   onDateTimeUpdated,
   onServicesUpdated,
   onProductsUpdated,
 }) => {
+  const { salonuid } = useParams();
+  const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
+
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isServicesDialogOpen, setIsServicesDialogOpen] = useState(false);
   const [isProductsDialogOpen, setIsProductsDialogOpen] = useState(false);
   const [isCheckoutDialogOpen, setIsCheckoutDialogOpen] = useState(false);
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
+  const [viewReceipt, { isLoading: isViewReceiptLoading }] =
+    useViewReceiptMutation();
   const effectiveStatus: UiStatus | undefined = selectedAppointment?.status;
+
+  const handleViewReceipt = async () => {
+    if (!selectedAppointment?.id) {
+      toast.error("Booking ID is missing");
+      return;
+    }
+
+    try {
+      const response = await viewReceipt({
+        salonUid,
+        bookingUid: selectedAppointment.id,
+      }).unwrap();
+
+      if (typeof window === "undefined") {
+        toast.error("Unable to download receipt on server side");
+        return;
+      }
+
+      const { url, fileName } = response;
+
+      if (!url) {
+        toast.error("Failed to create receipt link");
+        return;
+      }
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName || `receipt-${selectedAppointment.id}.pdf`;
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      window.URL.revokeObjectURL(url);
+
+      toast.success("Receipt download started");
+    } catch (error) {
+      console.error("Failed to load receipt:", error);
+      toast.error("Failed to load receipt");
+    }
+  };
 
   const statusClasses = cn(
     "flex items-center gap-2 rounded-full px-3 py-1",
@@ -194,7 +247,7 @@ const IndividualAppointmentDetailsPanel: React.FC<
               <div className="text-foreground text-base font-semibold">
                 {selectedAppointment.client}
               </div>
-              <div className="text-muted-foreground text-xs">Client</div>
+              <div className="text-muted-foreground text-xs">Customer</div>
             </div>
           </div>
         </div>
@@ -324,6 +377,40 @@ const IndividualAppointmentDetailsPanel: React.FC<
             {selectedAppointment.notes || "No notes added for this booking."}
           </p>
         </div>
+
+        {isCancelled && (
+          <>
+            <Separator />
+            <div>
+              <h4 className="text-foreground mb-2 text-sm font-semibold">
+                Cancellation Reason:
+              </h4>
+              {cancellationReason ? (
+                <p className="text-foreground text-xs">{cancellationReason}</p>
+              ) : (
+                <p className="text-muted-foreground text-xs">
+                  No cancellation reason provided.
+                </p>
+              )}
+            </div>
+          </>
+        )}
+
+        {selectedAppointment.status === "completed" && (
+          <div>
+            <Separator />
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-3 w-full shadow dark:shadow-gray-600"
+              onClick={handleViewReceipt}
+              disabled={isViewReceiptLoading}
+              type="button"
+            >
+              {isViewReceiptLoading ? "Loading Receipt..." : "Download Receipt"}
+            </Button>
+          </div>
+        )}
       </div>
     );
   };
