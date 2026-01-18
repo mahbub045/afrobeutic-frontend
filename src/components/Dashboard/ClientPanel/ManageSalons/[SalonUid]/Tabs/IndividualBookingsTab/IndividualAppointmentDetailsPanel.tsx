@@ -55,6 +55,19 @@ export interface IndividualAppointment {
   finalPrice?: number;
   tipsAmount?: number;
   paymentType?: string;
+  // Optional totals coming from the API (support both snake_case and camelCase)
+  total_services?: number;
+  total_services_price?: number;
+  totalServicesPrice?: number;
+  total_products?: number;
+  total_products_price?: number;
+  totalProductsPrice?: number;
+  services_discount_price?: number;
+  servicesDiscountPrice?: number;
+  total_price?: number;
+  total_rice?: number;
+  final_price?: number;
+  tips_amount?: number | string;
 }
 
 interface IndividualAppointmentDetailsPanelProps {
@@ -83,6 +96,10 @@ interface IndividualAppointmentDetailsPanelProps {
   onProductsUpdated?: (
     products: { uid: string; name: string; price: string }[],
   ) => void;
+  onCheckoutUpdated?: (data: {
+    tips_amount: number;
+    payment_type: string;
+  }) => void;
 }
 
 const IndividualAppointmentDetailsPanel: React.FC<
@@ -98,6 +115,7 @@ const IndividualAppointmentDetailsPanel: React.FC<
   onDateTimeUpdated,
   onServicesUpdated,
   onProductsUpdated,
+  onCheckoutUpdated,
 }) => {
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
@@ -181,22 +199,57 @@ const IndividualAppointmentDetailsPanel: React.FC<
     const servicesCount = services.length;
     const productsCount = products.length;
 
-    const parseAmount = (value?: string) => {
-      const num = Number(value);
+    // Helpers for safely handling numeric values that may be strings or undefined
+    const getNumber = (value?: string | number) => {
+      const num = Number(value ?? 0);
       return Number.isNaN(num) ? 0 : num;
     };
 
-    const servicesTotal = services
-      .reduce((sum, svc) => sum + parseAmount(svc.price), 0)
-      .toFixed(2);
+    const format = (n: number) => n.toFixed(2);
 
-    const productsTotal = products
-      .reduce((sum, prod) => sum + parseAmount(prod.price), 0)
-      .toFixed(2);
+    // Prefer pre-computed totals from the API, but fall back to
+    // computing from the services/products arrays when needed.
+    const rawServicesTotalPrice =
+      selectedAppointment.total_services_price ??
+      selectedAppointment.totalServicesPrice;
+    const servicesTotalOriginal =
+      rawServicesTotalPrice !== undefined
+        ? getNumber(rawServicesTotalPrice)
+        : services.reduce((sum, svc) => sum + getNumber(svc.price), 0);
 
-    const grandTotal = (
-      parseFloat(servicesTotal) + parseFloat(productsTotal)
-    ).toFixed(2);
+    const rawServicesDiscountTotal =
+      selectedAppointment.services_discount_price ??
+      selectedAppointment.servicesDiscountPrice;
+    const servicesTotalAfterDiscount =
+      rawServicesDiscountTotal !== undefined
+        ? getNumber(rawServicesDiscountTotal)
+        : servicesTotalOriginal;
+
+    const rawProductsTotalPrice =
+      selectedAppointment.total_products_price ??
+      selectedAppointment.totalProductsPrice;
+    const productsTotal =
+      rawProductsTotalPrice !== undefined
+        ? getNumber(rawProductsTotalPrice)
+        : products.reduce((sum, prod) => sum + getNumber(prod.price), 0);
+
+    const rawTips =
+      selectedAppointment.tips_amount ?? selectedAppointment.tipsAmount;
+    const tipsTotal = getNumber(rawTips);
+
+    const rawTotalPrice =
+      selectedAppointment.total_price ?? selectedAppointment.total_rice;
+    const totalPrice =
+      rawTotalPrice !== undefined
+        ? getNumber(rawTotalPrice)
+        : servicesTotalAfterDiscount + productsTotal;
+
+    const rawFinalPrice =
+      selectedAppointment.final_price ?? selectedAppointment.finalPrice;
+    const finalPrice =
+      rawFinalPrice !== undefined
+        ? getNumber(rawFinalPrice)
+        : totalPrice + tipsTotal;
 
     return (
       <div className="space-y-5">
@@ -349,21 +402,65 @@ const IndividualAppointmentDetailsPanel: React.FC<
               Pricing Summary
             </h4>
             <div className="space-y-1.5">
+              {/* Services total - show original and discounted when applicable */}
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Services Total</span>
-                <span className="text-foreground">${servicesTotal}</span>
+                <div className="text-right">
+                  <div>
+                    <div className="text-muted-foreground text-sm line-through">
+                      ${format(servicesTotalOriginal)}
+                    </div>
+                  </div>
+                </div>
               </div>
+
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">
+                  Services Total (After Discount)
+                </span>
+                <span className="text-foreground">
+                  ${format(servicesTotalAfterDiscount)}
+                </span>
+              </div>
+
+              {/* Products */}
               {productsCount > 0 && (
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Products Total</span>
-                  <span className="text-foreground">${productsTotal}</span>
+                  <span className="text-foreground">
+                    ${format(productsTotal)}
+                  </span>
                 </div>
               )}
+
+              <Separator />
+
+              {/* Total Price (pre-final) - may be struck through if final differs */}
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Total Price</span>
+                <div>
+                  <div className="text-muted-foreground line-through">
+                    ${format(totalPrice)}
+                  </div>
+                </div>
+              </div>
+              <Separator />
+
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Tips</span>
+                <span className="text-foreground">${format(tipsTotal)}</span>
+              </div>
+
+              <Separator />
+
+              {/* Final price */}
               <div className="flex items-center justify-between text-base">
                 <span className="text-foreground font-semibold">
-                  Grand Total
+                  Final Price
                 </span>
-                <span className="text-foreground font-bold">${grandTotal}</span>
+                <span className="text-foreground font-bold">
+                  ${format(finalPrice)}
+                </span>
               </div>
             </div>
           </div>
@@ -593,6 +690,9 @@ const IndividualAppointmentDetailsPanel: React.FC<
           }}
           onStatusUpdated={(newStatus) => {
             onStatusUpdated?.(newStatus);
+          }}
+          onCheckoutUpdated={(data) => {
+            onCheckoutUpdated?.(data);
           }}
         />
       )}
