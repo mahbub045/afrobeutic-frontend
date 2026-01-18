@@ -34,6 +34,7 @@ const EditBookingCheckoutDialog: React.FC<CommonEditBookingDataProps> = ({
   onOpenChange,
   bookingData,
   onStatusUpdated,
+  onCheckoutUpdated,
 }) => {
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
@@ -58,11 +59,13 @@ const EditBookingCheckoutDialog: React.FC<CommonEditBookingDataProps> = ({
     if (!bookingData) return;
 
     try {
+      const updatedTipsAmount = parseFloat(tipsAmount) || 0;
+
       await editBooking({
         salonUid,
         bookingUid: bookingData.uid,
         data: {
-          tips_amount: parseFloat(tipsAmount) || 0,
+          tips_amount: updatedTipsAmount,
           payment_type: paymentType,
           status: "COMPLETED",
         },
@@ -70,6 +73,10 @@ const EditBookingCheckoutDialog: React.FC<CommonEditBookingDataProps> = ({
 
       if (bookingData.uid) {
         onStatusUpdated?.("COMPLETED");
+        onCheckoutUpdated?.({
+          tips_amount: updatedTipsAmount,
+          payment_type: paymentType,
+        });
       }
 
       try {

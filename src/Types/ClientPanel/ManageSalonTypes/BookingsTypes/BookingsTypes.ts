@@ -156,6 +156,8 @@ export interface CommonEditBookingDataProps {
   onServicesUpdated?: (services: Service[]) => void;
   onProductsUpdated?: (products: Product[]) => void;
   onStatusUpdated?: (status: string) => void;
+  onCheckoutUpdated?: (data: {
+    tips_amount: number;
+    payment_type: string;
+  }) => void;
 }
-
-

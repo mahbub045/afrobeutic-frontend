@@ -83,6 +83,10 @@ interface IndividualAppointmentDetailsPanelProps {
   onProductsUpdated?: (
     products: { uid: string; name: string; price: string }[],
   ) => void;
+  onCheckoutUpdated?: (data: {
+    tips_amount: number;
+    payment_type: string;
+  }) => void;
 }
 
 const IndividualAppointmentDetailsPanel: React.FC<
@@ -98,6 +102,7 @@ const IndividualAppointmentDetailsPanel: React.FC<
   onDateTimeUpdated,
   onServicesUpdated,
   onProductsUpdated,
+  onCheckoutUpdated,
 }) => {
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
@@ -593,6 +598,9 @@ const IndividualAppointmentDetailsPanel: React.FC<
           }}
           onStatusUpdated={(newStatus) => {
             onStatusUpdated?.(newStatus);
+          }}
+          onCheckoutUpdated={(data) => {
+            onCheckoutUpdated?.(data);
           }}
         />
       )}

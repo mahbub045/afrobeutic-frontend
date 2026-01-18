@@ -311,6 +311,20 @@ const IndividualBookingsTab: React.FC = () => {
     });
   };
 
+  const handleCheckoutUpdated = (data: {
+    tips_amount: number;
+    payment_type: string;
+  }) => {
+    setSelectedAppointment((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        tipsAmount: data.tips_amount,
+        paymentType: data.payment_type,
+      };
+    });
+  };
+
   const appointments: Appointment[] = filteredBookings.map((booking) => {
     const apiStatus = booking.status as ApiStatus;
 
@@ -545,6 +559,7 @@ const IndividualBookingsTab: React.FC = () => {
             onDateTimeUpdated={handleDateTimeUpdated}
             onServicesUpdated={handleServicesUpdated}
             onProductsUpdated={handleProductsUpdated}
+            onCheckoutUpdated={handleCheckoutUpdated}
           />
         </div>
       )}
