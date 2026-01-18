@@ -49,6 +49,7 @@ interface Appointment {
   startTime: string;
   status: UiStatus;
   color: string;
+  bookingDate?: string;
   bookingDuration?: string;
   services?: IndividualBookingApi["services"];
   products?: IndividualBookingApi["products"];
@@ -213,6 +214,7 @@ const IndividualBookingsTab: React.FC = () => {
       startTime: booking.booking_time,
       status: (statusMap[apiStatus] ?? "placed") as UiStatus,
       color: statusColorMap[apiStatus] ?? statusColorMap["PLACED"],
+      bookingDate: booking.booking_date,
       bookingDuration: booking.booking_duration,
       services: booking.services,
       products: booking.products,
@@ -355,6 +357,7 @@ const IndividualBookingsTab: React.FC = () => {
                                 client: appointment.client,
                                 startTime: appointment.startTime,
                                 status: appointment.status,
+                                bookingDate: appointment.bookingDate,
                                 bookingDuration: appointment.bookingDuration,
                                 services: appointment.services,
                                 products: appointment.products,

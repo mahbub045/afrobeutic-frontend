@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/sheet";
 import { cn, formatChoiceFieldValue } from "@/lib/utils";
 import { Calendar as CalendarIcon, Edit } from "lucide-react";
+import { useState } from "react";
+import EditBookingDialog from "./Dialogs/EditBookingDialog";
 
 type UiStatus =
   | "placed"
@@ -25,6 +27,7 @@ export interface IndividualAppointment {
   client: string;
   startTime: string;
   status: UiStatus;
+  bookingDate?: string;
   bookingDuration?: string;
   services?: {
     name: string;
@@ -50,6 +53,7 @@ interface IndividualAppointmentDetailsPanelProps {
 const IndividualAppointmentDetailsPanel: React.FC<
   IndividualAppointmentDetailsPanelProps
 > = ({ selectedAppointment, dateLabel, isOpen, onOpenChange }) => {
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const effectiveStatus: UiStatus | undefined = selectedAppointment?.status;
 
   const statusClasses = cn(
@@ -100,9 +104,22 @@ const IndividualAppointmentDetailsPanel: React.FC<
 
     return (
       <div className="space-y-5">
-        <div className="flex items-start gap-3 text-sm">
-          <span className="text-muted-foreground mt-0.5 text-xs">On</span>
-          <span className="text-foreground font-medium">{dateLabel}</span>
+        <div className="flex justify-between">
+          <div className="flex items-start gap-3 text-sm">
+            <span className="text-muted-foreground mt-0.5 text-xs">On</span>
+            <span className="text-foreground font-medium">{dateLabel}</span>
+          </div>
+          <div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 p-0"
+              type="button"
+              onClick={() => setIsEditDialogOpen(true)}
+            >
+              <Edit size={14} />
+            </Button>
+          </div>
         </div>
 
         <div className="item-center flex justify-between">
@@ -268,6 +285,19 @@ const IndividualAppointmentDetailsPanel: React.FC<
 
   const title = selectedAppointment?.service || "Appointment details";
 
+  // Convert selectedAppointment to booking data format for the dialog
+  const bookingDataForDialog = selectedAppointment
+    ? {
+        uid: selectedAppointment.id,
+        booking_date: selectedAppointment.bookingDate,
+        booking_time: selectedAppointment.startTime,
+        booking_duration: selectedAppointment.bookingDuration,
+        notes: selectedAppointment.notes,
+        services: selectedAppointment.services,
+        products: selectedAppointment.products,
+      }
+    : null;
+
   return (
     <>
       {/* Desktop sidebar */}
@@ -330,6 +360,15 @@ const IndividualAppointmentDetailsPanel: React.FC<
           </SheetContent>
         </Sheet>
       </div>
+
+      {/* Edit Booking Dialog */}
+      {bookingDataForDialog && (
+        <EditBookingDialog
+          isOpen={isEditDialogOpen}
+          onClose={() => setIsEditDialogOpen(false)}
+          bookingData={bookingDataForDialog as any} // eslint-disable-line @typescript-eslint/no-explicit-any
+        />
+      )}
     </>
   );
 };
