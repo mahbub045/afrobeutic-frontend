@@ -38,8 +38,8 @@ import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import AppointmentDetailsPanel from "./AppointmentDetailsPanel";
-import EditBookingDialog from "./Dialogs/EditBookingDialog";
 import EditBookingStatusDialog from "./Dialogs/EditBookingStatusDialog";
+import EditBookingTimeAndDateDialog from "./Dialogs/EditBookingTimeAndDateDialog";
 
 const BookingsTab: React.FC = () => {
   const { salonuid } = useParams();
@@ -602,7 +602,7 @@ const BookingsTab: React.FC = () => {
       )}
 
       {/* Edit Booking Dialog */}
-      <EditBookingDialog
+      <EditBookingTimeAndDateDialog
         isOpen={isEditDialogOpen}
         onClose={() => handleIsEditDialogOpen(false)}
         bookingData={

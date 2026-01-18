@@ -12,7 +12,8 @@ import {
 import { cn, formatChoiceFieldValue } from "@/lib/utils";
 import { Calendar as CalendarIcon, Edit } from "lucide-react";
 import { useState } from "react";
-import EditBookingDialog from "./Dialogs/EditBookingDialog";
+import EditBookingDialog from "./Dialogs/EditBookingTimeAndDateDialog";
+import EditBookingTimeAndDateDialog from "./Dialogs/EditBookingTimeAndDateDialog";
 
 type UiStatus =
   | "placed"
@@ -363,7 +364,7 @@ const IndividualAppointmentDetailsPanel: React.FC<
 
       {/* Edit Booking Dialog */}
       {bookingDataForDialog && (
-        <EditBookingDialog
+        <EditBookingTimeAndDateDialog
           isOpen={isEditDialogOpen}
           onClose={() => setIsEditDialogOpen(false)}
           bookingData={bookingDataForDialog as any} // eslint-disable-line @typescript-eslint/no-explicit-any

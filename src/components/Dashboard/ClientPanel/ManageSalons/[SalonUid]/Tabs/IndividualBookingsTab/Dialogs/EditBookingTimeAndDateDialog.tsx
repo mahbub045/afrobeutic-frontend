@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { baseApi } from "@/Redux/Api/BaseApi";
-import { useEditBookingMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/BookingsApi";
+import { useUpdateIndividualBookingStatusMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/IndividualBookings/IndividualBookingsApi";
 import { EditBookingDialogProps } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
 import { Loader2 } from "lucide-react";
@@ -20,7 +20,7 @@ import Swal from "sweetalert2";
 
 import * as Yup from "yup";
 
-const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
+const EditBookingTimeAndDateDialog: React.FC<EditBookingDialogProps> = ({
   isOpen,
   onClose,
   bookingData,
@@ -31,7 +31,8 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
 
   // RTK hooks
   const dispatch = useDispatch();
-  const [editBooking, { isLoading }] = useEditBookingMutation();
+  const [editBooking, { isLoading }] =
+    useUpdateIndividualBookingStatusMutation();
 
   const hours = Array.from({ length: 24 }, (_, i) =>
     String(i).padStart(2, "0"),
@@ -66,13 +67,13 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
         },
       }).unwrap();
 
-      // Invalidate ChairsBooking tag to force refetch for useGetChairsBookingDataQuery
-      // This ensures any views that rely on Chairs bookings will refresh
+      // Invalidate IndividualBookings tag to force refetch for useGetIndividualBookingsQuery
+      // This ensures any views that rely on Individual bookings will refresh
       try {
-        dispatch(baseApi.util.invalidateTags(["ChairsBooking"]));
+        dispatch(baseApi.util.invalidateTags(["IndividualBookings"]));
       } catch (e) {
         // non-blocking if dispatch fails for some reason
-        console.warn("Failed to invalidate ChairsBooking tag:", e);
+        console.warn("Failed to invalidate Bookings tag:", e);
       }
 
       Swal.fire({
@@ -104,7 +105,9 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
         <div className="flex max-h-[95vh] flex-col">
           <div className="pb-6">
             <DialogHeader>
-              <DialogTitle className="text-primary">Edit Booking</DialogTitle>
+              <DialogTitle className="text-primary">
+                Edit Booking Date And Time
+              </DialogTitle>
               <DialogDescription>
                 Edit the booking details below.
               </DialogDescription>
@@ -117,7 +120,7 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
             onSubmit={handleSubmit}
             enableReinitialize
           >
-            {({ isSubmitting }) => (
+            {({ isSubmitting, values }) => (
               <Form className="flex flex-1 flex-col">
                 <div className="space-y-4">
                   {/* Booking Date and Time */}
@@ -131,6 +134,7 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
                         name="booking_date"
                         as="input"
                         type="date"
+                        value={values.booking_date}
                         required
                       />
                       <ErrorMessage
@@ -148,6 +152,7 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
                         id="booking_time"
                         name="booking_time"
                         as="select"
+                        value={values.booking_time}
                         required
                       >
                         <option value="">Select time</option>
@@ -177,6 +182,7 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
                       as="textarea"
                       placeholder="Keep additional notes about the booking..."
                       rows={3}
+                      className="w-full rounded border border-gray-300 bg-white px-3 py-2 dark:border-gray-600 dark:bg-gray-900 dark:text-white"
                     />
                   </div>
                 </div>
@@ -208,4 +214,4 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
   );
 };
 
-export default EditBookingDialog;
+export default EditBookingTimeAndDateDialog;
