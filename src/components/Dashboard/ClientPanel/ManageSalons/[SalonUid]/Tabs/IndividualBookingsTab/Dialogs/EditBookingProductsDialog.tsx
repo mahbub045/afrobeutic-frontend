@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { baseApi } from "@/Redux/Api/BaseApi";
-import { useEditBookingMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/BookingsApi";
+import { useUpdateIndividualBookingStatusMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/IndividualBookings/IndividualBookingsApi";
 import { useGetProductsDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Products/ProductsApi";
 import type {
   CommonEditBookingDataProps,
@@ -21,7 +21,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import Swal from "sweetalert2";
 
-const EditBookingProductsModal: React.FC<CommonEditBookingDataProps> = ({
+const EditBookingProductsDialog: React.FC<CommonEditBookingDataProps> = ({
   isOpen,
   onOpenChange,
   bookingData,
@@ -40,7 +40,8 @@ const EditBookingProductsModal: React.FC<CommonEditBookingDataProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const [editBooking, { isLoading }] = useEditBookingMutation();
+  const [editBooking, { isLoading }] =
+    useUpdateIndividualBookingStatusMutation();
 
   // Sync localSelection with bookingData when modal opens or data changes
   useEffect(() => {
@@ -78,7 +79,7 @@ const EditBookingProductsModal: React.FC<CommonEditBookingDataProps> = ({
       }).unwrap();
 
       try {
-        dispatch(baseApi.util.invalidateTags(["ChairsBooking"]));
+        dispatch(baseApi.util.invalidateTags(["IndividualBookings"]));
       } catch (e) {
         console.warn(e);
       }
@@ -252,4 +253,4 @@ const EditBookingProductsModal: React.FC<CommonEditBookingDataProps> = ({
   );
 };
 
-export default EditBookingProductsModal;
+export default EditBookingProductsDialog;

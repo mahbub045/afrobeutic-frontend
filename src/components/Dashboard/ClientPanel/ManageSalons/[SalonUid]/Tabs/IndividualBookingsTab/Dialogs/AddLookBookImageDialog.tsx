@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { baseApi } from "@/Redux/Api/BaseApi";
-import { useEditBookingMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/BookingsApi";
+import { useUpdateIndividualBookingStatusMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/IndividualBookings/IndividualBookingsApi";
 import { Upload, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
@@ -39,7 +39,8 @@ const AddLookBookImageDialog: React.FC<AddLookBookImageDialogProps> = ({
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
-  const [editBooking, { isLoading }] = useEditBookingMutation();
+  const [editBooking, { isLoading }] =
+    useUpdateIndividualBookingStatusMutation();
 
   const MAX_IMAGES = 3;
   const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -134,11 +135,7 @@ const AddLookBookImageDialog: React.FC<AddLookBookImageDialogProps> = ({
 
       try {
         dispatch(
-          baseApi.util.invalidateTags([
-            "Bookings",
-            "ChairsBooking",
-            "LookBook",
-          ]),
+          baseApi.util.invalidateTags(["IndividualBookings", "LookBook"]),
         );
       } catch (e) {
         console.warn(e);

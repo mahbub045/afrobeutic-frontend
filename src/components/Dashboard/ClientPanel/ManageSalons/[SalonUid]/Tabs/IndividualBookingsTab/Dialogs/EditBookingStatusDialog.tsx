@@ -9,6 +9,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { baseApi } from "@/Redux/Api/BaseApi";
 import { useEditBookingMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/BookingsApi";
+import { useUpdateIndividualBookingStatusMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/IndividualBookings/IndividualBookingsApi";
 import { EditBookingStatusDialogProps } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
 import { Loader2 } from "lucide-react";
@@ -29,7 +30,7 @@ const EditBookingStatusDialog: React.FC<EditBookingStatusDialogProps> = ({
   const { resolvedTheme } = useTheme();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
   const dispatch = useDispatch();
-  const [editBooking, { isLoading }] = useEditBookingMutation();
+  const [editBooking, { isLoading }] = useUpdateIndividualBookingStatusMutation();
 
   const validationSchema = Yup.object({
     status: Yup.string()
@@ -107,9 +108,9 @@ const EditBookingStatusDialog: React.FC<EditBookingStatusDialogProps> = ({
       }).unwrap();
 
       try {
-        dispatch(baseApi.util.invalidateTags(["ChairsBooking"]));
+        dispatch(baseApi.util.invalidateTags(["IndividualBookings"]));
       } catch (e) {
-        console.warn("Failed to invalidate ChairsBooking tag:", e);
+        console.warn("Failed to invalidate IndividualBookings tag:", e);
       }
 
       Swal.fire({
