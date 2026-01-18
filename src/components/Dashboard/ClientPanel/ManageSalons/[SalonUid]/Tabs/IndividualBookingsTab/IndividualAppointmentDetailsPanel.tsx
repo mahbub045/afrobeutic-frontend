@@ -25,6 +25,17 @@ export interface IndividualAppointment {
   client: string;
   startTime: string;
   status: UiStatus;
+  bookingDuration?: string;
+  services?: {
+    name: string;
+    price?: string;
+    service_duration?: string;
+  }[];
+  products?: {
+    name: string;
+    price?: string;
+  }[];
+  notes?: string | null;
 }
 
 interface IndividualAppointmentDetailsPanelProps {
@@ -64,22 +75,28 @@ const IndividualAppointmentDetailsPanel: React.FC<
         </div>
       );
     }
-    // Dummy values to mimic AppointmentDetailsPanel layout
-    const dummyDuration = "00:00:00";
-    const dummyEmployeeName = "mahbub test";
-    const dummyServicesCount = 0;
-    const dummyProductsCount = 0;
-    const dummyServicesTotal = "80.00";
-    const dummyServicesDiscountTotal = "0.00";
-    const dummyProductsTotal = "0.00";
-    const dummyTips = "0.00";
-    const dummyTotalPrice = "80.00";
-    const dummyFinalPrice = "0.00";
-    const dummyPaymentType = "NOT_SPECIFIED";
-    const isCancelled = effectiveStatus === "cancelled";
-    const cancellationReason = isCancelled
-      ? "Client cancelled the appointment (dummy)."
-      : "";
+    const services = selectedAppointment.services ?? [];
+    const products = selectedAppointment.products ?? [];
+
+    const servicesCount = services.length;
+    const productsCount = products.length;
+
+    const parseAmount = (value?: string) => {
+      const num = Number(value);
+      return Number.isNaN(num) ? 0 : num;
+    };
+
+    const servicesTotal = services
+      .reduce((sum, svc) => sum + parseAmount(svc.price), 0)
+      .toFixed(2);
+
+    const productsTotal = products
+      .reduce((sum, prod) => sum + parseAmount(prod.price), 0)
+      .toFixed(2);
+
+    const grandTotal = (
+      parseFloat(servicesTotal) + parseFloat(productsTotal)
+    ).toFixed(2);
 
     return (
       <div className="space-y-5">
@@ -96,7 +113,10 @@ const IndividualAppointmentDetailsPanel: React.FC<
             </div>
           </div>
           <div className="text-muted-foreground text-xs">
-            Duration: <span className="text-foreground">{dummyDuration}</span>
+            Duration:{" "}
+            <span className="text-foreground">
+              {selectedAppointment.bookingDuration || "N/A"}
+            </span>
           </div>
         </div>
 
@@ -124,7 +144,7 @@ const IndividualAppointmentDetailsPanel: React.FC<
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h4 className="text-foreground text-sm font-semibold">
-              Services ({dummyServicesCount})
+              Services ({servicesCount})
             </h4>
             <Button
               variant="ghost"
@@ -135,20 +155,34 @@ const IndividualAppointmentDetailsPanel: React.FC<
               <Edit size={14} />
             </Button>
           </div>
-          <div className="space-y-1 rounded-lg border p-3">
-            <div className="flex items-start justify-between">
-              <span className="text-foreground text-sm font-medium">
-                {formatChoiceFieldValue(selectedAppointment.service) ||
-                  "No Services Specified"}
-              </span>
-              <span className="text-foreground text-sm font-semibold">
-                $0.00
-              </span>
-            </div>
-            <p className="text-muted-foreground mt-1 text-xs">
-              with {dummyEmployeeName}
+          {servicesCount === 0 ? (
+            <p className="text-muted-foreground text-xs">
+              No services added to this booking.
             </p>
-          </div>
+          ) : (
+            <div className="space-y-1 rounded-lg border p-3">
+              {services.map((svc, index) => (
+                <div
+                  key={index}
+                  className="flex items-start justify-between py-1 first:pt-0 last:pb-0"
+                >
+                  <div>
+                    <span className="text-foreground text-sm font-medium">
+                      {formatChoiceFieldValue(svc.name)}
+                    </span>
+                    {svc.service_duration && (
+                      <p className="text-muted-foreground text-[11px]">
+                        Duration: {svc.service_duration}
+                      </p>
+                    )}
+                  </div>
+                  <span className="text-foreground text-sm font-semibold">
+                    ${svc.price ?? "0.00"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <Separator />
@@ -157,7 +191,7 @@ const IndividualAppointmentDetailsPanel: React.FC<
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h4 className="text-foreground text-sm font-semibold">
-                Products ({dummyProductsCount})
+                Products ({productsCount})
               </h4>
               <Button
                 variant="ghost"
@@ -168,7 +202,27 @@ const IndividualAppointmentDetailsPanel: React.FC<
                 <Edit size={14} />
               </Button>
             </div>
-            {/* No products in dummy view */}
+            {productsCount === 0 ? (
+              <p className="text-muted-foreground text-xs">
+                No products added to this booking.
+              </p>
+            ) : (
+              <div className="space-y-1 rounded-lg border p-3">
+                {products.map((prod, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between py-1 first:pt-0 last:pb-0"
+                  >
+                    <span className="text-foreground text-sm font-medium">
+                      {formatChoiceFieldValue(prod.name)}
+                    </span>
+                    <span className="text-foreground text-sm font-semibold">
+                      ${prod.price ?? "0.00"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -182,61 +236,21 @@ const IndividualAppointmentDetailsPanel: React.FC<
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Services Total</span>
-                <del className="text-muted-foreground">
-                  ${dummyServicesTotal}
-                </del>
+                <span className="text-foreground">${servicesTotal}</span>
               </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">
-                  Services Total{" "}
-                  <small className="text-[10px]">(After Discount)</small>
-                </span>
-                <span className="text-foreground">
-                  ${dummyServicesDiscountTotal}
-                </span>
-              </div>
-              {dummyProductsCount > 0 && (
+              {productsCount > 0 && (
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Products Total</span>
-                  <span className="text-foreground">${dummyProductsTotal}</span>
+                  <span className="text-foreground">${productsTotal}</span>
                 </div>
               )}
-              <div className="mt-1.5 border-t pt-1.5">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Tips</span>
-                  <span className="text-muted-foreground font-medium">
-                    ${dummyTips}
-                  </span>
-                </div>
-              </div>
-              <div className="mt-1.5 border-t pt-1.5">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Total Price</span>
-                  <del className="text-muted-foreground font-medium">
-                    ${dummyTotalPrice}
-                  </del>
-                </div>
-              </div>
               <div className="flex items-center justify-between text-base">
                 <span className="text-foreground font-semibold">
-                  Final Price
+                  Grand Total
                 </span>
-                <span className="text-foreground font-bold">
-                  ${dummyFinalPrice}
-                </span>
+                <span className="text-foreground font-bold">${grandTotal}</span>
               </div>
             </div>
-          </div>
-        </div>
-
-        <Separator />
-
-        <div className="mt-1.5 px-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Payment Type</span>
-            <span className="text-muted-foreground font-medium">
-              {formatChoiceFieldValue(dummyPaymentType) ?? "Not Specified"}
-            </span>
           </div>
         </div>
 
@@ -245,35 +259,9 @@ const IndividualAppointmentDetailsPanel: React.FC<
         <div>
           <h4 className="text-foreground mb-2 text-sm font-semibold">Notes:</h4>
           <p className="text-muted-foreground text-xs">
-            In a real implementation, this area can show booking notes,
-            preferences, or internal comments about the appointment.
+            {selectedAppointment.notes || "No notes added for this booking."}
           </p>
         </div>
-
-        {isCancelled && (
-          <>
-            <Separator />
-            <div>
-              <h4 className="text-foreground mb-2 text-sm font-semibold">
-                Cancellation Reason:
-              </h4>
-              <p className="text-muted-foreground text-xs">
-                {cancellationReason || "No cancellation reason provided."}
-              </p>
-            </div>
-          </>
-        )}
-
-        {effectiveStatus === "completed" && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full shadow dark:shadow-gray-600"
-            type="button"
-          >
-            Download Receipt
-          </Button>
-        )}
       </div>
     );
   };

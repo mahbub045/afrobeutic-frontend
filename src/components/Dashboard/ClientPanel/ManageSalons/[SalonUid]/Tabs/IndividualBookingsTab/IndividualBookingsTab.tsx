@@ -49,6 +49,10 @@ interface Appointment {
   startTime: string;
   status: UiStatus;
   color: string;
+  bookingDuration?: string;
+  services?: IndividualBookingApi["services"];
+  products?: IndividualBookingApi["products"];
+  notes?: string | null;
 }
 
 // Shape of a single booking item returned from the API
@@ -57,6 +61,7 @@ interface IndividualBookingApi {
   booking_id: string;
   booking_date: string; // YYYY-MM-DD
   booking_time: string; // HH:MM:SS
+  booking_duration?: string; // HH:MM:SS
   status: ApiStatus;
   customer?: {
     first_name?: string | null;
@@ -65,7 +70,14 @@ interface IndividualBookingApi {
   } | null;
   services?: {
     name: string;
+    price?: string;
+    service_duration?: string;
   }[];
+  products?: {
+    name: string;
+    price?: string;
+  }[];
+  notes?: string | null;
 }
 
 // Generate time slots (e.g. 08:00-09:00, 09:00-10:00 ...)
@@ -201,6 +213,10 @@ const IndividualBookingsTab: React.FC = () => {
       startTime: booking.booking_time,
       status: (statusMap[apiStatus] ?? "placed") as UiStatus,
       color: statusColorMap[apiStatus] ?? statusColorMap["PLACED"],
+      bookingDuration: booking.booking_duration,
+      services: booking.services,
+      products: booking.products,
+      notes: booking.notes,
     };
   });
 
@@ -339,6 +355,10 @@ const IndividualBookingsTab: React.FC = () => {
                                 client: appointment.client,
                                 startTime: appointment.startTime,
                                 status: appointment.status,
+                                bookingDuration: appointment.bookingDuration,
+                                services: appointment.services,
+                                products: appointment.products,
+                                notes: appointment.notes,
                               };
                               setSelectedAppointment(detailAppointment);
                               if (
