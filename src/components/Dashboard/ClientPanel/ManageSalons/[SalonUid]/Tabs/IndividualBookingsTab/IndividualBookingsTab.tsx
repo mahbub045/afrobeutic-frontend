@@ -58,6 +58,9 @@ interface Appointment {
   services?: IndividualBookingApi["services"];
   products?: IndividualBookingApi["products"];
   notes?: string | null;
+  finalPrice?: number;
+  tipsAmount?: number;
+  paymentType?: string;
 }
 
 // Shape of a single booking item returned from the API
@@ -85,6 +88,9 @@ interface IndividualBookingApi {
     price?: string;
   }[];
   notes?: string | null;
+  final_price?: number;
+  tips_amount?: number;
+  payment_type?: string;
 }
 
 // Generate time slots (e.g. 08:00-09:00, 09:00-10:00 ...)
@@ -308,6 +314,9 @@ const IndividualBookingsTab: React.FC = () => {
       services: booking.services,
       products: booking.products,
       notes: booking.notes,
+      finalPrice: booking.final_price,
+      tipsAmount: booking.tips_amount,
+      paymentType: booking.payment_type,
     };
   });
 
@@ -451,6 +460,9 @@ const IndividualBookingsTab: React.FC = () => {
                                 services: appointment.services,
                                 products: appointment.products,
                                 notes: appointment.notes,
+                                finalPrice: appointment.finalPrice,
+                                tipsAmount: appointment.tipsAmount,
+                                paymentType: appointment.paymentType,
                               };
                               setSelectedAppointment(detailAppointment);
                               if (

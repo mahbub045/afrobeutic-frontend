@@ -33,6 +33,7 @@ const EditBookingCheckoutDialog: React.FC<CommonEditBookingDataProps> = ({
   isOpen,
   onOpenChange,
   bookingData,
+  onStatusUpdated,
 }) => {
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
@@ -50,7 +51,7 @@ const EditBookingCheckoutDialog: React.FC<CommonEditBookingDataProps> = ({
       setTipsAmount(bookingData.tips_amount?.toString() || "");
       setPaymentType(bookingData.payment_type || "");
     }
-  }, [bookingData, isOpen]);
+  }, [bookingData]);
 
   const handleSave = async () => {
     if (!bookingData) return;
@@ -65,6 +66,10 @@ const EditBookingCheckoutDialog: React.FC<CommonEditBookingDataProps> = ({
           status: "COMPLETED",
         },
       }).unwrap();
+
+      if (bookingData.uid) {
+        onStatusUpdated?.("COMPLETED");
+      }
 
       try {
         dispatch(baseApi.util.invalidateTags(["Bookings", "ChairsBooking"]));
@@ -122,7 +127,10 @@ const EditBookingCheckoutDialog: React.FC<CommonEditBookingDataProps> = ({
               <div className="flex justify-between text-sm">
                 <span>Final Price:</span>
                 <span className="font-medium">
-                  ${bookingData?.final_price.toFixed(2) || "0.00"}
+                  $
+                  {bookingData?.final_price !== undefined
+                    ? bookingData.final_price.toFixed(2)
+                    : "0.00"}
                 </span>
               </div>
               <div className="flex justify-between text-sm">

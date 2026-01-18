@@ -154,4 +154,5 @@ export interface CommonEditBookingDataProps {
   bookingData?: Partial<Booking> | null;
   onServicesUpdated?: (services: Service[]) => void;
   onProductsUpdated?: (products: Product[]) => void;
+  onStatusUpdated?: (status: string) => void;
 }

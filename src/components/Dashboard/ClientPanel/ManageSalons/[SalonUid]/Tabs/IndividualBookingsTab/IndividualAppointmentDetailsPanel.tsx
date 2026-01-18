@@ -16,6 +16,7 @@ import type {
 } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
 import { Calendar as CalendarIcon, Edit } from "lucide-react";
 import { useState } from "react";
+import EditBookingCheckoutDialog from "./Dialogs/EditBookingCheckoutDialog";
 import EditBookingProductsDialog from "./Dialogs/EditBookingProductsDialog";
 import EditBookingServicesDialog from "./Dialogs/EditBookingServicesDialog";
 import EditBookingStatusDialog from "./Dialogs/EditBookingStatusDialog";
@@ -48,6 +49,9 @@ export interface IndividualAppointment {
     price?: string;
   }[];
   notes?: string | null;
+  finalPrice?: number;
+  tipsAmount?: number;
+  paymentType?: string;
 }
 
 interface IndividualAppointmentDetailsPanelProps {
@@ -86,6 +90,7 @@ const IndividualAppointmentDetailsPanel: React.FC<
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isServicesDialogOpen, setIsServicesDialogOpen] = useState(false);
   const [isProductsDialogOpen, setIsProductsDialogOpen] = useState(false);
+  const [isCheckoutDialogOpen, setIsCheckoutDialogOpen] = useState(false);
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
   const effectiveStatus: UiStatus | undefined = selectedAppointment?.status;
 
@@ -363,6 +368,7 @@ const IndividualAppointmentDetailsPanel: React.FC<
                 variant="outline"
                 size="sm"
                 className="ml-auto text-xs font-semibold uppercase"
+                onClick={() => setIsCheckoutDialogOpen(true)}
               >
                 Checkout
               </Button>
@@ -405,6 +411,15 @@ const IndividualAppointmentDetailsPanel: React.FC<
                         <Edit size={14} />
                       </Button>
                     </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="ml-auto text-xs font-semibold uppercase"
+                      onClick={() => setIsCheckoutDialogOpen(true)}
+                    >
+                      Checkout
+                    </Button>
                   </div>
                 )}
               </div>
@@ -468,6 +483,23 @@ const IndividualAppointmentDetailsPanel: React.FC<
                 price: prod.price,
               })),
             );
+          }}
+        />
+      )}
+
+      {/* Checkout Dialog */}
+      {selectedAppointment && (
+        <EditBookingCheckoutDialog
+          isOpen={isCheckoutDialogOpen}
+          onOpenChange={setIsCheckoutDialogOpen}
+          bookingData={{
+            uid: selectedAppointment.id,
+            final_price: selectedAppointment.finalPrice,
+            tips_amount: selectedAppointment.tipsAmount,
+            payment_type: selectedAppointment.paymentType,
+          }}
+          onStatusUpdated={(newStatus) => {
+            onStatusUpdated?.(newStatus);
           }}
         />
       )}
