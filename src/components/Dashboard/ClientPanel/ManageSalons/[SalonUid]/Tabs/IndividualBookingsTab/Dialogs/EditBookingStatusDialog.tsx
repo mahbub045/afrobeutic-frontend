@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { baseApi } from "@/Redux/Api/BaseApi";
-import { useEditBookingMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/BookingsApi";
 import { useUpdateIndividualBookingStatusMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/IndividualBookings/IndividualBookingsApi";
 import { EditBookingStatusDialogProps } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
@@ -25,12 +24,14 @@ const EditBookingStatusDialog: React.FC<EditBookingStatusDialogProps> = ({
   isOpen,
   onClose,
   bookingData,
+  onStatusUpdated,
 }) => {
   const { salonuid } = useParams();
   const { resolvedTheme } = useTheme();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
   const dispatch = useDispatch();
-  const [editBooking, { isLoading }] = useUpdateIndividualBookingStatusMutation();
+  const [editBooking, { isLoading }] =
+    useUpdateIndividualBookingStatusMutation();
 
   const validationSchema = Yup.object({
     status: Yup.string()
@@ -106,6 +107,11 @@ const EditBookingStatusDialog: React.FC<EditBookingStatusDialogProps> = ({
         bookingUid: bookingData.uid,
         data: requestBody,
       }).unwrap();
+
+      // Notify parent so it can update local UI state immediately
+      if (bookingData?.uid) {
+        onStatusUpdated?.(values.status, values.cancellation_reason || "");
+      }
 
       try {
         dispatch(baseApi.util.invalidateTags(["IndividualBookings"]));

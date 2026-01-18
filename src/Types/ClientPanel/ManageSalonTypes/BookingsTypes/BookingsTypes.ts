@@ -109,6 +109,11 @@ export interface EditBookingDialogProps {
     products: Array<{ uid: string }>;
     images?: string[];
   };
+  onDateTimeUpdated?: (data: {
+    booking_date: string;
+    booking_time: string;
+    notes?: string;
+  }) => void;
 }
 
 export interface EditBookingStatusDialogProps {
@@ -120,6 +125,7 @@ export interface EditBookingStatusDialogProps {
     cancellation_reason?: string;
     images?: string[];
   };
+  onStatusUpdated?: (status: string, cancellation_reason?: string) => void;
 }
 
 export interface Appointment {

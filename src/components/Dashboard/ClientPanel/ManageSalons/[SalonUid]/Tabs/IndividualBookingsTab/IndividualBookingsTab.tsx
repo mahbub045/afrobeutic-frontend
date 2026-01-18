@@ -195,6 +195,36 @@ const IndividualBookingsTab: React.FC = () => {
     return booking.status === statusFilter;
   });
 
+  const handleStatusUpdated = (newApiStatus: string) => {
+    const apiStatus = newApiStatus as ApiStatus;
+    setSelectedAppointment((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        status: statusMap[apiStatus] ?? prev.status,
+      };
+    });
+  };
+
+  const handleDateTimeUpdated = (data: {
+    booking_date: string;
+    booking_time: string;
+    notes?: string;
+  }) => {
+    setSelectedAppointment((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        startTime:
+          data.booking_time && data.booking_time.length === 5
+            ? `${data.booking_time}:00`
+            : data.booking_time || prev.startTime,
+        bookingDate: data.booking_date || prev.bookingDate,
+        notes: data.notes ?? prev.notes,
+      };
+    });
+  };
+
   const appointments: Appointment[] = filteredBookings.map((booking) => {
     const apiStatus = booking.status as ApiStatus;
 
@@ -406,6 +436,8 @@ const IndividualBookingsTab: React.FC = () => {
             dateLabel={formatDate(selectedDate)}
             isOpen={isDetailsOpen}
             onOpenChange={setIsDetailsOpen}
+            onStatusUpdated={handleStatusUpdated}
+            onDateTimeUpdated={handleDateTimeUpdated}
           />
         </div>
       )}

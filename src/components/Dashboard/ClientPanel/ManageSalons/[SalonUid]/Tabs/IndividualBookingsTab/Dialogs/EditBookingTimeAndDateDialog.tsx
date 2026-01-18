@@ -24,6 +24,7 @@ const EditBookingTimeAndDateDialog: React.FC<EditBookingDialogProps> = ({
   isOpen,
   onClose,
   bookingData,
+  onDateTimeUpdated,
 }) => {
   const { salonuid } = useParams();
   const { resolvedTheme } = useTheme();
@@ -66,6 +67,15 @@ const EditBookingTimeAndDateDialog: React.FC<EditBookingDialogProps> = ({
           notes: values.notes,
         },
       }).unwrap();
+
+      // Notify parent so it can update local UI state immediately
+      if (bookingData?.uid) {
+        onDateTimeUpdated?.({
+          booking_date: values.booking_date,
+          booking_time: values.booking_time,
+          notes: values.notes,
+        });
+      }
 
       // Invalidate IndividualBookings tag to force refetch for useGetIndividualBookingsQuery
       // This ensures any views that rely on Individual bookings will refresh

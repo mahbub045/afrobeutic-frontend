@@ -12,7 +12,7 @@ import {
 import { cn, formatChoiceFieldValue } from "@/lib/utils";
 import { Calendar as CalendarIcon, Edit } from "lucide-react";
 import { useState } from "react";
-import EditBookingDialog from "./Dialogs/EditBookingTimeAndDateDialog";
+import EditBookingStatusDialog from "./Dialogs/EditBookingStatusDialog";
 import EditBookingTimeAndDateDialog from "./Dialogs/EditBookingTimeAndDateDialog";
 
 type UiStatus =
@@ -49,12 +49,26 @@ interface IndividualAppointmentDetailsPanelProps {
   /** Controls the mobile sheet */
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+  onStatusUpdated?: (status: string) => void;
+  onDateTimeUpdated?: (data: {
+    booking_date: string;
+    booking_time: string;
+    notes?: string;
+  }) => void;
 }
 
 const IndividualAppointmentDetailsPanel: React.FC<
   IndividualAppointmentDetailsPanelProps
-> = ({ selectedAppointment, dateLabel, isOpen, onOpenChange }) => {
+> = ({
+  selectedAppointment,
+  dateLabel,
+  isOpen,
+  onOpenChange,
+  onStatusUpdated,
+  onDateTimeUpdated,
+}) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
   const effectiveStatus: UiStatus | undefined = selectedAppointment?.status;
 
   const statusClasses = cn(
@@ -319,6 +333,7 @@ const IndividualAppointmentDetailsPanel: React.FC<
                   size="icon"
                   className="h-6 w-6 p-0"
                   type="button"
+                  onClick={() => setIsStatusDialogOpen(true)}
                 >
                   <Edit size={14} />
                 </Button>
@@ -348,11 +363,30 @@ const IndividualAppointmentDetailsPanel: React.FC<
             </SheetHeader>
             <div className="flex h-full flex-col">
               <div className="border-b px-4 py-3">
-                <div className="mb-3 flex items-start justify-start">
+                <div className="mb-1 flex items-start justify-start">
                   <h3 className="text-foreground text-base font-semibold">
                     {title}
                   </h3>
                 </div>
+                {selectedAppointment && effectiveStatus && (
+                  <div className="mt-1 flex items-center gap-2">
+                    <div className={statusClasses}>
+                      <div className={cn("h-2 w-2 rounded-full bg-white")} />
+                      <span className="text-xs font-medium capitalize">
+                        {(effectiveStatus || "").replace("-", " ")}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 p-0"
+                        type="button"
+                        onClick={() => setIsStatusDialogOpen(true)}
+                      >
+                        <Edit size={14} />
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="flex-1 overflow-y-auto px-4 py-4">
                 {renderContent()}
@@ -368,6 +402,26 @@ const IndividualAppointmentDetailsPanel: React.FC<
           isOpen={isEditDialogOpen}
           onClose={() => setIsEditDialogOpen(false)}
           bookingData={bookingDataForDialog as any} // eslint-disable-line @typescript-eslint/no-explicit-any
+          onDateTimeUpdated={(data) => {
+            onDateTimeUpdated?.(data);
+          }}
+        />
+      )}
+
+      {/* Edit Booking Status Dialog */}
+      {selectedAppointment && (
+        <EditBookingStatusDialog
+          isOpen={isStatusDialogOpen}
+          onClose={() => setIsStatusDialogOpen(false)}
+          bookingData={{
+            uid: selectedAppointment.id,
+            status: selectedAppointment.status
+              .toUpperCase()
+              .replace("-", "") as string,
+          }}
+          onStatusUpdated={(newStatus) => {
+            onStatusUpdated?.(newStatus);
+          }}
         />
       )}
     </>
