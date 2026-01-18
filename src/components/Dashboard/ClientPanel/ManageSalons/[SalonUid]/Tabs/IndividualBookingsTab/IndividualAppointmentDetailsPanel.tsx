@@ -446,13 +446,10 @@ const IndividualAppointmentDetailsPanel: React.FC<
               </div>
               <Separator />
 
-              {/* Tips - show only when booking is completed */}
-              {selectedAppointment?.status === "completed" && (
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Tips</span>
-                  <span className="text-foreground">${format(tipsTotal)}</span>
-                </div>
-              )}
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Tips</span>
+                <span className="text-foreground">${format(tipsTotal)}</span>
+              </div>
 
               <Separator />
 
