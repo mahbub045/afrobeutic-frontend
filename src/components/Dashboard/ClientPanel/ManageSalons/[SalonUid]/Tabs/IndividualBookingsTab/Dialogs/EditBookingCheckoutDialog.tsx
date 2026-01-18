@@ -9,7 +9,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { baseApi } from "@/Redux/Api/BaseApi";
-import { useEditBookingMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/BookingsApi";
+import { useUpdateIndividualBookingStatusMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/IndividualBookings/IndividualBookingsApi";
 import { CommonEditBookingDataProps } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
 import { useTheme } from "next-themes";
 import { useParams } from "next/navigation";
@@ -44,7 +44,8 @@ const EditBookingCheckoutDialog: React.FC<CommonEditBookingDataProps> = ({
   const [paymentType, setPaymentType] = useState<string>("");
   const [showImageDialog, setShowImageDialog] = useState(false);
 
-  const [editBooking, { isLoading }] = useEditBookingMutation();
+  const [editBooking, { isLoading }] =
+    useUpdateIndividualBookingStatusMutation();
 
   useEffect(() => {
     if (bookingData) {
@@ -72,7 +73,7 @@ const EditBookingCheckoutDialog: React.FC<CommonEditBookingDataProps> = ({
       }
 
       try {
-        dispatch(baseApi.util.invalidateTags(["Bookings", "ChairsBooking"]));
+        dispatch(baseApi.util.invalidateTags(["IndividualBookings"]));
       } catch (e) {
         console.warn(e);
       }

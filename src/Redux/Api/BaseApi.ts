@@ -144,6 +144,7 @@ export const baseApi = createApi({
     "Chairs",
     "ChairsBooking",
     "Bookings",
+    "IndividualBookings",
     "Receipt",
     "LookBook",
     "Employees",

@@ -15,12 +15,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn, formatChoiceFieldValue } from "@/lib/utils";
+import { useGetIndividualBookingsQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/IndividualBookings/IndividualBookingsApi";
+import type {
+  Product,
+  Service,
+} from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
 import {
   Calendar as CalendarIcon,
   CalendarSearch,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { useParams } from "next/navigation";
 import { useState } from "react";
 import IndividualAppointmentDetailsPanel, {
   IndividualAppointment,
@@ -40,15 +46,6 @@ type UiStatus =
   | "completed"
   | "cancelled";
 
-interface DummyBooking {
-  id: string;
-  date: string; // YYYY-MM-DD
-  service: string;
-  client: string;
-  startTime: string; // HH:MM or HH:MM:SS
-  status: ApiStatus;
-}
-
 interface Appointment {
   id: string;
   service: string;
@@ -56,51 +53,46 @@ interface Appointment {
   startTime: string;
   status: UiStatus;
   color: string;
+  bookingDate?: string;
+  bookingDuration?: string;
+  services?: IndividualBookingApi["services"];
+  products?: IndividualBookingApi["products"];
+  notes?: string | null;
+  finalPrice?: number;
+  tipsAmount?: number;
+  paymentType?: string;
 }
 
-// Simple dummy data set for a single staff member
-const DUMMY_BOOKINGS: DummyBooking[] = [
-  {
-    id: "1",
-    date: "2026-01-17",
-    service: "Haircut & Style",
-    client: "Jane Doe",
-    startTime: "10:00",
-    status: "PLACED",
-  },
-  {
-    id: "2",
-    date: "2026-01-17",
-    service: "Hair Coloring",
-    client: "John Smith",
-    startTime: "13:00",
-    status: "INPROGRESS",
-  },
-  {
-    id: "3",
-    date: "2026-01-17",
-    service: "Braids",
-    client: "Amina Yusuf",
-    startTime: "15:30",
-    status: "COMPLETED",
-  },
-  {
-    id: "4",
-    date: "2026-01-18",
-    service: "Beard Trim",
-    client: "Michael Lee",
-    startTime: "11:00",
-    status: "RESCHEDULED",
-  },
-  {
-    id: "5",
-    date: "2026-01-19",
-    service: "Wash & Blow-dry",
-    client: "Sophia K.",
-    startTime: "09:30",
-    status: "CANCELLED",
-  },
-];
+// Shape of a single booking item returned from the API
+interface IndividualBookingApi {
+  uid?: string;
+  booking_id: string;
+  booking_date: string; // YYYY-MM-DD
+  booking_time: string; // HH:MM:SS
+  booking_duration?: string; // HH:MM:SS
+  status: ApiStatus;
+  cancellation_reason?: string;
+  customer?: {
+    first_name?: string | null;
+    last_name?: string | null;
+    phone?: string | null;
+  } | null;
+  services?: {
+    uid?: string;
+    name: string;
+    price?: string;
+    service_duration?: string;
+  }[];
+  products?: {
+    uid?: string;
+    name: string;
+    price?: string;
+  }[];
+  notes?: string | null;
+  final_price?: number;
+  tips_amount?: number;
+  payment_type?: string;
+}
 
 // Generate time slots (e.g. 08:00-09:00, 09:00-10:00 ...)
 const generateTimeSlots = (
@@ -144,6 +136,24 @@ const parseTimeToMinutes = (timeStr: string) => {
   return NaN;
 };
 
+// Parse a duration string (HH:MM:SS) into total seconds
+const parseDurationToSeconds = (duration: string | undefined) => {
+  if (!duration) return 0;
+  const parts = duration.split(":").map((n) => Number(n));
+  if (parts.length !== 3 || parts.some((n) => Number.isNaN(n))) return 0;
+  const [hours, minutes, seconds] = parts;
+  return hours * 3600 + minutes * 60 + seconds;
+};
+
+// Format total seconds back into HH:MM:SS
+const formatSecondsToHHMMSS = (totalSeconds: number) => {
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+};
+
 const formatDate = (date: Date, short = false) => {
   if (short) {
     return date.toLocaleDateString("en-US", {
@@ -184,6 +194,7 @@ const statusMap: Record<ApiStatus, UiStatus> = {
 };
 
 const IndividualBookingsTab: React.FC = () => {
+  const { salonuid } = useParams();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [statusFilter, setStatusFilter] = useState<"ALL" | ApiStatus>("ALL");
   const [selectedAppointment, setSelectedAppointment] =
@@ -192,20 +203,154 @@ const IndividualBookingsTab: React.FC = () => {
 
   const dateParam = toLocalYMD(selectedDate);
 
-  const filteredBookings = DUMMY_BOOKINGS.filter((booking) => {
-    if (booking.date !== dateParam) return false;
+  const filters: Record<string, string> = { booking_date: dateParam };
+  if (statusFilter !== "ALL") {
+    filters.status = statusFilter;
+  }
+
+  // RTK Hooks
+  const {
+    data: individualBookingsData,
+    isLoading: isIndividualBookingsLoading,
+  } = useGetIndividualBookingsQuery({
+    salonUid: salonuid as string,
+    params: filters,
+  });
+
+  // Normalize paginated API response into a flat bookings array
+  const bookings: IndividualBookingApi[] =
+    (individualBookingsData as IndividualBookingApi[]) ?? [];
+
+  const filteredBookings = bookings.filter((booking) => {
     if (statusFilter === "ALL") return true;
     return booking.status === statusFilter;
   });
 
-  const appointments: Appointment[] = filteredBookings.map((booking) => ({
-    id: booking.id,
-    service: booking.service.toUpperCase(),
-    client: booking.client,
-    startTime: booking.startTime,
-    status: statusMap[booking.status],
-    color: statusColorMap[booking.status],
-  }));
+  const handleStatusUpdated = (newApiStatus: string) => {
+    const apiStatus = newApiStatus as ApiStatus;
+    setSelectedAppointment((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        status: statusMap[apiStatus] ?? prev.status,
+      };
+    });
+  };
+
+  const handleDateTimeUpdated = (data: {
+    booking_date: string;
+    booking_time: string;
+    notes?: string;
+  }) => {
+    setSelectedAppointment((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        startTime:
+          data.booking_time && data.booking_time.length === 5
+            ? `${data.booking_time}:00`
+            : data.booking_time || prev.startTime,
+        bookingDate: data.booking_date || prev.bookingDate,
+        notes: data.notes ?? prev.notes,
+      };
+    });
+  };
+
+  const handleServicesUpdated = (services: Service[]) => {
+    setSelectedAppointment((prev) => {
+      if (!prev) return prev;
+      const updatedServices = services.map((service) => ({
+        uid: service.uid,
+        name: service.name,
+        price: service.price,
+        service_duration: service.service_duration,
+      }));
+
+      const totalSeconds = services.reduce(
+        (sum, service) =>
+          sum + parseDurationToSeconds(service.service_duration),
+        0,
+      );
+
+      const bookingDuration =
+        totalSeconds > 0
+          ? formatSecondsToHHMMSS(totalSeconds)
+          : prev.bookingDuration;
+
+      return {
+        ...prev,
+        services: updatedServices,
+        bookingDuration,
+      };
+    });
+  };
+
+  const handleProductsUpdated = (products: Product[]) => {
+    setSelectedAppointment((prev) => {
+      if (!prev) return prev;
+
+      const prevProductsByUid = new Map(
+        (prev.products ?? [])
+          .filter((p) => p.uid)
+          .map((p) => [p.uid as string, p]),
+      );
+
+      const updatedProducts = products.map((product) => {
+        const prevProd = prevProductsByUid.get(product.uid);
+        return {
+          uid: product.uid,
+          name: product.name,
+          price: product.price ?? prevProd?.price,
+        };
+      });
+
+      return {
+        ...prev,
+        products: updatedProducts,
+      };
+    });
+  };
+
+  const appointments: Appointment[] = filteredBookings.map((booking) => {
+    const apiStatus = booking.status as ApiStatus;
+
+    const customerName = booking.customer
+      ? `${booking.customer.first_name ?? ""} ${booking.customer.last_name ?? ""}`.trim()
+      : "";
+
+    const serviceName =
+      booking.services && booking.services.length > 0
+        ? booking.services[0].name
+        : "Service";
+
+    return {
+      id: booking.uid ?? booking.booking_id,
+      service: serviceName.toUpperCase(),
+      client: customerName || booking.customer?.phone || "Unknown Customer",
+      startTime: booking.booking_time,
+      status: (statusMap[apiStatus] ?? "placed") as UiStatus,
+      color: statusColorMap[apiStatus] ?? statusColorMap["PLACED"],
+      bookingDate: booking.booking_date,
+      bookingDuration: booking.booking_duration,
+      services: booking.services,
+      products: booking.products,
+      notes: booking.notes,
+      // Keep final price fields; cancellation_reason handled separately
+      finalPrice: booking.final_price,
+      tipsAmount: booking.tips_amount,
+      paymentType: booking.payment_type,
+    };
+  });
+
+  const isCancelled = selectedAppointment?.status === "cancelled";
+
+  const cancellationReason = (() => {
+    if (!selectedAppointment) return undefined;
+    const match = bookings.find(
+      (b) => (b.uid ?? b.booking_id) === selectedAppointment.id,
+    );
+    return match?.cancellation_reason;
+  })();
 
   const navigateDate = (direction: "prev" | "next") => {
     const newDate = new Date(selectedDate.toISOString().slice(0, 10));
@@ -342,6 +487,14 @@ const IndividualBookingsTab: React.FC = () => {
                                 client: appointment.client,
                                 startTime: appointment.startTime,
                                 status: appointment.status,
+                                bookingDate: appointment.bookingDate,
+                                bookingDuration: appointment.bookingDuration,
+                                services: appointment.services,
+                                products: appointment.products,
+                                notes: appointment.notes,
+                                finalPrice: appointment.finalPrice,
+                                tipsAmount: appointment.tipsAmount,
+                                paymentType: appointment.paymentType,
                               };
                               setSelectedAppointment(detailAppointment);
                               if (
@@ -386,6 +539,12 @@ const IndividualBookingsTab: React.FC = () => {
             dateLabel={formatDate(selectedDate)}
             isOpen={isDetailsOpen}
             onOpenChange={setIsDetailsOpen}
+            isCancelled={isCancelled}
+            cancellationReason={cancellationReason}
+            onStatusUpdated={handleStatusUpdated}
+            onDateTimeUpdated={handleDateTimeUpdated}
+            onServicesUpdated={handleServicesUpdated}
+            onProductsUpdated={handleProductsUpdated}
           />
         </div>
       )}

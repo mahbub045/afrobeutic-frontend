@@ -20,7 +20,7 @@ import Swal from "sweetalert2";
 
 import * as Yup from "yup";
 
-const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
+const EditBookingTimeAndDateDialog: React.FC<EditBookingDialogProps> = ({
   isOpen,
   onClose,
   bookingData,
@@ -42,14 +42,12 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
   const validationSchema = Yup.object({
     booking_date: Yup.string().required("Booking date is required"),
     booking_time: Yup.string().required("Booking time is required"),
-    booking_duration: Yup.string().required("Duration is required"),
     notes: Yup.string(),
   });
 
   const initialValues = {
     booking_date: bookingData?.booking_date || "",
     booking_time: bookingData?.booking_time?.slice(0, 5) || "",
-    booking_duration: bookingData?.booking_duration || "",
     notes: bookingData?.notes || "",
   };
 
@@ -64,7 +62,6 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
         data: {
           booking_date: values.booking_date,
           booking_time: values.booking_time,
-          booking_duration: values.booking_duration,
           notes: values.notes,
         },
       }).unwrap();
@@ -171,27 +168,6 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
                     </div>
                   </div>
 
-                  {/* Duration */}
-                  <div className="space-y-2">
-                    <Label htmlFor="booking_duration">
-                      Duration (HH:MM:SS){" "}
-                      <span className="text-red-500">*</span>
-                    </Label>
-                    <Field
-                      id="booking_duration"
-                      name="booking_duration"
-                      as="input"
-                      type="text"
-                      placeholder="01:30:00"
-                      required
-                    />
-                    <ErrorMessage
-                      name="booking_duration"
-                      component="p"
-                      className="text-xs text-red-500"
-                    />
-                  </div>
-
                   {/* Notes */}
                   <div className="space-y-2">
                     <Label htmlFor="notes">Notes</Label>
@@ -232,4 +208,4 @@ const EditBookingDialog: React.FC<EditBookingDialogProps> = ({
   );
 };
 
-export default EditBookingDialog;
+export default EditBookingTimeAndDateDialog;
