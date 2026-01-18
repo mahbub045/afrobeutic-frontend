@@ -135,6 +135,24 @@ const parseTimeToMinutes = (timeStr: string) => {
   return NaN;
 };
 
+// Parse a duration string (HH:MM:SS) into total seconds
+const parseDurationToSeconds = (duration: string | undefined) => {
+  if (!duration) return 0;
+  const parts = duration.split(":").map((n) => Number(n));
+  if (parts.length !== 3 || parts.some((n) => Number.isNaN(n))) return 0;
+  const [hours, minutes, seconds] = parts;
+  return hours * 3600 + minutes * 60 + seconds;
+};
+
+// Format total seconds back into HH:MM:SS
+const formatSecondsToHHMMSS = (totalSeconds: number) => {
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+};
+
 const formatDate = (date: Date, short = false) => {
   if (short) {
     return date.toLocaleDateString("en-US", {
@@ -240,26 +258,28 @@ const IndividualBookingsTab: React.FC = () => {
   const handleServicesUpdated = (services: Service[]) => {
     setSelectedAppointment((prev) => {
       if (!prev) return prev;
+      const updatedServices = services.map((service) => ({
+        uid: service.uid,
+        name: service.name,
+        price: service.price,
+        service_duration: service.service_duration,
+      }));
 
-      const prevServicesByUid = new Map(
-        (prev.services ?? [])
-          .filter((s) => s.uid)
-          .map((s) => [s.uid as string, s]),
+      const totalSeconds = services.reduce(
+        (sum, service) =>
+          sum + parseDurationToSeconds(service.service_duration),
+        0,
       );
 
-      const updatedServices = services.map((service) => {
-        const prevSvc = prevServicesByUid.get(service.uid);
-        return {
-          uid: service.uid,
-          name: service.name,
-          price: service.price,
-          service_duration: prevSvc?.service_duration,
-        };
-      });
+      const bookingDuration =
+        totalSeconds > 0
+          ? formatSecondsToHHMMSS(totalSeconds)
+          : prev.bookingDuration;
 
       return {
         ...prev,
         services: updatedServices,
+        bookingDuration,
       };
     });
   };

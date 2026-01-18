@@ -83,6 +83,7 @@ export interface Service {
   uid: string;
   name: string;
   price: string;
+  service_duration?: string;
 }
 
 export interface Product {

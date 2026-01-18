@@ -68,7 +68,12 @@ interface IndividualAppointmentDetailsPanelProps {
     notes?: string;
   }) => void;
   onServicesUpdated?: (
-    services: { uid: string; name: string; price: string }[],
+    services: {
+      uid: string;
+      name: string;
+      price: string;
+      service_duration?: string;
+    }[],
   ) => void;
   onProductsUpdated?: (
     products: { uid: string; name: string; price: string }[],
@@ -459,6 +464,7 @@ const IndividualAppointmentDetailsPanel: React.FC<
                 uid: svc.uid,
                 name: svc.name,
                 price: svc.price,
+                service_duration: svc.service_duration,
               })),
             );
           }}
