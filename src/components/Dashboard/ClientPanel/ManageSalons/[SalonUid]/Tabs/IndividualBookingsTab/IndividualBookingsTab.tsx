@@ -15,12 +15,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn, formatChoiceFieldValue } from "@/lib/utils";
+import { useGetIndividualBookingsQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/IndividualBookings/IndividualBookingsApi";
 import {
   Calendar as CalendarIcon,
   CalendarSearch,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { useParams } from "next/navigation";
 import { useState } from "react";
 import IndividualAppointmentDetailsPanel, {
   IndividualAppointment,
@@ -184,6 +186,7 @@ const statusMap: Record<ApiStatus, UiStatus> = {
 };
 
 const IndividualBookingsTab: React.FC = () => {
+  const { salonuid } = useParams();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [statusFilter, setStatusFilter] = useState<"ALL" | ApiStatus>("ALL");
   const [selectedAppointment, setSelectedAppointment] =
@@ -192,7 +195,21 @@ const IndividualBookingsTab: React.FC = () => {
 
   const dateParam = toLocalYMD(selectedDate);
 
-  const filteredBookings = DUMMY_BOOKINGS.filter((booking) => {
+  const filters: Record<string, string> = { booking_date: dateParam };
+  if (statusFilter !== "ALL") {
+    filters.status = statusFilter;
+  }
+
+  // RTK Hooks
+  const {
+    data: individualBookingsData,
+    isLoading: isIndividualBookingsLoading,
+  } = useGetIndividualBookingsQuery({
+    salonUid: salonuid as string,
+    params: filters,
+  });
+
+  const filteredBookings = individualBookingsData?.filter((booking) => {
     if (booking.date !== dateParam) return false;
     if (statusFilter === "ALL") return true;
     return booking.status === statusFilter;
