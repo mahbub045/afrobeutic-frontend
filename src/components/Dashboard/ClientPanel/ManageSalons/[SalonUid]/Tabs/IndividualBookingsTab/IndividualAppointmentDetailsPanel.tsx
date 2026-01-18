@@ -10,8 +10,10 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { cn, formatChoiceFieldValue } from "@/lib/utils";
+import type { BookingService } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
 import { Calendar as CalendarIcon, Edit } from "lucide-react";
 import { useState } from "react";
+import EditBookingServicesDialog from "./Dialogs/EditBookingServicesDialog";
 import EditBookingStatusDialog from "./Dialogs/EditBookingStatusDialog";
 import EditBookingTimeAndDateDialog from "./Dialogs/EditBookingTimeAndDateDialog";
 
@@ -31,11 +33,13 @@ export interface IndividualAppointment {
   bookingDate?: string;
   bookingDuration?: string;
   services?: {
+    uid?: string;
     name: string;
     price?: string;
     service_duration?: string;
   }[];
   products?: {
+    uid?: string;
     name: string;
     price?: string;
   }[];
@@ -55,6 +59,9 @@ interface IndividualAppointmentDetailsPanelProps {
     booking_time: string;
     notes?: string;
   }) => void;
+  onServicesUpdated?: (
+    services: { uid: string; name: string; price: string }[],
+  ) => void;
 }
 
 const IndividualAppointmentDetailsPanel: React.FC<
@@ -66,8 +73,10 @@ const IndividualAppointmentDetailsPanel: React.FC<
   onOpenChange,
   onStatusUpdated,
   onDateTimeUpdated,
+  onServicesUpdated,
 }) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isServicesDialogOpen, setIsServicesDialogOpen] = useState(false);
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
   const effectiveStatus: UiStatus | undefined = selectedAppointment?.status;
 
@@ -183,6 +192,7 @@ const IndividualAppointmentDetailsPanel: React.FC<
               size="icon"
               className="h-6 w-6 p-0"
               type="button"
+              onClick={() => setIsServicesDialogOpen(true)}
             >
               <Edit size={14} />
             </Button>
@@ -404,6 +414,28 @@ const IndividualAppointmentDetailsPanel: React.FC<
           bookingData={bookingDataForDialog as any} // eslint-disable-line @typescript-eslint/no-explicit-any
           onDateTimeUpdated={(data) => {
             onDateTimeUpdated?.(data);
+          }}
+        />
+      )}
+
+      {/* Edit Booking Services Dialog */}
+      {selectedAppointment && (
+        <EditBookingServicesDialog
+          isOpen={isServicesDialogOpen}
+          onOpenChange={setIsServicesDialogOpen}
+          bookingData={{
+            uid: selectedAppointment.id,
+            services: (selectedAppointment.services ??
+              []) as unknown as BookingService[],
+          }}
+          onServicesUpdated={(services) => {
+            onServicesUpdated?.(
+              services.map((svc) => ({
+                uid: svc.uid,
+                name: svc.name,
+                price: svc.price,
+              })),
+            );
           }}
         />
       )}

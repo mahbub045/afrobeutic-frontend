@@ -151,5 +151,6 @@ export interface StaffMember {
 export interface CommonEditBookingDataProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  bookingData?: Booking | null;
+  bookingData?: Partial<Booking> | null;
+  onServicesUpdated?: (services: Service[]) => void;
 }

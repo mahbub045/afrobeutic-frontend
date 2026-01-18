@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { cn, formatChoiceFieldValue } from "@/lib/utils";
 import { useGetIndividualBookingsQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/IndividualBookings/IndividualBookingsApi";
+import type { Service } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
 import {
   Calendar as CalendarIcon,
   CalendarSearch,
@@ -70,11 +71,13 @@ interface IndividualBookingApi {
     phone?: string | null;
   } | null;
   services?: {
+    uid?: string;
     name: string;
     price?: string;
     service_duration?: string;
   }[];
   products?: {
+    uid?: string;
     name: string;
     price?: string;
   }[];
@@ -221,6 +224,33 @@ const IndividualBookingsTab: React.FC = () => {
             : data.booking_time || prev.startTime,
         bookingDate: data.booking_date || prev.bookingDate,
         notes: data.notes ?? prev.notes,
+      };
+    });
+  };
+
+  const handleServicesUpdated = (services: Service[]) => {
+    setSelectedAppointment((prev) => {
+      if (!prev) return prev;
+
+      const prevServicesByUid = new Map(
+        (prev.services ?? [])
+          .filter((s) => s.uid)
+          .map((s) => [s.uid as string, s]),
+      );
+
+      const updatedServices = services.map((service) => {
+        const prevSvc = prevServicesByUid.get(service.uid);
+        return {
+          uid: service.uid,
+          name: service.name,
+          price: service.price,
+          service_duration: prevSvc?.service_duration,
+        };
+      });
+
+      return {
+        ...prev,
+        services: updatedServices,
       };
     });
   };
@@ -438,6 +468,7 @@ const IndividualBookingsTab: React.FC = () => {
             onOpenChange={setIsDetailsOpen}
             onStatusUpdated={handleStatusUpdated}
             onDateTimeUpdated={handleDateTimeUpdated}
+            onServicesUpdated={handleServicesUpdated}
           />
         </div>
       )}
