@@ -22,7 +22,7 @@ import { useParams } from "next/navigation";
 import { SetStateAction, useState, type Dispatch } from "react";
 import { toast } from "sonner";
 import EditBookingCheckoutDialog from "./Dialogs/EditBookingCheckoutDialog";
-import EditBookingEmployeeModal from "./Dialogs/EditBookingEmployeeModal";
+import EditBookingEmployeeDialog from "./Dialogs/EditBookingEmployeeDialog";
 import EditBookingProductsModal from "./Dialogs/EditBookingProductsModal";
 import EditBookingServicesModal from "./Dialogs/EditBookingServicesModal";
 
@@ -899,7 +899,7 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
         onOpenChange={setIsEditProductsOpen}
         bookingData={singleBookingData}
       />
-      <EditBookingEmployeeModal
+      <EditBookingEmployeeDialog
         isOpen={isEditEmployeeOpen}
         onOpenChange={setIsEditEmployeeOpen}
         bookingData={singleBookingData}
