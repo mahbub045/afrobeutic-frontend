@@ -21,7 +21,7 @@ import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import Swal from "sweetalert2";
 
-const EditBookingEmployeeModal: React.FC<CommonEditBookingDataProps> = ({
+const EditBookingEmployeeDialog: React.FC<CommonEditBookingDataProps> = ({
   isOpen,
   onOpenChange,
   bookingData,
@@ -146,4 +146,4 @@ const EditBookingEmployeeModal: React.FC<CommonEditBookingDataProps> = ({
   );
 };
 
-export default EditBookingEmployeeModal;
+export default EditBookingEmployeeDialog;
