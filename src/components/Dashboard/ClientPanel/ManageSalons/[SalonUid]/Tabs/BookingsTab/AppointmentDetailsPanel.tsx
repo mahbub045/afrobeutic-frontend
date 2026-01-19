@@ -23,8 +23,8 @@ import { SetStateAction, useState, type Dispatch } from "react";
 import { toast } from "sonner";
 import EditBookingCheckoutDialog from "./Dialogs/EditBookingCheckoutDialog";
 import EditBookingEmployeeDialog from "./Dialogs/EditBookingEmployeeDialog";
-import EditBookingProductsModal from "./Dialogs/EditBookingProductsModal";
-import EditBookingServicesModal from "./Dialogs/EditBookingServicesModal";
+import EditBookingProductsDialog from "./Dialogs/EditBookingProductsDialog";
+import EditBookingServicesDialog from "./Dialogs/EditBookingServicesDialog";
 
 interface AppointmentDetailsPanelProps {
   serviceTitle: string;
@@ -889,12 +889,12 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
         onOpenChange={setIsEditCheckoutOpen}
         bookingData={singleBookingData}
       />
-      <EditBookingServicesModal
+      <EditBookingServicesDialog
         isOpen={isEditServicesOpen}
         onOpenChange={setIsEditServicesOpen}
         bookingData={singleBookingData}
       />
-      <EditBookingProductsModal
+      <EditBookingProductsDialog
         isOpen={isEditProductsOpen}
         onOpenChange={setIsEditProductsOpen}
         bookingData={singleBookingData}
