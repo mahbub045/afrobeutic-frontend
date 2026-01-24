@@ -25,6 +25,7 @@ import {
   CalendarSearch,
   ChevronLeft,
   ChevronRight,
+  Plus,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
@@ -479,6 +480,10 @@ const IndividualBookingsTab: React.FC = () => {
               />
             </PopoverContent>
           </Popover>
+          <Button variant="default" size="sm">
+            <Plus />
+            Add Booking
+          </Button>
         </div>
       </div>
 

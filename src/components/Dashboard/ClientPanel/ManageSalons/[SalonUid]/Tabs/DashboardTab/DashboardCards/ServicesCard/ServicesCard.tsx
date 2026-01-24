@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatChoiceFieldValue } from "@/lib/utils";
 import { useGetServicesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
 import { ServiceProps } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import { Cog, Scissors } from "lucide-react";
@@ -104,15 +105,30 @@ const ServicesCard: React.FC = () => {
                     <p className="truncate text-sm font-semibold">
                       {service.name}
                     </p>
-                    <p className="text-muted-foreground mt-1 truncate text-xs">
-                      Category: {service.category}
-                    </p>
+
+                    <div>
+                      <p className="text-muted-foreground mt-1 text-xs">
+                        <span>
+                          Category:{" "}
+                          <strong>
+                            {formatChoiceFieldValue(service.category)}
+                          </strong>
+                        </span>{" "}
+                        |{" "}
+                        <span>
+                          Sub Category:{" "}
+                          <strong>
+                            {formatChoiceFieldValue(service.sub_category)}
+                          </strong>
+                        </span>
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                <div className="text-muted-foreground text-sm font-medium">
+                <p className="text-muted-foreground text-sm font-medium">
                   ${service.price ? service.price : "0.0"}
-                </div>
+                </p>
               </div>
             ))}
           </div>
