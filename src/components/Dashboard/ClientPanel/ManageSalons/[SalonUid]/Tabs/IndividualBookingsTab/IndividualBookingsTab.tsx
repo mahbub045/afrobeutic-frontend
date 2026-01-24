@@ -25,9 +25,11 @@ import {
   CalendarSearch,
   ChevronLeft,
   ChevronRight,
+  Plus,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
+import AddIndividualBookingDialog from "./Dialogs/AddIndividualBookingDialog";
 import IndividualAppointmentDetailsPanel, {
   IndividualAppointment,
 } from "./IndividualAppointmentDetailsPanel";
@@ -216,6 +218,11 @@ const IndividualBookingsTab: React.FC = () => {
   const [selectedAppointment, setSelectedAppointment] =
     useState<IndividualAppointment | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isAddBookingDialogOpen, setIsAddBookingDialogOpen] = useState(false);
+
+  const handleAddBookingDialogOpen = () => {
+    setIsAddBookingDialogOpen(true);
+  };
 
   const dateParam = toLocalYMD(selectedDate);
 
@@ -479,6 +486,14 @@ const IndividualBookingsTab: React.FC = () => {
               />
             </PopoverContent>
           </Popover>
+          <Button
+            variant="default"
+            size="sm"
+            onClick={handleAddBookingDialogOpen}
+          >
+            <Plus />
+            Add Booking
+          </Button>
         </div>
       </div>
 
@@ -603,6 +618,10 @@ const IndividualBookingsTab: React.FC = () => {
           />
         </div>
       )}
+      <AddIndividualBookingDialog
+        isOpen={isAddBookingDialogOpen}
+        onOpenChange={setIsAddBookingDialogOpen}
+      />
     </div>
   );
 };
