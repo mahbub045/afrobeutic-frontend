@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import {
@@ -35,10 +35,22 @@ export interface RevenueProps {
 
 const Revenue: React.FC = () => {
   const { salonuid } = useParams();
+
+  const [dateType, setDateType] = useState<string>("all");
+  const [search, setSearch] = useState<string>("");
+  const [debouncedSearch, setDebouncedSearch] = useState<string>("");
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search.trim()), 400);
+    return () => clearTimeout(t);
+  }, [search]);
+
   const { data: revenueData, isLoading } = useGetRevenueAnalyticsQuery({
     salonUid: salonuid,
     params: {
       status: "COMPLETED",
+      ...(dateType && dateType !== "all" ? { date_type: dateType } : {}),
+      ...(debouncedSearch ? { search: debouncedSearch } : {}),
     },
   });
 
@@ -51,14 +63,34 @@ const Revenue: React.FC = () => {
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-start">
         <div className="flex items-center gap-2">
           <label className="text-sm font-medium">Date Range:</label>
-          <Select defaultValue="today">
+          <Select
+            defaultValue={dateType}
+            onValueChange={(val) => setDateType(val)}
+          >
             <SelectTrigger size="sm" className="w-40">
-              <SelectValue>Today</SelectValue>
+              <SelectValue>
+                {dateType === "today" && "Today"}
+                {dateType === "next_day" && "Next Day"}
+                {dateType === "previous_day" && "Previous Day"}
+                {dateType === "this_week" && "This Week"}
+                {dateType === "this_month" && "This Month"}
+                {dateType === "previous_month" && "Previous Month"}
+                {dateType === "last_6_month" && "Last 6 Months"}
+                {dateType === "one_year" && "One Year"}
+                {dateType === "custom" && "Custom"}
+                {(!dateType || dateType === "all") && "All"}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="all">All</SelectItem>
               <SelectItem value="today">Today</SelectItem>
-              <SelectItem value="week">This Week</SelectItem>
-              <SelectItem value="month">This Month</SelectItem>
+              <SelectItem value="next_day">Next Day</SelectItem>
+              <SelectItem value="previous_day">Previous Day</SelectItem>
+              <SelectItem value="this_week">This Week</SelectItem>
+              <SelectItem value="this_month">This Month</SelectItem>
+              <SelectItem value="previous_month">Previous Month</SelectItem>
+              <SelectItem value="last_6_month">Last 6 Months</SelectItem>
+              <SelectItem value="one_year">One Year</SelectItem>
               <SelectItem value="custom">Custom</SelectItem>
             </SelectContent>
           </Select>
@@ -67,7 +99,11 @@ const Revenue: React.FC = () => {
         <div className="flex items-center gap-2 md:ml-4">
           <label className="text-sm font-medium">Search:</label>
           <div className="w-full md:w-72">
-            <Input placeholder="Booking ID or Customer Name" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch((e.target as HTMLInputElement).value)}
+              placeholder="Booking ID or Customer Name"
+            />
           </div>
         </div>
       </div>
@@ -87,7 +123,7 @@ const Revenue: React.FC = () => {
             {isLoading ? (
               <TableRow>
                 <TableCell colSpan={5} className="py-6 text-center">
-                  <LoaderPinwheel className="mx-auto h-6 w-6 animate-spin text-primary" />
+                  <LoaderPinwheel className="text-primary mx-auto h-6 w-6 animate-spin" />
                 </TableCell>
               </TableRow>
             ) : revenueData && revenueData.length > 0 ? (
