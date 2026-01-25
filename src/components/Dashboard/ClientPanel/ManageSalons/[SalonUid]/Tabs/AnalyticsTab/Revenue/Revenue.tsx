@@ -32,7 +32,7 @@ const Revenue: React.FC = () => {
   const [search, setSearch] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [page, setPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(12);
+  const [pageSize] = useState<number>(12);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search.trim()), 400);
@@ -74,6 +74,7 @@ const Revenue: React.FC = () => {
       URL.revokeObjectURL(url);
     } catch (err) {
       // optional: show user notification
+      console.error("Error downloading invoice:", err);
     } finally {
       setDownloadingId(null);
     }

@@ -234,7 +234,6 @@ const IndividualBookingsTab: React.FC = () => {
   // RTK Hooks
   const {
     data: individualBookingsData,
-    isLoading: isIndividualBookingsLoading,
   } = useGetIndividualBookingsQuery({
     salonUid: salonuid as string,
     params: filters,
