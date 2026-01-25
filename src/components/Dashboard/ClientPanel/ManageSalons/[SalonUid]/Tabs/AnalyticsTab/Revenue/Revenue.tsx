@@ -31,11 +31,18 @@ const Revenue: React.FC = () => {
   const [dateType, setDateType] = useState<string>("all");
   const [search, setSearch] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
+  const [page, setPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(12);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search.trim()), 400);
     return () => clearTimeout(t);
   }, [search]);
+
+  useEffect(() => {
+    // Reset to first page when filters/search change
+    setPage(1);
+  }, [dateType, debouncedSearch]);
 
   const { data: revenueData, isLoading } = useGetRevenueAnalyticsQuery({
     salonUid: salonuid,
@@ -71,6 +78,17 @@ const Revenue: React.FC = () => {
       setDownloadingId(null);
     }
   };
+
+  const totalCount = revenueData ? revenueData.length : 0;
+  const maxPage = Math.max(1, Math.ceil(totalCount / pageSize));
+  // keep page within bounds if data or pageSize changes
+  useEffect(() => {
+    setPage((p) => Math.min(Math.max(1, p), maxPage));
+  }, [totalCount, pageSize, maxPage]);
+
+  const startIdx = (page - 1) * pageSize;
+  const endIdx = Math.min(startIdx + pageSize, totalCount);
+  const paginatedData = revenueData ? revenueData.slice(startIdx, endIdx) : [];
 
   return (
     <section className="space-y-4">
@@ -144,8 +162,8 @@ const Revenue: React.FC = () => {
                   <LoaderPinwheel className="text-primary mx-auto h-6 w-6 animate-spin" />
                 </TableCell>
               </TableRow>
-            ) : revenueData && revenueData.length > 0 ? (
-              revenueData.map((rev: RevenueProps) => (
+            ) : totalCount > 0 ? (
+              paginatedData.map((rev: RevenueProps) => (
                 <TableRow key={rev.uid}>
                   <TableCell>{rev.booking_id}</TableCell>
                   <TableCell>
@@ -180,6 +198,38 @@ const Revenue: React.FC = () => {
             )}
           </TableBody>
         </Table>
+        <div className="mb-2 flex items-center justify-between">
+          <div className="text-muted-foreground text-sm">
+            <span className="font-medium">Total:</span> {totalCount}
+            {totalCount > 0 && (
+              <span className="ml-3">
+                Showing {startIdx + 1} - {endIdx} of {totalCount}
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
+              <Button
+                size="xs"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page <= 1}
+              >
+                Prev
+              </Button>
+              <div className="text-sm">
+                Page {page} / {maxPage}
+              </div>
+              <Button
+                size="xs"
+                onClick={() => setPage((p) => Math.min(maxPage, p + 1))}
+                disabled={page >= maxPage}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
