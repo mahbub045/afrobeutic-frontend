@@ -21,6 +21,7 @@ const PeakDays: React.FC = () => {
       salonUid: salonuid,
       params: { period: range },
     });
+
   const chartData = useMemo(() => {
     const raw = (appointmentPeakDaysData ?? {}) as Record<string, number>;
     const header: (string | number)[] = ["Day", "Bookings"];
@@ -89,7 +90,7 @@ const PeakDays: React.FC = () => {
         </div>
       </header>
 
-      <div className="w-full shadow-md dark:shadow-gray-600 rounded-md">
+      <div className="w-full rounded-md shadow-md dark:shadow-gray-600">
         {isLoading ? (
           <div className="flex h-80 items-center justify-center">
             <LoaderPinwheel className="text-primary animate-spin" size={20} />

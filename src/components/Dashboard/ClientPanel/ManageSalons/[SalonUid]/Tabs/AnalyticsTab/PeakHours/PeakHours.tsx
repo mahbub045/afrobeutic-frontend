@@ -83,7 +83,7 @@ const PeakHours: React.FC = () => {
         </div>
       </header>
 
-      <div className="w-full">
+      <div className="w-full shadow-md dark:shadow-gray-600 rounded-md">
         {isLoading ? (
           <div className="flex h-80 items-center justify-center">
             <LoaderPinwheel className="text-primary animate-spin" size={20} />
@@ -96,7 +96,7 @@ const PeakHours: React.FC = () => {
           <Chart
             chartType="ColumnChart"
             width="100%"
-            height="390px"
+            height="360px"
             data={chartData}
             options={options}
           />

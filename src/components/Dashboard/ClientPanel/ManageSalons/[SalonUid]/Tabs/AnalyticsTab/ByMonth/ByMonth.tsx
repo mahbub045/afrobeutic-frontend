@@ -102,7 +102,7 @@ const ByMonth: React.FC = () => {
         </div>
       </header>
 
-      <div className="w-full">
+      <div className="w-full rounded-md shadow-md dark:shadow-gray-600">
         {isLoading ? (
           <div className="flex h-80 items-center justify-center">
             <LoaderPinwheel className="text-primary animate-spin" size={20} />

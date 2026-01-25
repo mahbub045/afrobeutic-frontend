@@ -96,7 +96,7 @@ const ProductCategoriesRevenue: React.FC = () => {
         </div>
       </header>
 
-      <div className="flex w-full flex-col items-center shadow-md dark:shadow-gray-600">
+      <div className="flex w-full flex-col items-center rounded-md shadow-md dark:shadow-gray-600">
         <div className="w-full max-w-2xl">
           {isLoading ? (
             <div className="flex h-80 items-center justify-center">

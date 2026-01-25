@@ -13,8 +13,8 @@ import {
 import { formatChoiceFieldValue } from "@/lib/utils";
 import { useGetServiceRevenueQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Analytics/AnalyticsApi";
 import { ServiceRevenue } from "@/Types/ClientPanel/ManageSalonTypes/AnalyticsTypes/AnalyticsTypes";
-import { useParams } from "next/navigation";
 import { LoaderPinwheel } from "lucide-react";
+import { useParams } from "next/navigation";
 
 const ServicesRevenue: React.FC = () => {
   const [range, setRange] = useState<string>("this_week");
@@ -96,7 +96,7 @@ const ServicesRevenue: React.FC = () => {
         </div>
       </header>
 
-      <div className="flex w-full flex-col items-center shadow-md dark:shadow-gray-600">
+      <div className="flex w-full flex-col items-center rounded-md shadow-md dark:shadow-gray-600">
         <div className="w-full max-w-2xl">
           {isLoading ? (
             <div className="flex h-80 items-center justify-center">
