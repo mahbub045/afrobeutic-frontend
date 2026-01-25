@@ -31,6 +31,12 @@ const CustomerAnalysis: React.FC = () => {
       const newCount = resp.new_customer_booking_count ?? 0;
       const repeated = resp.repeated_customer_booking_count ?? 0;
       const total = resp.total_bookings ?? newCount + repeated;
+
+      // If all counts are zero, treat as no data so the empty state is shown
+      if (newCount === 0 && repeated === 0 && total === 0) {
+        return [["Customer", "Count"]];
+      }
+
       return [
         ["Customer", "Count"],
         ["Total", total],
