@@ -15,10 +15,13 @@ import { Chart } from "react-google-charts";
 
 const ServiceCategoriesRevenue: React.FC = () => {
   const { salonuid } = useParams();
-  const { data: serviceCategoriesRevenueData, isLoading } =
-    useGetServiceCategotyiesRevenueQuery({ salonUid: salonuid, params: {} });
+  const [range, setRange] = useState<string>("this_week");
 
-  const [range, setRange] = useState<string>("week");
+  const { data: serviceCategoriesRevenueData, isLoading } =
+    useGetServiceCategotyiesRevenueQuery({
+      salonUid: salonuid,
+      params: { period: range },
+    });
 
   const prettifyCategory = (key: string) => {
     if (!key) return "Unknown";
@@ -31,6 +34,17 @@ const ServiceCategoriesRevenue: React.FC = () => {
       .split(/_|\s+/)
       .map((w) => w[0]?.toUpperCase() + w.slice(1))
       .join(" ");
+  };
+
+  const prettifyRange = (key: string) => {
+    const map: Record<string, string> = {
+      this_week: "This Week",
+      last_week: "Last Week",
+      this_month: "This Month",
+      last_6_months: "Last 6 Months",
+      last_year: "Last Year",
+    };
+    return map[key] ?? key;
   };
 
   const chartData = useMemo(() => {
@@ -79,18 +93,14 @@ const ServiceCategoriesRevenue: React.FC = () => {
         <div className="flex items-center gap-2">
           <Select defaultValue={range} onValueChange={(val) => setRange(val)}>
             <SelectTrigger size="sm" className="w-40">
-              <SelectValue>
-                {range === "day"
-                  ? "Today"
-                  : range === "week"
-                    ? "This Week"
-                    : "This Month"}
-              </SelectValue>
+              <SelectValue>{prettifyRange(range)}</SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="day">Today</SelectItem>
-              <SelectItem value="week">This Week</SelectItem>
-              <SelectItem value="month">This Month</SelectItem>
+              <SelectItem value="this_week">This Week</SelectItem>
+              <SelectItem value="last_week">Last Week</SelectItem>
+              <SelectItem value="this_month">This Month</SelectItem>
+              <SelectItem value="last_6_months">Last 6 Months</SelectItem>
+              <SelectItem value="last_year">Last Year</SelectItem>
             </SelectContent>
           </Select>
         </div>
