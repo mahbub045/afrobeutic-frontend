@@ -18,3 +18,11 @@ export interface ProductCategoryRevenue {
   product_category?: string | null;
   revenue?: number | null;
 }
+export interface ServiceRevenue {
+  service_name?: string | null;
+  revenue?: number | null;
+}
+export interface ProductRevenue {
+  product_name?: string | null;
+  revenue?: number | null;
+}

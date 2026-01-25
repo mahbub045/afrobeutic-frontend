@@ -37,6 +37,14 @@ export const AnalyticsApi = baseApi.injectEndpoints({
       }),
       providesTags: ["SalonAnalytics"],
     }),
+    getServiceRevenue: build.query({
+      query: ({ salonUid, params }) => ({
+        url: `/salons/${salonUid}/analytics/service-revenue`,
+        method: "GET",
+        params,
+      }),
+        providesTags: ["SalonAnalytics"],
+    }),
   }),
 });
 
@@ -45,4 +53,5 @@ export const {
   useDownloadRevenueReportMutation,
   useGetServiceCategotyiesRevenueQuery,
   useGetProductCategoriesRevenueQuery,
+  useGetServiceRevenueQuery,
 } = AnalyticsApi;
