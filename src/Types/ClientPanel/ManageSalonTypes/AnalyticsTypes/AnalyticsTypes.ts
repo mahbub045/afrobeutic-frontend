@@ -37,3 +37,11 @@ export interface TopStaffPerformer {
   name: string;
   total_revenue: number;
 }
+export interface TopService {
+  name: string;
+  total_revenue: number;
+}
+export interface TopProduct {
+  name: string;
+  total_revenue: number;
+}
