@@ -1,6 +1,6 @@
 "use client";
 import { useSession } from "next-auth/react";
-import AppointmentsDistribution from "./AppointmentsDistribution/AppointmentsDistribution";
+import ByMonth from "./ByMonth/ByMonth";
 import CustomerAnalysis from "./CustomerAnalysis/CustomerAnalysis";
 import PeakDaysWeek from "./PeakDaysWeek/PeakDaysWeek";
 import PeakHours from "./PeakHours/PeakHours";
@@ -28,8 +28,13 @@ const AnalyticsTab: React.FC = () => {
         <ServicesRevenue />
         <ProductsRevenue />
       </div>
-      <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-2">
-        <AppointmentsDistribution />
+      <div className="mt-10">
+        <h3 className="text-xl font-semibold md:text-2xl">
+          Appointments Distribution
+        </h3>
+      </div>
+      <div className="mt-6 grid grid-cols-1 gap-10 md:grid-cols-2">
+        <ByMonth />
         <PeakHours />
       </div>
       <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-2">
