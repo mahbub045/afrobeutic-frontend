@@ -1,8 +1,8 @@
 "use client";
 import { useSession } from "next-auth/react";
-import AppointmentsDistribution from "./AppointmentsDistribution/AppointmentsDistribution";
+import ByMonth from "./ByMonth/ByMonth";
 import CustomerAnalysis from "./CustomerAnalysis/CustomerAnalysis";
-import PeakDaysWeek from "./PeakDaysWeek/PeakDaysWeek";
+import PeakDays from "./PeakDays/PeakDays";
 import PeakHours from "./PeakHours/PeakHours";
 import ProductCategoriesRevenue from "./ProductCategoriesRevenue/ProductCategoriesRevenue";
 import ProductSales from "./ProductSales/ProductSales";
@@ -20,20 +20,25 @@ const AnalyticsTab: React.FC = () => {
       <div>
         <Revenue />
       </div>
-      <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-2">
+      <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-2">
         <ServiceCategoriesRevenue />
         <ProductCategoriesRevenue />
       </div>
-      <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-2">
+      <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-2">
         <ServicesRevenue />
         <ProductsRevenue />
       </div>
-      <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-2">
-        <AppointmentsDistribution />
+      <div className="mt-10">
+        <h3 className="text-xl font-semibold lg:text-2xl">
+          Appointments Distribution
+        </h3>
+      </div>
+      <div className="mt-6 grid grid-cols-1 gap-10 lg:grid-cols-2">
+        <ByMonth />
         <PeakHours />
       </div>
-      <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-2">
-        <PeakDaysWeek />
+      <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-2">
+        <PeakDays />
         <CustomerAnalysis />
       </div>
       {session?.user?.account_type === "INDIVIDUAL_STYLIST" ? null : (

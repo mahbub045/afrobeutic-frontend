@@ -17,7 +17,6 @@ import type {
   Booking,
 } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
 import { Calendar as CalendarIcon, Edit, LoaderPinwheel } from "lucide-react";
-import type { Session } from "next-auth";
 import { useParams } from "next/navigation";
 import { SetStateAction, useState, type Dispatch } from "react";
 import { toast } from "sonner";
@@ -44,7 +43,6 @@ interface AppointmentDetailsPanelProps {
   appointmentDateLabel: string;
   onOpenEdit: (open: boolean) => void;
   onOpenEditStatus: (open: boolean) => void;
-  session: Session | null;
 }
 
 const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
@@ -60,7 +58,6 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
   appointmentDateLabel,
   onOpenEdit,
   onOpenEditStatus,
-  session,
 }) => {
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");

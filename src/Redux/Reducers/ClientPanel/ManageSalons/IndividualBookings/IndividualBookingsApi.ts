@@ -16,7 +16,7 @@ export const IndividualBookingsApi = baseApi.injectEndpoints({
         method: "PATCH",
         body: data,
       }),
-      invalidatesTags: ["IndividualBookings"],
+      invalidatesTags: ["IndividualBookings", "SalonAnalytics"],
     }),
   }),
 });
