@@ -32,3 +32,8 @@ export interface CustomerAnalysisResp {
   repeated_customer_booking_count?: number;
   [key: string]: unknown;
 }
+export interface TopStaffPerformer {
+  employee_id: string;
+  name: string;
+  total_revenue: number;
+}
