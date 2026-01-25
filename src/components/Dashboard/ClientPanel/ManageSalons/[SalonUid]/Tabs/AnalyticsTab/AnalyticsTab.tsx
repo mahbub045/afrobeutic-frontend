@@ -20,24 +20,24 @@ const AnalyticsTab: React.FC = () => {
       <div>
         <Revenue />
       </div>
-      <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-2">
+      <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-2">
         <ServiceCategoriesRevenue />
         <ProductCategoriesRevenue />
       </div>
-      <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-2">
+      <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-2">
         <ServicesRevenue />
         <ProductsRevenue />
       </div>
       <div className="mt-10">
-        <h3 className="text-xl font-semibold md:text-2xl">
+        <h3 className="text-xl font-semibold lg:text-2xl">
           Appointments Distribution
         </h3>
       </div>
-      <div className="mt-6 grid grid-cols-1 gap-10 md:grid-cols-2">
+      <div className="mt-6 grid grid-cols-1 gap-10 lg:grid-cols-2">
         <ByMonth />
         <PeakHours />
       </div>
-      <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-2">
+      <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-2">
         <PeakDays />
         <CustomerAnalysis />
       </div>
