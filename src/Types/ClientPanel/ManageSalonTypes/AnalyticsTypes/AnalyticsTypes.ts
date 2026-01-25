@@ -14,3 +14,7 @@ export interface ServiceCategoryRevenue {
   service_category?: string | null;
   revenue?: number | null;
 }
+export interface ProductCategoryRevenue {
+  product_category?: string | null;
+  revenue?: number | null;
+}
