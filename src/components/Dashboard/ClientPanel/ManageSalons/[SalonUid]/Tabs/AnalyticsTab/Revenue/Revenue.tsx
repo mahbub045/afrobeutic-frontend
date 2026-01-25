@@ -24,6 +24,7 @@ import {
 import { RevenueProps } from "@/Types/ClientPanel/ManageSalonTypes/AnalyticsTypes/AnalyticsTypes";
 import { LoaderPinwheel } from "lucide-react";
 import { useParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 const Revenue: React.FC = () => {
   const { salonuid } = useParams();
@@ -153,9 +154,9 @@ const Revenue: React.FC = () => {
                   <TableCell>{formatDateTime(rev.completed_at)}</TableCell>
                   <TableCell>${rev.final_price}</TableCell>
                   <TableCell className="text-center">
-                    <button
-                      type="button"
-                      className={`text-primary hover:underline ${downloadingId === rev.uid ? "cursor-wait opacity-70" : ""}`}
+                    <Button
+                      variant="link"
+                      // className={`text-primary hover:underline ${downloadingId === rev.uid ? "cursor-wait opacity-70" : ""}`}
                       onClick={() => handleDownload(rev)}
                       disabled={downloadingId === rev.uid}
                     >
@@ -164,7 +165,7 @@ const Revenue: React.FC = () => {
                       ) : (
                         "Download"
                       )}
-                    </button>
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))
