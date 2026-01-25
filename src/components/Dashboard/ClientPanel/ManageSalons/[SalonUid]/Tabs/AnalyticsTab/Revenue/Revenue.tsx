@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -24,7 +25,6 @@ import {
 import { RevenueProps } from "@/Types/ClientPanel/ManageSalonTypes/AnalyticsTypes/AnalyticsTypes";
 import { LoaderPinwheel } from "lucide-react";
 import { useParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
 
 const Revenue: React.FC = () => {
   const { salonuid } = useParams();
@@ -156,7 +156,6 @@ const Revenue: React.FC = () => {
                   <TableCell className="text-center">
                     <Button
                       variant="link"
-                      // className={`text-primary hover:underline ${downloadingId === rev.uid ? "cursor-wait opacity-70" : ""}`}
                       onClick={() => handleDownload(rev)}
                       disabled={downloadingId === rev.uid}
                     >
