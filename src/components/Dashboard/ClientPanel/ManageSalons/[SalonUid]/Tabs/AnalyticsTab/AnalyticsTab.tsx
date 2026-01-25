@@ -2,7 +2,7 @@
 import { useSession } from "next-auth/react";
 import ByMonth from "./ByMonth/ByMonth";
 import CustomerAnalysis from "./CustomerAnalysis/CustomerAnalysis";
-import PeakDaysWeek from "./PeakDaysWeek/PeakDaysWeek";
+import PeakDays from "./PeakDays/PeakDays";
 import PeakHours from "./PeakHours/PeakHours";
 import ProductCategoriesRevenue from "./ProductCategoriesRevenue/ProductCategoriesRevenue";
 import ProductSales from "./ProductSales/ProductSales";
@@ -38,7 +38,7 @@ const AnalyticsTab: React.FC = () => {
         <PeakHours />
       </div>
       <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-2">
-        <PeakDaysWeek />
+        <PeakDays />
         <CustomerAnalysis />
       </div>
       {session?.user?.account_type === "INDIVIDUAL_STYLIST" ? null : (
