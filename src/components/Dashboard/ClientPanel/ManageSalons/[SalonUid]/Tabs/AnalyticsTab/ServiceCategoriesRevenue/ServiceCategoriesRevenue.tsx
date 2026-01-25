@@ -1,5 +1,4 @@
 "use client";
-
 import {
   Select,
   SelectContent,
@@ -7,8 +6,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { formatChoiceFieldValue } from "@/lib/utils";
 import { useGetServiceCategotyiesRevenueQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Analytics/AnalyticsApi";
 import { ServiceCategoryRevenue } from "@/Types/ClientPanel/ManageSalonTypes/AnalyticsTypes/AnalyticsTypes";
+import { LoaderPinwheel } from "lucide-react";
 import { useParams } from "next/navigation";
 import React, { useMemo, useState } from "react";
 import { Chart } from "react-google-charts";
@@ -22,19 +23,6 @@ const ServiceCategoriesRevenue: React.FC = () => {
       salonUid: salonuid,
       params: { period: range },
     });
-
-  const prettifyCategory = (key: string) => {
-    if (!key) return "Unknown";
-    const maps: Record<string, string> = {
-      BRIDAL_AND_MAKEUP_SERVICES: "Bridal & Makeup Services",
-    };
-    if (maps[key]) return maps[key];
-    return key
-      .toLowerCase()
-      .split(/_|\s+/)
-      .map((w) => w[0]?.toUpperCase() + w.slice(1))
-      .join(" ");
-  };
 
   const prettifyRange = (key: string) => {
     const map: Record<string, string> = {
@@ -63,7 +51,7 @@ const ServiceCategoriesRevenue: React.FC = () => {
       )
       .slice(0, 5)
       .map((r: ServiceCategoryRevenue) => [
-        prettifyCategory(r.service_category || ""),
+        formatChoiceFieldValue(r.service_category || ""),
         r.revenue || 0,
       ]);
 
@@ -106,12 +94,16 @@ const ServiceCategoriesRevenue: React.FC = () => {
         </div>
       </header>
 
-      <div className="flex w-full flex-col items-center">
+      <div className="flex w-full flex-col items-center shadow-md dark:shadow-gray-600">
         <div className="w-full max-w-2xl">
           {isLoading ? (
-            <div className="p-8 text-center">Loading chart…</div>
+            <div className="flex h-80 items-center justify-center">
+              <LoaderPinwheel className="text-primary animate-spin" size={20} />
+            </div>
           ) : chartData.length <= 1 ? (
-            <div className="p-8 text-center">No revenue data available.</div>
+            <div className="flex h-80 items-center justify-center">
+              No revenue data available.
+            </div>
           ) : (
             <Chart
               chartType="PieChart"
