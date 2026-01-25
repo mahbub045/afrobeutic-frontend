@@ -69,6 +69,7 @@ const Revenue: React.FC = () => {
           >
             <SelectTrigger size="sm" className="w-40">
               <SelectValue>
+                {(!dateType || dateType === "all") && "All"}
                 {dateType === "today" && "Today"}
                 {dateType === "next_day" && "Next Day"}
                 {dateType === "previous_day" && "Previous Day"}
@@ -78,7 +79,6 @@ const Revenue: React.FC = () => {
                 {dateType === "last_6_month" && "Last 6 Months"}
                 {dateType === "one_year" && "One Year"}
                 {dateType === "custom" && "Custom"}
-                {(!dateType || dateType === "all") && "All"}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
