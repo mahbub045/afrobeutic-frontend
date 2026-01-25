@@ -83,13 +83,13 @@ const PeakHours: React.FC = () => {
         </div>
       </header>
 
-      <div className="w-full shadow-md dark:shadow-gray-600 rounded-md">
+      <div className="w-full rounded-md shadow-md dark:shadow-gray-600">
         {isLoading ? (
-          <div className="flex h-80 items-center justify-center">
+          <div className="flex h-[360px] items-center justify-center">
             <LoaderPinwheel className="text-primary animate-spin" size={20} />
           </div>
         ) : chartData.length <= 1 ? (
-          <div className="flex h-80 items-center justify-center">
+          <div className="flex h-[360px] items-center justify-center">
             No peak hours data available.
           </div>
         ) : (

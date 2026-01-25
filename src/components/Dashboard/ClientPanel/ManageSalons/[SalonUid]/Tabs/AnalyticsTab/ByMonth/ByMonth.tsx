@@ -104,11 +104,11 @@ const ByMonth: React.FC = () => {
 
       <div className="w-full rounded-md shadow-md dark:shadow-gray-600">
         {isLoading ? (
-          <div className="flex h-80 items-center justify-center">
+          <div className="flex h-[360px] items-center justify-center">
             <LoaderPinwheel className="text-primary animate-spin" size={20} />
           </div>
         ) : chartData.length <= 1 ? (
-          <div className="flex h-80 items-center justify-center">
+          <div className="flex h-[360px] items-center justify-center">
             No bookings data available.
           </div>
         ) : (

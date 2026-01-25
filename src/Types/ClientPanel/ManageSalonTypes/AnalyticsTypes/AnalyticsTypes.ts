@@ -26,3 +26,9 @@ export interface ProductRevenue {
   product_name?: string | null;
   revenue?: number | null;
 }
+export interface CustomerAnalysisResp {
+  total_bookings?: number;
+  new_customer_booking_count?: number;
+  repeated_customer_booking_count?: number;
+  [key: string]: unknown;
+}

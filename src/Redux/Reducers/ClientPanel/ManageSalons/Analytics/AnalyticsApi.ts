@@ -77,6 +77,14 @@ export const AnalyticsApi = baseApi.injectEndpoints({
       }),
       providesTags: ["SalonAnalytics"],
     }),
+    getCustomerAnalysis: build.query({
+      query: ({ salonUid, params }) => ({
+        url: `/salons/${salonUid}/analytics/customer-analysis`,
+        method: "GET",
+        params,
+      }),
+      providesTags: ["SalonAnalytics"],
+    }),
   }),
 });
 
@@ -90,4 +98,5 @@ export const {
   useGetAppointmentsByMonthQuery,
   useGetAppointmentsPeakHoursQuery,
   useGetAppointmentsPeakDaysQuery,
+  useGetCustomerAnalysisQuery,
 } = AnalyticsApi;
