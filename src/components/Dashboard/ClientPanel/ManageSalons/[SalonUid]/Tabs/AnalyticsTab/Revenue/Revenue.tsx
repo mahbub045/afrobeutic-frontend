@@ -17,25 +17,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDateTime } from "@/lib/utils";
-import { useGetRevenueAnalyticsQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Analytics/AnalyticsApi";
+import {
+  useDownloadRevenueReportMutation,
+  useGetRevenueAnalyticsQuery,
+} from "@/Redux/Reducers/ClientPanel/ManageSalons/Analytics/AnalyticsApi";
+import { RevenueProps } from "@/Types/ClientPanel/ManageSalonTypes/AnalyticsTypes/AnalyticsTypes";
 import { LoaderPinwheel } from "lucide-react";
 import { useParams } from "next/navigation";
 
-export interface RevenueProps {
-  uid: string;
-  booking_id: string;
-  customer: {
-    uid: string;
-    first_name: string;
-    last_name: string;
-  };
-  completed_at: string;
-  final_price: number;
-}
-
 const Revenue: React.FC = () => {
   const { salonuid } = useParams();
-
   const [dateType, setDateType] = useState<string>("all");
   const [search, setSearch] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
@@ -53,6 +44,32 @@ const Revenue: React.FC = () => {
       ...(debouncedSearch ? { search: debouncedSearch } : {}),
     },
   });
+  const [downloadRevenueReport] = useDownloadRevenueReportMutation();
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+  const handleDownload = async (rev: RevenueProps) => {
+    setDownloadingId(rev.uid);
+    try {
+      const blob = await downloadRevenueReport({
+        salonUid: salonuid,
+        bookingUid: rev.uid,
+      }).unwrap();
+      const url = URL.createObjectURL(blob as Blob);
+      const ext = (blob as Blob).type === "application/pdf" ? "pdf" : "bin";
+      const filename = `${rev.booking_id}-receipt.${ext}`;
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      // optional: show user notification
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   return (
     <section className="space-y-4">
@@ -136,9 +153,18 @@ const Revenue: React.FC = () => {
                   <TableCell>{formatDateTime(rev.completed_at)}</TableCell>
                   <TableCell>${rev.final_price}</TableCell>
                   <TableCell className="text-center">
-                    <a className="text-primary hover:underline" href="#">
-                      Download
-                    </a>
+                    <button
+                      type="button"
+                      className={`text-primary hover:underline ${downloadingId === rev.uid ? "cursor-wait opacity-70" : ""}`}
+                      onClick={() => handleDownload(rev)}
+                      disabled={downloadingId === rev.uid}
+                    >
+                      {downloadingId === rev.uid ? (
+                        <LoaderPinwheel className="inline-block h-4 w-4 animate-spin" />
+                      ) : (
+                        "Download"
+                      )}
+                    </button>
                   </TableCell>
                 </TableRow>
               ))
