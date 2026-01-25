@@ -9,3 +9,8 @@ export interface RevenueProps {
   completed_at: string;
   final_price: number;
 }
+
+export interface ServiceCategoryRevenue {
+  service_category?: string | null;
+  revenue?: number | null;
+}
