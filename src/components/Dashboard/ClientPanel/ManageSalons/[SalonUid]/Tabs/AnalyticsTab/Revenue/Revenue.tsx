@@ -1,4 +1,3 @@
-import Link from "next/link";
 import React from "react";
 
 import { Input } from "@/components/ui/input";
@@ -17,8 +16,32 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatDateTime } from "@/lib/utils";
+import { useGetRevenueAnalyticsQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Analytics/AnalyticsApi";
+import { LoaderPinwheel } from "lucide-react";
+import { useParams } from "next/navigation";
+
+export interface RevenueProps {
+  uid: string;
+  booking_id: string;
+  customer: {
+    uid: string;
+    first_name: string;
+    last_name: string;
+  };
+  completed_at: string;
+  final_price: number;
+}
 
 const Revenue: React.FC = () => {
+  const { salonuid } = useParams();
+  const { data: revenueData, isLoading } = useGetRevenueAnalyticsQuery({
+    salonUid: salonuid,
+    params: {
+      status: "COMPLETED",
+    },
+  });
+
   return (
     <section className="space-y-4">
       <header className="flex items-center justify-between">
@@ -44,7 +67,7 @@ const Revenue: React.FC = () => {
         <div className="flex items-center gap-2 md:ml-4">
           <label className="text-sm font-medium">Search:</label>
           <div className="w-full md:w-72">
-            <Input placeholder="Booking ID or Customer N" />
+            <Input placeholder="Booking ID or Customer Name" />
           </div>
         </div>
       </div>
@@ -57,29 +80,42 @@ const Revenue: React.FC = () => {
               <TableHead>Customer Name</TableHead>
               <TableHead>Finished At</TableHead>
               <TableHead>Revenue</TableHead>
-              <TableHead>Download Invoice</TableHead>
+              <TableHead className="text-center">Download Invoice</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRow>
-              <TableCell>
-                <Link href="#" className="text-primary hover:underline">
-                  BKG1160
-                </Link>
-              </TableCell>
-              <TableCell>
-                <Link href="#" className="text-primary hover:underline">
-                  Michael Brown
-                </Link>
-              </TableCell>
-              <TableCell>Jan 6, 2026, 08:55 PM</TableCell>
-              <TableCell>$118.09</TableCell>
-              <TableCell>
-                <a className="text-primary hover:underline" href="#">
-                  Download
-                </a>
-              </TableCell>
-            </TableRow>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={5} className="py-6 text-center">
+                  <LoaderPinwheel className="mx-auto h-6 w-6 animate-spin text-primary" />
+                </TableCell>
+              </TableRow>
+            ) : revenueData && revenueData.length > 0 ? (
+              revenueData.map((rev: RevenueProps) => (
+                <TableRow key={rev.uid}>
+                  <TableCell>{rev.booking_id}</TableCell>
+                  <TableCell>
+                    {rev.customer.first_name} {rev.customer.last_name}
+                  </TableCell>
+                  <TableCell>{formatDateTime(rev.completed_at)}</TableCell>
+                  <TableCell>${rev.final_price}</TableCell>
+                  <TableCell className="text-center">
+                    <a className="text-primary hover:underline" href="#">
+                      Download
+                    </a>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={5}
+                  className="text-muted-foreground py-6 text-center text-sm"
+                >
+                  No revenue records found.
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>
