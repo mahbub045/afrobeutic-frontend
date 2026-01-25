@@ -96,7 +96,7 @@ const Revenue: React.FC = () => {
         <h2 className="text-2xl font-semibold">Revenue</h2>
       </header>
 
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-start">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-2">
           <label className="text-sm font-medium">Date Range:</label>
           <Select
