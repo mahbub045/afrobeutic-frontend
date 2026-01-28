@@ -1,3 +1,4 @@
+"use client";
 import Breadcrumbs from "../../CommonComponents/Breadcrumbs";
 import SubscriptionList from "./SubscriptionList/SubscriptionList";
 

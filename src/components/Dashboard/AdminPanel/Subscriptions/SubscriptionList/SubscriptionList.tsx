@@ -29,6 +29,7 @@ import {
   X,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const SubscriptionList: React.FC = () => {
@@ -232,13 +233,17 @@ const SubscriptionList: React.FC = () => {
                       : "--"}
                   </TableCell>
                   <TableCell className="text-center">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="shadow-md dark:shadow-gray-600"
+                    <Link
+                      href={`/dashboard/admin-panel/subscriptions/${s.uid}`}
                     >
-                      Details
-                    </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="shadow-md dark:shadow-gray-600"
+                      >
+                        Details
+                      </Button>
+                    </Link>
                   </TableCell>
                 </TableRow>
               ))
