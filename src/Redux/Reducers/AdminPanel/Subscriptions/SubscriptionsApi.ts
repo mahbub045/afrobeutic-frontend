@@ -11,7 +11,15 @@ export const SubscriptionsApi = baseApi.injectEndpoints({
       providesTags: ["SubscriptionsList"],
     }),
     // Additional endpoints can be defined here
+    getSubscriptionDetails: builder.query({
+      query: ({ subscriptionUid }) => ({
+        url: `/admin/subscriptions/${subscriptionUid}`,
+        method: "GET",
+      }),
+      providesTags: ["SubscriptionsList"],
+    }),
   }),
 });
 
-export const { useGetSubscriptionsQuery } = SubscriptionsApi;
+export const { useGetSubscriptionsQuery, useGetSubscriptionDetailsQuery } =
+  SubscriptionsApi;
