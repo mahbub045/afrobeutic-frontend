@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/sheet";
 import {
   BadgeQuestionMark,
+  Banknote,
   BookOpen,
   ChevronRight,
   CircleUserRound,
@@ -18,6 +19,7 @@ import {
   LoaderPinwheel,
   Megaphone,
   MessageSquare,
+  Podcast,
   ShieldUser,
   UserCog,
   Users,
@@ -90,6 +92,16 @@ const SideBar: React.FC<SideBarProps> = ({
           label: "Accounts",
           href: "/dashboard/admin-panel/accounts",
           Icon: CircleUserRound,
+        },
+        {
+          label: "Pricing Plans",
+          href: "/dashboard/admin-panel/pricing-plans",
+          Icon: Banknote,
+        },
+        {
+          label: "Subscriptions",
+          href: "/dashboard/admin-panel/subscriptions",
+          Icon: Podcast,
         },
       ];
     }
