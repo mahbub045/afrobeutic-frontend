@@ -63,3 +63,15 @@ export   const getCountryName = (code?: string | null) => {
     );
     return found?.name ?? code;
   };
+
+  export const formatPrice = (price?: string) => {
+    if (!price) return "-";
+  
+    const num = Number(price);
+    if (Number.isNaN(num)) return price;
+  
+    return `$${new Intl.NumberFormat(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(num)}`;
+  };
