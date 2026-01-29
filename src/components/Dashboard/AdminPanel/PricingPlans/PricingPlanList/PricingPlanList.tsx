@@ -1,4 +1,5 @@
 "use client";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,8 +10,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { formatChoiceFieldValue, formatPrice } from "@/lib/utils";
 import { useGetPricingPlansQuery } from "@/Redux/Reducers/AdminPanel/PricingPlans/PricingPlansApi";
-import { Edit, Plus } from "lucide-react";
+import { PricingPlanTypes } from "@/Types/AdminPanel/PricingPlansTypes/PricingPlansTypes";
+import { Edit, LoaderPinwheel, Plus, Trash } from "lucide-react";
 
 const PricingPlanList: React.FC = () => {
   const { data: pricingPlanData, isLoading } =
@@ -24,35 +27,84 @@ const PricingPlanList: React.FC = () => {
           <Plus /> Add Plan
         </Button>
       </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="shadow-md dark:shadow-gray-600">
-          <CardHeader>
-            <CardTitle>Package Name</CardTitle>
-            <CardDescription>
-              Premium plan for growing salons with WhatsApp automation and
-              broadcasting support.
-            </CardDescription>
-            <CardAction>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="shadow-md dark:shadow-gray-600"
-              >
-                <Edit />
-                Edit Plan
-              </Button>
-            </CardAction>
-          </CardHeader>
-          <CardContent>
-            <p>Card Content</p>
-          </CardContent>
-          <CardFooter>
-            <Button variant="danger" className="w-full">
-              Delete Plan
-            </Button>
-          </CardFooter>
-        </Card>
-      </div>
+
+      {isLoading ? (
+        <div className="flex items-center justify-center">
+          <LoaderPinwheel size={30} className="animate-spin" />
+        </div>
+      ) : !pricingPlanData || pricingPlanData.results.length === 0 ? (
+        <div>No pricing plans available.</div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {pricingPlanData.results.map((plan: PricingPlanTypes) => (
+            <Card
+              key={plan.uid}
+              className="mb-2 shadow-md dark:shadow-gray-600"
+            >
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span className="text-primary text-xl">{plan.name}</span>
+                </CardTitle>
+                <CardDescription>{plan.description}</CardDescription>
+                <CardAction>
+                  <Badge variant="secondary">
+                    {plan.is_active ? "Active" : "Inactive"}
+                  </Badge>
+                </CardAction>
+              </CardHeader>
+              <CardContent>
+                <div>
+                  <h2 className="my-10 text-center text-4xl font-bold">
+                    <span className="text-primary">
+                      {formatPrice(plan.price)}
+                    </span>
+                    <small className="text-xs">/month</small>
+                  </h2>
+                </div>
+                <ul className="marker:text-primary list-disc space-y-1 pl-6 text-sm">
+                  <li>
+                    <strong>Category -&gt; </strong>{" "}
+                    {formatChoiceFieldValue(plan.account_category)}
+                  </li>
+                  <li>
+                    <strong>Salon Limit -&gt;</strong> {plan.salon_limit}
+                  </li>
+                  <li>
+                    <strong>Chatbot Limit -&gt;</strong>{" "}
+                    {plan.whatsapp_chatbot_limit}
+                  </li>
+                  <li>
+                    <strong>Chatbot Messages Limit -&gt;</strong>{" "}
+                    {plan.whatsapp_messages_per_chatbot}
+                  </li>
+                  <li>
+                    <strong>Broadcasting -&gt;</strong>{" "}
+                    {plan.has_broadcasting
+                      ? `Yes (limit ${plan.broadcasting_message_limit})`
+                      : "No"}
+                  </li>
+                </ul>
+              </CardContent>
+              <CardFooter className="flex justify-center gap-2">
+                <Button
+                  variant="danger"
+                  className="w-1/2 shadow-md dark:shadow-gray-600"
+                >
+                  <Trash />
+                  Delete Plan
+                </Button>
+                <Button
+                  variant="default"
+                  className="w-1/2 shadow-md dark:shadow-gray-600"
+                >
+                  <Edit />
+                  Edit Plan
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      )}
     </>
   );
 };
