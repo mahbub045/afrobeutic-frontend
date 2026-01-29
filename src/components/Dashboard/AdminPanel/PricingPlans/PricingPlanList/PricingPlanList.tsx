@@ -27,6 +27,17 @@ const PricingPlanList: React.FC = () => {
 
   const pricingPlans = pricingPlanData?.results ?? [];
 
+  const getStausColorMap = (is_status: boolean) => {
+    switch (is_status) {
+      case true:
+        return "secondary";
+      case false:
+        return "danger";
+      default:
+        return "outline";
+    }
+  };
+
   return (
     <>
       <div className="mb-4 flex items-center justify-between">
@@ -56,7 +67,7 @@ const PricingPlanList: React.FC = () => {
                   </CardTitle>
                   <CardDescription>{plan.description}</CardDescription>
                   <CardAction>
-                    <Badge variant="secondary">
+                    <Badge variant={getStausColorMap(plan.is_active)}>
                       {plan.is_active ? "Active" : "Inactive"}
                     </Badge>
                   </CardAction>
