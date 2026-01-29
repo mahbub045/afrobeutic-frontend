@@ -1,7 +1,5 @@
-import React from 'react'
+import PricingPlansContainer from "@/components/Dashboard/AdminPanel/PricingPlans";
 
 export default function PricingPlansPage() {
-  return (
-    <div>PricingPlansPage</div>
-  )
+  return <PricingPlansContainer />;
 }
