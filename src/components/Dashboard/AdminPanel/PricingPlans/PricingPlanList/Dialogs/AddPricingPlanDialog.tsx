@@ -10,7 +10,14 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useAddPricingPlanMutation } from "@/Redux/Reducers/AdminPanel/PricingPlans/PricingPlansApi";
-import { Field, FieldProps, Form, Formik } from "formik";
+import {
+  Field,
+  FieldProps,
+  Form,
+  Formik,
+  FormikErrors,
+  FormikHelpers,
+} from "formik";
 import { useTheme } from "next-themes";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
@@ -71,7 +78,10 @@ const AddPricingPlanDialog: React.FC<AddPricingPlanDialogProps> = ({
     description: Yup.string().nullable(),
   });
 
-  const handleSubmit = async (values: typeof initialValues) => {
+  const handleSubmit = async (
+    values: typeof initialValues,
+    { setErrors, setSubmitting }: FormikHelpers<typeof initialValues>,
+  ) => {
     try {
       // ensure numeric values are numbers
       const payload = {
@@ -104,9 +114,52 @@ const AddPricingPlanDialog: React.FC<AddPricingPlanDialogProps> = ({
         timer: 2500,
       });
       onClose();
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Failed to add pricing plan:", error);
-      toast.error("Failed to add pricing plan. Please try again.");
+
+      type ApiError = {
+        data?: Record<string, unknown> | null;
+        originalStatus?: unknown;
+        error?: string;
+        message?: string;
+      };
+
+      const err = error as ApiError;
+
+      // Try to extract field errors from the API response
+      const apiData = err.data ?? err.originalStatus ?? null;
+
+      if (apiData && typeof apiData === "object") {
+        const fieldErrors: Record<string, string> = {};
+
+        // If API returns { field: [..] } or { field: '...' }
+        for (const key of Object.keys(apiData as Record<string, unknown>)) {
+          const val = (apiData as Record<string, unknown>)[key];
+          if (Array.isArray(val)) {
+            fieldErrors[key] = (val as unknown[]).map(String).join(" ");
+          } else if (typeof val === "string") {
+            fieldErrors[key] = val;
+          } else if (typeof val === "object" && val !== null) {
+            // nested object, stringify or pick message
+            fieldErrors[key] = JSON.stringify(val);
+          }
+        }
+
+        if (Object.keys(fieldErrors).length > 0) {
+          setErrors(
+            fieldErrors as unknown as FormikErrors<typeof initialValues>,
+          );
+        } else {
+          toast.error("Failed to add pricing plan. Please try again.");
+        }
+      } else {
+        // fallback error message
+        const message =
+          err.error ?? err.message ?? "Failed to add pricing plan.";
+        toast.error(String(message));
+      }
+    } finally {
+      setSubmitting(false);
     }
   };
 
