@@ -83,7 +83,15 @@ const PricingPlanList: React.FC = () => {
                   <CardTitle className="flex items-center justify-between">
                     <span className="text-primary text-2xl">{plan.name}</span>
                   </CardTitle>
-                  <CardDescription>{plan.description}</CardDescription>
+                  <CardDescription>
+                    {plan.description ? (
+                      <span className="text-xs">{plan.description}</span>
+                    ) : (
+                      <small className="text-muted-foreground">
+                        No description provided.
+                      </small>
+                    )}
+                  </CardDescription>
                   <CardAction>
                     <Badge variant={getStausColorMap(plan.is_active)}>
                       {plan.is_active ? "Active" : "Inactive"}
