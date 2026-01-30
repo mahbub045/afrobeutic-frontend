@@ -11,3 +11,14 @@ export interface PricingPlanTypes {
   is_active: boolean;
   description: string;
 }
+
+export interface AddPricingPlanDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export interface EditPricingPlanDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  pricingPlanData: PricingPlanTypes;
+}

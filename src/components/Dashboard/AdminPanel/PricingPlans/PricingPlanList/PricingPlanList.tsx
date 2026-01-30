@@ -16,12 +16,25 @@ import { PricingPlanTypes } from "@/Types/AdminPanel/PricingPlansTypes/PricingPl
 import { Edit, LoaderPinwheel, Plus, Trash } from "lucide-react";
 import { useState } from "react";
 import AddPricingPlanDialog from "./Dialogs/AddPricingPlanDialog";
+import EditPricingPlanDialog from "./Dialogs/EditPricingPlanDialog";
 
 const PricingPlanList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState<boolean>(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
+  const [selectedPricingPlan, setSelectedPricingPlan] =
+    useState<PricingPlanTypes | null>(null);
 
   const handleAddDialogOpen = () => setIsAddDialogOpen(true);
+  const handleEditDialogOpen = (plan: PricingPlanTypes) => {
+    setSelectedPricingPlan(plan);
+    setIsEditDialogOpen(true);
+  };
+  const handleDeleteDialogOpen = (plan: PricingPlanTypes) => {
+    setSelectedPricingPlan(plan);
+    setIsDeleteDialogOpen(true);
+  };
 
   const {
     data: pricingPlanData,
@@ -113,6 +126,7 @@ const PricingPlanList: React.FC = () => {
                   <Button
                     variant="danger"
                     className="w-1/2 shadow-md dark:shadow-gray-600"
+                    onClick={() => handleDeleteDialogOpen(plan)}
                   >
                     <Trash />
                     Delete Plan
@@ -120,6 +134,7 @@ const PricingPlanList: React.FC = () => {
                   <Button
                     variant="default"
                     className="w-1/2 shadow-md dark:shadow-gray-600"
+                    onClick={() => handleEditDialogOpen(plan)}
                   >
                     <Edit />
                     Edit Plan
@@ -184,6 +199,13 @@ const PricingPlanList: React.FC = () => {
         isOpen={isAddDialogOpen}
         onClose={() => setIsAddDialogOpen(false)}
       />
+      {selectedPricingPlan && (
+        <EditPricingPlanDialog
+          isOpen={isEditDialogOpen}
+          onClose={() => setIsEditDialogOpen(false)}
+          pricingPlanData={selectedPricingPlan}
+        />
+      )}
     </>
   );
 };

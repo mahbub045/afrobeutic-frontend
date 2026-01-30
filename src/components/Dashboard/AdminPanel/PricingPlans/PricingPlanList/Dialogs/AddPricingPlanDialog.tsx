@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useAddPricingPlanMutation } from "@/Redux/Reducers/AdminPanel/PricingPlans/PricingPlansApi";
+import { AddPricingPlanDialogProps } from "@/Types/AdminPanel/PricingPlansTypes/PricingPlansTypes";
 import {
   Field,
   FieldProps,
@@ -22,11 +23,6 @@ import { useTheme } from "next-themes";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
-
-export interface AddPricingPlanDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
 
 const AddPricingPlanDialog: React.FC<AddPricingPlanDialogProps> = ({
   isOpen,
@@ -167,7 +163,6 @@ const AddPricingPlanDialog: React.FC<AddPricingPlanDialogProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-h-[80vh] overflow-y-auto shadow-md dark:shadow-gray-600">
         <DialogHeader>
-          Add Pricing Plan
           <DialogTitle className="text-primary">
             Add New Pricing Plan
           </DialogTitle>{" "}

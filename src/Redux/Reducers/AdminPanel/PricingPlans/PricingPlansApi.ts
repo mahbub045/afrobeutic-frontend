@@ -18,7 +18,7 @@ export const PricingPlansApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["PricingPlans"],
     }),
-    updatePricingPlan: builder.mutation({
+    editPricingPlan: builder.mutation({
       query: ({ uid, payload }) => ({
         url: `/admin/pricing-plans/${uid}`,
         method: "PUT",
@@ -39,6 +39,6 @@ export const PricingPlansApi = baseApi.injectEndpoints({
 export const {
   useGetPricingPlansQuery,
   useAddPricingPlanMutation,
-  useUpdatePricingPlanMutation,
+  useEditPricingPlanMutation,
   useDeletePricingPlanMutation,
 } = PricingPlansApi;
