@@ -15,9 +15,13 @@ import { useGetPricingPlansQuery } from "@/Redux/Reducers/AdminPanel/PricingPlan
 import { PricingPlanTypes } from "@/Types/AdminPanel/PricingPlansTypes/PricingPlansTypes";
 import { Edit, LoaderPinwheel, Plus, Trash } from "lucide-react";
 import { useState } from "react";
+import AddPricingPlanDialog from "./Dialogs/AddPricingPlanDialog";
 
 const PricingPlanList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState<boolean>(false);
+
+  const handleAddDialogOpen = () => setIsAddDialogOpen(true);
 
   const {
     data: pricingPlanData,
@@ -42,8 +46,8 @@ const PricingPlanList: React.FC = () => {
     <>
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-2xl font-semibold md:w-auto">Pricing Plans</h2>
-        <Button variant="default">
-          <Plus /> Add Plan
+        <Button variant="default" onClick={handleAddDialogOpen}>
+          <Plus /> Add New Plan
         </Button>
       </div>
 
@@ -175,6 +179,11 @@ const PricingPlanList: React.FC = () => {
           </div>
         </>
       )}
+      {/* Modals */}
+      <AddPricingPlanDialog
+        isOpen={isAddDialogOpen}
+        onClose={() => setIsAddDialogOpen(false)}
+      />
     </>
   );
 };
