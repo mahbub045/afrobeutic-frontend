@@ -22,3 +22,8 @@ export interface EditPricingPlanDialogProps {
   onClose: () => void;
   pricingPlanData: PricingPlanTypes;
 }
+export interface DeletePricingPlanDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  pricingPlanData: PricingPlanTypes;
+}

@@ -16,6 +16,7 @@ import { PricingPlanTypes } from "@/Types/AdminPanel/PricingPlansTypes/PricingPl
 import { Edit, LoaderPinwheel, Plus, Trash } from "lucide-react";
 import { useState } from "react";
 import AddPricingPlanDialog from "./Dialogs/AddPricingPlanDialog";
+import DeletePricingPlanDialog from "./Dialogs/DeletePricingPlanDialog";
 import EditPricingPlanDialog from "./Dialogs/EditPricingPlanDialog";
 
 const PricingPlanList: React.FC = () => {
@@ -203,6 +204,13 @@ const PricingPlanList: React.FC = () => {
         <EditPricingPlanDialog
           isOpen={isEditDialogOpen}
           onClose={() => setIsEditDialogOpen(false)}
+          pricingPlanData={selectedPricingPlan}
+        />
+      )}
+      {selectedPricingPlan && (
+        <DeletePricingPlanDialog
+          isOpen={isDeleteDialogOpen}
+          onClose={() => setIsDeleteDialogOpen(false)}
           pricingPlanData={selectedPricingPlan}
         />
       )}
