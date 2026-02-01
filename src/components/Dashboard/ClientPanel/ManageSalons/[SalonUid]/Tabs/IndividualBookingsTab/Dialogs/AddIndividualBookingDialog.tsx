@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -7,6 +8,34 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import {
+  useAddIndividualBookingMutation,
+  useGetIndividualBookingsQuery,
+} from "@/Redux/Reducers/ClientPanel/ManageSalons/IndividualBookings/IndividualBookingsApi";
+import {
+  useGetProductsFiltersQuery,
+  useGetServicesFiltersQuery,
+} from "@/Redux/Reducers/Common/FiltersApi";
+import { BookingFormValues } from "@/Types/ClientPanel/ManageSalonTypes/ChairsTypes/ChairBookingTypes";
+import { ProductProps } from "@/Types/ClientPanel/ManageSalonTypes/ProductsTypes/ProductsType";
+import { ServiceProps } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
+import {
+  ErrorMessage,
+  Field,
+  FieldProps,
+  Form,
+  Formik,
+  FormikHelpers,
+} from "formik";
+import { X } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import PhoneInput from "react-phone-input-2";
+import { toast } from "react-toastify";
+import Swal from "sweetalert2";
+import * as Yup from "yup";
 
 export interface AddIndividualBookingDialogProps {
   isOpen: boolean;
@@ -17,16 +46,748 @@ const AddIndividualBookingDialog: React.FC<AddIndividualBookingDialogProps> = ({
   isOpen,
   onOpenChange,
 }) => {
+  const { salonuid } = useParams();
+  const { resolvedTheme } = useTheme();
+  const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
+
+  // RTK Hooks
+  const { data: servicesFilterData, isLoading: isLoadingServices } =
+    useGetServicesFiltersQuery({ salonUid: salonUid });
+  const { data: productsFilterData, isLoading: isLoadingProducts } =
+    useGetProductsFiltersQuery({ salonUid: salonUid });
+  const { refetch: refetchBookings } = useGetIndividualBookingsQuery({
+    salonUid: salonUid,
+  });
+  const [addIndividualBooking, { isLoading: isAddingIndividualBooking }] =
+    useAddIndividualBookingMutation();
+
+  // Format data for dropdowns
+  const services = servicesFilterData ?? [];
+
+  const products = productsFilterData ?? [];
+
+  const [showServices, setShowServices] = useState(false);
+  const [showProducts, setShowProducts] = useState(false);
+  const [serviceSearch, setServiceSearch] = useState("");
+  const [productSearch, setProductSearch] = useState("");
+  const servicesInputRef = useRef<HTMLInputElement>(null);
+  const productsInputRef = useRef<HTMLInputElement>(null);
+  const servicesDropdownRef = useRef<HTMLDivElement>(null);
+  const productsDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        servicesDropdownRef.current &&
+        !servicesDropdownRef.current.contains(event.target as Node) &&
+        servicesInputRef.current &&
+        !servicesInputRef.current.contains(event.target as Node)
+      ) {
+        setShowServices(false);
+      }
+      if (
+        productsDropdownRef.current &&
+        !productsDropdownRef.current.contains(event.target as Node) &&
+        productsInputRef.current &&
+        !productsInputRef.current.contains(event.target as Node)
+      ) {
+        setShowProducts(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const BookingSchema = Yup.object().shape({
+    customer: Yup.object().shape({
+      first_name: Yup.string().required("Customer name is required"),
+      last_name: Yup.string().required("Customer last name is required"),
+      phone: Yup.string()
+        .required("Customer phone is required")
+        .matches(/^\+?[1-9]\d{1,14}$/, "Please enter a valid phone number"),
+    }),
+    booking_date: Yup.string().required("Booking date is required"),
+    booking_time: Yup.string().required("Booking time is required"),
+    notes: Yup.string(),
+    services: Yup.array(),
+    products: Yup.array(),
+  });
+
+  const handleAdd = async (
+    values: BookingFormValues,
+    helpers: FormikHelpers<BookingFormValues>,
+  ) => {
+    try {
+      if (!salonUid) return;
+
+      // Normalize booking_time to include milliseconds and Z
+      let formattedTime = values.booking_time;
+      if (!formattedTime.includes(".")) {
+        if (/^\d{2}:\d{2}:\d{2}$/.test(formattedTime)) {
+          formattedTime = `${formattedTime}.000Z`;
+        } else if (/^\d{2}:\d{2}$/.test(formattedTime)) {
+          formattedTime = `${formattedTime}:00.000Z`;
+        }
+      }
+
+      const payload = {
+        customer: values.customer,
+        booking_date: values.booking_date,
+        booking_time: formattedTime,
+        services: values.services,
+        products: values.products || [],
+        notes: values.notes || "",
+      };
+
+      const response = await addIndividualBooking({
+        salonUid: salonuid,
+        data: payload,
+      }).unwrap();
+
+      onOpenChange(false);
+      refetchBookings();
+
+      Swal.fire({
+        icon: "success",
+        iconColor: "#037375",
+        title: "Booking Created Successfully",
+        html: `Booking for <b class="text-primary">${values.customer.first_name} ${values.customer.last_name}</b> has been created.`,
+        background: resolvedTheme === "dark" ? "#0f1724" : undefined,
+        color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
+        confirmButtonColor: "#037375",
+        timer: 2000,
+      });
+
+      helpers.resetForm();
+    } catch (error: unknown) {
+      console.error("Failed to create booking:", error);
+
+      // Strongly-typed API error response
+      interface ApiErrorResponse {
+        data?: {
+          message?: string;
+          errors?: Record<string, string | string[] | Record<string, unknown>>;
+          error?: Record<string, string | string[] | Record<string, unknown>>;
+        };
+        message?: string;
+        status?: number;
+      }
+
+      const isApiErrorResponse = (obj: unknown): obj is ApiErrorResponse =>
+        typeof obj === "object" &&
+        obj !== null &&
+        ("data" in obj || "message" in obj);
+
+      const apiError: ApiErrorResponse = isApiErrorResponse(error)
+        ? error
+        : { message: String(error) };
+
+      console.error("Error details:", apiError?.data || apiError);
+
+      const apiErrors =
+        apiError.data?.errors || apiError.data?.error || apiError.data;
+
+      if (apiErrors && typeof apiErrors === "object") {
+        type NestedErrors = { [key: string]: string | NestedErrors };
+        const formikErrors: NestedErrors = {};
+
+        const setNested = (obj: NestedErrors, path: string, value: string) => {
+          const parts = path.split(".");
+          let cur: NestedErrors = obj;
+          for (let i = 0; i < parts.length; i++) {
+            const p = parts[i];
+            if (i === parts.length - 1) {
+              cur[p] = value;
+            } else {
+              if (typeof cur[p] !== "object" || cur[p] === undefined) {
+                cur[p] = {} as NestedErrors;
+              }
+              cur = cur[p] as NestedErrors;
+            }
+          }
+        };
+
+        const traverse = (errObj: Record<string, unknown>, prefix = "") => {
+          for (const key in errObj) {
+            if (!Object.prototype.hasOwnProperty.call(errObj, key)) continue;
+            const val = errObj[key];
+            const path = prefix ? `${prefix}.${key}` : key;
+
+            if (Array.isArray(val)) {
+              setNested(formikErrors, path, (val as string[]).join(" "));
+            } else if (typeof val === "string") {
+              setNested(formikErrors, path, val);
+            } else if (typeof val === "object" && val !== null) {
+              traverse(val as Record<string, unknown>, path);
+            }
+          }
+        };
+
+        traverse(apiErrors as Record<string, unknown>);
+
+        helpers.setErrors(
+          formikErrors as unknown as import("formik").FormikErrors<BookingFormValues>,
+        );
+      } else {
+        toast.error(
+          apiError.data?.message ||
+            apiError.message ||
+            "Failed to create booking. Please try again.",
+        );
+      }
+
+      helpers.setSubmitting(false);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[80vh] !max-w-2xl overflow-y-auto shadow-md">
         <DialogHeader>
-          <DialogTitle className="text-primary">Add Individual Booking</DialogTitle>
+          <DialogTitle className="text-primary">
+            Add Individual Booking
+          </DialogTitle>
           <DialogDescription>
             Add a new booking to the salon&apos;s schedule.
           </DialogDescription>
         </DialogHeader>
-        <div className="text-center text-danger">This Dialog is under construction.</div>
+
+        <Formik
+          initialValues={
+            {
+              customer: { first_name: "", last_name: "", phone: "" },
+              booking_date: new Date().toISOString().split("T")[0],
+              booking_time: "08:00",
+              notes: "",
+              services: [],
+              products: [],
+              employee: "",
+            } as BookingFormValues
+          }
+          validationSchema={BookingSchema}
+          onSubmit={handleAdd}
+        >
+          {({ handleSubmit, setFieldValue, values }) => (
+            <Form onSubmit={handleSubmit} className="space-y-4">
+              {/* Customer */}
+              <div className="space-y-4 rounded-lg border p-4">
+                <h3 className="font-semibold">Customer Information</h3>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                  <div>
+                    <Label htmlFor="customer.first_name" className="mb-2">
+                      Customer First Name<span className="text-danger">*</span>
+                    </Label>
+                    <Field
+                      id="customer.first_name"
+                      name="customer.first_name"
+                      as="input"
+                      type="text"
+                      placeholder="Enter customer first name"
+                      required
+                    />
+                    <ErrorMessage
+                      name="customer.first_name"
+                      component="p"
+                      className="mt-1 text-sm text-red-500"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="customer.last_name" className="mb-2">
+                      Customer Last Name<span className="text-danger">*</span>
+                    </Label>
+                    <Field
+                      id="customer.last_name"
+                      name="customer.last_name"
+                      as="input"
+                      type="text"
+                      placeholder="Enter customer last name"
+                      required
+                    />
+                    <ErrorMessage
+                      name="customer.last_name"
+                      component="p"
+                      className="mt-1 text-sm text-red-500"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="customer.phone" className="mb-2">
+                      Customer Phone<span className="text-danger">*</span>
+                    </Label>
+                    <Field name="customer.phone" required>
+                      {({
+                        field,
+                        form,
+                      }: FieldProps<
+                        string,
+                        import("formik").FormikProps<BookingFormValues>
+                      >) => (
+                        <div>
+                          <PhoneInput
+                            country={"gb"}
+                            value={field.value}
+                            onChange={(
+                              val: string,
+                              data?: { dialCode?: string },
+                            ) => {
+                              const dial = data?.dialCode
+                                ? `+${data.dialCode}`
+                                : "";
+                              const numeric = (val || "").replace(
+                                /[^0-9]/g,
+                                "",
+                              );
+                              if (!numeric) {
+                                form.setFieldValue(field.name, "");
+                                return;
+                              }
+                              let newVal = numeric;
+                              if (dial) {
+                                if (
+                                  !numeric.startsWith(dial.replace(/\D/g, ""))
+                                ) {
+                                  newVal = `${dial}${numeric}`;
+                                } else {
+                                  newVal = `+${numeric}`;
+                                }
+                              } else if (numeric) {
+                                newVal = `+${numeric}`;
+                              }
+                              form.setFieldValue(field.name, newVal);
+                            }}
+                            inputProps={{ name: field.name }}
+                            searchPlaceholder="Search"
+                            enableSearch
+                            inputClass="!w-full !h-auto px-3 py-2 rounded-md !bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100"
+                            buttonClass="!bg-white !text-black dark:!bg-[#181818] dark:!text-gray-100 !border-1 dark:!border-gray-700"
+                            dropdownClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100 !px-2"
+                            searchClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100"
+                          />
+                          <ErrorMessage
+                            name="customer.phone"
+                            component="div"
+                            className="text-danger mt-1 text-xs"
+                          />
+                        </div>
+                      )}
+                    </Field>
+                  </div>
+                </div>
+              </div>
+
+              {/* Booking Details */}
+              <div className="space-y-4 rounded-lg border p-4">
+                <h3 className="font-semibold">Booking Details</h3>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
+                    <Label htmlFor="booking_date" className="mb-2">
+                      Booking Date<span className="text-danger">*</span>
+                    </Label>
+                    <Field
+                      id="booking_date"
+                      name="booking_date"
+                      as="input"
+                      type="date"
+                      required
+                    />
+                    <ErrorMessage
+                      name="booking_date"
+                      component="p"
+                      className="mt-1 text-sm text-red-500"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="booking_time" className="mb-2">
+                      Booking Time<span className="text-danger">*</span>
+                    </Label>
+                    <Field
+                      id="booking_time"
+                      name="booking_time"
+                      as="select"
+                      required
+                      className="dark:bg-[#181818]"
+                    >
+                      <option value="" disabled>
+                        Select time
+                      </option>
+                      {Array.from({ length: 96 }, (_, i) => {
+                        const hours = Math.floor(i / 4);
+                        const minutes = (i % 4) * 15;
+                        const timeString = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+                        return (
+                          <option key={timeString} value={timeString}>
+                            {timeString}
+                          </option>
+                        );
+                      })}
+                    </Field>
+                    <ErrorMessage
+                      name="booking_time"
+                      component="p"
+                      className="mt-1 text-sm text-red-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="notes" className="mb-2">
+                    Notes
+                  </Label>
+                  <Field
+                    id="notes"
+                    name="notes"
+                    as="textarea"
+                    placeholder="Enter booking notes (optional)"
+                  />
+                  <ErrorMessage
+                    name="notes"
+                    component="p"
+                    className="mt-1 text-sm text-red-500"
+                  />
+                </div>
+              </div>
+
+              {/* Services & Products */}
+              <div className="space-y-4 rounded-lg border p-4">
+                <h3 className="font-semibold">Services & Products</h3>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="relative">
+                    <Label htmlFor="services" className="mb-2">
+                      Services
+                    </Label>
+                    <div className="relative">
+                      <div
+                        onClick={() => {
+                          setShowServices(true);
+                          servicesInputRef.current?.focus();
+                        }}
+                        className="flex min-h-[42px] w-full cursor-text flex-wrap gap-2 rounded-md border px-3 py-2 dark:bg-[#181818]"
+                      >
+                        {values.services.length > 0 ? (
+                          <>
+                            {values.services.map((serviceUid) => {
+                              const service = services.find(
+                                (s: ServiceProps) => s.uid === serviceUid,
+                              );
+                              return service ? (
+                                <span
+                                  key={serviceUid}
+                                  className="bg-primary/10 text-primary inline-flex items-center gap-1 rounded-md px-2 py-1 text-sm"
+                                >
+                                  {service.name}
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setFieldValue(
+                                        "services",
+                                        values.services.filter(
+                                          (s) => s !== serviceUid,
+                                        ),
+                                      );
+                                    }}
+                                    className="hover:bg-primary/20 rounded-full"
+                                  >
+                                    <X size={14} />
+                                  </button>
+                                </span>
+                              ) : null;
+                            })}
+                            <input
+                              ref={servicesInputRef}
+                              type="text"
+                              placeholder="Search..."
+                              value={serviceSearch}
+                              onChange={(e) => setServiceSearch(e.target.value)}
+                              onFocus={() => setShowServices(true)}
+                              className="min-w-[120px] flex-1 border-none bg-transparent outline-none"
+                            />
+                          </>
+                        ) : (
+                          <input
+                            ref={servicesInputRef}
+                            type="text"
+                            placeholder="Search and select services..."
+                            value={serviceSearch}
+                            onChange={(e) => setServiceSearch(e.target.value)}
+                            onFocus={() => setShowServices(true)}
+                            className="w-full border-none bg-transparent outline-none"
+                          />
+                        )}
+                      </div>
+
+                      {showServices && (
+                        <div
+                          ref={servicesDropdownRef}
+                          className="absolute right-0 left-0 z-50 mt-1 max-h-60 overflow-auto rounded border bg-white shadow-lg dark:bg-[#0b1116]"
+                        >
+                          {isLoadingServices ? (
+                            <div className="p-2 text-sm text-gray-500">
+                              Loading services...
+                            </div>
+                          ) : (
+                            (() => {
+                              const searchTerm = serviceSearch
+                                .toLowerCase()
+                                .trim();
+                              const filteredServices = searchTerm
+                                ? services
+                                    .filter((service: ServiceProps) =>
+                                      service.name
+                                        .toLowerCase()
+                                        .includes(searchTerm),
+                                    )
+                                    .sort(
+                                      (a: ServiceProps, b: ServiceProps) => {
+                                        const aStarts = a.name
+                                          .toLowerCase()
+                                          .startsWith(searchTerm);
+                                        const bStarts = b.name
+                                          .toLowerCase()
+                                          .startsWith(searchTerm);
+                                        if (aStarts && !bStarts) return -1;
+                                        if (!aStarts && bStarts) return 1;
+                                        return 0;
+                                      },
+                                    )
+                                : services;
+
+                              return filteredServices.length > 0 ? (
+                                <ul className="divide-y p-2">
+                                  {filteredServices.map(
+                                    (service: ServiceProps) => (
+                                      <li key={service.uid}>
+                                        <label className="my-1 flex w-full cursor-pointer items-center gap-2 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-800">
+                                          <input
+                                            type="checkbox"
+                                            checked={values.services.includes(
+                                              service.uid,
+                                            )}
+                                            onChange={(e) => {
+                                              setFieldValue(
+                                                "services",
+                                                e.target.checked
+                                                  ? [
+                                                      ...values.services,
+                                                      service.uid,
+                                                    ]
+                                                  : values.services.filter(
+                                                      (s) => s !== service.uid,
+                                                    ),
+                                              );
+                                            }}
+                                            className="h-4 w-4 cursor-pointer"
+                                            style={{ accentColor: "#027f81" }}
+                                          />
+                                          <span className="text-sm">
+                                            {service.name}
+                                          </span>
+                                        </label>
+                                      </li>
+                                    ),
+                                  )}
+                                </ul>
+                              ) : (
+                                <div className="p-2 text-sm text-gray-500">
+                                  No services found
+                                </div>
+                              );
+                            })()
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <ErrorMessage
+                      name="services"
+                      component="p"
+                      className="mt-1 text-sm text-red-500"
+                    />
+                  </div>
+
+                  <div className="relative">
+                    <Label htmlFor="products" className="mb-2">
+                      Products
+                    </Label>
+                    <div className="relative">
+                      <div
+                        onClick={() => {
+                          setShowProducts(true);
+                          productsInputRef.current?.focus();
+                        }}
+                        className="flex min-h-[42px] w-full cursor-text flex-wrap gap-2 rounded-md border px-3 py-2 dark:bg-[#181818]"
+                      >
+                        {values.products.length > 0 ? (
+                          <>
+                            {values.products.map((productUid) => {
+                              const product = products.find(
+                                (p: ProductProps) => p.uid === productUid,
+                              );
+                              return product ? (
+                                <span
+                                  key={productUid}
+                                  className="bg-primary/10 text-primary inline-flex items-center gap-1 rounded-md px-2 py-1 text-sm"
+                                >
+                                  {product.name}
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setFieldValue(
+                                        "products",
+                                        values.products.filter(
+                                          (p) => p !== productUid,
+                                        ),
+                                      );
+                                    }}
+                                    className="hover:bg-primary/20 rounded-full"
+                                  >
+                                    <X size={14} />
+                                  </button>
+                                </span>
+                              ) : null;
+                            })}
+                            <input
+                              ref={productsInputRef}
+                              type="text"
+                              placeholder="Search..."
+                              value={productSearch}
+                              onChange={(e) => setProductSearch(e.target.value)}
+                              onFocus={() => setShowProducts(true)}
+                              className="min-w-[120px] flex-1 border-none bg-transparent outline-none"
+                            />
+                          </>
+                        ) : (
+                          <input
+                            ref={productsInputRef}
+                            type="text"
+                            placeholder="Search and select products..."
+                            value={productSearch}
+                            onChange={(e) => setProductSearch(e.target.value)}
+                            onFocus={() => setShowProducts(true)}
+                            className="w-full border-none bg-transparent outline-none"
+                          />
+                        )}
+                      </div>
+
+                      {showProducts && (
+                        <div
+                          ref={productsDropdownRef}
+                          className="absolute right-0 left-0 z-50 mt-1 max-h-60 overflow-auto rounded border bg-white shadow-lg dark:bg-[#0b1116]"
+                        >
+                          {isLoadingProducts ? (
+                            <div className="p-2 text-sm text-gray-500">
+                              Loading products...
+                            </div>
+                          ) : (
+                            (() => {
+                              const searchTerm = productSearch
+                                .toLowerCase()
+                                .trim();
+                              const filteredProducts = searchTerm
+                                ? products
+                                    .filter((product: ProductProps) =>
+                                      product.name
+                                        .toLowerCase()
+                                        .includes(searchTerm),
+                                    )
+                                    .sort(
+                                      (a: ProductProps, b: ProductProps) => {
+                                        const aStarts = a.name
+                                          .toLowerCase()
+                                          .startsWith(searchTerm);
+                                        const bStarts = b.name
+                                          .toLowerCase()
+                                          .startsWith(searchTerm);
+                                        if (aStarts && !bStarts) return -1;
+                                        if (!aStarts && bStarts) return 1;
+                                        return 0;
+                                      },
+                                    )
+                                : products;
+
+                              return filteredProducts.length > 0 ? (
+                                <ul className="divide-y p-2">
+                                  {filteredProducts.map(
+                                    (product: ProductProps) => (
+                                      <li key={product.uid}>
+                                        <label className="my-1 flex w-full cursor-pointer items-center gap-2 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-800">
+                                          <input
+                                            type="checkbox"
+                                            checked={values.products.includes(
+                                              product.uid,
+                                            )}
+                                            onChange={(e) => {
+                                              setFieldValue(
+                                                "products",
+                                                e.target.checked
+                                                  ? [
+                                                      ...values.products,
+                                                      product.uid,
+                                                    ]
+                                                  : values.products.filter(
+                                                      (p) => p !== product.uid,
+                                                    ),
+                                              );
+                                            }}
+                                            className="h-4 w-4 cursor-pointer"
+                                            style={{ accentColor: "#027f81" }}
+                                          />
+                                          <span className="text-sm">
+                                            {product.name}
+                                          </span>
+                                        </label>
+                                      </li>
+                                    ),
+                                  )}
+                                </ul>
+                              ) : (
+                                <div className="p-2 text-sm text-gray-500">
+                                  No products found
+                                </div>
+                              );
+                            })()
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <ErrorMessage
+                      name="products"
+                      component="p"
+                      className="mt-1 text-sm text-red-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  disabled={isAddingIndividualBooking}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={
+                    isAddingIndividualBooking ||
+                    isLoadingServices ||
+                    isLoadingProducts
+                  }
+                >
+                  {isAddingIndividualBooking ? "Creating..." : "Create Booking"}
+                </Button>
+              </div>
+            </Form>
+          )}
+        </Formik>
       </DialogContent>
     </Dialog>
   );
