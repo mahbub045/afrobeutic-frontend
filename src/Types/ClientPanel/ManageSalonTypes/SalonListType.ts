@@ -93,7 +93,7 @@ export interface FormValues {
 export interface DashboardTabProps {
   singleSalonData: SalonProps;
   isLoading: boolean;
-  isError: boolean;
+  isError?: boolean;
 }
 
 export interface EditDashboardProps {

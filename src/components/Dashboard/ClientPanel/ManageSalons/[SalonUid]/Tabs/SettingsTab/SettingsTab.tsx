@@ -1,8 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useGetSingleSalonDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SingleSalon/SingleSalonApi";
 import { Pause, Settings, Trash } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { useParams } from "next/navigation";
 import AboutAndProfessional from "./AboutAndProfessional/AboutAndProfessional";
 import AddressSection from "./AddressSection/AddressSection";
 import ContactAndSocialLinks from "./ContactAndSocialLinks/ContactAndSocialLinks";
@@ -11,6 +13,13 @@ import SalonProfileCard from "./SalonProfileCard/SalonProfileCard";
 
 const SettingsTab: React.FC = () => {
   const { data: session } = useSession();
+  const params = useParams();
+  const { salonuid } = params;
+  // RTK Hooks
+  const { data: singleSalonData, isLoading } = useGetSingleSalonDataQuery({
+    salonUid: salonuid,
+  });
+
   return (
     <div className="space-y-8 pb-6">
       {/* Heading Section */}
@@ -27,7 +36,7 @@ const SettingsTab: React.FC = () => {
         {/* Left Column - Salon Profile */}
         <div className="space-y-6">
           {/* Salon Profile Card */}
-          <SalonProfileCard />
+          <SalonProfileCard singleSalonData={singleSalonData} isLoading={isLoading} />
 
           {/* Address Section */}
           <AddressSection />

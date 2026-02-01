@@ -53,7 +53,7 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
               <Avatar className="size-12">
                 <AvatarImage
                   src={singleSalonData?.logo || ""}
-                  alt="salon avatar"
+                  alt="avatar"
                 />
                 <AvatarFallback>
                   <Scissors className="size-6" />
