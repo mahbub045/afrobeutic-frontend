@@ -8,11 +8,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { countries } from "@/data/countries";
 import { useEditSingleSalonMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/SingleSalon/SingleSalonApi";
 import {
-  BasicInfoFormValues,
   EditDashboardProps,
+  ProfileInfoFormValues,
   SalonProps,
 } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
 import {
@@ -45,17 +44,11 @@ const EditProfileDialog: React.FC<EditDashboardProps> = ({
   const basicSchema = Yup.object().shape({
     name: Yup.string().required("Salon name is required"),
     salon_type: Yup.string().required("Salon type is required"),
-    address_one: Yup.string(),
-    address_two: Yup.string(),
-    city: Yup.string().required("City is required"),
-    postal_code: Yup.string().required("Postal code is required"),
-    country: Yup.string().required("Country is required"),
-    address: Yup.string().nullable(),
   });
 
   const handleSubmit = async (
-    values: BasicInfoFormValues,
-    { setSubmitting }: FormikHelpers<BasicInfoFormValues>,
+    values: ProfileInfoFormValues,
+    { setSubmitting }: FormikHelpers<ProfileInfoFormValues>,
   ) => {
     setSubmitting(true);
     try {
@@ -64,12 +57,6 @@ const EditProfileDialog: React.FC<EditDashboardProps> = ({
         formData.append("logo", values.logoFile);
         formData.append("name", values.name);
         formData.append("salon_type", values.salon_type);
-        formData.append("address_one", values.address_one);
-        formData.append("address_two", values.address_two);
-        formData.append("city", values.city);
-        formData.append("postal_code", values.postal_code);
-        formData.append("country", values.country);
-        formData.append("address", values.address || "");
 
         await editProfile({
           salonUid: salonuid as string,
@@ -79,11 +66,6 @@ const EditProfileDialog: React.FC<EditDashboardProps> = ({
         const payload: Partial<SalonProps> = {
           name: values.name,
           salon_type: values.salon_type,
-          address_one: values.address_one,
-          address_two: values.address_two,
-          city: values.city,
-          postal_code: values.postal_code,
-          country: values.country,
         };
 
         await editProfile({
@@ -128,17 +110,11 @@ const EditProfileDialog: React.FC<EditDashboardProps> = ({
             logoPreview: singleSalonData?.logo || "",
             name: singleSalonData?.name || "",
             salon_type: singleSalonData?.salon_type || "",
-            address_one: singleSalonData?.address_one || "",
-            address_two: singleSalonData?.address_two || "",
-            city: singleSalonData?.city || "",
-            postal_code: singleSalonData?.postal_code || "",
-            country: singleSalonData?.country || "",
-            address: singleSalonData?.address || "",
           }}
           validationSchema={basicSchema}
           onSubmit={handleSubmit}
         >
-          {({ values, setFieldValue }: FormikProps<BasicInfoFormValues>) => (
+          {({ values, setFieldValue }: FormikProps<ProfileInfoFormValues>) => (
             <FormikForm>
               <div className="grid grid-cols-1 gap-4">
                 <div className="flex items-center gap-4">
@@ -199,9 +175,11 @@ const EditProfileDialog: React.FC<EditDashboardProps> = ({
                       <option value="" disabled>
                         Select a salon type
                       </option>
-                      <option value="UNISEX">Unisex Salon</option>
-                      <option value="MALE">Male Salon</option>
-                      <option value="FEMALE">Female Salon</option>
+                      <option value="BARBERSHOP">
+                        Barbershop / Men’s Salon
+                      </option>
+                      <option value="UNISEX_SALON">Unisex Salon</option>
+                      <option value="LADIES_SALON">Ladies Salon</option>
                     </Field>
                     <ErrorMessage
                       name="salon_type"
@@ -210,104 +188,6 @@ const EditProfileDialog: React.FC<EditDashboardProps> = ({
                     />
                   </div>
                 </div>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div>
-                    <Label htmlFor="address_one" className="mb-2">
-                      Address Line 1
-                    </Label>
-                    <Field
-                      id="address_one"
-                      name="address_one"
-                      type="text"
-                      as="input"
-                    />
-                    <ErrorMessage
-                      name="address_one"
-                      component="div"
-                      className="text-danger mt-1 text-xs"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="address_two" className="mb-2">
-                      Address Line 2
-                    </Label>
-                    <Field
-                      id="address_two"
-                      name="address_two"
-                      type="text"
-                      as="input"
-                    />
-                    <ErrorMessage
-                      name="address_two"
-                      component="div"
-                      className="text-danger mt-1 text-xs"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                  <div>
-                    <Label htmlFor="city" className="mb-2">
-                      City
-                    </Label>
-                    <Field id="city" name="city" type="text" as="input" />
-                    <ErrorMessage
-                      name="city"
-                      component="div"
-                      className="text-danger mt-1 text-xs"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="postal_code" className="mb-2">
-                      Postal Code
-                    </Label>
-                    <Field
-                      id="postal_code"
-                      name="postal_code"
-                      type="text"
-                      as="input"
-                    />
-                    <ErrorMessage
-                      name="postal_code"
-                      component="div"
-                      className="text-danger mt-1 text-xs"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="country" className="mb-2">
-                      Country
-                    </Label>
-                    <Field id="country" name="country" as="select">
-                      <option value="" disabled>
-                        Select a country
-                      </option>
-                      {countries.map((c) => (
-                        <option key={c.code} value={c.code}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </Field>
-                    <ErrorMessage
-                      name="country"
-                      component="div"
-                      className="text-danger mt-1 text-xs"
-                    />
-                  </div>
-                </div>
-                {/* <div className="grid grid-cols-1">
-                  <Label htmlFor="address" className="mb-2">
-                    Google Location Link
-                  </Label>
-                  <Field id="address" name="address" type="text" as="input" />
-                  <ErrorMessage
-                    name="address"
-                    component="div"
-                    className="text-danger mt-1 text-xs"
-                  />
-                </div> */}
 
                 <div className="mt-4 flex justify-end gap-3">
                   <Button

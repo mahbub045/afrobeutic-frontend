@@ -6,11 +6,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { formatChoiceFieldValue } from "@/lib/utils";
 import { DashboardTabProps } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
 import { Pencil, Scissors } from "lucide-react";
+import React, { useState } from "react";
+import EditProfileDialog from "../Dialogs/EditProfileDialog";
 
 const SalonProfileCard: React.FC<DashboardTabProps> = ({
   singleSalonData,
   isLoading,
 }) => {
+  const [openEditProfileDialog, setOpenEditProfileDialog] = useState(false);
+
   return (
     <Card className="border-0 bg-gradient-to-br from-slate-50 to-slate-100 shadow-md transition-shadow duration-300 hover:shadow-lg dark:from-slate-950 dark:to-slate-900 dark:shadow-gray-900">
       <CardContent className="p-4">
@@ -54,12 +58,22 @@ const SalonProfileCard: React.FC<DashboardTabProps> = ({
           {isLoading ? (
             <Skeleton className="h-8 w-20 rounded-md" />
           ) : (
-            <Button variant="outline" size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setOpenEditProfileDialog(true)}
+            >
               <Pencil className="h-4 w-4" /> Edit
             </Button>
           )}
         </div>
       </CardContent>
+
+      <EditProfileDialog
+        singleSalonData={singleSalonData}
+        isOpen={openEditProfileDialog}
+        onClose={() => setOpenEditProfileDialog(false)}
+      />
     </Card>
   );
 };

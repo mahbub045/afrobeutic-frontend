@@ -118,6 +118,13 @@ export interface BasicInfoFormValues {
   address: string;
 }
 
+export interface ProfileInfoFormValues {
+  logoFile: File | null;
+  logoPreview: string;
+  name: string;
+  salon_type: string;
+}
+
 export interface AddressFormValues {
   address_one: string;
   address_two: string;

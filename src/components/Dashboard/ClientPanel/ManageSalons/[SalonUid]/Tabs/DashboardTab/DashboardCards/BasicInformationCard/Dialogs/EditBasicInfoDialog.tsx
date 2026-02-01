@@ -199,9 +199,11 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
                       <option value="" disabled>
                         Select a salon type
                       </option>
-                      <option value="UNISEX">Unisex Salon</option>
-                      <option value="MALE">Male Salon</option>
-                      <option value="FEMALE">Female Salon</option>
+                      <option value="BARBERSHOP">
+                        Barbershop / Men’s Salon
+                      </option>
+                      <option value="UNISEX_SALON">Unisex Salon</option>
+                      <option value="LADIES_SALON">Ladies Salon</option>
                     </Field>
                     <ErrorMessage
                       name="salon_type"
