@@ -100,7 +100,32 @@ const EditPricingPlanDialog: React.FC<EditPricingPlanDialogProps> = ({
     { setErrors, setSubmitting }: FormikHelpers<FormValues>,
   ) => {
     try {
-      const payload = {
+      // Helper to safely normalize numbers
+      const toNumberOrUndefined = (v: unknown) =>
+        v == null ? undefined : Number(v);
+
+      // Normalize original values for accurate comparison
+      const originalNormalized = {
+        account_category: pricingPlanData.account_category || "",
+        name: pricingPlanData.name || "",
+        price: toNumberOrUndefined(pricingPlanData.price),
+        salon_limit: toNumberOrUndefined(pricingPlanData.salon_limit),
+        whatsapp_chatbot_limit: toNumberOrUndefined(
+          pricingPlanData.whatsapp_chatbot_limit,
+        ),
+        whatsapp_messages_per_chatbot: toNumberOrUndefined(
+          pricingPlanData.whatsapp_messages_per_chatbot,
+        ),
+        has_broadcasting: Boolean(pricingPlanData.has_broadcasting),
+        broadcasting_message_limit: toNumberOrUndefined(
+          pricingPlanData.broadcasting_message_limit,
+        ),
+        is_active: Boolean(pricingPlanData.is_active),
+        description: pricingPlanData.description ?? "",
+      } as const;
+
+      // New normalized values (what we intend to send)
+      const newNormalized = {
         account_category: values.account_category,
         name: values.name,
         price: Number(values.price),
@@ -110,14 +135,87 @@ const EditPricingPlanDialog: React.FC<EditPricingPlanDialogProps> = ({
           values.whatsapp_messages_per_chatbot,
         ),
         has_broadcasting: Boolean(values.has_broadcasting),
+        // When broadcasting is disabled, we consider its limit as 0 for clearing
         broadcasting_message_limit: values.has_broadcasting
           ? Number(values.broadcasting_message_limit)
           : 0,
         is_active: Boolean(values.is_active),
         description: values.description || "",
-      };
+      } as const;
 
-      await editPricingPlan({ uid: pricingPlanData.uid, payload }).unwrap();
+      // Build a partial payload that includes only changed fields
+      const partialPayload: Record<string, unknown> = {};
+
+      // Simple string fields
+      if (
+        originalNormalized.account_category !== newNormalized.account_category
+      ) {
+        partialPayload.account_category = newNormalized.account_category;
+      }
+      if (originalNormalized.name !== newNormalized.name) {
+        partialPayload.name = newNormalized.name;
+      }
+      if (originalNormalized.description !== newNormalized.description) {
+        partialPayload.description = newNormalized.description;
+      }
+
+      // Numeric fields
+      if (originalNormalized.price !== newNormalized.price) {
+        partialPayload.price = newNormalized.price;
+      }
+      if (originalNormalized.salon_limit !== newNormalized.salon_limit) {
+        partialPayload.salon_limit = newNormalized.salon_limit;
+      }
+      if (
+        originalNormalized.whatsapp_chatbot_limit !==
+        newNormalized.whatsapp_chatbot_limit
+      ) {
+        partialPayload.whatsapp_chatbot_limit =
+          newNormalized.whatsapp_chatbot_limit;
+      }
+      if (
+        originalNormalized.whatsapp_messages_per_chatbot !==
+        newNormalized.whatsapp_messages_per_chatbot
+      ) {
+        partialPayload.whatsapp_messages_per_chatbot =
+          newNormalized.whatsapp_messages_per_chatbot;
+      }
+
+      // Boolean fields
+      if (originalNormalized.is_active !== newNormalized.is_active) {
+        partialPayload.is_active = newNormalized.is_active;
+      }
+      if (
+        originalNormalized.has_broadcasting !== newNormalized.has_broadcasting
+      ) {
+        partialPayload.has_broadcasting = newNormalized.has_broadcasting;
+      }
+
+      // Broadcasting limit: include only when relevant or when broadcasting toggles off
+      if (newNormalized.has_broadcasting) {
+        // Broadcasting is ON: include only if the limit changed
+        if (
+          originalNormalized.broadcasting_message_limit !==
+          newNormalized.broadcasting_message_limit
+        ) {
+          partialPayload.broadcasting_message_limit =
+            newNormalized.broadcasting_message_limit;
+        }
+      } else if (originalNormalized.has_broadcasting) {
+        // Broadcasting turned OFF from previously ON: send 0 to clear
+        partialPayload.broadcasting_message_limit = 0;
+      }
+
+      // If nothing changed, avoid making the request
+      if (Object.keys(partialPayload).length === 0) {
+        toast.info("No changes detected.");
+        return;
+      }
+
+      await editPricingPlan({
+        uid: pricingPlanData.uid,
+        payload: partialPayload,
+      }).unwrap();
 
       Swal.fire({
         icon: "success",
