@@ -130,9 +130,9 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
             <DropdownMenuItem asChild>
               <Link
                 className="cursor-pointer"
-                href="/dashboard/client-panel/accounts/billings"
+                href="/dashboard/client-panel/accounts/billing"
               >
-                Billings
+                Billing
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
