@@ -133,6 +133,14 @@ export interface AddressFormValues {
   country: string;
   address: string;
 }
+export interface ContactValues {
+  phone_number_one: string;
+  email: string;
+  website: string;
+  facebook?: string;
+  instagram?: string;
+  youtube?: string;
+}
 
 export interface ContactInfoFormValues {
   website: string;

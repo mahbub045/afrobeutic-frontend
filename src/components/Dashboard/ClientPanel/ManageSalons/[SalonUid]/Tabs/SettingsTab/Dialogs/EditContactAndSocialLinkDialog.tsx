@@ -8,7 +8,10 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useEditSingleSalonMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/SingleSalon/SingleSalonApi";
-import { EditDashboardProps } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
+import {
+  ContactValues,
+  EditDashboardProps,
+} from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
 import {
   ErrorMessage,
   Field,
@@ -24,12 +27,6 @@ import PhoneInput from "react-phone-input-2";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
-
-export interface ContactValues {
-  phone_number_one: string;
-  email: string;
-  website: string;
-}
 
 const EditContactAndSocialLinkDialog: React.FC<EditDashboardProps> = ({
   singleSalonData,
@@ -52,6 +49,9 @@ const EditContactAndSocialLinkDialog: React.FC<EditDashboardProps> = ({
         website: values.website || null,
         phone_number_one: values.phone_number_one || null,
         email: values.email || null,
+        facebook: values.facebook || null,
+        instagram: values.instagram || null,
+        youtube: values.youtube || null,
       };
 
       await editBasicInfo({
@@ -82,6 +82,9 @@ const EditContactAndSocialLinkDialog: React.FC<EditDashboardProps> = ({
     website: Yup.string().url("Invalid URL").nullable(),
     phone_number_one: Yup.string().nullable(),
     email: Yup.string().email("Invalid email address").nullable(),
+    facebook: Yup.string().url("Invalid URL").nullable(),
+    instagram: Yup.string().url("Invalid URL").nullable(),
+    youtube: Yup.string().url("Invalid URL").nullable(),
   });
 
   return (
@@ -100,6 +103,9 @@ const EditContactAndSocialLinkDialog: React.FC<EditDashboardProps> = ({
             website: singleSalonData?.website || "",
             phone_number_one: singleSalonData?.phone_number_one || "",
             email: singleSalonData?.email || "",
+            facebook: singleSalonData?.facebook || "",
+            instagram: singleSalonData?.instagram || "",
+            youtube: singleSalonData?.youtube || "",
           }}
           validationSchema={schema}
           onSubmit={handleSubmit}
@@ -107,15 +113,6 @@ const EditContactAndSocialLinkDialog: React.FC<EditDashboardProps> = ({
           {(): React.ReactNode => (
             <FormikForm>
               <div className="grid gap-4">
-                {/* <div>
-                  <Label className="mb-2">Website</Label>
-                  <Field id="website" name="website" as="input" type="text" />
-                  <ErrorMessage
-                    name="website"
-                    component="div"
-                    className="text-danger mt-1 text-xs"
-                  />
-                </div> */}
                 <div>
                   <Label className="mb-2">Phone</Label>
                   <Field name="phone_number_one">
@@ -173,6 +170,41 @@ const EditContactAndSocialLinkDialog: React.FC<EditDashboardProps> = ({
                   <Field id="email" name="email" as="input" type="email" />
                   <ErrorMessage
                     name="email"
+                    component="div"
+                    className="text-danger mt-1 text-xs"
+                  />
+                </div>
+
+                <div>
+                  <Label className="mb-2">Facebook</Label>
+                  <Field id="facebook" name="facebook" as="input" type="url" />
+                  <ErrorMessage
+                    name="facebook"
+                    component="div"
+                    className="text-danger mt-1 text-xs"
+                  />
+                </div>
+
+                <div>
+                  <Label className="mb-2">Instagram</Label>
+                  <Field
+                    id="instagram"
+                    name="instagram"
+                    as="input"
+                    type="url"
+                  />
+                  <ErrorMessage
+                    name="instagram"
+                    component="div"
+                    className="text-danger mt-1 text-xs"
+                  />
+                </div>
+
+                <div>
+                  <Label className="mb-2">YouTube</Label>
+                  <Field id="youtube" name="youtube" as="input" type="url" />
+                  <ErrorMessage
+                    name="youtube"
                     component="div"
                     className="text-danger mt-1 text-xs"
                   />
