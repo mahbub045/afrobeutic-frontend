@@ -9,7 +9,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { baseApi } from "@/Redux/Api/BaseApi";
 import { useEditBookingMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/BookingsApi";
-import { useGetServicesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
+import { useGetServicesFiltersQuery } from "@/Redux/Reducers/Common/FiltersApi";
 import type {
   CommonEditBookingDataProps,
   Service,
@@ -32,7 +32,7 @@ const EditBookingServicesDialog: React.FC<CommonEditBookingDataProps> = ({
   const dispatch = useDispatch();
 
   const { data: servicesData, isLoading: isLoadingServices } =
-    useGetServicesDataQuery({ salonUid });
+    useGetServicesFiltersQuery({ salonUid });
 
   const [localSelection, setLocalSelection] = useState<string[]>([]);
   const [search, setSearch] = useState("");
@@ -124,7 +124,7 @@ const EditBookingServicesDialog: React.FC<CommonEditBookingDataProps> = ({
                 {localSelection.length > 0 ? (
                   <>
                     {localSelection.map((serviceUid) => {
-                      const service = servicesData?.results?.find(
+                      const service = servicesData?.find(
                         (s: Service) => s.uid === serviceUid,
                       );
                       return service ? (
