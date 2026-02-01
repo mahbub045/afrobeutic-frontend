@@ -184,7 +184,7 @@ const EditBookingProductsDialog: React.FC<CommonEditBookingDataProps> = ({
                     (() => {
                       const searchTerm = search.toLowerCase().trim();
                       const filteredProducts = searchTerm
-                        ? (productsData?.results || [])
+                        ? (productsData || [])
                             .filter((product: Product) =>
                               product.name.toLowerCase().includes(searchTerm),
                             )
@@ -199,7 +199,7 @@ const EditBookingProductsDialog: React.FC<CommonEditBookingDataProps> = ({
                               if (!aStarts && bStarts) return 1;
                               return 0;
                             })
-                        : productsData?.results || [];
+                        : productsData || [];
 
                       return filteredProducts.length > 0 ? (
                         <ul className="divide-y p-2">

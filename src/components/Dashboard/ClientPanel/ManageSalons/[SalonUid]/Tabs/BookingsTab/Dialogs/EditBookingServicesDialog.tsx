@@ -184,7 +184,7 @@ const EditBookingServicesDialog: React.FC<CommonEditBookingDataProps> = ({
                     (() => {
                       const searchTerm = search.toLowerCase().trim();
                       const filteredServices = searchTerm
-                        ? (servicesData?.results || [])
+                        ? (servicesData || [])
                             .filter((service: Service) =>
                               service.name.toLowerCase().includes(searchTerm),
                             )
@@ -199,7 +199,7 @@ const EditBookingServicesDialog: React.FC<CommonEditBookingDataProps> = ({
                               if (!aStarts && bStarts) return 1;
                               return 0;
                             })
-                        : servicesData?.results || [];
+                        : servicesData || [];
 
                       return filteredServices.length > 0 ? (
                         <ul className="divide-y p-2">
