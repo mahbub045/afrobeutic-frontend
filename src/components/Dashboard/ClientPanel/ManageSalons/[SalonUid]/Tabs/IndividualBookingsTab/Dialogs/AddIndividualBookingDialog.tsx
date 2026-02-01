@@ -142,7 +142,7 @@ const AddIndividualBookingDialog: React.FC<AddIndividualBookingDialogProps> = ({
         notes: values.notes || "",
       };
 
-      const response = await addIndividualBooking({
+      await addIndividualBooking({
         salonUid: salonuid,
         data: payload,
       }).unwrap();
