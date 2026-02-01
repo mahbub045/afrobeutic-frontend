@@ -1,10 +1,16 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useGetSingleSalonDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SingleSalon/SingleSalonApi";
-import { Pause, Settings, Trash } from "lucide-react";
+import {
+  useEditSingleSalonMutation,
+  useGetSingleSalonDataQuery,
+} from "@/Redux/Reducers/ClientPanel/ManageSalons/SingleSalon/SingleSalonApi";
+import { Check, Pause, Settings, Trash } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { useTheme } from "next-themes";
 import { useParams } from "next/navigation";
+import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 import AboutAndProfessional from "./AboutAndProfessional/AboutAndProfessional";
 import AddressSection from "./AddressSection/AddressSection";
 import ContactAndSocialLinks from "./ContactAndSocialLinks/ContactAndSocialLinks";
@@ -15,10 +21,57 @@ const SettingsTab: React.FC = () => {
   const { data: session } = useSession();
   const params = useParams();
   const { salonuid } = params;
+  const { resolvedTheme } = useTheme();
+
+  // RTK hooks
+  const [editProfile, { isLoading: isEditing }] = useEditSingleSalonMutation();
   // RTK Hooks
-  const { data: singleSalonData, isLoading } = useGetSingleSalonDataQuery({
+  const {
+    data: singleSalonData,
+    isLoading,
+    refetch,
+  } = useGetSingleSalonDataQuery({
     salonUid: salonuid,
   });
+
+  const handleToggleStatus = async () => {
+    const isInactive = singleSalonData?.status === "INACTIVE";
+    const res = await Swal.fire({
+      title: isInactive ? "Activate salon" : "Deactivate salon",
+      text: isInactive
+        ? "Are you sure you want to activate this salon?"
+        : "Are you sure you want to deactivate this salon?",
+      icon: isInactive ? "question" : "warning",
+      showCancelButton: true,
+      confirmButtonText: isInactive ? "Yes, activate" : "Yes, deactivate",
+      cancelButtonText: "Cancel",
+    });
+
+    if (!res.isConfirmed) return;
+
+    try {
+      await editProfile({
+        salonUid: salonuid as string,
+        salonData: { status: isInactive ? "ACTIVE" : "INACTIVE" },
+      }).unwrap();
+
+      Swal.fire({
+        icon: "success",
+        title: isInactive ? "Activated" : "Deactivated",
+        text: isInactive
+          ? "Salon was activated successfully"
+          : "Salon was deactivated successfully",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+
+      // refresh data
+      refetch();
+    } catch (err) {
+      console.error("Failed to update salon status", err);
+      toast.error("Failed to update salon status. Please try again.");
+    }
+  };
 
   return (
     <div className="space-y-8 pb-6">
@@ -36,37 +89,76 @@ const SettingsTab: React.FC = () => {
         {/* Left Column - Salon Profile */}
         <div className="space-y-6">
           {/* Salon Profile Card */}
-          <SalonProfileCard singleSalonData={singleSalonData} isLoading={isLoading} />
+          <SalonProfileCard
+            singleSalonData={singleSalonData}
+            isLoading={isLoading}
+          />
 
           {/* Address Section */}
-          <AddressSection singleSalonData={singleSalonData} isLoading={isLoading} />
+          <AddressSection
+            singleSalonData={singleSalonData}
+            isLoading={isLoading}
+          />
         </div>
 
         <div className="space-y-6">
           {/* Contact & Social Links Section */}
-          <ContactAndSocialLinks singleSalonData={singleSalonData} isLoading={isLoading} />
+          <ContactAndSocialLinks
+            singleSalonData={singleSalonData}
+            isLoading={isLoading}
+          />
         </div>
       </div>
 
       {/* About Salon */}
       <div>
         {session?.user?.account_type === "INDIVIDUAL_STYLIST" ? (
-          <AboutAndProfessional singleSalonData={singleSalonData} isLoading={isLoading} />
+          <AboutAndProfessional
+            singleSalonData={singleSalonData}
+            isLoading={isLoading}
+          />
         ) : null}
       </div>
       {/* Professional Career Details */}
       <div>
         {session?.user?.account_type === "INDIVIDUAL_STYLIST" ? (
-          <ProfessionalCareer singleSalonData={singleSalonData} isLoading={isLoading} />
+          <ProfessionalCareer
+            singleSalonData={singleSalonData}
+            isLoading={isLoading}
+          />
         ) : null}
       </div>
 
       <hr />
       {/* Action Buttons */}
       <div className="flex justify-end gap-3">
-        <Button variant="warning">
-          <Pause /> Deactivate Salon
-        </Button>
+        {(() => {
+          const isInactive = singleSalonData?.status === "INACTIVE";
+          return (
+            <Button
+              variant={isInactive ? "default" : "warning"}
+              onClick={handleToggleStatus}
+              disabled={isEditing}
+              aria-label={isInactive ? "Activate salon" : "Deactivate salon"}
+              className={
+                isInactive
+                  ? "bg-green-600 text-white hover:bg-green-700"
+                  : undefined
+              }
+            >
+              {isInactive ? (
+                <>
+                  <Check /> {isEditing ? "Processing..." : "Activate Salon"}
+                </>
+              ) : (
+                <>
+                  <Pause /> {isEditing ? "Processing..." : "Deactivate Salon"}
+                </>
+              )}
+            </Button>
+          );
+        })()}
+
         <Button variant="danger">
           <Trash /> Delete Salon
         </Button>
