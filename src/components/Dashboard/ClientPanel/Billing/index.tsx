@@ -1,5 +1,4 @@
 "use client";
-
 import { useGetBillingInfoQuery } from "@/Redux/Reducers/ClientPanel/Billing/BillingApi";
 import { BillingSubscription } from "@/Types/ClientPanel/Billing/BillingTypes";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -232,7 +231,7 @@ const BillingContainer: React.FC = () => {
                       Change plan
                     </Link>
                   </Button>
-                  <Button
+                  {/* <Button
                     type="button"
                     variant="outline"
                     className="sm:w-auto"
@@ -240,7 +239,7 @@ const BillingContainer: React.FC = () => {
                     title="Coming soon"
                   >
                     Manage payment method
-                  </Button>
+                  </Button> */}
                 </div>
               </CardContent>
             </Card>
