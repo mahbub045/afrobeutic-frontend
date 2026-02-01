@@ -51,10 +51,7 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
           <>
             <div className="flex items-center gap-4">
               <Avatar className="size-12">
-                <AvatarImage
-                  src={singleSalonData?.logo || ""}
-                  alt="avatar"
-                />
+                <AvatarImage src={singleSalonData?.logo || ""} alt="avatar" />
                 <AvatarFallback>
                   <Scissors className="size-6" />
                 </AvatarFallback>
@@ -145,10 +142,15 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
               <div className="mt-2 grid grid-cols-2 gap-6">
                 <div className="flex flex-col">
                   <p className="text-muted-foreground text-xs uppercase">
-                    Street
+                    Address
                   </p>
                   <p className="text-foreground mt-1 text-sm">
-                    {singleSalonData?.street}
+                    {[
+                      singleSalonData?.address_one,
+                      singleSalonData?.address_two,
+                    ]
+                      .filter(Boolean)
+                      .join(", ") || "Not Specified"}
                   </p>
                 </div>
 

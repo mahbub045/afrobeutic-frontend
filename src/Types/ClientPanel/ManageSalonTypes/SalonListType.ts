@@ -110,7 +110,17 @@ export interface BasicInfoFormValues {
   logoPreview: string;
   name: string;
   salon_type: string;
-  street: string;
+  address_one: string;
+  address_two: string;
+  city: string;
+  postal_code: string;
+  country: string;
+  address: string;
+}
+
+export interface AddressFormValues {
+  address_one: string;
+  address_two: string;
   city: string;
   postal_code: string;
   country: string;

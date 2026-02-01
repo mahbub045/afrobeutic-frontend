@@ -4,11 +4,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { countries } from "@/data/countries";
 import { DashboardTabProps } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
 import { MapPin, Pencil } from "lucide-react";
+import React, { useState } from "react";
+import EditAddressDialog from "../Dialogs/EditAddressDialog";
 
 const AddressSection: React.FC<DashboardTabProps> = ({
   singleSalonData,
   isLoading,
 }) => {
+  const [openAddressDialog, setOpenAddressDialog] = useState(false);
+
   return (
     <div>
       <Card className="border-0 shadow-md transition-shadow duration-300 hover:shadow-lg dark:shadow-gray-600">
@@ -25,7 +29,12 @@ const AddressSection: React.FC<DashboardTabProps> = ({
             {isLoading ? (
               <Skeleton className="h-8 w-16 rounded" />
             ) : (
-              <Button variant="outline" size="sm">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setOpenAddressDialog(true)}
+                aria-label="Edit address"
+              >
                 <Pencil className="h-4 w-4" /> Edit
               </Button>
             )}
@@ -45,7 +54,7 @@ const AddressSection: React.FC<DashboardTabProps> = ({
               <>
                 <div>
                   <p className="text-xs font-semibold tracking-wide text-gray-500 uppercase dark:text-gray-400">
-                    Street
+                    Address
                   </p>
                   <p className="mt-1 text-lg font-semibold text-gray-900 dark:text-white">
                     {[
@@ -103,6 +112,12 @@ const AddressSection: React.FC<DashboardTabProps> = ({
           </div>
         </CardContent>
       </Card>
+
+      <EditAddressDialog
+        singleSalonData={singleSalonData}
+        isOpen={openAddressDialog}
+        onClose={() => setOpenAddressDialog(false)}
+      />
     </div>
   );
 };
