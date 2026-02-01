@@ -306,8 +306,12 @@ const BillingContainer: React.FC = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Feature</TableHead>
-                        <TableHead className="text-right">Limit</TableHead>
+                        <TableHead className="text-primary text-lg font-bold">
+                          Feature
+                        </TableHead>
+                        <TableHead className="text-primary text-right text-lg font-bold">
+                          Limit
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -333,7 +337,7 @@ const BillingContainer: React.FC = () => {
                         <TableCell>Broadcasting</TableCell>
                         <TableCell className="text-right">
                           {plan?.has_broadcasting
-                            ? `Yes (limit ${safe(plan?.broadcasting_message_limit)})`
+                            ? `Yes (Limit -> ${safe(plan?.broadcasting_message_limit)})`
                             : "No"}
                         </TableCell>
                       </TableRow>
