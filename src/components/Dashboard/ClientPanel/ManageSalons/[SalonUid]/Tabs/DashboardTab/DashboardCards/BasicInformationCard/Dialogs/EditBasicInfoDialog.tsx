@@ -45,7 +45,8 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
   const basicSchema = Yup.object().shape({
     name: Yup.string().required("Salon name is required"),
     salon_type: Yup.string().required("Salon type is required"),
-    street: Yup.string().required("Street is required"),
+    address_one: Yup.string(),
+    address_two: Yup.string(),
     city: Yup.string().required("City is required"),
     postal_code: Yup.string().required("Postal code is required"),
     country: Yup.string().required("Country is required"),
@@ -63,7 +64,8 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
         formData.append("logo", values.logoFile);
         formData.append("name", values.name);
         formData.append("salon_type", values.salon_type);
-        formData.append("street", values.street);
+        formData.append("address_one", values.address_one || "");
+        formData.append("address_two", values.address_two || "");
         formData.append("city", values.city);
         formData.append("postal_code", values.postal_code);
         formData.append("country", values.country);
@@ -77,7 +79,8 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
         const payload: Partial<SalonProps> = {
           name: values.name,
           salon_type: values.salon_type,
-          street: values.street,
+          address_one: values.address_one || "",
+          address_two: values.address_two || "",
           city: values.city,
           postal_code: values.postal_code,
           country: values.country,
@@ -125,7 +128,8 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
             logoPreview: singleSalonData?.logo || "",
             name: singleSalonData?.name || "",
             salon_type: singleSalonData?.salon_type || "",
-            street: singleSalonData?.street || "",
+            address_one: singleSalonData?.address_one || "",
+            address_two: singleSalonData?.address_two || "",
             city: singleSalonData?.city || "",
             postal_code: singleSalonData?.postal_code || "",
             country: singleSalonData?.country || "",
@@ -195,9 +199,11 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
                       <option value="" disabled>
                         Select a salon type
                       </option>
-                      <option value="UNISEX">Unisex Salon</option>
-                      <option value="MALE">Male Salon</option>
-                      <option value="FEMALE">Female Salon</option>
+                      <option value="BARBERSHOP">
+                        Barbershop / Men’s Salon
+                      </option>
+                      <option value="UNISEX_SALON">Unisex Salon</option>
+                      <option value="LADIES_SALON">Ladies Salon</option>
                     </Field>
                     <ErrorMessage
                       name="salon_type"
@@ -209,17 +215,41 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
-                    <Label htmlFor="street" className="mb-2">
-                      Street
+                    <Label htmlFor="address_one" className="mb-2">
+                      Address Line 1
                     </Label>
-                    <Field id="street" name="street" type="text" as="input" />
+                    <Field
+                      id="address_one"
+                      name="address_one"
+                      type="text"
+                      as="input"
+                    />
                     <ErrorMessage
-                      name="street"
+                      name="address_one"
                       component="div"
                       className="text-danger mt-1 text-xs"
                     />
                   </div>
 
+                  <div>
+                    <Label htmlFor="address_two" className="mb-2">
+                      Address Line 2
+                    </Label>
+                    <Field
+                      id="address_two"
+                      name="address_two"
+                      type="text"
+                      as="input"
+                    />
+                    <ErrorMessage
+                      name="address_two"
+                      component="div"
+                      className="text-danger mt-1 text-xs"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div>
                     <Label htmlFor="city" className="mb-2">
                       City
@@ -231,9 +261,6 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
                       className="text-danger mt-1 text-xs"
                     />
                   </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
                     <Label htmlFor="postal_code" className="mb-2">
                       Postal Code

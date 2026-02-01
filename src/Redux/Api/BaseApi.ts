@@ -132,6 +132,7 @@ export const baseApi = createApi({
   tagTypes: [
     // Common Tags
     "UserProfile",
+    "Filters",
     // Client Panlel Tags
     "AcceptInvitation",
     "CommonCategories",
@@ -144,6 +145,7 @@ export const baseApi = createApi({
     "Chairs",
     "ChairsBooking",
     "Bookings",
+    "IndividualBookings",
     "Receipt",
     "LookBook",
     "Employees",
@@ -152,12 +154,16 @@ export const baseApi = createApi({
     "LeadsAndCustomers",
     "Enquiries",
     "SupportTickets",
+    "SalonAnalytics",
+    "BillingInfo",
     // Admin Panel Tags
     "ManagementsList",
     "CustomersList",
     "AccountsList",
     "SalonsList",
     "EnquiryList",
+    "PricingPlans",
+    "SubscriptionsList",
   ],
   endpoints: () => ({}),
 });

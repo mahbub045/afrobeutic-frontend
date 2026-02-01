@@ -10,35 +10,43 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { formatChoiceFieldValue } from "@/lib/utils";
+import { useGetServiceRevenueQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Analytics/AnalyticsApi";
+import { ServiceRevenue } from "@/Types/ClientPanel/ManageSalonTypes/AnalyticsTypes/AnalyticsTypes";
+import { LoaderPinwheel } from "lucide-react";
+import { useParams } from "next/navigation";
 
 const ServicesRevenue: React.FC = () => {
-  const [range, setRange] = useState<string>("week");
+  const [range, setRange] = useState<string>("this_week");
+  const { salonuid } = useParams();
 
-  const data = useMemo(() => {
-    // sample datasets for different ranges; replace with real data from API
-    const datasets: Record<string, (string | number)[][]> = {
-      day: [
-        ["Date", "Massage", "Makeup Application"],
-        ["2026-01-01", 80, 70],
-        ["2026-01-02", 120, 95],
-        ["2026-01-03", 90, 60],
-      ],
-      week: [
-        ["Week", "Massage", "Makeup Application", "Facial"],
-        ["2026-01", 220, 180, 140],
-        ["2026-02", 240, 200, 160],
-        ["2026-03", 260, 210, 170],
-      ],
-      month: [
-        ["Month", "Massage", "Makeup Application", "Facial", "Nails"],
-        ["2025-10", 600, 480, 380, 210],
-        ["2025-11", 720, 520, 410, 260],
-        ["2025-12", 810, 590, 480, 310],
-      ],
-    };
+  const { data: servicesRevenueData, isLoading } = useGetServiceRevenueQuery({
+    salonUid: salonuid,
+    params: { period: range },
+  });
 
-    return datasets[range] ?? datasets.week;
-  }, [range]);
+  const chartData = useMemo(() => {
+    // Expecting an array like: [{ service_name: string, revenue: number }, ...]
+    const raw = Array.isArray(servicesRevenueData)
+      ? (servicesRevenueData as ServiceRevenue[])
+      : (servicesRevenueData as ServiceRevenue[]) || [];
+
+    if (!raw.length) return [["Service", "Revenue"]];
+
+    const rows = raw
+      .slice()
+      .sort(
+        (a: ServiceRevenue, b: ServiceRevenue) =>
+          (b.revenue || 0) - (a.revenue || 0),
+      )
+      .slice(0, 5)
+      .map((r: ServiceRevenue) => [
+        formatChoiceFieldValue(r.service_name || ""),
+        r.revenue || 0,
+      ]);
+
+    return [["Service", "Revenue"], ...rows];
+  }, [servicesRevenueData]);
 
   const options = {
     backgroundColor: "transparent",
@@ -55,6 +63,17 @@ const ServicesRevenue: React.FC = () => {
     tooltip: { trigger: "both" },
   };
 
+  const prettifyRange = (key: string) => {
+    const map: Record<string, string> = {
+      this_week: "This Week",
+      last_week: "Last Week",
+      this_month: "This Month",
+      last_6_months: "Last 6 Months",
+      last_year: "Last Year",
+    };
+    return map[key] ?? key;
+  };
+
   return (
     <section className="space-y-4">
       <header className="flex items-center justify-between">
@@ -64,32 +83,39 @@ const ServicesRevenue: React.FC = () => {
         <div className="flex items-center gap-2">
           <Select defaultValue={range} onValueChange={(val) => setRange(val)}>
             <SelectTrigger size="sm" className="w-40">
-              <SelectValue>
-                {range === "day"
-                  ? "Today"
-                  : range === "week"
-                    ? "This Week"
-                    : "This Month"}
-              </SelectValue>
+              <SelectValue>{prettifyRange(range)}</SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="day">Today</SelectItem>
-              <SelectItem value="week">This Week</SelectItem>
-              <SelectItem value="month">This Month</SelectItem>
+              <SelectItem value="this_week">This Week</SelectItem>
+              <SelectItem value="last_week">Last Week</SelectItem>
+              <SelectItem value="this_month">This Month</SelectItem>
+              <SelectItem value="last_6_months">Last 6 Months</SelectItem>
+              <SelectItem value="last_year">Last Year</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </header>
 
-      <div className="w-full">
-        <Chart
-          chartType="LineChart"
-          width="100%"
-          height="320px"
-          data={data}
-          options={options}
-          loader={<div className="p-8 text-center">Loading chart…</div>}
-        />
+      <div className="flex w-full flex-col items-center rounded-md shadow-md dark:shadow-gray-600">
+        <div className="w-full max-w-2xl">
+          {isLoading ? (
+            <div className="flex h-80 items-center justify-center">
+              <LoaderPinwheel className="text-primary animate-spin" size={20} />
+            </div>
+          ) : chartData.length <= 1 ? (
+            <div className="flex h-80 items-center justify-center">
+              No revenue data available.
+            </div>
+          ) : (
+            <Chart
+              chartType="LineChart"
+              width="100%"
+              height="320px"
+              data={chartData}
+              options={options}
+            />
+          )}
+        </div>
       </div>
     </section>
   );

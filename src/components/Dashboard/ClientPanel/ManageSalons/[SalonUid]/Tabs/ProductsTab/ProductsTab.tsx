@@ -183,7 +183,7 @@ const ProductsTab: React.FC = () => {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={7} className="py-6">
+                <TableCell colSpan={8} className="py-6">
                   <div className="flex items-center justify-center">
                     <LoaderPinwheel className="h-6 w-6 animate-spin" />
                   </div>
@@ -192,7 +192,7 @@ const ProductsTab: React.FC = () => {
             ) : extractedProducts.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={7}
+                  colSpan={8}
                   className="text-muted-foreground py-6 text-center text-sm"
                 >
                   No products found.

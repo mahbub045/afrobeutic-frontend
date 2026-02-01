@@ -10,7 +10,20 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { cn, formatChoiceFieldValue } from "@/lib/utils";
+import { useViewReceiptMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/ViewReceiptApi";
+import type {
+  BookingProduct,
+  BookingService,
+} from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
 import { Calendar as CalendarIcon, Edit } from "lucide-react";
+import { useParams } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
+import EditBookingCheckoutDialog from "./Dialogs/EditBookingCheckoutDialog";
+import EditBookingProductsDialog from "./Dialogs/EditBookingProductsDialog";
+import EditBookingServicesDialog from "./Dialogs/EditBookingServicesDialog";
+import EditBookingStatusDialog from "./Dialogs/EditBookingStatusDialog";
+import EditBookingTimeAndDateDialog from "./Dialogs/EditBookingTimeAndDateDialog";
 
 type UiStatus =
   | "placed"
@@ -25,6 +38,36 @@ export interface IndividualAppointment {
   client: string;
   startTime: string;
   status: UiStatus;
+  bookingDate?: string;
+  bookingDuration?: string;
+  services?: {
+    uid?: string;
+    name: string;
+    price?: string;
+    service_duration?: string;
+  }[];
+  products?: {
+    uid?: string;
+    name: string;
+    price?: string;
+  }[];
+  notes?: string | null;
+  finalPrice?: number;
+  tipsAmount?: number;
+  paymentType?: string;
+  // Optional totals coming from the API (support both snake_case and camelCase)
+  total_services?: number;
+  total_services_price?: number;
+  totalServicesPrice?: number;
+  total_products?: number;
+  total_products_price?: number;
+  totalProductsPrice?: number;
+  services_discount_price?: number;
+  servicesDiscountPrice?: number;
+  total_price?: number;
+  total_rice?: number;
+  final_price?: number;
+  tips_amount?: number | string;
 }
 
 interface IndividualAppointmentDetailsPanelProps {
@@ -34,12 +77,98 @@ interface IndividualAppointmentDetailsPanelProps {
   /** Controls the mobile sheet */
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+  isCancelled?: boolean;
+  cancellationReason?: string;
+  onStatusUpdated?: (status: string) => void;
+  onDateTimeUpdated?: (data: {
+    booking_date: string;
+    booking_time: string;
+    notes?: string;
+  }) => void;
+  onServicesUpdated?: (
+    services: {
+      uid: string;
+      name: string;
+      price: string;
+      service_duration?: string;
+    }[],
+  ) => void;
+  onProductsUpdated?: (
+    products: { uid: string; name: string; price: string }[],
+  ) => void;
+  onCheckoutUpdated?: (data: {
+    tips_amount: number;
+    payment_type: string;
+  }) => void;
 }
 
 const IndividualAppointmentDetailsPanel: React.FC<
   IndividualAppointmentDetailsPanelProps
-> = ({ selectedAppointment, dateLabel, isOpen, onOpenChange }) => {
+> = ({
+  selectedAppointment,
+  dateLabel,
+  isOpen,
+  onOpenChange,
+  isCancelled,
+  cancellationReason,
+  onStatusUpdated,
+  onDateTimeUpdated,
+  onServicesUpdated,
+  onProductsUpdated,
+  onCheckoutUpdated,
+}) => {
+  const { salonuid } = useParams();
+  const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
+
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isServicesDialogOpen, setIsServicesDialogOpen] = useState(false);
+  const [isProductsDialogOpen, setIsProductsDialogOpen] = useState(false);
+  const [isCheckoutDialogOpen, setIsCheckoutDialogOpen] = useState(false);
+  const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
+  const [viewReceipt, { isLoading: isViewReceiptLoading }] =
+    useViewReceiptMutation();
   const effectiveStatus: UiStatus | undefined = selectedAppointment?.status;
+
+  const handleViewReceipt = async () => {
+    if (!selectedAppointment?.id) {
+      toast.error("Booking ID is missing");
+      return;
+    }
+
+    try {
+      const response = await viewReceipt({
+        salonUid,
+        bookingUid: selectedAppointment.id,
+      }).unwrap();
+
+      if (typeof window === "undefined") {
+        toast.error("Unable to download receipt on server side");
+        return;
+      }
+
+      const { url, fileName } = response;
+
+      if (!url) {
+        toast.error("Failed to create receipt link");
+        return;
+      }
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName || `receipt-${selectedAppointment.id}.pdf`;
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      window.URL.revokeObjectURL(url);
+
+      toast.success("Receipt download started");
+    } catch (error) {
+      console.error("Failed to load receipt:", error);
+      toast.error("Failed to load receipt");
+    }
+  };
 
   const statusClasses = cn(
     "flex items-center gap-2 rounded-full px-3 py-1",
@@ -64,28 +193,82 @@ const IndividualAppointmentDetailsPanel: React.FC<
         </div>
       );
     }
-    // Dummy values to mimic AppointmentDetailsPanel layout
-    const dummyDuration = "00:00:00";
-    const dummyEmployeeName = "mahbub test";
-    const dummyServicesCount = 0;
-    const dummyProductsCount = 0;
-    const dummyServicesTotal = "80.00";
-    const dummyServicesDiscountTotal = "0.00";
-    const dummyProductsTotal = "0.00";
-    const dummyTips = "0.00";
-    const dummyTotalPrice = "80.00";
-    const dummyFinalPrice = "0.00";
-    const dummyPaymentType = "NOT_SPECIFIED";
-    const isCancelled = effectiveStatus === "cancelled";
-    const cancellationReason = isCancelled
-      ? "Client cancelled the appointment (dummy)."
-      : "";
+    const services = selectedAppointment.services ?? [];
+    const products = selectedAppointment.products ?? [];
+
+    const servicesCount = services.length;
+    const productsCount = products.length;
+
+    // Helpers for safely handling numeric values that may be strings or undefined
+    const getNumber = (value?: string | number) => {
+      const num = Number(value ?? 0);
+      return Number.isNaN(num) ? 0 : num;
+    };
+
+    const format = (n: number) => n.toFixed(2);
+
+    // Prefer pre-computed totals from the API, but fall back to
+    // computing from the services/products arrays when needed.
+    const rawServicesTotalPrice =
+      selectedAppointment.total_services_price ??
+      selectedAppointment.totalServicesPrice;
+    const servicesTotalOriginal =
+      rawServicesTotalPrice !== undefined
+        ? getNumber(rawServicesTotalPrice)
+        : services.reduce((sum, svc) => sum + getNumber(svc.price), 0);
+
+    const rawServicesDiscountTotal =
+      selectedAppointment.services_discount_price ??
+      selectedAppointment.servicesDiscountPrice;
+    const servicesTotalAfterDiscount =
+      rawServicesDiscountTotal !== undefined
+        ? getNumber(rawServicesDiscountTotal)
+        : servicesTotalOriginal;
+
+    const rawProductsTotalPrice =
+      selectedAppointment.total_products_price ??
+      selectedAppointment.totalProductsPrice;
+    const productsTotal =
+      rawProductsTotalPrice !== undefined
+        ? getNumber(rawProductsTotalPrice)
+        : products.reduce((sum, prod) => sum + getNumber(prod.price), 0);
+
+    const rawTips =
+      selectedAppointment.tips_amount ?? selectedAppointment.tipsAmount;
+    const tipsTotal = getNumber(rawTips);
+
+    const rawTotalPrice =
+      selectedAppointment.total_price ?? selectedAppointment.total_rice;
+    const totalPrice =
+      rawTotalPrice !== undefined
+        ? getNumber(rawTotalPrice)
+        : servicesTotalAfterDiscount + productsTotal;
+
+    const rawFinalPrice =
+      selectedAppointment.final_price ?? selectedAppointment.finalPrice;
+    const finalPrice =
+      rawFinalPrice !== undefined
+        ? getNumber(rawFinalPrice)
+        : totalPrice + tipsTotal;
 
     return (
       <div className="space-y-5">
-        <div className="flex items-start gap-3 text-sm">
-          <span className="text-muted-foreground mt-0.5 text-xs">On</span>
-          <span className="text-foreground font-medium">{dateLabel}</span>
+        <div className="flex justify-between">
+          <div className="flex items-start gap-3 text-sm">
+            <span className="text-muted-foreground mt-0.5 text-xs">On</span>
+            <span className="text-foreground font-medium">{dateLabel}</span>
+          </div>
+          <div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 p-0"
+              type="button"
+              onClick={() => setIsEditDialogOpen(true)}
+            >
+              <Edit size={14} />
+            </Button>
+          </div>
         </div>
 
         <div className="item-center flex justify-between">
@@ -96,7 +279,10 @@ const IndividualAppointmentDetailsPanel: React.FC<
             </div>
           </div>
           <div className="text-muted-foreground text-xs">
-            Duration: <span className="text-foreground">{dummyDuration}</span>
+            Duration:{" "}
+            <span className="text-foreground">
+              {selectedAppointment.bookingDuration || "N/A"}
+            </span>
           </div>
         </div>
 
@@ -114,7 +300,7 @@ const IndividualAppointmentDetailsPanel: React.FC<
               <div className="text-foreground text-base font-semibold">
                 {selectedAppointment.client}
               </div>
-              <div className="text-muted-foreground text-xs">Client</div>
+              <div className="text-muted-foreground text-xs">Customer</div>
             </div>
           </div>
         </div>
@@ -124,31 +310,46 @@ const IndividualAppointmentDetailsPanel: React.FC<
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h4 className="text-foreground text-sm font-semibold">
-              Services ({dummyServicesCount})
+              Services ({servicesCount})
             </h4>
             <Button
               variant="ghost"
               size="icon"
               className="h-6 w-6 p-0"
               type="button"
+              onClick={() => setIsServicesDialogOpen(true)}
             >
               <Edit size={14} />
             </Button>
           </div>
-          <div className="space-y-1 rounded-lg border p-3">
-            <div className="flex items-start justify-between">
-              <span className="text-foreground text-sm font-medium">
-                {formatChoiceFieldValue(selectedAppointment.service) ||
-                  "No Services Specified"}
-              </span>
-              <span className="text-foreground text-sm font-semibold">
-                $0.00
-              </span>
-            </div>
-            <p className="text-muted-foreground mt-1 text-xs">
-              with {dummyEmployeeName}
+          {servicesCount === 0 ? (
+            <p className="text-muted-foreground text-xs">
+              No services added to this booking.
             </p>
-          </div>
+          ) : (
+            <div className="space-y-1 rounded-lg border p-3">
+              {services.map((svc, index) => (
+                <div
+                  key={index}
+                  className="flex items-start justify-between py-1 first:pt-0 last:pb-0"
+                >
+                  <div>
+                    <span className="text-foreground text-sm font-medium">
+                      {formatChoiceFieldValue(svc.name)}
+                    </span>
+                    {svc.service_duration && (
+                      <p className="text-muted-foreground text-[11px]">
+                        Duration: {svc.service_duration}
+                      </p>
+                    )}
+                  </div>
+                  <span className="text-foreground text-sm font-semibold">
+                    ${svc.price ?? "0.00"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <Separator />
@@ -157,18 +358,39 @@ const IndividualAppointmentDetailsPanel: React.FC<
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h4 className="text-foreground text-sm font-semibold">
-                Products ({dummyProductsCount})
+                Products ({productsCount})
               </h4>
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-6 w-6 p-0"
                 type="button"
+                onClick={() => setIsProductsDialogOpen(true)}
               >
                 <Edit size={14} />
               </Button>
             </div>
-            {/* No products in dummy view */}
+            {productsCount === 0 ? (
+              <p className="text-muted-foreground text-xs">
+                No products added to this booking.
+              </p>
+            ) : (
+              <div className="space-y-1 rounded-lg border p-3">
+                {products.map((prod, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between py-1 first:pt-0 last:pb-0"
+                  >
+                    <span className="text-foreground text-sm font-medium">
+                      {formatChoiceFieldValue(prod.name)}
+                    </span>
+                    <span className="text-foreground text-sm font-semibold">
+                      ${prod.price ?? "0.00"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -180,49 +402,64 @@ const IndividualAppointmentDetailsPanel: React.FC<
               Pricing Summary
             </h4>
             <div className="space-y-1.5">
+              {/* Services total - show original and discounted when applicable */}
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Services Total</span>
-                <del className="text-muted-foreground">
-                  ${dummyServicesTotal}
-                </del>
+                <div className="text-right">
+                  <div>
+                    <div className="text-muted-foreground text-sm line-through">
+                      ${format(servicesTotalOriginal)}
+                    </div>
+                  </div>
+                </div>
               </div>
+
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">
-                  Services Total{" "}
-                  <small className="text-[10px]">(After Discount)</small>
+                  Services Total (After Discount)
                 </span>
                 <span className="text-foreground">
-                  ${dummyServicesDiscountTotal}
+                  ${format(servicesTotalAfterDiscount)}
                 </span>
               </div>
-              {dummyProductsCount > 0 && (
+
+              {/* Products */}
+              {productsCount > 0 && (
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Products Total</span>
-                  <span className="text-foreground">${dummyProductsTotal}</span>
-                </div>
-              )}
-              <div className="mt-1.5 border-t pt-1.5">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Tips</span>
-                  <span className="text-muted-foreground font-medium">
-                    ${dummyTips}
+                  <span className="text-foreground">
+                    ${format(productsTotal)}
                   </span>
                 </div>
-              </div>
-              <div className="mt-1.5 border-t pt-1.5">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Total Price</span>
-                  <del className="text-muted-foreground font-medium">
-                    ${dummyTotalPrice}
-                  </del>
+              )}
+
+              <Separator />
+
+              {/* Total Price (pre-final) - may be struck through if final differs */}
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Total Price</span>
+                <div>
+                  <div className="text-muted-foreground line-through">
+                    ${format(totalPrice)}
+                  </div>
                 </div>
               </div>
+              <Separator />
+
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Tips</span>
+                <span className="text-foreground">${format(tipsTotal)}</span>
+              </div>
+
+              <Separator />
+
+              {/* Final price */}
               <div className="flex items-center justify-between text-base">
                 <span className="text-foreground font-semibold">
                   Final Price
                 </span>
                 <span className="text-foreground font-bold">
-                  ${dummyFinalPrice}
+                  ${format(finalPrice)}
                 </span>
               </div>
             </div>
@@ -231,22 +468,10 @@ const IndividualAppointmentDetailsPanel: React.FC<
 
         <Separator />
 
-        <div className="mt-1.5 px-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Payment Type</span>
-            <span className="text-muted-foreground font-medium">
-              {formatChoiceFieldValue(dummyPaymentType) ?? "Not Specified"}
-            </span>
-          </div>
-        </div>
-
-        <Separator />
-
         <div>
           <h4 className="text-foreground mb-2 text-sm font-semibold">Notes:</h4>
           <p className="text-muted-foreground text-xs">
-            In a real implementation, this area can show booking notes,
-            preferences, or internal comments about the appointment.
+            {selectedAppointment.notes || "No notes added for this booking."}
           </p>
         </div>
 
@@ -257,28 +482,50 @@ const IndividualAppointmentDetailsPanel: React.FC<
               <h4 className="text-foreground mb-2 text-sm font-semibold">
                 Cancellation Reason:
               </h4>
-              <p className="text-muted-foreground text-xs">
-                {cancellationReason || "No cancellation reason provided."}
-              </p>
+              {cancellationReason ? (
+                <p className="text-foreground text-xs">{cancellationReason}</p>
+              ) : (
+                <p className="text-muted-foreground text-xs">
+                  No cancellation reason provided.
+                </p>
+              )}
             </div>
           </>
         )}
 
-        {effectiveStatus === "completed" && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full shadow dark:shadow-gray-600"
-            type="button"
-          >
-            Download Receipt
-          </Button>
+        {selectedAppointment.status === "completed" && (
+          <div>
+            <Separator />
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-3 w-full shadow dark:shadow-gray-600"
+              onClick={handleViewReceipt}
+              disabled={isViewReceiptLoading}
+              type="button"
+            >
+              {isViewReceiptLoading ? "Loading Receipt..." : "Download Receipt"}
+            </Button>
+          </div>
         )}
       </div>
     );
   };
 
   const title = selectedAppointment?.service || "Appointment details";
+
+  // Convert selectedAppointment to booking data format for the dialog
+  const bookingDataForDialog = selectedAppointment
+    ? {
+        uid: selectedAppointment.id,
+        booking_date: selectedAppointment.bookingDate,
+        booking_time: selectedAppointment.startTime,
+        booking_duration: selectedAppointment.bookingDuration,
+        notes: selectedAppointment.notes,
+        services: selectedAppointment.services,
+        products: selectedAppointment.products,
+      }
+    : null;
 
   return (
     <>
@@ -300,6 +547,7 @@ const IndividualAppointmentDetailsPanel: React.FC<
                   size="icon"
                   className="h-6 w-6 p-0"
                   type="button"
+                  onClick={() => setIsStatusDialogOpen(true)}
                 >
                   <Edit size={14} />
                 </Button>
@@ -309,6 +557,7 @@ const IndividualAppointmentDetailsPanel: React.FC<
                 variant="outline"
                 size="sm"
                 className="ml-auto text-xs font-semibold uppercase"
+                onClick={() => setIsCheckoutDialogOpen(true)}
               >
                 Checkout
               </Button>
@@ -329,11 +578,39 @@ const IndividualAppointmentDetailsPanel: React.FC<
             </SheetHeader>
             <div className="flex h-full flex-col">
               <div className="border-b px-4 py-3">
-                <div className="mb-3 flex items-start justify-start">
+                <div className="mb-1 flex items-start justify-start">
                   <h3 className="text-foreground text-base font-semibold">
                     {title}
                   </h3>
                 </div>
+                {selectedAppointment && effectiveStatus && (
+                  <div className="mt-1 flex items-center gap-2">
+                    <div className={statusClasses}>
+                      <div className={cn("h-2 w-2 rounded-full bg-white")} />
+                      <span className="text-xs font-medium capitalize">
+                        {(effectiveStatus || "").replace("-", " ")}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 p-0"
+                        type="button"
+                        onClick={() => setIsStatusDialogOpen(true)}
+                      >
+                        <Edit size={14} />
+                      </Button>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="ml-auto text-xs font-semibold uppercase"
+                      onClick={() => setIsCheckoutDialogOpen(true)}
+                    >
+                      Checkout
+                    </Button>
+                  </div>
+                )}
               </div>
               <div className="flex-1 overflow-y-auto px-4 py-4">
                 {renderContent()}
@@ -342,6 +619,100 @@ const IndividualAppointmentDetailsPanel: React.FC<
           </SheetContent>
         </Sheet>
       </div>
+
+      {/* Edit Booking Dialog */}
+      {bookingDataForDialog && (
+        <EditBookingTimeAndDateDialog
+          isOpen={isEditDialogOpen}
+          onClose={() => setIsEditDialogOpen(false)}
+          bookingData={bookingDataForDialog as any} // eslint-disable-line @typescript-eslint/no-explicit-any
+          onDateTimeUpdated={(data) => {
+            onDateTimeUpdated?.(data);
+          }}
+        />
+      )}
+
+      {/* Edit Booking Services Dialog */}
+      {selectedAppointment && (
+        <EditBookingServicesDialog
+          isOpen={isServicesDialogOpen}
+          onOpenChange={setIsServicesDialogOpen}
+          bookingData={{
+            uid: selectedAppointment.id,
+            services: (selectedAppointment.services ??
+              []) as unknown as BookingService[],
+          }}
+          onServicesUpdated={(services) => {
+            onServicesUpdated?.(
+              services.map((svc) => ({
+                uid: svc.uid,
+                name: svc.name,
+                price: svc.price,
+                service_duration: svc.service_duration,
+              })),
+            );
+          }}
+        />
+      )}
+
+      {/* Edit Booking Products Dialog */}
+      {selectedAppointment && (
+        <EditBookingProductsDialog
+          isOpen={isProductsDialogOpen}
+          onOpenChange={setIsProductsDialogOpen}
+          bookingData={{
+            uid: selectedAppointment.id,
+            products: (selectedAppointment.products ??
+              []) as unknown as BookingProduct[],
+          }}
+          onProductsUpdated={(products) => {
+            onProductsUpdated?.(
+              products.map((prod) => ({
+                uid: prod.uid,
+                name: prod.name,
+                price: prod.price,
+              })),
+            );
+          }}
+        />
+      )}
+
+      {/* Checkout Dialog */}
+      {selectedAppointment && (
+        <EditBookingCheckoutDialog
+          isOpen={isCheckoutDialogOpen}
+          onOpenChange={setIsCheckoutDialogOpen}
+          bookingData={{
+            uid: selectedAppointment.id,
+            final_price: selectedAppointment.finalPrice,
+            tips_amount: selectedAppointment.tipsAmount,
+            payment_type: selectedAppointment.paymentType,
+          }}
+          onStatusUpdated={(newStatus) => {
+            onStatusUpdated?.(newStatus);
+          }}
+          onCheckoutUpdated={(data) => {
+            onCheckoutUpdated?.(data);
+          }}
+        />
+      )}
+
+      {/* Edit Booking Status Dialog */}
+      {selectedAppointment && (
+        <EditBookingStatusDialog
+          isOpen={isStatusDialogOpen}
+          onClose={() => setIsStatusDialogOpen(false)}
+          bookingData={{
+            uid: selectedAppointment.id,
+            status: selectedAppointment.status
+              .toUpperCase()
+              .replace("-", "") as string,
+          }}
+          onStatusUpdated={(newStatus) => {
+            onStatusUpdated?.(newStatus);
+          }}
+        />
+      )}
     </>
   );
 };

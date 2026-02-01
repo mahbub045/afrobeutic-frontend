@@ -9,7 +9,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { baseApi } from "@/Redux/Api/BaseApi";
 import { useEditBookingMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/BookingsApi";
-import { useGetProductsDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Products/ProductsApi";
+import { useGetProductsFiltersQuery } from "@/Redux/Reducers/Common/FiltersApi";
 import type {
   CommonEditBookingDataProps,
   Product,
@@ -21,7 +21,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import Swal from "sweetalert2";
 
-const EditBookingProductsModal: React.FC<CommonEditBookingDataProps> = ({
+const EditBookingProductsDialog: React.FC<CommonEditBookingDataProps> = ({
   isOpen,
   onOpenChange,
   bookingData,
@@ -32,7 +32,7 @@ const EditBookingProductsModal: React.FC<CommonEditBookingDataProps> = ({
   const dispatch = useDispatch();
 
   const { data: productsData, isLoading: isLoadingProducts } =
-    useGetProductsDataQuery({ salonUid });
+    useGetProductsFiltersQuery({ salonUid });
 
   const [localSelection, setLocalSelection] = useState<string[]>([]);
   const [search, setSearch] = useState("");
@@ -124,7 +124,7 @@ const EditBookingProductsModal: React.FC<CommonEditBookingDataProps> = ({
                 {localSelection.length > 0 ? (
                   <>
                     {localSelection.map((productUid) => {
-                      const product = productsData?.results?.find(
+                      const product = productsData?.find(
                         (p: Product) => p.uid === productUid,
                       );
                       return product ? (
@@ -184,7 +184,7 @@ const EditBookingProductsModal: React.FC<CommonEditBookingDataProps> = ({
                     (() => {
                       const searchTerm = search.toLowerCase().trim();
                       const filteredProducts = searchTerm
-                        ? (productsData?.results || [])
+                        ? (productsData || [])
                             .filter((product: Product) =>
                               product.name.toLowerCase().includes(searchTerm),
                             )
@@ -199,7 +199,7 @@ const EditBookingProductsModal: React.FC<CommonEditBookingDataProps> = ({
                               if (!aStarts && bStarts) return 1;
                               return 0;
                             })
-                        : productsData?.results || [];
+                        : productsData || [];
 
                       return filteredProducts.length > 0 ? (
                         <ul className="divide-y p-2">
@@ -252,4 +252,4 @@ const EditBookingProductsModal: React.FC<CommonEditBookingDataProps> = ({
   );
 };
 
-export default EditBookingProductsModal;
+export default EditBookingProductsDialog;

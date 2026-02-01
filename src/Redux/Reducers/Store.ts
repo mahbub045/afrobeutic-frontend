@@ -9,7 +9,21 @@ export const store = configureStore({
     account: accountReducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(baseApi.middleware),
+    getDefaultMiddleware({
+      serializableCheck: {
+        // RTK Query stores non-serializable values (like Blob) in mutation results
+        // and passes them through action.payload. We can safely ignore those here.
+        ignoredPaths: [`${baseApi.reducerPath}.mutations`],
+        ignoredActions: [
+          `${baseApi.reducerPath}/executeQuery/pending`,
+          `${baseApi.reducerPath}/executeQuery/fulfilled`,
+          `${baseApi.reducerPath}/executeQuery/rejected`,
+          `${baseApi.reducerPath}/executeMutation/pending`,
+          `${baseApi.reducerPath}/executeMutation/fulfilled`,
+          `${baseApi.reducerPath}/executeMutation/rejected`,
+        ],
+      },
+    }).concat(baseApi.middleware),
 });
 
 // Optional but recommended for refetchOnFocus/refetchOnReconnect

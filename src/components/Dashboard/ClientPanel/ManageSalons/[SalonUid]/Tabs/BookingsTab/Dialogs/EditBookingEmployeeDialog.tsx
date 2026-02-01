@@ -9,7 +9,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { baseApi } from "@/Redux/Api/BaseApi";
 import { useEditBookingMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/BookingsApi";
-import { useGetEmployeesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Employees/EmployeesApi";
+import { useGetEmployeeFiltersQuery } from "@/Redux/Reducers/Common/FiltersApi";
 import type {
   CommonEditBookingDataProps,
   Employee,
@@ -21,7 +21,7 @@ import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import Swal from "sweetalert2";
 
-const EditBookingEmployeeModal: React.FC<CommonEditBookingDataProps> = ({
+const EditBookingEmployeeDialog: React.FC<CommonEditBookingDataProps> = ({
   isOpen,
   onOpenChange,
   bookingData,
@@ -32,7 +32,7 @@ const EditBookingEmployeeModal: React.FC<CommonEditBookingDataProps> = ({
   const dispatch = useDispatch();
 
   const { data: employeesData, isLoading: isLoadingEmployees } =
-    useGetEmployeesDataQuery({ salonUid });
+    useGetEmployeeFiltersQuery({ salonUid });
 
   const [selectedEmployee, setSelectedEmployee] = useState<string>("");
 
@@ -94,10 +94,10 @@ const EditBookingEmployeeModal: React.FC<CommonEditBookingDataProps> = ({
               <div className="flex items-center justify-center rounded-lg border border-dashed p-6">
                 <Loader2 className="h-5 w-5 animate-spin" />
               </div>
-            ) : employeesData?.results && employeesData.results.length > 0 ? (
+            ) : employeesData && employeesData.length > 0 ? (
               <div className="max-h-80 overflow-y-auto rounded-lg border p-3">
                 <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                  {employeesData.results.map((employee: Employee) => (
+                  {employeesData.map((employee: Employee) => (
                     <label
                       key={employee.uid}
                       className="hover:border-primary hover:bg-primary/5 flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-all"
@@ -146,4 +146,4 @@ const EditBookingEmployeeModal: React.FC<CommonEditBookingDataProps> = ({
   );
 };
 
-export default EditBookingEmployeeModal;
+export default EditBookingEmployeeDialog;

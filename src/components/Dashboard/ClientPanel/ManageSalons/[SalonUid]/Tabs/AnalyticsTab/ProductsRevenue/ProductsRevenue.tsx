@@ -10,35 +10,43 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { formatChoiceFieldValue } from "@/lib/utils";
+import { useGetProductRevenueQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Analytics/AnalyticsApi";
+import { ProductRevenue } from "@/Types/ClientPanel/ManageSalonTypes/AnalyticsTypes/AnalyticsTypes";
+import { LoaderPinwheel } from "lucide-react";
+import { useParams } from "next/navigation";
 
 const ProductsRevenue: React.FC = () => {
-  const [range, setRange] = useState<string>("week");
+  const [range, setRange] = useState<string>("this_week");
+  const { salonuid } = useParams();
 
-  const data = useMemo(() => {
-    // sample datasets for different ranges; replace with real data from API
-    const datasets: Record<string, (string | number)[][]> = {
-      day: [
-        ["Date", "Makeup", "Shampoo", "Skincare"],
-        ["2026-01-01", 40, 30, 20],
-        ["2026-01-02", 60, 45, 35],
-        ["2026-01-03", 50, 40, 30],
-      ],
-      week: [
-        ["Week", "Makeup", "Shampoo", "Skincare", "Fragrance"],
-        ["2026-01", 420, 280, 210, 140],
-        ["2026-02", 460, 300, 240, 160],
-        ["2026-03", 490, 330, 260, 180],
-      ],
-      month: [
-        ["Month", "Makeup", "Shampoo", "Skincare", "Fragrance", "Wellness"],
-        ["2025-10", 1700, 980, 640, 420, 210],
-        ["2025-11", 1900, 1050, 720, 460, 240],
-        ["2025-12", 2150, 1180, 840, 520, 280],
-      ],
-    };
+  const { data: productsRevenueData, isLoading } = useGetProductRevenueQuery({
+    salonUid: salonuid,
+    params: { period: range },
+  });
 
-    return datasets[range] ?? datasets.week;
-  }, [range]);
+  const chartData = useMemo(() => {
+    // Expecting an array like: [{ service_name: string, revenue: number }, ...]
+    const raw = Array.isArray(productsRevenueData)
+      ? (productsRevenueData as ProductRevenue[])
+      : (productsRevenueData as ProductRevenue[]) || [];
+
+    if (!raw.length) return [["Product", "Revenue"]];
+
+    const rows = raw
+      .slice()
+      .sort(
+        (a: ProductRevenue, b: ProductRevenue) =>
+          (b.revenue || 0) - (a.revenue || 0),
+      )
+      .slice(0, 5)
+      .map((r: ProductRevenue) => [
+        formatChoiceFieldValue(r.product_name || ""),
+        r.revenue || 0,
+      ]);
+
+    return [["Product", "Revenue"], ...rows];
+  }, [productsRevenueData]);
 
   const options = {
     backgroundColor: "transparent",
@@ -50,10 +58,21 @@ const ProductsRevenue: React.FC = () => {
     },
     hAxis: { textStyle: { color: "#027f81" } },
     vAxis: { minValue: 0, textStyle: { color: "#027f81" } },
-    colors: ["#ff7aa2", "#63a4ff", "#ffd166", "#2ec4b6", "#8e44ad"],
+    colors: ["#2ec4b6", "#63a4ff", "#ff7aa2", "#ffd166", "#8e44ad"],
     pointSize: 6,
     tooltip: { trigger: "both" },
   };
+  const prettifyRange = (key: string) => {
+    const map: Record<string, string> = {
+      this_week: "This Week",
+      last_week: "Last Week",
+      this_month: "This Month",
+      last_6_months: "Last 6 Months",
+      last_year: "Last Year",
+    };
+    return map[key] ?? key;
+  };
+
   return (
     <section className="space-y-4">
       <header className="flex items-center justify-between">
@@ -63,32 +82,39 @@ const ProductsRevenue: React.FC = () => {
         <div className="flex items-center gap-2">
           <Select defaultValue={range} onValueChange={(val) => setRange(val)}>
             <SelectTrigger size="sm" className="w-40">
-              <SelectValue>
-                {range === "day"
-                  ? "Today"
-                  : range === "week"
-                    ? "This Week"
-                    : "This Month"}
-              </SelectValue>
+              <SelectValue>{prettifyRange(range)}</SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="day">Today</SelectItem>
-              <SelectItem value="week">This Week</SelectItem>
-              <SelectItem value="month">This Month</SelectItem>
+              <SelectItem value="this_week">This Week</SelectItem>
+              <SelectItem value="last_week">Last Week</SelectItem>
+              <SelectItem value="this_month">This Month</SelectItem>
+              <SelectItem value="last_6_months">Last 6 Months</SelectItem>
+              <SelectItem value="last_year">Last Year</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </header>
 
-      <div className="w-full">
-        <Chart
-          chartType="LineChart"
-          width="100%"
-          height="320px"
-          data={data}
-          options={options}
-          loader={<div className="p-8 text-center">Loading chart…</div>}
-        />
+      <div className="flex w-full flex-col items-center rounded-md shadow-md dark:shadow-gray-600">
+        <div className="w-full max-w-2xl">
+          {isLoading ? (
+            <div className="flex h-80 items-center justify-center">
+              <LoaderPinwheel className="text-primary animate-spin" size={20} />
+            </div>
+          ) : chartData.length <= 1 ? (
+            <div className="flex h-80 items-center justify-center">
+              No revenue data available.
+            </div>
+          ) : (
+            <Chart
+              chartType="LineChart"
+              width="100%"
+              height="320px"
+              data={chartData}
+              options={options}
+            />
+          )}
+        </div>
       </div>
     </section>
   );

@@ -83,6 +83,7 @@ export interface Service {
   uid: string;
   name: string;
   price: string;
+  service_duration?: string;
 }
 
 export interface Product {
@@ -109,6 +110,11 @@ export interface EditBookingDialogProps {
     products: Array<{ uid: string }>;
     images?: string[];
   };
+  onDateTimeUpdated?: (data: {
+    booking_date: string;
+    booking_time: string;
+    notes?: string;
+  }) => void;
 }
 
 export interface EditBookingStatusDialogProps {
@@ -120,6 +126,7 @@ export interface EditBookingStatusDialogProps {
     cancellation_reason?: string;
     images?: string[];
   };
+  onStatusUpdated?: (status: string, cancellation_reason?: string) => void;
 }
 
 export interface Appointment {
@@ -145,5 +152,12 @@ export interface StaffMember {
 export interface CommonEditBookingDataProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  bookingData?: Booking | null;
+  bookingData?: Partial<Booking> | null;
+  onServicesUpdated?: (services: Service[]) => void;
+  onProductsUpdated?: (products: Product[]) => void;
+  onStatusUpdated?: (status: string) => void;
+  onCheckoutUpdated?: (data: {
+    tips_amount: number;
+    payment_type: string;
+  }) => void;
 }

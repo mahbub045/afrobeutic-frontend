@@ -8,8 +8,8 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { baseApi } from "@/Redux/Api/BaseApi";
-import { useEditBookingMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/BookingsApi";
-import { useGetServicesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
+import { useUpdateIndividualBookingStatusMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/IndividualBookings/IndividualBookingsApi";
+import { useGetServicesFiltersQuery } from "@/Redux/Reducers/Common/FiltersApi";
 import type {
   CommonEditBookingDataProps,
   Service,
@@ -21,10 +21,11 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import Swal from "sweetalert2";
 
-const EditBookingServicesModal: React.FC<CommonEditBookingDataProps> = ({
+const EditBookingServicesDialog: React.FC<CommonEditBookingDataProps> = ({
   isOpen,
   onOpenChange,
   bookingData,
+  onServicesUpdated,
 }) => {
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
@@ -32,7 +33,7 @@ const EditBookingServicesModal: React.FC<CommonEditBookingDataProps> = ({
   const dispatch = useDispatch();
 
   const { data: servicesData, isLoading: isLoadingServices } =
-    useGetServicesDataQuery({ salonUid });
+    useGetServicesFiltersQuery({ salonUid });
 
   const [localSelection, setLocalSelection] = useState<string[]>([]);
   const [search, setSearch] = useState("");
@@ -40,7 +41,8 @@ const EditBookingServicesModal: React.FC<CommonEditBookingDataProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const [editBooking, { isLoading }] = useEditBookingMutation();
+  const [editBooking, { isLoading }] =
+    useUpdateIndividualBookingStatusMutation();
 
   // Sync localSelection with bookingData when modal opens or data changes
   useEffect(() => {
@@ -77,8 +79,16 @@ const EditBookingServicesModal: React.FC<CommonEditBookingDataProps> = ({
         data: { services: localSelection },
       }).unwrap();
 
+      // Notify parent so it can update local UI state immediately
+      if (onServicesUpdated && servicesData) {
+        const updatedServices = (servicesData as Service[]).filter((service) =>
+          localSelection.includes(service.uid),
+        );
+        onServicesUpdated(updatedServices);
+      }
+
       try {
-        dispatch(baseApi.util.invalidateTags(["ChairsBooking"]));
+        dispatch(baseApi.util.invalidateTags(["IndividualBookings"]));
       } catch (e) {
         console.warn(e);
       }
@@ -124,7 +134,7 @@ const EditBookingServicesModal: React.FC<CommonEditBookingDataProps> = ({
                 {localSelection.length > 0 ? (
                   <>
                     {localSelection.map((serviceUid) => {
-                      const service = servicesData?.results?.find(
+                      const service = servicesData?.find(
                         (s: Service) => s.uid === serviceUid,
                       );
                       return service ? (
@@ -184,7 +194,7 @@ const EditBookingServicesModal: React.FC<CommonEditBookingDataProps> = ({
                     (() => {
                       const searchTerm = search.toLowerCase().trim();
                       const filteredServices = searchTerm
-                        ? (servicesData?.results || [])
+                        ? (servicesData || [])
                             .filter((service: Service) =>
                               service.name.toLowerCase().includes(searchTerm),
                             )
@@ -199,7 +209,7 @@ const EditBookingServicesModal: React.FC<CommonEditBookingDataProps> = ({
                               if (!aStarts && bStarts) return 1;
                               return 0;
                             })
-                        : servicesData?.results || [];
+                        : servicesData || [];
 
                       return filteredServices.length > 0 ? (
                         <ul className="divide-y p-2">
@@ -252,4 +262,4 @@ const EditBookingServicesModal: React.FC<CommonEditBookingDataProps> = ({
   );
 };
 
-export default EditBookingServicesModal;
+export default EditBookingServicesDialog;

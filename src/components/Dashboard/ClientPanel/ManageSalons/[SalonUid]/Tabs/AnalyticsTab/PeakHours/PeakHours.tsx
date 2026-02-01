@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useMemo, useState } from "react";
 import { Chart } from "react-google-charts";
 
@@ -10,47 +9,32 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useGetAppointmentsPeakHoursQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Analytics/AnalyticsApi";
+import { LoaderPinwheel } from "lucide-react";
+import { useParams } from "next/navigation";
 
 const PeakHours: React.FC = () => {
+  const { salonuid } = useParams();
   const [timeRange, setTimeRange] = useState<string>("today");
-  const [month, setMonth] = useState<string>("all");
 
-  const data = useMemo(() => {
-    // sample peak-hour distribution (values between 0 and 1)
-    const sample = {
-      today: [
-        ["Time", "Peak Hours"],
-        ["09-11", 5],
-        ["11-13", 2],
-        ["13-15", 6],
-        ["15-17", 1],
-        ["17-19", 10],
-      ],
-      week: [
-        ["Time", "Peak Hours"],
-        ["09-11", 4],
-        ["11-13", 6],
-        ["13-15", 7],
-        ["15-17", 5],
-        ["17-19", 3],
-      ],
-      month: [
-        ["Time", "Peak Hours"],
-        ["09-11", 5],
-        ["11-13", 5.5],
-        ["13-15", 6.5],
-        ["15-17", 5],
-        ["17-19", 4],
-      ],
+  const { data: appointmentPeakHoursData, isLoading } =
+    useGetAppointmentsPeakHoursQuery({
+      salonUid: salonuid,
+      params: { period: timeRange },
+    });
+  const chartData = useMemo(() => {
+    const raw = (appointmentPeakHoursData ?? {}) as Record<string, number>;
+    const header: (string | number)[] = ["Time", "Bookings"];
+    const parseStartHour = (s: string) => {
+      const part = s.split("-")[0] ?? s;
+      const hour = parseInt(part.split(":")[0] ?? "0", 10);
+      return Number.isNaN(hour) ? 0 : hour;
     };
-
-    return sample[timeRange as keyof typeof sample] ?? sample.today;
-  }, [timeRange]);
-
-  const maxValue = useMemo(() => {
-    const values = data.slice(1).map((row) => Number(row[1]) || 0);
-    return Math.max(...values, 0);
-  }, [data]);
+    const rows = Object.keys(raw)
+      .sort((a, b) => parseStartHour(a) - parseStartHour(b))
+      .map((k) => [k, raw[k] ?? 0]);
+    return [header, ...rows];
+  }, [appointmentPeakHoursData]);
 
   const options = {
     chartArea: { left: 48, top: 48, width: "88%", height: "70%" },
@@ -62,7 +46,6 @@ const PeakHours: React.FC = () => {
     vAxis: {
       minValue: 0,
       textStyle: { color: "#027f81" },
-      ticks: Array.from({ length: Math.ceil(maxValue) + 1 }, (_, i) => i),
     },
     hAxis: { textStyle: { color: "#027f81" } },
     backgroundColor: "transparent",
@@ -85,56 +68,39 @@ const PeakHours: React.FC = () => {
                 <SelectValue>
                   {timeRange === "today"
                     ? "Today"
-                    : timeRange === "week"
-                      ? "This Week"
-                      : "This Month"}
+                    : timeRange === "last_7_days"
+                      ? "Last 7 Days"
+                      : "All Time"}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="today">Today</SelectItem>
-                <SelectItem value="week">This Week</SelectItem>
-                <SelectItem value="month">This Month</SelectItem>
-              </SelectContent>
-            </Select>
-          </label>
-
-          <label className="flex items-center gap-2">
-            <span className="text-sm">Month:</span>
-            <Select defaultValue={month} onValueChange={(val) => setMonth(val)}>
-              <SelectTrigger size="sm" className="w-44">
-                <SelectValue>
-                  {month === "all" ? "All Months" : month}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Months</SelectItem>
-                <SelectItem value="01">January</SelectItem>
-                <SelectItem value="02">February</SelectItem>
-                <SelectItem value="03">March</SelectItem>
-                <SelectItem value="04">April</SelectItem>
-                <SelectItem value="05">May</SelectItem>
-                <SelectItem value="06">June</SelectItem>
-                <SelectItem value="07">July</SelectItem>
-                <SelectItem value="08">August</SelectItem>
-                <SelectItem value="09">September</SelectItem>
-                <SelectItem value="10">October</SelectItem>
-                <SelectItem value="11">November</SelectItem>
-                <SelectItem value="12">December</SelectItem>
+                <SelectItem value="last_7_days">Last 7 Days</SelectItem>
+                <SelectItem value="all_time">All Time</SelectItem>
               </SelectContent>
             </Select>
           </label>
         </div>
       </header>
 
-      <div className="w-full">
-        <Chart
-          chartType="ColumnChart"
-          width="100%"
-          height="390px"
-          data={data}
-          options={options}
-          loader={<div className="p-8 text-center">Loading chart…</div>}
-        />
+      <div className="w-full rounded-md shadow-md dark:shadow-gray-600">
+        {isLoading ? (
+          <div className="flex h-[360px] items-center justify-center">
+            <LoaderPinwheel className="text-primary animate-spin" size={20} />
+          </div>
+        ) : chartData.length <= 1 ? (
+          <div className="flex h-[360px] items-center justify-center">
+            No peak hours data available.
+          </div>
+        ) : (
+          <Chart
+            chartType="ColumnChart"
+            width="100%"
+            height="360px"
+            data={chartData}
+            options={options}
+          />
+        )}
       </div>
     </section>
   );

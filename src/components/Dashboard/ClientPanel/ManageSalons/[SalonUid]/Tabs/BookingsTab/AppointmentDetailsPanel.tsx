@@ -1,6 +1,7 @@
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -16,14 +17,13 @@ import type {
   Booking,
 } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
 import { Calendar as CalendarIcon, Edit, LoaderPinwheel } from "lucide-react";
-import type { Session } from "next-auth";
 import { useParams } from "next/navigation";
 import { SetStateAction, useState, type Dispatch } from "react";
 import { toast } from "sonner";
 import EditBookingCheckoutDialog from "./Dialogs/EditBookingCheckoutDialog";
-import EditBookingEmployeeModal from "./Dialogs/EditBookingEmployeeModal";
-import EditBookingProductsModal from "./Dialogs/EditBookingProductsModal";
-import EditBookingServicesModal from "./Dialogs/EditBookingServicesModal";
+import EditBookingEmployeeDialog from "./Dialogs/EditBookingEmployeeDialog";
+import EditBookingProductsDialog from "./Dialogs/EditBookingProductsDialog";
+import EditBookingServicesDialog from "./Dialogs/EditBookingServicesDialog";
 
 interface AppointmentDetailsPanelProps {
   serviceTitle: string;
@@ -43,7 +43,6 @@ interface AppointmentDetailsPanelProps {
   appointmentDateLabel: string;
   onOpenEdit: (open: boolean) => void;
   onOpenEditStatus: (open: boolean) => void;
-  session: Session | null;
 }
 
 const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
@@ -59,7 +58,6 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
   appointmentDateLabel,
   onOpenEdit,
   onOpenEditStatus,
-  session,
 }) => {
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
@@ -121,25 +119,6 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
             <h3 className="text-foreground text-base font-semibold">
               {serviceTitle}
             </h3>
-            <div className="-mt-1 flex items-center gap-1">
-              {selectedAppointment && (
-                <>
-                  <div>
-                    {(session?.user?.role === "OWNER" ||
-                      session?.user?.role === "ADMIN") && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => onOpenEdit(true)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
           </div>
           {selectedAppointment && (
             <div className="flex items-center gap-2">
@@ -192,13 +171,25 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
               </div>
             ) : (
               <div className="space-y-5">
-                <div className="flex items-start gap-3 text-sm">
-                  <span className="text-muted-foreground mt-0.5 text-xs">
-                    On
-                  </span>
-                  <span className="text-foreground font-medium">
-                    {appointmentDateLabel}
-                  </span>
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-3 text-sm">
+                    <span className="text-muted-foreground mt-0.5 text-xs">
+                      On
+                    </span>
+                    <span className="text-foreground font-medium">
+                      {appointmentDateLabel}
+                    </span>
+                  </div>
+                  <div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => onOpenEdit(true)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="item-center flex justify-between">
@@ -267,14 +258,16 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                         <span className="text-foreground text-sm font-medium">
                           {service.name}
                         </span>
-                        <span className="text-foreground text-sm font-semibold">
+                        <span className="text-primary text-sm font-semibold">
                           ${service.discount_price}
                         </span>
                       </div>
                       <div className="text-muted-foreground text-xs">
-                        Price: ${service.price}  b7 Discount:{" "}
-                        {service.discount_percentage}%  b7 Final: $
-                        {service.discount_price}
+                        Price: ${service.price} {"->"} Discount:{" "}
+                        {service.discount_percentage}% {"->"}{" "}
+                        <span className="text-primary">
+                          Final: ${service.discount_price}
+                        </span>
                       </div>
                       {service.description && (
                         <p className="text-muted-foreground mt-1 text-xs">
@@ -328,7 +321,7 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                           <span className="text-foreground text-sm font-medium">
                             {product.name}
                           </span>
-                          <span className="text-foreground text-sm font-semibold">
+                          <span className="text-primary text-sm font-semibold">
                             ${product.price}
                           </span>
                         </div>
@@ -398,24 +391,23 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                           </span>
                         </div>
                       )}
-                    <div className="mt-1.5 border-t pt-1.5">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Tips</span>
-                        <span className="text-muted-foreground font-medium">
-                          ${singleBookingData?.tips_amount ?? 0}
-                        </span>
-                      </div>
+                    <Separator />
+
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Total Price</span>
+                      <del className="text-muted-foreground font-medium">
+                        ${(singleBookingData?.total_price ?? 0).toFixed(2)}
+                      </del>
                     </div>
-                    <div className="mt-1.5 border-t pt-1.5">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">
-                          Total Price
-                        </span>
-                        <del className="text-muted-foreground font-medium">
-                          ${(singleBookingData?.total_price ?? 0).toFixed(2)}
-                        </del>
-                      </div>
+                    <Separator />
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Tips</span>
+                      <span className="text-foreground font-medium">
+                        ${singleBookingData?.tips_amount ?? 0}
+                      </span>
                     </div>
+                    <Separator />
+
                     <div className="flex items-center justify-between text-base">
                       <span className="text-foreground font-semibold">
                         Final Price
@@ -432,11 +424,11 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                 <div className="mt-1.5 px-2">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Payment Type</span>
-                    <span className="text-muted-foreground font-medium">
+                    <Badge variant="secondary">
                       {formatChoiceFieldValue(
                         singleBookingData?.payment_type,
                       ) ?? "Not Specified"}
-                    </span>
+                    </Badge>
                   </div>
                 </div>
 
@@ -515,25 +507,6 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                   <h3 className="text-foreground text-base font-semibold">
                     {serviceTitle}
                   </h3>
-                  <div className="flex items-center gap-1">
-                    {selectedAppointment && (
-                      <>
-                        <div>
-                          {(session?.user?.role === "OWNER" ||
-                            session?.user?.role === "ADMIN") && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => onOpenEdit(true)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      </>
-                    )}
-                  </div>
                 </div>
                 {selectedAppointment && (
                   <div className="flex items-center gap-2">
@@ -585,13 +558,25 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                     </div>
                   ) : (
                     <div className="space-y-5">
-                      <div className="flex items-start gap-3 text-sm">
-                        <span className="text-muted-foreground mt-0.5 text-xs">
-                          On
-                        </span>
-                        <span className="text-foreground font-medium">
-                          {appointmentDateLabel}
-                        </span>
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-3 text-sm">
+                          <span className="text-muted-foreground mt-0.5 text-xs">
+                            On
+                          </span>
+                          <span className="text-foreground font-medium">
+                            {appointmentDateLabel}
+                          </span>
+                        </div>
+                        <div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => onOpenEdit(true)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
 
                       <div className="item-center flex justify-between">
@@ -665,9 +650,11 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                               </span>
                             </div>
                             <div className="text-muted-foreground text-xs">
-                              Price: ${service.price}  b7 Discount:{" "}
-                              {service.discount_percentage}%  b7 Final: $
-                              {service.discount_price}
+                              Price: ${service.price} {"->"} Discount:{" "}
+                              {service.discount_percentage}% {"->"}{" "}
+                              <span className="text-primary">
+                                Final: ${service.discount_price}
+                              </span>
                             </div>
                             {service.description && (
                               <p className="text-muted-foreground mt-1 text-xs">
@@ -723,7 +710,7 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                                   <span className="text-foreground text-sm font-medium">
                                     {product.name}
                                   </span>
-                                  <span className="text-foreground text-sm font-semibold">
+                                  <span className="text-primary text-sm font-semibold">
                                     ${product.price}
                                   </span>
                                 </div>
@@ -796,29 +783,26 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                               </span>
                             </div>
                           )}
-                          <div className="mt-1.5 border-t pt-1.5">
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="text-muted-foreground">
-                                Tips
-                              </span>
-                              <span className="text-muted-foreground font-medium">
-                                ${singleBookingData?.tips_amount ?? 0}
-                              </span>
-                            </div>
+                          <Separator />
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-muted-foreground">
+                              Total Price
+                            </span>
+                            <del className="text-muted-foreground font-medium">
+                              $
+                              {(singleBookingData?.total_price ?? 0).toFixed(2)}
+                            </del>
                           </div>
-                          <div className="mt-1.5 border-t pt-1.5">
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="text-muted-foreground">
-                                Total Price
-                              </span>
-                              <del className="text-muted-foreground font-medium">
-                                $
-                                {(singleBookingData?.total_price ?? 0).toFixed(
-                                  2,
-                                )}
-                              </del>
-                            </div>
+                          <Separator />
+
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-muted-foreground">Tips</span>
+                            <span className="text-foreground font-medium">
+                              ${singleBookingData?.tips_amount ?? 0}
+                            </span>
                           </div>
+                          <Separator />
+
                           <div className="flex items-center justify-between text-base">
                             <span className="text-foreground font-semibold">
                               Final Price
@@ -902,17 +886,17 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
         onOpenChange={setIsEditCheckoutOpen}
         bookingData={singleBookingData}
       />
-      <EditBookingServicesModal
+      <EditBookingServicesDialog
         isOpen={isEditServicesOpen}
         onOpenChange={setIsEditServicesOpen}
         bookingData={singleBookingData}
       />
-      <EditBookingProductsModal
+      <EditBookingProductsDialog
         isOpen={isEditProductsOpen}
         onOpenChange={setIsEditProductsOpen}
         bookingData={singleBookingData}
       />
-      <EditBookingEmployeeModal
+      <EditBookingEmployeeDialog
         isOpen={isEditEmployeeOpen}
         onOpenChange={setIsEditEmployeeOpen}
         bookingData={singleBookingData}

@@ -34,16 +34,14 @@ import {
   ChevronRight,
   LoaderPinwheel,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import AppointmentDetailsPanel from "./AppointmentDetailsPanel";
-import EditBookingDialog from "./Dialogs/EditBookingDialog";
 import EditBookingStatusDialog from "./Dialogs/EditBookingStatusDialog";
+import EditBookingTimeAndDateDialog from "./Dialogs/EditBookingTimeAndDateDialog";
 
 const BookingsTab: React.FC = () => {
   const { salonuid } = useParams();
-  const { data: session } = useSession();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [viewMode] = useState<"day" | "week">("day");
   const [selectedAppointment, setSelectedAppointment] =
@@ -596,13 +594,12 @@ const BookingsTab: React.FC = () => {
             appointmentDateLabel={formatDate(selectedDate, false)}
             onOpenEdit={handleIsEditDialogOpen}
             onOpenEditStatus={handleIsEditStatusDialogOpen}
-            session={session ?? null}
           />
         </div>
       )}
 
       {/* Edit Booking Dialog */}
-      <EditBookingDialog
+      <EditBookingTimeAndDateDialog
         isOpen={isEditDialogOpen}
         onClose={() => handleIsEditDialogOpen(false)}
         bookingData={
