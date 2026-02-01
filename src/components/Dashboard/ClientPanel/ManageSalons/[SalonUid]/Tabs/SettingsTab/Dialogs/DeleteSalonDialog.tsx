@@ -64,6 +64,18 @@ const DeleteSalonDialog: React.FC<EditDashboardProps> = ({
           </DialogDescription>
         </DialogHeader>
 
+        <div className="space-y-1 rounded-md border border-red-100 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-900/30 dark:text-red-200">
+          <p className="font-semibold">Warning</p>
+          <p>
+            This will permanently delete the salon and all associated data
+            (appointments, clients, settings).
+          </p>
+          <p>
+            Please ensure you have exported any important information — this
+            action cannot be undone.
+          </p>
+        </div>
+
         <div className="mt-4 flex justify-end space-x-2">
           <Button
             size="sm"
