@@ -1,4 +1,5 @@
 import Breadcrumbs from "../../CommonComponents/Breadcrumbs";
+import PricingPlanList from "./PricingPlanList/PricingPlanList";
 
 const PricingPlansContainer: React.FC = () => {
   return (
@@ -12,6 +13,7 @@ const PricingPlansContainer: React.FC = () => {
           },
         ]}
       />
+      <PricingPlanList />
     </div>
   );
 };

@@ -70,7 +70,9 @@ const PricingPlanList: React.FC = () => {
           <LoaderPinwheel size={30} className="animate-spin" />
         </div>
       ) : !pricingPlanData || pricingPlanData.results.length === 0 ? (
-        <div>No pricing plans available.</div>
+        <div className="text-muted-foreground text-center">
+          No pricing plans available.
+        </div>
       ) : (
         <>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
