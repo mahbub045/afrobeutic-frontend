@@ -45,6 +45,8 @@ export interface SalonProps {
   status?: string;
   address?: string;
   opening_hours: OpeningHour[];
+  professional_career_details?: string;
+  about_salon?: string;
 }
 export interface SalonListResponse {
   count: number;

@@ -44,20 +44,20 @@ const SettingsTab: React.FC = () => {
 
         <div className="space-y-6">
           {/* Contact & Social Links Section */}
-          <ContactAndSocialLinks />
+          <ContactAndSocialLinks singleSalonData={singleSalonData} isLoading={isLoading} />
         </div>
       </div>
 
       {/* About Salon */}
       <div>
         {session?.user?.account_type === "INDIVIDUAL_STYLIST" ? (
-          <AboutAndProfessional />
+          <AboutAndProfessional singleSalonData={singleSalonData} isLoading={isLoading} />
         ) : null}
       </div>
       {/* Professional Career Details */}
       <div>
         {session?.user?.account_type === "INDIVIDUAL_STYLIST" ? (
-          <ProfessionalCareer />
+          <ProfessionalCareer singleSalonData={singleSalonData} isLoading={isLoading} />
         ) : null}
       </div>
 

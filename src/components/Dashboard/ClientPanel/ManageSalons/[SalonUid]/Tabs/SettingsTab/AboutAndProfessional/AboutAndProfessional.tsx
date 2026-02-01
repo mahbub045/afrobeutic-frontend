@@ -1,24 +1,45 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { DashboardTabProps } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
 import { Info, Pencil } from "lucide-react";
 
-const AboutAndProfessional: React.FC = () => {
+const AboutAndProfessional: React.FC<DashboardTabProps> = ({
+  singleSalonData,
+  isLoading,
+}) => {
   return (
     <Card className="border-0 shadow-md transition-shadow duration-300 hover:shadow-lg dark:shadow-gray-600">
       <CardContent className="p-4">
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="flex gap-2 text-xl font-bold text-gray-900 dark:text-white">
-            <Info /> About Salon
-          </h2>
-          <Button variant="outline" size="sm">
-            <Pencil className="h-4 w-4" /> Edit
-          </Button>
+          {isLoading ? (
+            <Skeleton className="h-6 w-40" />
+          ) : (
+            <h2 className="flex gap-2 text-xl font-bold text-gray-900 dark:text-white">
+              <Info /> About Salon
+            </h2>
+          )}
+
+          {isLoading ? (
+            <Skeleton className="h-8 w-16 rounded" />
+          ) : (
+            <Button variant="outline" size="sm">
+              <Pencil className="h-4 w-4" /> Edit
+            </Button>
+          )}
         </div>
-        <p className="leading-relaxed text-gray-700 dark:text-gray-300">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque sed
-          magna euismod, sodales lorem at, porttitor est. Vestibulum ante ipsum
-          primis in faucibus orci luctus et ultrices posuere cubilia curae;
-        </p>
+
+        {isLoading ? (
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-5/6" />
+            <Skeleton className="h-4 w-3/4" />
+          </div>
+        ) : (
+          <p className="leading-relaxed text-gray-700 dark:text-gray-300">
+            {singleSalonData?.about_salon || "No about salon details provided."}
+          </p>
+        )}
       </CardContent>
     </Card>
   );
