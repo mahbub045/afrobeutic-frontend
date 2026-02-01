@@ -106,7 +106,7 @@ const NavBar: React.FC<NavBarProps> = ({
             </Button>
 
             {/* Notifications */}
-            <Button
+            {/* <Button
               variant="ghost"
               size="icon"
               className="relative dark:shadow-gray-600"
@@ -116,7 +116,7 @@ const NavBar: React.FC<NavBarProps> = ({
                 3
               </Badge>
               <span className="sr-only">Notifications</span>
-            </Button>
+            </Button> */}
 
             {/* User Authentication */}
             <UserDropdown

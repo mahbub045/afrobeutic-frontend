@@ -135,6 +135,14 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
                 Billings
               </Link>
             </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link
+                className="cursor-pointer"
+                href="/dashboard/client-panel/accounts/pricing-plans"
+              >
+                Pricing Plans
+              </Link>
+            </DropdownMenuItem>
           </>
         )}
         {isManagementRole && (
