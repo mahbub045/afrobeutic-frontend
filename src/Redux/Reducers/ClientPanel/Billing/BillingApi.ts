@@ -27,7 +27,29 @@ export const BillingApi = baseApi.injectEndpoints({
       },
       invalidatesTags: ["BillingInfo"],
     }),
+
+    // New: update auto-renew for the current subscription. Backend accepts
+    // a PATCH to the same endpoint with `auto_renew` field.
+    updateSubscriptionAutoRenew: builder.mutation<
+      unknown,
+      { auto_renew: boolean }
+    >({
+      query: ({ auto_renew }) => {
+        const formData = new FormData();
+        formData.append("auto_renew", String(auto_renew));
+
+        return {
+          url: "/accounts/subscription",
+          method: "PATCH",
+          body: formData,
+        };
+      },
+      invalidatesTags: ["BillingInfo"],
+    }),
   }),
 });
-export const { useGetBillingInfoQuery, useCreateOrUpdateSubscriptionMutation } =
-  BillingApi;
+export const {
+  useGetBillingInfoQuery,
+  useCreateOrUpdateSubscriptionMutation,
+  useUpdateSubscriptionAutoRenewMutation,
+} = BillingApi;
