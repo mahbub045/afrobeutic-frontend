@@ -129,7 +129,7 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link
-                className="text-muted-foreground cursor-not-allowed"
+                className="cursor-pointer"
                 href="/dashboard/client-panel/accounts/billings"
               >
                 Billings
