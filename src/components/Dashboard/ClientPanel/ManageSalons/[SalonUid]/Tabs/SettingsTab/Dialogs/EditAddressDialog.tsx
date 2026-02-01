@@ -21,7 +21,6 @@ import {
   Formik,
   Form as FormikForm,
   FormikHelpers,
-  FormikProps,
 } from "formik";
 import { useTheme } from "next-themes";
 import { useParams } from "next/navigation";
@@ -111,7 +110,7 @@ const EditAddressDialog: React.FC<EditDashboardProps> = ({
           validationSchema={basicSchema}
           onSubmit={handleSubmit}
         >
-          {({ values }: FormikProps<AddressFormValues>) => (
+          {() => (
             <FormikForm>
               <div className="grid grid-cols-1 gap-4">
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
