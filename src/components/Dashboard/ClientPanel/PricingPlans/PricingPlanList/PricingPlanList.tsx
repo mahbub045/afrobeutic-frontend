@@ -1,41 +1,23 @@
 "use client";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { formatChoiceFieldValue, formatPrice } from "@/lib/utils";
-import { useGetPricingPlansQuery } from "@/Redux/Reducers/AdminPanel/PricingPlans/PricingPlansApi";
+import { formatPrice } from "@/lib/utils";
+import { useGetPricingPlansQuery } from "@/Redux/Reducers/ClientPanel/PricingPlans/PricingPlansApi";
 import { PricingPlanTypes } from "@/Types/AdminPanel/PricingPlansTypes/PricingPlansTypes";
-import { Edit, LoaderPinwheel, Plus, Trash } from "lucide-react";
+import { LoaderPinwheel } from "lucide-react";
 import { useState } from "react";
-import AddPricingPlanDialog from "./Dialogs/AddPricingPlanDialog";
-import DeletePricingPlanDialog from "./Dialogs/DeletePricingPlanDialog";
-import EditPricingPlanDialog from "./Dialogs/EditPricingPlanDialog";
 
 const PricingPlanList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState<boolean>(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
   const [selectedPricingPlan, setSelectedPricingPlan] =
     useState<PricingPlanTypes | null>(null);
-
-  const handleAddDialogOpen = () => setIsAddDialogOpen(true);
-  const handleEditDialogOpen = (plan: PricingPlanTypes) => {
-    setSelectedPricingPlan(plan);
-    setIsEditDialogOpen(true);
-  };
-  const handleDeleteDialogOpen = (plan: PricingPlanTypes) => {
-    setSelectedPricingPlan(plan);
-    setIsDeleteDialogOpen(true);
-  };
 
   const {
     data: pricingPlanData,
@@ -45,24 +27,10 @@ const PricingPlanList: React.FC = () => {
 
   const pricingPlans = pricingPlanData?.results ?? [];
 
-  const getStausColorMap = (is_status: boolean) => {
-    switch (is_status) {
-      case true:
-        return "secondary";
-      case false:
-        return "danger";
-      default:
-        return "outline";
-    }
-  };
-
   return (
     <>
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-2xl font-semibold md:w-auto">Pricing Plans</h2>
-        <Button variant="default" onClick={handleAddDialogOpen}>
-          <Plus /> Add New Plan
-        </Button>
       </div>
 
       {isLoading ? (
@@ -94,11 +62,6 @@ const PricingPlanList: React.FC = () => {
                       </small>
                     )}
                   </CardDescription>
-                  <CardAction>
-                    <Badge variant={getStausColorMap(plan.is_active)}>
-                      {plan.is_active ? "Active" : "Inactive"}
-                    </Badge>
-                  </CardAction>
                 </CardHeader>
                 <CardContent>
                   <div>
@@ -110,10 +73,6 @@ const PricingPlanList: React.FC = () => {
                     </h2>
                   </div>
                   <ul className="marker:text-primary list-disc space-y-1 pl-6 text-sm">
-                    <li>
-                      <strong>Category -&gt; </strong>{" "}
-                      {formatChoiceFieldValue(plan.account_category)}
-                    </li>
                     <li>
                       <strong>Salon Limit -&gt;</strong> {plan.salon_limit}
                     </li>
@@ -135,20 +94,10 @@ const PricingPlanList: React.FC = () => {
                 </CardContent>
                 <CardFooter className="flex justify-center gap-2">
                   <Button
-                    variant="danger"
-                    className="w-1/2 shadow-md dark:shadow-gray-600"
-                    onClick={() => handleDeleteDialogOpen(plan)}
-                  >
-                    <Trash />
-                    Delete Plan
-                  </Button>
-                  <Button
                     variant="default"
-                    className="w-1/2 shadow-md dark:shadow-gray-600"
-                    onClick={() => handleEditDialogOpen(plan)}
+                    className="w-full shadow-md dark:shadow-gray-600"
                   >
-                    <Edit />
-                    Edit Plan
+                    Get Now
                   </Button>
                 </CardFooter>
               </Card>
@@ -204,25 +153,6 @@ const PricingPlanList: React.FC = () => {
               )}
           </div>
         </>
-      )}
-      {/* Modals */}
-      <AddPricingPlanDialog
-        isOpen={isAddDialogOpen}
-        onClose={() => setIsAddDialogOpen(false)}
-      />
-      {selectedPricingPlan && (
-        <EditPricingPlanDialog
-          isOpen={isEditDialogOpen}
-          onClose={() => setIsEditDialogOpen(false)}
-          pricingPlanData={selectedPricingPlan}
-        />
-      )}
-      {selectedPricingPlan && (
-        <DeletePricingPlanDialog
-          isOpen={isDeleteDialogOpen}
-          onClose={() => setIsDeleteDialogOpen(false)}
-          pricingPlanData={selectedPricingPlan}
-        />
       )}
     </>
   );

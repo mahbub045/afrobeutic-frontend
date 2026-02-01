@@ -154,6 +154,7 @@ export const baseApi = createApi({
     "Enquiries",
     "SupportTickets",
     "SalonAnalytics",
+    "BillingInfo",
     // Admin Panel Tags
     "ManagementsList",
     "CustomersList",
