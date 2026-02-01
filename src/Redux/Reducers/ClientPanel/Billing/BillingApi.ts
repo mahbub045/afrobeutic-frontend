@@ -9,6 +9,25 @@ export const BillingApi = baseApi.injectEndpoints({
       }),
       providesTags: ["BillingInfo"],
     }),
+
+    createOrUpdateSubscription: builder.mutation<
+      unknown,
+      { pricing_plan: string; payment_method_id: string }
+    >({
+      query: ({ pricing_plan, payment_method_id }) => {
+        const formData = new FormData();
+        formData.append("pricing_plan", pricing_plan);
+        formData.append("payment_method_id", payment_method_id);
+
+        return {
+          url: "/accounts/subscription",
+          method: "PATCH",
+          body: formData,
+        };
+      },
+      invalidatesTags: ["BillingInfo"],
+    }),
   }),
 });
-export const { useGetBillingInfoQuery } = BillingApi;
+export const { useGetBillingInfoQuery, useCreateOrUpdateSubscriptionMutation } =
+  BillingApi;

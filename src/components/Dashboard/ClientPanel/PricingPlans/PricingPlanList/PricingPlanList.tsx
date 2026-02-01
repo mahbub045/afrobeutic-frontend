@@ -13,9 +13,11 @@ import { useGetPricingPlansQuery } from "@/Redux/Reducers/ClientPanel/PricingPla
 import { PricingPlanTypes } from "@/Types/AdminPanel/PricingPlansTypes/PricingPlansTypes";
 import { LoaderPinwheel } from "lucide-react";
 import { useState } from "react";
+import SubscribeToPlanDialog from "./Dialogs/SubscribeToPlanDialog";
 
 const PricingPlanList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [subscribeOpen, setSubscribeOpen] = useState(false);
   const [selectedPricingPlan, setSelectedPricingPlan] =
     useState<PricingPlanTypes | null>(null);
 
@@ -29,6 +31,15 @@ const PricingPlanList: React.FC = () => {
 
   return (
     <>
+      <SubscribeToPlanDialog
+        open={subscribeOpen}
+        onOpenChange={(open) => {
+          setSubscribeOpen(open);
+          if (!open) setSelectedPricingPlan(null);
+        }}
+        plan={selectedPricingPlan}
+      />
+
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-2xl font-semibold md:w-auto">Pricing Plans</h2>
       </div>
@@ -96,6 +107,10 @@ const PricingPlanList: React.FC = () => {
                   <Button
                     variant="default"
                     className="w-full shadow-md dark:shadow-gray-600"
+                    onClick={() => {
+                      setSelectedPricingPlan(plan);
+                      setSubscribeOpen(true);
+                    }}
                   >
                     Get Now
                   </Button>

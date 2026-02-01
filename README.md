@@ -2,6 +2,13 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+### Environment Variables
+
+Create a `.env.local` file (you can copy from `.env.example`) and set:
+
+- `NEXT_PUBLIC_APIBASE_URL` – your backend base URL
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` – Stripe publishable key used by Stripe.js
+
 First, run the development server:
 
 ```bash
