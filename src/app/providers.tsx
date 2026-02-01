@@ -3,7 +3,7 @@
 import { AccountPersistence } from "@/components/AccountPersistence";
 import store from "@/Redux/Reducers/Store";
 import { Elements } from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
+import { loadStripe } from "@stripe/stripe-js/pure";
 import { SessionProvider } from "next-auth/react";
 import type { CSSProperties, ReactNode } from "react";
 import { Provider as ReduxProvider } from "react-redux";
@@ -12,6 +12,10 @@ import "react-toastify/dist/ReactToastify.css";
 
 const stripePublishableKey =
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "";
+
+// Reduce noisy console/network errors when ad blockers block Stripe beacons.
+// This uses the Stripe-supported API (available only via `@stripe/stripe-js/pure`).
+loadStripe.setLoadParameters({ advancedFraudSignals: false });
 
 const stripePromise = stripePublishableKey
   ? loadStripe(stripePublishableKey)

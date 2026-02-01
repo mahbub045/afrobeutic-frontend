@@ -28,12 +28,10 @@ import {
   Search,
   X,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const SubscriptionList: React.FC = () => {
-  const { data: session } = useSession();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
