@@ -31,7 +31,7 @@ import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
 
-const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
+const EditProfileDialog: React.FC<EditDashboardProps> = ({
   singleSalonData,
   isOpen,
   onClose,
@@ -40,12 +40,12 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
   const { resolvedTheme } = useTheme();
 
   // RTK hooks
-  const [editBasicInfo, { isLoading }] = useEditSingleSalonMutation();
+  const [editProfile, { isLoading }] = useEditSingleSalonMutation();
 
   const basicSchema = Yup.object().shape({
     name: Yup.string().required("Salon name is required"),
     salon_type: Yup.string().required("Salon type is required"),
-    street: Yup.string(),
+    street: Yup.string().required("Street is required"),
     city: Yup.string().required("City is required"),
     postal_code: Yup.string().required("Postal code is required"),
     country: Yup.string().required("Country is required"),
@@ -69,7 +69,7 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
         formData.append("country", values.country);
         formData.append("address", values.address || "");
 
-        await editBasicInfo({
+        await editProfile({
           salonUid: salonuid as string,
           salonData: formData,
         }).unwrap();
@@ -83,7 +83,7 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
           country: values.country,
         };
 
-        await editBasicInfo({
+        await editProfile({
           salonUid: salonuid as string,
           salonData: payload,
         }).unwrap();
@@ -310,4 +310,4 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
   );
 };
 
-export default EditBasicInfoDialog;
+export default EditProfileDialog;
