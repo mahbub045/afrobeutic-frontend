@@ -45,6 +45,8 @@ export interface SalonProps {
   status?: string;
   address?: string;
   opening_hours: OpeningHour[];
+  professional_career_details?: string;
+  about_salon?: string;
 }
 export interface SalonListResponse {
   count: number;
@@ -93,7 +95,7 @@ export interface FormValues {
 export interface DashboardTabProps {
   singleSalonData: SalonProps;
   isLoading: boolean;
-  isError: boolean;
+  isError?: boolean;
 }
 
 export interface EditDashboardProps {
@@ -108,11 +110,36 @@ export interface BasicInfoFormValues {
   logoPreview: string;
   name: string;
   salon_type: string;
-  street: string;
+  address_one: string;
+  address_two: string;
   city: string;
   postal_code: string;
   country: string;
   address: string;
+}
+
+export interface ProfileInfoFormValues {
+  logoFile: File | null;
+  logoPreview: string;
+  name: string;
+  salon_type: string;
+}
+
+export interface AddressFormValues {
+  address_one: string;
+  address_two: string;
+  city: string;
+  postal_code: string;
+  country: string;
+  address: string;
+}
+export interface ContactValues {
+  phone_number_one: string;
+  email: string;
+  website: string;
+  facebook?: string;
+  instagram?: string;
+  youtube?: string;
 }
 
 export interface ContactInfoFormValues {

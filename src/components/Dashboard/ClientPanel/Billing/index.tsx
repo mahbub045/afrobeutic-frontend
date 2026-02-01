@@ -1,5 +1,8 @@
 "use client";
-import { useGetBillingInfoQuery } from "@/Redux/Reducers/ClientPanel/Billing/BillingApi";
+import {
+  useGetBillingInfoQuery,
+  useUpdateSubscriptionAutoRenewMutation,
+} from "@/Redux/Reducers/ClientPanel/Billing/BillingApi";
 import { BillingSubscription } from "@/Types/ClientPanel/Billing/BillingTypes";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -31,6 +35,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import Breadcrumbs from "../../CommonComponents/Breadcrumbs";
 
 const BillingContainer: React.FC = () => {
@@ -59,6 +65,53 @@ const BillingContainer: React.FC = () => {
     if (normalized === "EXPIRED") return "bg-zinc-700 text-white";
     return "bg-secondary text-white";
   })();
+
+  function AutoRenewControl({
+    subscriptionAutoRenew,
+  }: {
+    subscriptionAutoRenew: boolean;
+  }) {
+    const [value, setValue] = useState<boolean>(subscriptionAutoRenew);
+
+    useEffect(() => {
+      setValue(subscriptionAutoRenew);
+    }, [subscriptionAutoRenew]);
+
+    const [updateAutoRenew, { isLoading }] =
+      useUpdateSubscriptionAutoRenewMutation();
+
+    const handleToggle = async (checked: boolean | undefined) => {
+      const newValue = !!checked;
+      const prev = value;
+      setValue(newValue);
+
+      try {
+        await updateAutoRenew({ auto_renew: newValue }).unwrap();
+        toast.success("Auto-renew updated.");
+      } catch (e) {
+        console.error(e);
+        setValue(prev);
+        const message =
+          (e as { data?: { message?: string } })?.data?.message ||
+          "Failed to update auto-renew. Please try again.";
+        toast.error(message);
+      }
+    };
+
+    return (
+      <div className="flex items-center gap-2">
+        <Badge variant={value ? "default" : "danger"}>
+          {value ? "Enabled" : "Disabled"}
+        </Badge>
+
+        <Switch
+          checked={value}
+          onCheckedChange={handleToggle}
+          disabled={isLoading}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -253,8 +306,12 @@ const BillingContainer: React.FC = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Feature</TableHead>
-                        <TableHead className="text-right">Limit</TableHead>
+                        <TableHead className="text-primary text-lg font-bold">
+                          Feature
+                        </TableHead>
+                        <TableHead className="text-primary text-right text-lg font-bold">
+                          Limit
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -280,7 +337,7 @@ const BillingContainer: React.FC = () => {
                         <TableCell>Broadcasting</TableCell>
                         <TableCell className="text-right">
                           {plan?.has_broadcasting
-                            ? `Yes (limit ${safe(plan?.broadcasting_message_limit)})`
+                            ? `Yes (Limit -> ${safe(plan?.broadcasting_message_limit)})`
                             : "No"}
                         </TableCell>
                       </TableRow>
@@ -324,11 +381,11 @@ const BillingContainer: React.FC = () => {
                   <span className="text-muted-foreground text-sm">
                     Auto renew
                   </span>
-                  <Badge
-                    variant={subscription?.auto_renew ? "default" : "danger"}
-                  >
-                    {subscription?.auto_renew ? "Enabled" : "Disabled"}
-                  </Badge>
+
+                  {/* Editable auto-renew control */}
+                  <AutoRenewControl
+                    subscriptionAutoRenew={!!subscription?.auto_renew}
+                  />
                 </div>
 
                 <Separator />

@@ -1,12 +1,11 @@
 "use client";
 
-import { Bell, Menu, Moon, Sun } from "lucide-react";
+import { Menu, Moon, Sun } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import Link from "next/link";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { logOut } from "@/Redux/Api/BaseApi";
 import UserDropdown from "./UserDropdown";

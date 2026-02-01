@@ -6,7 +6,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-
 export function formatDateTime(value?: string | null): string {
   if (value === undefined || value === null || value === "") return "-";
 
@@ -56,22 +55,27 @@ export const formatChoiceFieldValue = (v: unknown): string => {
     .join(" ");
 };
 
-export   const getCountryName = (code?: string | null) => {
-    if (!code) return null;
-    const found = countries.find(
-      (c) => c.code === code || c.code.toLowerCase() === code.toLowerCase(),
-    );
-    return found?.name ?? code;
-  };
+export const getCountryName = (code?: string | null) => {
+  if (!code) return null;
+  const found = countries.find(
+    (c) => c.code === code || c.code.toLowerCase() === code.toLowerCase(),
+  );
+  return found?.name ?? code;
+};
 
-  export const formatPrice = (price?: string) => {
-    if (!price) return "-";
-  
-    const num = Number(price);
-    if (Number.isNaN(num)) return price;
-  
-    return `$${new Intl.NumberFormat(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(num)}`;
-  };
+export const formatPrice = (price?: string) => {
+  if (!price) return "-";
+
+  const num = Number(price);
+  if (Number.isNaN(num)) return price;
+
+  return `$${new Intl.NumberFormat(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(num)}`;
+};
+
+function convertToSubCurrency(amount: number, factor = 100) {
+  return Math.round(amount * factor);
+}
+export default convertToSubCurrency;
