@@ -39,7 +39,7 @@ const SettingsTab: React.FC = () => {
           <SalonProfileCard singleSalonData={singleSalonData} isLoading={isLoading} />
 
           {/* Address Section */}
-          <AddressSection />
+          <AddressSection singleSalonData={singleSalonData} isLoading={isLoading} />
         </div>
 
         <div className="space-y-6">
