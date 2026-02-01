@@ -4,7 +4,7 @@ export const PricingPlansApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getPricingPlans: builder.query({
       query: (params) => ({
-        url: "/client/pricing-plans",
+        url: "/accounts/pricing-plans",
         method: "GET",
         params,
       }),

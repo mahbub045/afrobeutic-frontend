@@ -1,19 +1,17 @@
 "use client";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { formatChoiceFieldValue, formatPrice } from "@/lib/utils";
-import { useGetPricingPlansQuery } from "@/Redux/Reducers/AdminPanel/PricingPlans/PricingPlansApi";
+import { formatPrice } from "@/lib/utils";
+import { useGetPricingPlansQuery } from "@/Redux/Reducers/ClientPanel/PricingPlans/PricingPlansApi";
 import { PricingPlanTypes } from "@/Types/AdminPanel/PricingPlansTypes/PricingPlansTypes";
-import { LoaderPinwheel, Trash } from "lucide-react";
+import { LoaderPinwheel } from "lucide-react";
 import { useState } from "react";
 
 const PricingPlanList: React.FC = () => {
@@ -29,17 +27,6 @@ const PricingPlanList: React.FC = () => {
 
   const pricingPlans = pricingPlanData?.results ?? [];
 
-  const getStausColorMap = (is_status: boolean) => {
-    switch (is_status) {
-      case true:
-        return "secondary";
-      case false:
-        return "danger";
-      default:
-        return "outline";
-    }
-  };
-
   return (
     <>
       <div className="mb-4 flex items-center justify-between">
@@ -51,7 +38,9 @@ const PricingPlanList: React.FC = () => {
           <LoaderPinwheel size={30} className="animate-spin" />
         </div>
       ) : !pricingPlanData || pricingPlanData.results.length === 0 ? (
-        <div className="text-center text-muted-foreground">No pricing plans available.</div>
+        <div className="text-muted-foreground text-center">
+          No pricing plans available.
+        </div>
       ) : (
         <>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -73,11 +62,6 @@ const PricingPlanList: React.FC = () => {
                       </small>
                     )}
                   </CardDescription>
-                  <CardAction>
-                    <Badge variant={getStausColorMap(plan.is_active)}>
-                      {plan.is_active ? "Active" : "Inactive"}
-                    </Badge>
-                  </CardAction>
                 </CardHeader>
                 <CardContent>
                   <div>
@@ -89,10 +73,6 @@ const PricingPlanList: React.FC = () => {
                     </h2>
                   </div>
                   <ul className="marker:text-primary list-disc space-y-1 pl-6 text-sm">
-                    <li>
-                      <strong>Category -&gt; </strong>{" "}
-                      {formatChoiceFieldValue(plan.account_category)}
-                    </li>
                     <li>
                       <strong>Salon Limit -&gt;</strong> {plan.salon_limit}
                     </li>
@@ -114,11 +94,10 @@ const PricingPlanList: React.FC = () => {
                 </CardContent>
                 <CardFooter className="flex justify-center gap-2">
                   <Button
-                    variant="danger"
-                    className="w-1/2 shadow-md dark:shadow-gray-600"
+                    variant="default"
+                    className="w-full shadow-md dark:shadow-gray-600"
                   >
-                    <Trash />
-                    Delete Plan
+                    Get Now
                   </Button>
                 </CardFooter>
               </Card>
