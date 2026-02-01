@@ -19,8 +19,18 @@ export const SingleSalonApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["SingleSalon"],
     }),
+    deleteSingleSalon: builder.mutation({
+      query: ({ salonUid }) => ({
+        url: `/salons/${salonUid}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["SingleSalon"],
+    }),
   }),
 });
 
-export const { useGetSingleSalonDataQuery, useEditSingleSalonMutation } =
-  SingleSalonApi;
+export const {
+  useGetSingleSalonDataQuery,
+  useEditSingleSalonMutation,
+  useDeleteSingleSalonMutation,
+} = SingleSalonApi;

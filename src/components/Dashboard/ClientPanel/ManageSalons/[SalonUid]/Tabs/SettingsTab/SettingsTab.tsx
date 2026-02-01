@@ -9,11 +9,13 @@ import { Check, Pause, Settings, Trash } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { useParams } from "next/navigation";
+import React, { useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import AboutAndProfessional from "./AboutAndProfessional/AboutAndProfessional";
 import AddressSection from "./AddressSection/AddressSection";
 import ContactAndSocialLinks from "./ContactAndSocialLinks/ContactAndSocialLinks";
+import DeleteSalonDialog from "./Dialogs/DeleteSalonDialog";
 import ProfessionalCareer from "./ProfessionalCareer/ProfessionalCareer";
 import SalonProfileCard from "./SalonProfileCard/SalonProfileCard";
 
@@ -45,6 +47,10 @@ const SettingsTab: React.FC = () => {
       showCancelButton: true,
       confirmButtonText: isInactive ? "Yes, activate" : "Yes, deactivate",
       cancelButtonText: "Cancel",
+      background: resolvedTheme === "dark" ? "#0f1724" : undefined,
+      color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
+      confirmButtonColor: "#037375",
+      timer: 2000,
     });
 
     if (!res.isConfirmed) return;
@@ -61,8 +67,11 @@ const SettingsTab: React.FC = () => {
         text: isInactive
           ? "Salon was activated successfully"
           : "Salon was deactivated successfully",
-        timer: 2000,
         showConfirmButton: false,
+        background: resolvedTheme === "dark" ? "#0f1724" : undefined,
+        color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
+        confirmButtonColor: "#037375",
+        timer: 2000,
       });
 
       // refresh data
@@ -72,6 +81,8 @@ const SettingsTab: React.FC = () => {
       toast.error("Failed to update salon status. Please try again.");
     }
   };
+
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
   return (
     <div className="space-y-8 pb-6">
@@ -159,9 +170,19 @@ const SettingsTab: React.FC = () => {
           );
         })()}
 
-        <Button variant="danger">
+        <Button
+          variant="danger"
+          onClick={() => setOpenDeleteDialog(true)}
+          aria-label="Delete salon"
+        >
           <Trash /> Delete Salon
         </Button>
+
+        <DeleteSalonDialog
+          singleSalonData={singleSalonData}
+          isOpen={openDeleteDialog}
+          onClose={() => setOpenDeleteDialog(false)}
+        />
       </div>
     </div>
   );
