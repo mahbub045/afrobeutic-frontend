@@ -1,13 +1,19 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DashboardTabProps } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
 import { BriefcaseBusiness, Pencil } from "lucide-react";
+import React, { useState } from "react";
+import EditProfessionalCareerDialog from "../Dialogs/EditProfessionalCareerDialog";
 
 const ProfessionalCareer: React.FC<DashboardTabProps> = ({
   singleSalonData,
   isLoading,
 }) => {
+  const [openCareerDialog, setOpenCareerDialog] = useState(false);
+
   return (
     <Card className="border-0 shadow-md transition-shadow duration-300 hover:shadow-lg dark:shadow-gray-600">
       <CardContent className="p-4">
@@ -23,7 +29,11 @@ const ProfessionalCareer: React.FC<DashboardTabProps> = ({
           {isLoading ? (
             <Skeleton className="h-8 w-16 rounded" />
           ) : (
-            <Button variant="outline" size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setOpenCareerDialog(true)}
+            >
               <Pencil className="h-4 w-4" /> Edit
             </Button>
           )}
@@ -41,6 +51,12 @@ const ProfessionalCareer: React.FC<DashboardTabProps> = ({
               "No professional career details provided."}
           </p>
         )}
+
+        <EditProfessionalCareerDialog
+          singleSalonData={singleSalonData}
+          isOpen={openCareerDialog}
+          onClose={() => setOpenCareerDialog(false)}
+        />
       </CardContent>
     </Card>
   );
