@@ -218,7 +218,10 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
   };
 
   // Return true on success so caller (Formik) can reset the form and close dialog
-  const handleSubmit = async (formData: FormValues) => {
+  const handleSubmit = async (
+    formData: FormValues,
+    setErrors?: (errors: import("formik").FormikErrors<FormValues>) => void,
+  ) => {
     try {
       // Transform the data to match API payload format
       const payload: Partial<SalonProps> & {
@@ -287,29 +290,94 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
     } catch (error: unknown) {
       console.error("Failed to add salon:", error);
 
-      // Display specific error messages from API
-      const apiError = error as { data?: Record<string, unknown> };
-      if (apiError?.data) {
-        const errorData = apiError.data;
-        const errorMessages: string[] = [];
+      interface ApiErrorResponse {
+        data?: Record<string, unknown> | string[];
+        message?: string;
+        status?: number;
+      }
 
-        Object.keys(errorData).forEach((key) => {
-          const value = errorData[key];
-          if (Array.isArray(value)) {
-            errorMessages.push(`${key}: ${value.join(", ")}`);
-          } else if (typeof value === "object" && value !== null) {
-            errorMessages.push(`${key} has errors`);
+      const isApiErrorResponse = (obj: unknown): obj is ApiErrorResponse =>
+        typeof obj === "object" &&
+        obj !== null &&
+        ("data" in obj || "message" in obj);
+
+      const apiError: ApiErrorResponse = isApiErrorResponse(error)
+        ? (error as ApiErrorResponse)
+        : { message: String(error) };
+
+      console.error("Error details:", apiError?.data || apiError);
+
+      const apiErrors =
+        (apiError.data && typeof apiError.data !== "string"
+          ? apiError.data
+          : undefined) || undefined;
+
+      const messages: string[] = [];
+
+      if (apiErrors && typeof apiErrors === "object") {
+        type NestedErrors = { [key: string]: string | NestedErrors };
+        const formikErrors: NestedErrors = {};
+
+        const setNested = (obj: NestedErrors, path: string, value: string) => {
+          const parts = path.split(".");
+          let cur: NestedErrors = obj;
+          for (let i = 0; i < parts.length; i++) {
+            const p = parts[i];
+            if (i === parts.length - 1) {
+              cur[p] = value;
+            } else {
+              if (typeof cur[p] !== "object" || cur[p] === undefined) {
+                cur[p] = {} as NestedErrors;
+              }
+              cur = cur[p] as NestedErrors;
+            }
           }
-        });
+        };
 
-        if (errorMessages.length > 0) {
-          errorMessages.forEach((msg) => toast.error(msg));
+        const traverse = (errObj: Record<string, unknown>, prefix = "") => {
+          for (const key in errObj) {
+            if (!Object.prototype.hasOwnProperty.call(errObj, key)) continue;
+            const val = errObj[key];
+            const path = prefix ? `${prefix}.${key}` : key;
+
+            if (Array.isArray(val)) {
+              const arr = val as unknown[];
+              const joined = arr.map((v) => String(v)).join(" ");
+              setNested(formikErrors, path, joined);
+              messages.push(...arr.map((v) => String(v)));
+            } else if (typeof val === "string") {
+              setNested(formikErrors, path, val);
+              messages.push(val);
+            } else if (typeof val === "object" && val !== null) {
+              traverse(val as Record<string, unknown>, path);
+            }
+          }
+        };
+
+        traverse(apiErrors as Record<string, unknown>);
+
+        if (setErrors) {
+          setErrors(
+            formikErrors as unknown as import("formik").FormikErrors<FormValues>,
+          );
+        }
+
+        if (messages.length > 0) {
+          // Show each message as a toast for visibility
+          messages.forEach((m) => toast.error(m));
         } else {
-          toast.error("Failed to add salon. Please try again.");
+          toast.error("There were validation errors. Please check the form.");
         }
       } else {
-        toast.error("Failed to add salon. Please try again.");
+        const topMessage =
+          (Array.isArray(apiError.data)
+            ? (apiError.data as string[]).join(" ")
+            : undefined) ||
+          apiError.message ||
+          "Failed to add salon. Please try again.";
+        toast.error(topMessage);
       }
+
       return false;
     }
   };
@@ -592,9 +660,12 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
               })),
             }}
             validationSchema={validationSchema}
-            onSubmit={async (values, { resetForm, setSubmitting }) => {
+            onSubmit={async (
+              values,
+              { resetForm, setSubmitting, setErrors },
+            ) => {
               setSubmitting(true);
-              const success = await handleSubmit(values);
+              const success = await handleSubmit(values, setErrors);
               setSubmitting(false);
               if (success) {
                 resetForm();
