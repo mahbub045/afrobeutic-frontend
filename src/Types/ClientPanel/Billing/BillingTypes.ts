@@ -20,4 +20,5 @@ export interface BillingSubscription {
   cancelled_at?: string | null;
   notes?: string | null;
   pricing_plan: PricingPlan;
+  auto_renew: boolean;
 }

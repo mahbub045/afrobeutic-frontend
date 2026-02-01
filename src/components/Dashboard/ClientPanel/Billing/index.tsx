@@ -319,6 +319,18 @@ const BillingContainer: React.FC = () => {
                   <span className="text-muted-foreground text-sm">Status</span>
                   <Badge className={statusColorClass}>{statusLabel}</Badge>
                 </div>
+
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-muted-foreground text-sm">
+                    Auto renew
+                  </span>
+                  <Badge
+                    variant={subscription?.auto_renew ? "default" : "danger"}
+                  >
+                    {subscription?.auto_renew ? "Enabled" : "Disabled"}
+                  </Badge>
+                </div>
+
                 <Separator />
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center justify-between gap-3">
