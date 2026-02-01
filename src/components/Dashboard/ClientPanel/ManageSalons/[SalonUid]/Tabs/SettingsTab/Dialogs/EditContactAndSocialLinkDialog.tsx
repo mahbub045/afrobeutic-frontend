@@ -80,7 +80,7 @@ const EditContactAndSocialLinkDialog: React.FC<EditDashboardProps> = ({
 
   const schema = Yup.object().shape({
     website: Yup.string().url("Invalid URL").nullable(),
-    phone: Yup.string().nullable(),
+    phone_number_one: Yup.string().nullable(),
     email: Yup.string().email("Invalid email address").nullable(),
   });
 
@@ -118,7 +118,7 @@ const EditContactAndSocialLinkDialog: React.FC<EditDashboardProps> = ({
                 </div> */}
                 <div>
                   <Label className="mb-2">Phone</Label>
-                  <Field name="phone">
+                  <Field name="phone_number_one">
                     {({ field, form }: FieldProps) => (
                       <div>
                         <PhoneInput
@@ -159,7 +159,7 @@ const EditContactAndSocialLinkDialog: React.FC<EditDashboardProps> = ({
                           searchClass="!bg-card !text-card-foreground dark:!bg-gray-800 dark:!text-gray-100"
                         />
                         <ErrorMessage
-                          name="phone"
+                          name="phone_number_one"
                           component="div"
                           className="text-danger mt-1 text-xs"
                         />

@@ -10,11 +10,15 @@ import {
   Phone,
   Youtube,
 } from "lucide-react";
+import React, { useState } from "react";
+import EditContactAndSocialLinkDialog from "../Dialogs/EditContactAndSocialLinkDialog";
 
 const ContactAndSocialLinks: React.FC<DashboardTabProps> = ({
   singleSalonData,
   isLoading,
 }) => {
+  const [openContactDialog, setOpenContactDialog] = useState(false);
+
   return (
     <Card className="border-0 shadow-md transition-shadow duration-300 hover:shadow-lg dark:shadow-gray-600">
       <CardContent className="p-4">
@@ -30,11 +34,23 @@ const ContactAndSocialLinks: React.FC<DashboardTabProps> = ({
           {isLoading ? (
             <Skeleton className="h-8 w-16 rounded" />
           ) : (
-            <Button variant="outline" size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setOpenContactDialog(true)}
+              aria-label="Edit contact and social links"
+            >
               <Pencil className="h-4 w-4" /> Edit
             </Button>
           )}
         </div>
+
+        {/* Dialog */}
+        <EditContactAndSocialLinkDialog
+          singleSalonData={singleSalonData}
+          isOpen={openContactDialog}
+          onClose={() => setOpenContactDialog(false)}
+        />
 
         <div className="space-y-6">
           {/* Phone */}
