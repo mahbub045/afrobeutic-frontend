@@ -132,6 +132,7 @@ export const baseApi = createApi({
   tagTypes: [
     // Common Tags
     "UserProfile",
+    "Filters",
     // Client Panlel Tags
     "AcceptInvitation",
     "CommonCategories",

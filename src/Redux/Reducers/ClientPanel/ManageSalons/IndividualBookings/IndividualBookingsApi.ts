@@ -10,6 +10,14 @@ export const IndividualBookingsApi = baseApi.injectEndpoints({
       }),
       providesTags: ["IndividualBookings"],
     }),
+    addIndividualBooking: builder.mutation({
+      query: ({ salonUid, data }) => ({
+        url: `/salons/${salonUid}/bookings`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["IndividualBookings", "SalonAnalytics"],
+    }),
     updateIndividualBookingStatus: builder.mutation({
       query: ({ salonUid, bookingUid, data }) => ({
         url: `/salons/${salonUid}/bookings/${bookingUid}`,
@@ -23,5 +31,6 @@ export const IndividualBookingsApi = baseApi.injectEndpoints({
 
 export const {
   useGetIndividualBookingsQuery,
+  useAddIndividualBookingMutation,
   useUpdateIndividualBookingStatusMutation,
 } = IndividualBookingsApi;

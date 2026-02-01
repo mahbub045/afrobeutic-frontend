@@ -7,9 +7,11 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useEditChairBookingMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Chairs/ChairsBookingApi";
-import { useGetEmployeesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Employees/EmployeesApi";
-import { useGetProductsDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Products/ProductsApi";
-import { useGetServicesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
+import {
+  useGetEmployeeFiltersQuery,
+  useGetProductsFiltersQuery,
+  useGetServicesFiltersQuery,
+} from "@/Redux/Reducers/Common/FiltersApi";
 import {
   BookingFormValues,
   EditChairBookingDialogProps,
@@ -75,33 +77,21 @@ const EditChairBookingDialog: React.FC<EditChairBookingDialogProps> = ({
   const productsDropdownRef = useRef<HTMLDivElement>(null);
 
   // RTK Hooks
-  const { data: servicesData, isLoading: isLoadingServices } =
-    useGetServicesDataQuery({ salonUid: salonUid });
-  const { data: productsData, isLoading: isLoadingProducts } =
-    useGetProductsDataQuery({ salonUid: salonUid });
-  const { data: employeesData, isLoading: isLoadingEmployees } =
-    useGetEmployeesDataQuery({ salonUid: salonUid });
+  const { data: servicesFilterData, isLoading: isLoadingServices } =
+    useGetServicesFiltersQuery({ salonUid: salonUid });
+  const { data: productsFilterData, isLoading: isLoadingProducts } =
+    useGetProductsFiltersQuery({ salonUid: salonUid });
+  const { data: employeesFilterData, isLoading: isLoadingEmployees } =
+    useGetEmployeeFiltersQuery({ salonUid: salonUid });
   const [editChairBooking, { isLoading: isEditingChairBooking }] =
     useEditChairBookingMutation();
 
   // Format data for dropdowns
-  const services = Array.isArray(servicesData?.results)
-    ? servicesData.results
-    : Array.isArray(servicesData)
-      ? servicesData
-      : [];
+  const services = servicesFilterData ?? [];
 
-  const products = Array.isArray(productsData?.results)
-    ? productsData.results
-    : Array.isArray(productsData)
-      ? productsData
-      : [];
+  const products = productsFilterData ?? [];
 
-  const employees = Array.isArray(employeesData?.results)
-    ? employeesData.results
-    : Array.isArray(employeesData)
-      ? employeesData
-      : [];
+  const employees = employeesFilterData ?? [];
 
   const initialBookingTime = (() => {
     const raw = selectedChairBookingData?.booking_time;
@@ -185,16 +175,86 @@ const EditChairBookingDialog: React.FC<EditChairBookingDialogProps> = ({
       helpers.resetForm();
     } catch (error: unknown) {
       console.error("Failed to create booking:", error);
-      const apiError = error as {
-        data?: { message?: string };
+
+      // Strongly-typed API error response
+      interface ApiErrorResponse {
+        data?: {
+          message?: string;
+          errors?: Record<string, string | string[] | Record<string, unknown>>;
+          error?: Record<string, string | string[] | Record<string, unknown>>;
+        };
         message?: string;
-      };
+        status?: number;
+      }
+
+      const isApiErrorResponse = (obj: unknown): obj is ApiErrorResponse =>
+        typeof obj === "object" &&
+        obj !== null &&
+        ("data" in obj || "message" in obj);
+
+      const apiError: ApiErrorResponse = isApiErrorResponse(error)
+        ? error
+        : { message: String(error) };
+
       console.error("Error details:", apiError?.data || apiError);
-      toast.error(
-        apiError?.data?.message ||
-          apiError?.message ||
-          "Failed to create booking. Please try again.",
-      );
+
+      // Try to map server-side validation errors to Formik fields so they
+      // appear under each corresponding input.
+      const apiErrors =
+        apiError.data?.errors || apiError.data?.error || apiError.data;
+
+      if (apiErrors && typeof apiErrors === "object") {
+        type NestedErrors = { [key: string]: string | NestedErrors };
+        const formikErrors: NestedErrors = {};
+
+        const setNested = (obj: NestedErrors, path: string, value: string) => {
+          const parts = path.split(".");
+          let cur: NestedErrors = obj;
+          for (let i = 0; i < parts.length; i++) {
+            const p = parts[i];
+            if (i === parts.length - 1) {
+              cur[p] = value;
+            } else {
+              if (typeof cur[p] !== "object" || cur[p] === undefined) {
+                cur[p] = {} as NestedErrors;
+              }
+              cur = cur[p] as NestedErrors;
+            }
+          }
+        };
+
+        const traverse = (errObj: Record<string, unknown>, prefix = "") => {
+          for (const key in errObj) {
+            if (!Object.prototype.hasOwnProperty.call(errObj, key)) continue;
+            const val = errObj[key];
+            const path = prefix ? `${prefix}.${key}` : key;
+
+            if (Array.isArray(val)) {
+              setNested(formikErrors, path, (val as string[]).join(" "));
+            } else if (typeof val === "string") {
+              setNested(formikErrors, path, val);
+            } else if (typeof val === "object" && val !== null) {
+              traverse(val as Record<string, unknown>, path);
+            }
+          }
+        };
+
+        traverse(apiErrors as Record<string, unknown>);
+
+        // Cast to Formik errors type for our Booking form
+        helpers.setErrors(
+          formikErrors as unknown as import("formik").FormikErrors<BookingFormValues>,
+        );
+      } else {
+        // Fallback to a toast for generic errors
+        toast.error(
+          apiError.data?.message ||
+            apiError.message ||
+            "Failed to create booking. Please try again.",
+        );
+      }
+
+      helpers.setSubmitting(false);
     }
   };
 
