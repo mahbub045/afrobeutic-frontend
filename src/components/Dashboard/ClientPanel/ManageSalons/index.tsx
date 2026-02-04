@@ -14,6 +14,7 @@ import {
   ArrowRight,
   ChevronLeft,
   ChevronRight,
+  CircleAlert,
   Plus,
   Scissors,
 } from "lucide-react";
@@ -231,11 +232,11 @@ const ManageSalonsContainer: React.FC = () => {
             ))}
           </div>
         ) : !salonListData?.results || salonListData.results.length === 0 ? (
-          <div className="w-full rounded-xl border-2 border-dashed border-gray-400/60 bg-white/80 p-8 text-center dark:border-gray-700/60 dark:bg-gray-900/80">
-            <div className="bg-primary/5 mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full">
-              <Scissors className="text-primary h-6 w-6" />
+          <div className="border-danger w-full rounded-xl border-1 border-dashed bg-white/80 p-8 text-center dark:bg-gray-900/80">
+            <div className="bg-primary/5 mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full">
+              <CircleAlert size={50} className="text-danger" />
             </div>
-            <h3 className="mb-1 text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-danger mb-1 text-lg font-semibold">
               No salons yet
             </h3>
             <p className="text-muted-foreground text-sm">
