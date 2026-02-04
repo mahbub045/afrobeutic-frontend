@@ -1,49 +1,34 @@
-"use client";
+import MetaOauthCallbackClient from "./MetaOauthCallbackClient";
 
-import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+export const dynamic = "force-dynamic";
 
-export default function MetaOauthCallbackPage() {
-  const searchParams = useSearchParams();
+type PageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
 
-  useEffect(() => {
-    const code = searchParams.get("code");
-    const state = searchParams.get("state");
-    const error = searchParams.get("error");
-    const errorDescription = searchParams.get("error_description");
+export default async function MetaOauthCallbackPage({
+  searchParams,
+}: PageProps) {
+  const resolvedSearchParams = (await searchParams) ?? {};
 
-    const payload = {
-      type: "META_OAUTH_CODE",
-      code,
-      state,
-      error,
-      errorDescription,
-    };
+  const codeRaw = resolvedSearchParams.code;
+  const stateRaw = resolvedSearchParams.state;
+  const errorRaw = resolvedSearchParams.error;
+  const errorDescriptionRaw = resolvedSearchParams.error_description;
 
-    try {
-      if (window.opener && !window.opener.closed) {
-        window.opener.postMessage(payload, window.location.origin);
-        window.close();
-        return;
-      }
-    } catch {
-      // ignore
-    }
-
-    // Fallback: keep the payload accessible if there is no opener.
-    try {
-      localStorage.setItem("META_OAUTH_LAST_RESULT", JSON.stringify(payload));
-    } catch {
-      // ignore
-    }
-  }, [searchParams]);
+  const code = Array.isArray(codeRaw) ? codeRaw[0] : (codeRaw ?? null);
+  const state = Array.isArray(stateRaw) ? stateRaw[0] : (stateRaw ?? null);
+  const error = Array.isArray(errorRaw) ? errorRaw[0] : (errorRaw ?? null);
+  const errorDescription = Array.isArray(errorDescriptionRaw)
+    ? errorDescriptionRaw[0]
+    : (errorDescriptionRaw ?? null);
 
   return (
-    <div className="mx-auto flex min-h-[50vh] max-w-lg flex-col items-center justify-center gap-2 p-6 text-center">
-      <h1 className="text-lg font-semibold">Completing Meta login…</h1>
-      <p className="text-muted-foreground text-sm">
-        If this window doesn’t close automatically, you can close it.
-      </p>
-    </div>
+    <MetaOauthCallbackClient
+      code={code}
+      state={state}
+      error={error}
+      errorDescription={errorDescription}
+    />
   );
 }
