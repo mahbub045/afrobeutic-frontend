@@ -120,29 +120,29 @@ const ContactAndSocialLinks: React.FC<DashboardTabProps> = ({
                 <>
                   <Button variant="outline" size="sm">
                     <a
-                      href={singleSalonData?.facebook || ""}
+                      href={singleSalonData?.facebook || "#"}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <Facebook />
+                      <Facebook className="text-blue-500" />
                     </a>
                   </Button>
                   <Button variant="outline" size="sm">
                     <a
-                      href={singleSalonData?.instagram || ""}
+                      href={singleSalonData?.instagram || "#"}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <Instagram />
+                      <Instagram className="text-pink-500" />
                     </a>
                   </Button>
                   <Button variant="outline" size="sm">
                     <a
-                      href={singleSalonData?.youtube || ""}
+                      href={singleSalonData?.youtube || "#"}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <Youtube />
+                      <Youtube className="text-red-600" />
                     </a>
                   </Button>
                 </>
