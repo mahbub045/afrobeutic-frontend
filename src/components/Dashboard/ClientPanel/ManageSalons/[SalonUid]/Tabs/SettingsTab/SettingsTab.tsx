@@ -18,6 +18,7 @@ import ContactAndSocialLinks from "./ContactAndSocialLinks/ContactAndSocialLinks
 import DeleteSalonDialog from "./Dialogs/DeleteSalonDialog";
 import ProfessionalCareer from "./ProfessionalCareer/ProfessionalCareer";
 import SalonProfileCard from "./SalonProfileCard/SalonProfileCard";
+import WhatsApp from "./WhatsApp/WhatsApp";
 
 const SettingsTab: React.FC = () => {
   const { data: session } = useSession();
@@ -98,8 +99,8 @@ const SettingsTab: React.FC = () => {
       {/* Profile Header Section */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Left Column - Salon Profile */}
+        {/* Salon Profile Card */}
         <div className="space-y-6">
-          {/* Salon Profile Card */}
           <SalonProfileCard
             singleSalonData={singleSalonData}
             isLoading={isLoading}
@@ -112,12 +113,20 @@ const SettingsTab: React.FC = () => {
           />
         </div>
 
+        {/* Right Column - WhatsApp & Contact */}
         <div className="space-y-6">
+          {/* WhatsApp Section */}
+          <div className="space-y-1">
+            <WhatsApp singleSalonData={singleSalonData} isLoading={isLoading} />
+          </div>
+
           {/* Contact & Social Links Section */}
-          <ContactAndSocialLinks
-            singleSalonData={singleSalonData}
-            isLoading={isLoading}
-          />
+          <div className="space-y-6">
+            <ContactAndSocialLinks
+              singleSalonData={singleSalonData}
+              isLoading={isLoading}
+            />
+          </div>
         </div>
       </div>
 
