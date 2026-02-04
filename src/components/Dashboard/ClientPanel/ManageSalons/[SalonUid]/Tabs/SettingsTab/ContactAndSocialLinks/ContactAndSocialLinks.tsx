@@ -52,10 +52,10 @@ const ContactAndSocialLinks: React.FC<DashboardTabProps> = ({
           onClose={() => setOpenContactDialog(false)}
         />
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Phone */}
           {isLoading ? (
-            <div className="flex items-start gap-4 border-b border-gray-100 pb-5 dark:border-gray-700">
+            <div className="flex items-start gap-4 border-b border-gray-100 pb-3 dark:border-gray-700">
               <Skeleton className="h-10 w-10 rounded-lg" />
               <div className="flex-1">
                 <Skeleton className="h-3 w-24" />
@@ -63,7 +63,7 @@ const ContactAndSocialLinks: React.FC<DashboardTabProps> = ({
               </div>
             </div>
           ) : (
-            <div className="flex items-start gap-4 border-b border-gray-100 pb-5 dark:border-gray-700">
+            <div className="flex items-start gap-4 border-b border-gray-100 pb-3 dark:border-gray-700">
               <div className="flex-shrink-0 rounded-lg bg-blue-100 p-3 dark:bg-blue-900">
                 <Phone className="h-5 w-5 text-blue-600 dark:text-blue-300" />
               </div>
@@ -88,7 +88,7 @@ const ContactAndSocialLinks: React.FC<DashboardTabProps> = ({
               </div>
             </div>
           ) : (
-            <div className="flex items-start gap-4 border-b border-gray-100 pb-5 dark:border-gray-700">
+            <div className="flex items-start gap-4 border-b border-gray-100 pb-3 dark:border-gray-700">
               <div className="flex-shrink-0 rounded-lg bg-amber-100 p-3 dark:bg-amber-900">
                 <Mail className="h-5 w-5 text-amber-600 dark:text-amber-300" />
               </div>
