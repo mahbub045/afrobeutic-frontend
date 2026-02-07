@@ -3,6 +3,7 @@ import SessionMonitor from "@/components/SessionMonitor";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Viewport } from "next";
 import { Geist, Inter } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 // react-phone-input-2 requires its CSS to be imported globally
 import "react-phone-input-2/lib/style.css";
@@ -242,6 +243,27 @@ export default function RootLayout({
         className={`${inter.className} ${geistSans.variable} antialiased`}
         suppressHydrationWarning
       >
+        {/* Facebook SDK */}
+        <Script id="facebook-sdk" strategy="afterInteractive">
+          {`
+            window.fbAsyncInit = function() {
+              FB.init({
+                appId: '${process.env.NEXT_PUBLIC_META_APP_ID}',
+                autoLogAppEvents: true,
+                xfbml: true,
+                version: 'v21.0'
+              });
+            };
+          `}
+        </Script>
+        <Script
+          src="https://connect.facebook.net/en_US/sdk.js"
+          strategy="afterInteractive"
+          async
+          defer
+          crossOrigin="anonymous"
+        />
+
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
