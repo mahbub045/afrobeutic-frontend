@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { SalonProps } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
 import { useEffect, useMemo } from "react";
@@ -26,25 +27,44 @@ const WhatsApp = ({ singleSalonData, isLoading }: WhatsAppProps) => {
       if (!event.origin.endsWith("facebook.com")) return;
       try {
         const data = JSON.parse(event.data);
+        console.log("Received data from Facebook:", data);
+
         if (data.type === "WA_EMBEDDED_SIGNUP") {
+          console.log("WhatsApp Embedded Signup Event:", data.event);
+          console.log("Full data object:", JSON.stringify(data, null, 2));
+
           // if user finishes the Embedded Signup flow
           if (data.event === "FINISH" || data.event === "FINISH_ONLY_WABA") {
-            const { phone_number_id, waba_id } = data.data;
-            console.log(
-              "Phone number ID ",
+            const {
               phone_number_id,
-              " WhatsApp business account ID ",
               waba_id,
-            );
+              business_id,
+              page_ids,
+              catalog_ids,
+              dataset_ids,
+              instagram_account_ids,
+            } = data.data || {};
+
+            console.log("=== WhatsApp Business Account Setup Complete ===");
+            console.log("WABA ID:", waba_id);
+            console.log("Business ID:", business_id);
+            console.log("Phone Number ID:", phone_number_id || "Not provided");
+            console.log("Page IDs:", page_ids);
+            console.log("Catalog IDs:", catalog_ids);
+            console.log("Dataset IDs:", dataset_ids);
+            console.log("Instagram Account IDs:", instagram_account_ids);
+
+            // TODO: Send this data to your backend API
+            // You'll need the waba_id and business_id for further API calls
 
             // if user cancels the Embedded Signup flow
           } else if (data.event === "CANCEL") {
-            const { current_step } = data.data;
+            const { current_step } = data.data || {};
             console.warn("Cancel at ", current_step);
 
             // if user reports an error during the Embedded Signup flow
           } else if (data.event === "ERROR") {
-            const { error_message } = data.data;
+            const { error_message } = data.data || {};
             console.error("error ", error_message);
           }
         }
@@ -101,28 +121,12 @@ const WhatsApp = ({ singleSalonData, isLoading }: WhatsAppProps) => {
             )}
           </div>
           <p className="text-muted-foreground text-xs">
-            WhatsApp integration is being reworked; this layout represents the
-            new styling without hooking into a Meta flow.
+            Connect your WhatsApp Business Account to manage your messages and
+            appointments directly from Afrobeutic.
           </p>
         </div>
 
-        <button
-          onClick={launchEmbeddedSignup}
-          style={{
-            backgroundColor: "#1877f2",
-            border: 0,
-            borderRadius: "4px",
-            color: "#fff",
-            cursor: "pointer",
-            fontFamily: "Helvetica, Arial, sans-serif",
-            fontSize: "16px",
-            fontWeight: "bold",
-            height: "40px",
-            padding: "0 24px",
-          }}
-        >
-          Login with Facebook
-        </button>
+        <Button onClick={launchEmbeddedSignup}>Login with Facebook</Button>
       </div>
     </Card>
   );
