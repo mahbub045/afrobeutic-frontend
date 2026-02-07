@@ -3,8 +3,11 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { usePassWABAInfoMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/WhatsApp/WhatsAppApi";
 import type { SalonProps } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
+import { useParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
+import { toast } from "react-toastify";
 
 type WhatsAppProps = {
   singleSalonData?: SalonProps;
@@ -12,6 +15,11 @@ type WhatsAppProps = {
 };
 
 const WhatsApp = ({ singleSalonData, isLoading }: WhatsAppProps) => {
+  const { salonuid } = useParams();
+  const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
+
+  const [passWABAInfo] = usePassWABAInfoMutation();
+
   const whatsappStatus = useMemo(() => {
     const raw = (
       singleSalonData as (SalonProps & { whatsapp_status?: string }) | undefined
@@ -54,8 +62,27 @@ const WhatsApp = ({ singleSalonData, isLoading }: WhatsAppProps) => {
             console.log("Dataset IDs:", dataset_ids);
             console.log("Instagram Account IDs:", instagram_account_ids);
 
-            // TODO: Send this data to your backend API
-            // You'll need the waba_id and business_id for further API calls
+            // Send WABA info to backend
+            if (waba_id && business_id && salonUid) {
+              passWABAInfo({
+                salonUid,
+                waba_id,
+                business_id,
+                phone_number_id,
+              })
+                .unwrap()
+                .then(() => {
+                  toast.success("WhatsApp account connected successfully!");
+                })
+                .catch((error) => {
+                  console.error("Error sending WABA info:", error);
+                  toast.error("Failed to save WhatsApp account information");
+                });
+            } else {
+              console.warn(
+                "Cannot send WABA info - missing required data (waba_id, business_id, or salonUid)",
+              );
+            }
 
             // if user cancels the Embedded Signup flow
           } else if (data.event === "CANCEL") {
@@ -80,7 +107,7 @@ const WhatsApp = ({ singleSalonData, isLoading }: WhatsAppProps) => {
     return () => {
       window.removeEventListener("message", embeddedSignupInfoListener);
     };
-  }, []);
+  }, [passWABAInfo, salonUid]);
 
   // Handle WhatsApp Embedded Signup
   const launchEmbeddedSignup = () => {
