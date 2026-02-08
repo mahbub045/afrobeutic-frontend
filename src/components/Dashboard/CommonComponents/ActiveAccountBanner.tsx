@@ -3,7 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAccountSwitch } from "@/hooks/use-account-switch";
-import { useGetAccountAccesserQuery } from "@/Redux/Reducers/ClientPanel/SwitchAccount/SwitchAccountApi";
+import { useGetAccountAccesserQuery } from "@/Redux/Reducers/ClientPanel/Accounts/SwitchAccount/SwitchAccountApi";
 import { ArrowLeft, Info } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useEffect, useMemo, useState } from "react";

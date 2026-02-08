@@ -2,15 +2,33 @@ import { baseApi } from "@/Redux/Api/BaseApi";
 
 export const WhatsAppApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-    passWABAInfo: build.mutation({
+    getWhatsAppOnboardData: build.query({
+      query: (salonUid) => ({
+        url: `/salons/${salonUid}/whatsapp`,
+        method: "GET",
+      }),
+      providesTags: ["WhatsAppOnBoardData"],
+    }),
+    whatsAppOnboard: build.mutation({
       query: ({ salonUid, ...wabaInfo }) => ({
-        url: `/salons/${salonUid}/whatsapp-onboard`,
+        url: `/salons/${salonUid}/whatsapp`,
         method: "POST",
         body: wabaInfo,
       }),
-      invalidatesTags: ["SalonData"],
+      invalidatesTags: ["WhatsAppOnBoardData"],
+    }),
+    deleteWhatsAppOnboard: build.mutation({
+      query: (salonUid) => ({
+        url: `/salons/${salonUid}/whatsapp`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["WhatsAppOnBoardData"],
     }),
   }),
 });
 
-export const { usePassWABAInfoMutation } = WhatsAppApi;
+export const {
+  useGetWhatsAppOnboardDataQuery,
+  useWhatsAppOnboardMutation,
+  useDeleteWhatsAppOnboardMutation,
+} = WhatsAppApi;

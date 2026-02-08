@@ -2,8 +2,8 @@
 import {
   useGetBillingInfoQuery,
   useUpdateSubscriptionAutoRenewMutation,
-} from "@/Redux/Reducers/ClientPanel/Billing/BillingApi";
-import { BillingSubscription } from "@/Types/ClientPanel/Billing/BillingTypes";
+} from "@/Redux/Reducers/ClientPanel/Accounts/Billing/BillingApi";
+import { BillingSubscription } from "@/Types/ClientPanel/Accounts/BillingTypes";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,7 +37,7 @@ import {
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import Breadcrumbs from "../../CommonComponents/Breadcrumbs";
+import Breadcrumbs from "../../../CommonComponents/Breadcrumbs";
 
 const BillingContainer: React.FC = () => {
   const {

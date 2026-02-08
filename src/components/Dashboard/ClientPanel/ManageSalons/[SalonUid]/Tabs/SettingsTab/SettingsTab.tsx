@@ -117,7 +117,7 @@ const SettingsTab: React.FC = () => {
         <div className="space-y-6">
           {/* WhatsApp Section */}
           <div className="space-y-1">
-            <WhatsApp singleSalonData={singleSalonData} isLoading={isLoading} />
+            <WhatsApp />
           </div>
 
           {/* Contact & Social Links Section */}

@@ -17,7 +17,6 @@ import {
   Home,
   LifeBuoy,
   LoaderPinwheel,
-  Megaphone,
   MessageSquare,
   Podcast,
   ShieldUser,
@@ -134,11 +133,11 @@ const SideBar: React.FC<SideBarProps> = ({
           href: "/dashboard/client-panel/enquiries",
           Icon: BadgeQuestionMark,
         },
-        {
-          label: "Broadcasting",
-          href: "/dashboard/client-panel/broadcast",
-          Icon: Megaphone,
-        },
+        // {
+        //   label: "Broadcasting",
+        //   href: "/dashboard/client-panel/broadcast",
+        //   Icon: Megaphone,
+        // },
         {
           label: "Help",
           Icon: HelpCircle,

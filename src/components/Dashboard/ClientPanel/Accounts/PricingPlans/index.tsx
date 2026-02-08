@@ -1,4 +1,4 @@
-import Breadcrumbs from "../../CommonComponents/Breadcrumbs";
+import Breadcrumbs from "@/components/Dashboard/CommonComponents/Breadcrumbs";
 import PricingPlanList from "./PricingPlanList/PricingPlanList";
 
 const PricingPlansContainer: React.FC = () => {

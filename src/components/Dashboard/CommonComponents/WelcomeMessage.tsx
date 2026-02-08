@@ -3,7 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { useAccountSwitch } from "@/hooks/use-account-switch";
-import { useGetAccountAccesserQuery } from "@/Redux/Reducers/ClientPanel/SwitchAccount/SwitchAccountApi";
+import { useGetAccountAccesserQuery } from "@/Redux/Reducers/ClientPanel/Accounts/SwitchAccount/SwitchAccountApi";
 import { LoaderPinwheel } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
@@ -74,8 +74,8 @@ const WelcomeMessage: React.FC = () => {
               <stop
                 offset="20%"
                 stopColor="rgb(125, 211, 252)"
-                // stopOpacity="0.4"   
-                stopOpacity="0.3" 
+                // stopOpacity="0.4"
+                stopOpacity="0.3"
                 className="dark:[stop-color:rgb(14,116,144)]"
               />
               <stop
