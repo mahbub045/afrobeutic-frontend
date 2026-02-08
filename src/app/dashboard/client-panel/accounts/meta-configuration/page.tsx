@@ -1,7 +1,5 @@
-import React from 'react'
+import MetaConfigurationContainer from "@/components/Dashboard/ClientPanel/Accounts/MetaConfiguration";
 
 export default function MetaConfigurationPage() {
-  return (
-    <div>Meta Configuration Page</div>
-  )
+  return <MetaConfigurationContainer />;
 }

@@ -3,7 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { usePassWABAInfoMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/WhatsApp/WhatsAppApi";
+import { useWhatsAppOnboardMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/WhatsApp/WhatsAppApi";
 import type { SalonProps } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
@@ -18,7 +18,7 @@ const WhatsApp = ({ singleSalonData, isLoading }: WhatsAppProps) => {
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
 
-  const [passWABAInfo] = usePassWABAInfoMutation();
+  const [whatsAppOnboard] = useWhatsAppOnboardMutation();
 
   const whatsappStatus = useMemo(() => {
     const raw = (
@@ -64,7 +64,7 @@ const WhatsApp = ({ singleSalonData, isLoading }: WhatsAppProps) => {
 
             // Send WABA info to backend
             if (waba_id && business_id && salonUid) {
-              passWABAInfo({
+              whatsAppOnboard({
                 salonUid,
                 waba_id,
                 business_id,
@@ -107,7 +107,7 @@ const WhatsApp = ({ singleSalonData, isLoading }: WhatsAppProps) => {
     return () => {
       window.removeEventListener("message", embeddedSignupInfoListener);
     };
-  }, [passWABAInfo, salonUid]);
+  }, [whatsAppOnboard, salonUid]);
 
   // Handle WhatsApp Embedded Signup
   const launchEmbeddedSignup = () => {
