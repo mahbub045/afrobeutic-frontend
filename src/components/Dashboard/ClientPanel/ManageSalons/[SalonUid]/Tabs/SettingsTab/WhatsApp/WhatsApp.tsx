@@ -3,11 +3,10 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { loadMetaSdk } from "@/hooks/use-meta-sdk";
+import { usePassWABAInfoMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/WhatsApp/WhatsAppApi";
 import type { SalonProps } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
-import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
-import React, { useCallback, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { toast } from "react-toastify";
 
 type WhatsAppProps = {
@@ -15,11 +14,11 @@ type WhatsAppProps = {
   isLoading?: boolean;
 };
 
-const WhatsApp: React.FC<WhatsAppProps> = ({ singleSalonData, isLoading }) => {
-  const { salonuid: salonUid } = useParams() as { salonuid?: string };
-  const { data: session } = useSession();
+const WhatsApp = ({ singleSalonData, isLoading }: WhatsAppProps) => {
+  const { salonuid } = useParams();
+  const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
 
-  const [isConnecting, setIsConnecting] = useState(false);
+  const [passWABAInfo] = usePassWABAInfoMutation();
 
   const whatsappStatus = useMemo(() => {
     const raw = (
@@ -30,291 +29,116 @@ const WhatsApp: React.FC<WhatsAppProps> = ({ singleSalonData, isLoading }) => {
 
   const isConnected = whatsappStatus === "CONNECTED";
 
-  const startWhatsAppSignup = useCallback(async () => {
-    try {
-      if (!salonUid) {
-        toast.error("Missing salon id");
-        return;
-      }
-
-      const metaAppId = process.env.NEXT_PUBLIC_META_APP_ID;
-      const metaConfigId = process.env.NEXT_PUBLIC_META_CONFIG_ID;
-
-      if (!metaAppId || !metaConfigId) {
-        toast.error(
-          "Missing Meta configuration. Set NEXT_PUBLIC_META_APP_ID and NEXT_PUBLIC_META_CONFIG_ID.",
-        );
-        return;
-      }
-
-      const postCodeToBackend = async (code: string) => {
-        const baseUrl = process.env.NEXT_PUBLIC_APIBASE_URL;
-        if (!baseUrl) {
-          throw new Error("Backend URL is missing (NEXT_PUBLIC_APIBASE_URL)");
-        }
-
-        const path =
-          process.env.NEXT_PUBLIC_WHATSAPP_ONBOARD_PATH ?? "/whatsapp/onboard";
-
-        const url = new URL(path, baseUrl).toString();
-
-        const token =
-          session?.user?.accessToken ??
-          (typeof window !== "undefined"
-            ? localStorage.getItem("token")
-            : null);
-
-        const accountId =
-          typeof window !== "undefined"
-            ? localStorage.getItem("activeAccountId")
-            : null;
-
-        if (!token) {
-          throw new Error("You are not logged in.");
-        }
-
-        const res = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-            ...(accountId ? { "X-ACCOUNT-ID": accountId } : {}),
-          },
-          body: JSON.stringify({
-            code,
-            salonUid,
-            salon_uid: salonUid,
-          }),
-        });
-
-        if (!res.ok) {
-          const msg = await res.text();
-          throw new Error(msg || "Failed to send signup code");
-        }
-      };
-
-      const metaLoginMode = (
-        process.env.NEXT_PUBLIC_META_LOGIN_MODE ?? "redirect"
-      ).toLowerCase();
-
-      setIsConnecting(true);
-
-      if (metaLoginMode === "jssdk") {
-        await loadMetaSdk({ appId: metaAppId });
-
-        if (!window.FB) {
-          toast.error("Meta SDK failed to initialize");
-          return;
-        }
-
-        window.FB.login(
-          (response) => {
-            void (async () => {
-              try {
-                const code = response?.authResponse?.code;
-                if (!code) {
-                  toast.error(
-                    "WhatsApp connection was cancelled or failed. If you see a 'JSSDK option is not toggled' message, enable 'Log in with JavaScript SDK' in your Meta app settings.",
-                  );
-                  return;
-                }
-
-                await postCodeToBackend(code);
-                toast.success("WhatsApp onboarding started successfully.");
-              } catch (e) {
-                console.error(e);
-                toast.error(
-                  e instanceof Error ? e.message : "Failed to connect WhatsApp",
-                );
-              } finally {
-                setIsConnecting(false);
-              }
-            })();
-          },
-          {
-            config_id: metaConfigId,
-            response_type: "code",
-            override_default_response_type: true,
-            extras: {
-              setup: {},
-            },
-          },
-        );
-        return;
-      }
-
-      // Redirect-based OAuth flow (avoids needing the Facebook JS SDK login toggle)
-      const state =
-        typeof crypto !== "undefined" && "randomUUID" in crypto
-          ? crypto.randomUUID()
-          : `${Date.now()}_${Math.random().toString(16).slice(2)}`;
-
-      // IMPORTANT: This redirect URI must be allowed in Meta:
-      // - App Domains (Settings -> Basic)
-      // - Valid OAuth Redirect URIs (Facebook Login -> Settings)
-      const redirectUriEnv = process.env.NEXT_PUBLIC_META_REDIRECT_URI?.trim();
-      let redirectUri: string;
+  // Define session handler
+  useEffect(() => {
+    const embeddedSignupInfoListener = (event: MessageEvent) => {
+      if (!event.origin.endsWith("facebook.com")) return;
       try {
-        if (redirectUriEnv) {
-          const url = new URL(redirectUriEnv);
-          if (url.pathname === "/" || url.pathname === "") {
-            url.pathname = "/meta/oauth/callback";
-          }
-          redirectUri = url.toString();
-        } else {
-          redirectUri = new URL(
-            "/meta/oauth/callback",
-            window.location.origin,
-          ).toString();
-        }
-      } catch {
-        toast.error(
-          "Invalid NEXT_PUBLIC_META_REDIRECT_URI. Use a full URL like https://yourdomain.com/meta/oauth/callback",
-        );
-        setIsConnecting(false);
-        return;
-      }
+        const data = JSON.parse(event.data);
+        console.log("Received data from Facebook:", data);
 
-      // This flow relies on same-origin postMessage back to the opener.
-      // If you set NEXT_PUBLIC_META_REDIRECT_URI to a different origin, the popup can't safely message this page.
-      if (new URL(redirectUri).origin !== window.location.origin) {
-        toast.error(
-          `Meta redirect URI must use this site's origin (${window.location.origin}). Current: ${redirectUri}`,
-        );
-        setIsConnecting(false);
-        return;
-      }
+        if (data.type === "WA_EMBEDDED_SIGNUP") {
+          console.log("WhatsApp Embedded Signup Event:", data.event);
+          console.log("Full data object:", JSON.stringify(data, null, 2));
 
-      if (process.env.NODE_ENV === "development") {
-        toast.info(`Meta redirect_uri: ${redirectUri}`, {
-          autoClose: 6000,
-        });
-      }
+          // if user finishes the Embedded Signup flow
+          if (data.event === "FINISH" || data.event === "FINISH_ONLY_WABA") {
+            const {
+              phone_number_id,
+              waba_id,
+              business_id,
+              page_ids,
+              catalog_ids,
+              dataset_ids,
+              instagram_account_ids,
+            } = data.data || {};
 
-      const oauthUrl = new URL("https://www.facebook.com/v18.0/dialog/oauth");
-      oauthUrl.searchParams.set("client_id", metaAppId);
-      oauthUrl.searchParams.set("redirect_uri", redirectUri);
-      oauthUrl.searchParams.set("state", state);
-      oauthUrl.searchParams.set("response_type", "code");
-      oauthUrl.searchParams.set("config_id", metaConfigId);
+            console.log("=== WhatsApp Business Account Setup Complete ===");
+            console.log("WABA ID:", waba_id);
+            console.log("Business ID:", business_id);
+            console.log("Phone Number ID:", phone_number_id || "Not provided");
+            console.log("Page IDs:", page_ids);
+            console.log("Catalog IDs:", catalog_ids);
+            console.log("Dataset IDs:", dataset_ids);
+            console.log("Instagram Account IDs:", instagram_account_ids);
 
-      if (process.env.NODE_ENV === "development") {
-        console.info("[Meta OAuth] redirect_uri:", redirectUri);
-        console.info("[Meta OAuth] oauth_url:", oauthUrl.toString());
-      }
-
-      const width = 600;
-      const height = 800;
-      const left = window.screenX + (window.outerWidth - width) / 2;
-      const top = window.screenY + (window.outerHeight - height) / 2;
-      const popup = window.open(
-        oauthUrl.toString(),
-        "meta_oauth",
-        `popup=yes,width=${width},height=${height},left=${left},top=${top}`,
-      );
-
-      if (!popup) {
-        toast.error("Popup was blocked. Please allow popups and try again.");
-        setIsConnecting(false);
-        return;
-      }
-
-      let cleanedUp = false;
-      let pollTimer: number | null = null;
-      let hardTimeout: number | null = null;
-
-      const cleanup = () => {
-        if (cleanedUp) return;
-        cleanedUp = true;
-        window.removeEventListener("message", onMessage);
-        if (pollTimer !== null) window.clearInterval(pollTimer);
-        if (hardTimeout !== null) window.clearTimeout(hardTimeout);
-      };
-
-      const onMessage = (event: MessageEvent) => {
-        if (event.origin !== window.location.origin) return;
-        const data = event.data as
-          | {
-              type?: string;
-              code?: string | null;
-              state?: string | null;
-              error?: string | null;
-              errorDescription?: string | null;
-            }
-          | undefined;
-
-        if (!data || data.type !== "META_OAUTH_CODE") return;
-        if (!data.state || data.state !== state) return;
-
-        void (async () => {
-          try {
-            if (data.error) {
-              throw new Error(
-                data.errorDescription || data.error || "Meta login failed",
+            // Send WABA info to backend
+            if (waba_id && business_id && salonUid) {
+              passWABAInfo({
+                salonUid,
+                waba_id,
+                business_id,
+                phone_number_id,
+              })
+                .unwrap()
+                .then(() => {
+                  toast.success("WhatsApp account connected successfully!");
+                })
+                .catch((error) => {
+                  console.error("Error sending WABA info:", error);
+                  toast.error("Failed to save WhatsApp account information");
+                });
+            } else {
+              console.warn(
+                "Cannot send WABA info - missing required data (waba_id, business_id, or salonUid)",
               );
             }
 
-            if (!data.code) {
-              throw new Error("No code returned from Meta login");
-            }
+            // if user cancels the Embedded Signup flow
+          } else if (data.event === "CANCEL") {
+            const { current_step } = data.data || {};
+            console.warn("Cancel at ", current_step);
 
-            await postCodeToBackend(data.code);
-            toast.success("WhatsApp onboarding started successfully.");
-          } catch (e) {
-            console.error(e);
-            toast.error(
-              e instanceof Error ? e.message : "Failed to connect WhatsApp",
-            );
-          } finally {
-            cleanup();
-            try {
-              popup.close();
-            } catch {
-              // ignore
-            }
-            setIsConnecting(false);
+            // if user reports an error during the Embedded Signup flow
+          } else if (data.event === "ERROR") {
+            const { error_message } = data.data || {};
+            console.error("error ", error_message);
           }
-        })();
-      };
-
-      window.addEventListener("message", onMessage);
-
-      pollTimer = window.setInterval(() => {
-        if (popup.closed) {
-          cleanup();
-          toast.error("Login window was closed before completing.");
-          setIsConnecting(false);
         }
-      }, 400);
+      } catch {
+        console.log("Non JSON Responses", event.data);
+      }
+    };
 
-      hardTimeout = window.setTimeout(
-        () => {
-          cleanup();
-          toast.error("Login timed out. Please try again.");
-          try {
-            popup.close();
-          } catch {
-            // ignore
-          }
-          setIsConnecting(false);
+    // Listen for Embedded Signup events
+    window.addEventListener("message", embeddedSignupInfoListener);
+
+    // When the component unmounts, remove the event listener
+    return () => {
+      window.removeEventListener("message", embeddedSignupInfoListener);
+    };
+  }, [passWABAInfo, salonUid]);
+
+  // Handle WhatsApp Embedded Signup
+  const launchEmbeddedSignup = () => {
+    // Launch Facebook login
+    if (typeof window !== "undefined" && window.FB) {
+      window.FB.login(
+        (response: FBLoginResponse) => {
+          // Since you are using Twilio's APIs, you do not need to do anything with the response here.
+          console.log("WhatsApp signup response:", response);
         },
-        2 * 60 * 1000,
+        {
+          config_id: process.env.NEXT_PUBLIC_META_CONFIG_ID,
+          auth_type: "rerequest", // Avoids 'user is already logged' in errors if users click the button again before refreshing the page
+          response_type: "code",
+          override_default_response_type: true,
+          extras: {
+            sessionInfoVersion: 3, // Required to get WABA ID
+          },
+        },
       );
-    } catch (e) {
-      console.error(e);
-      toast.error(
-        e instanceof Error ? e.message : "Failed to connect WhatsApp",
-      );
-      setIsConnecting(false);
+    } else {
+      console.error("Facebook SDK not loaded");
     }
-  }, [salonUid, session?.user?.accessToken]);
+  };
 
   return (
     <Card className="border-0 shadow-md transition-shadow duration-300 hover:shadow-lg dark:shadow-gray-600">
       <div className="flex items-center justify-between gap-3 p-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <h3 className="text-sm font-semibold">WhatsApp 2</h3>
+            <h3 className="text-sm font-semibold">WhatsApp</h3>
             {isConnected ? (
               <Badge className="bg-green-600 hover:bg-green-700">
                 Connected
@@ -324,16 +148,12 @@ const WhatsApp: React.FC<WhatsAppProps> = ({ singleSalonData, isLoading }) => {
             )}
           </div>
           <p className="text-muted-foreground text-xs">
-            Connect WhatsApp to enable messaging features.
+            Connect your WhatsApp Business Account to manage your messages and
+            appointments directly from Afrobeutic.
           </p>
         </div>
 
-        <Button
-          onClick={startWhatsAppSignup}
-          disabled={isLoading || isConnecting}
-        >
-          {isConnecting ? "Connecting..." : "Connect WhatsApp"}
-        </Button>
+        <Button onClick={launchEmbeddedSignup}>Login with Facebook</Button>
       </div>
     </Card>
   );
