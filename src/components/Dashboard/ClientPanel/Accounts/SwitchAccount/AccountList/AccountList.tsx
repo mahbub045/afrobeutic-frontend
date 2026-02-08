@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAccountSwitch } from "@/hooks/use-account-switch";
 import { formatChoiceFieldValue } from "@/lib/utils";
-import { useGetAccountAccesserQuery } from "@/Redux/Reducers/ClientPanel/SwitchAccount/SwitchAccountApi";
+import { useGetAccountAccesserQuery } from "@/Redux/Reducers/ClientPanel/Accounts/SwitchAccount/SwitchAccountApi";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import React, { useEffect, useState } from "react";
 

@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { formatPrice } from "@/lib/utils";
-import { useCreateOrUpdateSubscriptionMutation } from "@/Redux/Reducers/ClientPanel/Billing/BillingApi";
+import { useCreateOrUpdateSubscriptionMutation } from "@/Redux/Reducers/ClientPanel/Accounts/Billing/BillingApi";
 import { PricingPlanTypes } from "@/Types/AdminPanel/PricingPlansTypes/PricingPlansTypes";
 import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { useSession } from "next-auth/react";

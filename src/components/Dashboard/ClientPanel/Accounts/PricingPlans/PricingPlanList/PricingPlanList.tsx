@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { formatPrice } from "@/lib/utils";
-import { useGetPricingPlansQuery } from "@/Redux/Reducers/ClientPanel/PricingPlans/PricingPlansApi";
+import { useGetPricingPlansQuery } from "@/Redux/Reducers/ClientPanel/Accounts/PricingPlans/PricingPlansApi";
 import { PricingPlanTypes } from "@/Types/AdminPanel/PricingPlansTypes/PricingPlansTypes";
 import { LoaderPinwheel } from "lucide-react";
 import { useState } from "react";

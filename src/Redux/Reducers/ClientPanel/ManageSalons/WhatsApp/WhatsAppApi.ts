@@ -17,8 +17,18 @@ export const WhatsAppApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["WhatsAppOnBoardData"],
     }),
+    deleteWhatsAppOnboard: build.mutation({
+      query: (salonUid) => ({
+        url: `/salons/${salonUid}/whatsapp`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["WhatsAppOnBoardData"],
+    }),
   }),
 });
 
-export const { useGetWhatsAppOnboardDataQuery, useWhatsAppOnboardMutation } =
-  WhatsAppApi;
+export const {
+  useGetWhatsAppOnboardDataQuery,
+  useWhatsAppOnboardMutation,
+  useDeleteWhatsAppOnboardMutation,
+} = WhatsAppApi;

@@ -5,18 +5,26 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetWhatsAppOnboardDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/WhatsApp/WhatsAppApi";
+import { WhatsAppOnboardData } from "@/Types/ClientPanel/ManageSalonTypes/WhatsAppTypes/WhatsAppTypes";
+import { Plus } from "lucide-react";
 import { useParams } from "next/navigation";
-
-export interface WhatsAppOnboardData {
-  waba_id: string;
-  chatbot_name: string;
-  whatsapp_sender_number?: string;
-  status: string;
-  sender_sid?: string;
-}
+import { useState } from "react";
+import ConnectWhatsAppDialog from "./Dialogs/ConnectWhatsAppDialog";
 
 const WhatsApp: React.FC = () => {
   const { salonuid } = useParams();
+  const [connectWhatsAppDialogOpen, setConnectWhatsAppDialogOpen] =
+    useState(false);
+  const [deleteWhatsAppDialogOpen, setDeleteWhatsAppDialogOpen] =
+    useState(false);
+  const [selectedWhatsAppData, setSelectedWhatsAppData] = useState<
+    WhatsAppOnboardData | undefined
+  >(undefined);
+
+  const handleConnectWhatsApp = () => {
+    setConnectWhatsAppDialogOpen(true);
+  };
+
   const { data: whatsAppOnboardData, isLoading } =
     useGetWhatsAppOnboardDataQuery({ salonUid: salonuid });
 
@@ -176,11 +184,23 @@ const WhatsApp: React.FC = () => {
             )}
 
             <div className="flex justify-end">
-              <Button disabled={isLoading}>Connect WhatsApp</Button>
+              <Button disabled={isLoading} onClick={handleConnectWhatsApp}>
+                <Plus />
+                Connect WhatsApp
+              </Button>
             </div>
           </>
         )}
       </div>
+      <ConnectWhatsAppDialog
+        isOpen={connectWhatsAppDialogOpen}
+        onClose={setConnectWhatsAppDialogOpen}
+      />
+      {/* <DeleteWhatsAppDialog
+        isOpen={deleteWhatsAppDialogOpen}
+        onClose={setDeleteWhatsAppDialogOpen}
+        whatsappData={selectedWhatsAppData}
+      /> */}
     </Card>
   );
 };
