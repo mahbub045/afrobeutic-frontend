@@ -1,16 +1,26 @@
 "use client";
-import { Edit, ExternalLink, LoaderPinwheel } from "lucide-react";
-import Link from "next/link";
-
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatChoiceFieldValue } from "@/lib/utils";
 import { useGetCustomerProfileQuery } from "@/Redux/Api/CustomerBaseApi";
-import { Mail, Phone, User } from "lucide-react";
+import {
+  Edit,
+  ExternalLink,
+  LoaderPinwheel,
+  Mail,
+  Phone,
+  User,
+} from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 import Breadcrumbs from "../Breadcrumbs/Breadcrumbs";
+import EditCustomerProfileInfoDialog from "./Dialogs/EditCustomerProfileInfoDialog";
 
 const CustomerProfileContainer: React.FC = () => {
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const handleEditDialogOpen = () => setIsEditDialogOpen(true);
+
   const {
     data: profile,
     isLoading,
@@ -81,7 +91,7 @@ const CustomerProfileContainer: React.FC = () => {
           </div>
 
           <div className="ml-auto flex items-center gap-3">
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleEditDialogOpen}>
               <Edit />
               Edit profile
             </Button>
@@ -137,6 +147,11 @@ const CustomerProfileContainer: React.FC = () => {
           </div>
         </div>
       </div>
+      {/* Modals  */}
+      <EditCustomerProfileInfoDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+      />
     </div>
   );
 };

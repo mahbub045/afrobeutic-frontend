@@ -58,7 +58,7 @@ export default function CustomerLayoutComponent({
           onMobileClose={handleMobileMenuClose}
         />
 
-        <main className="mx-auto min-h-screen flex-1 px-4 py-6 md:px-6 lg:px-8">
+        <main className="mx-auto min-h-screen flex-1 space-y-6 overflow-y-auto px-4 py-6 md:px-6 lg:px-8">
           {children}
         </main>
       </div>

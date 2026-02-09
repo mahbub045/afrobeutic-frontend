@@ -27,7 +27,11 @@ export const customerApi = createApi({
       providesTags: ["CustomerProfile"],
     }),
     updateCustomerProfile: builder.mutation({
-      query: (body) => ({ url: "/consumers/profile", method: "PUT", body }),
+      query: ({ payload }) => ({
+        url: `/consumers/profile`,
+        method: "PATCH",
+        body: payload,
+      }),
       invalidatesTags: ["CustomerProfile"],
     }),
 
