@@ -1,5 +1,5 @@
 "use client";
-import { LoaderPinwheel } from "lucide-react";
+import { Edit, ExternalLink, LoaderPinwheel } from "lucide-react";
 import Link from "next/link";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -81,9 +81,15 @@ const CustomerProfileContainer: React.FC = () => {
           </div>
 
           <div className="ml-auto flex items-center gap-3">
-            <Button variant="ghost">Edit profile</Button>
+            <Button variant="outline">
+              <Edit />
+              Edit profile
+            </Button>
             <Link href="/customer/bookings">
-              <Button>My bookings</Button>
+              <Button>
+                <ExternalLink />
+                My bookings
+              </Button>
             </Link>
           </div>
         </div>
