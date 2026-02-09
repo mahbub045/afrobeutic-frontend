@@ -40,14 +40,17 @@ export const customerApi = createApi({
       providesTags: ["CustomerBookings"],
     }),
 
-    getCustomerBooking: builder.query({
-      query: (id) => ({ url: `/consumers/bookings/${id}`, method: "GET" }),
+    getCustomerBookingDetails: builder.query({
+      query: (bookingUid) => ({
+        url: `/consumers/bookings/${bookingUid}`,
+        method: "GET",
+      }),
       providesTags: ["CustomerBookings"],
     }),
-    cancelCustomerBooking: builder.mutation<void, string>({
-      query: (id) => ({
-        url: `/consumers/bookings/${id}/cancel`,
-        method: "POST",
+    deleteCustomerBooking: builder.mutation({
+      query: (bookingUid) => ({
+        url: `/consumers/bookings/${bookingUid}`,
+        method: "DELETE",
       }),
       invalidatesTags: ["CustomerBookings"],
     }),
@@ -58,6 +61,6 @@ export const {
   useGetCustomerProfileQuery,
   useUpdateCustomerProfileMutation,
   useGetCustomerBookingsQuery,
-  useGetCustomerBookingQuery,
-  useCancelCustomerBookingMutation,
+  useGetCustomerBookingDetailsQuery,
+  useDeleteCustomerBookingMutation,
 } = customerApi;

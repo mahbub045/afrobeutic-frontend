@@ -1,10 +1,9 @@
 "use client";
 
-import { Menu, Moon, Sun } from "lucide-react";
+import { LoaderPinwheel, Menu, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { useGetCustomerProfileQuery } from "@/Redux/Api/CustomerBaseApi";
@@ -60,9 +59,11 @@ export default function CustomerNavBar({ onMobileMenuToggle }: NavBarProps) {
 
             <div className="flex flex-col items-end rounded-md p-2 text-right shadow-md dark:shadow-gray-600">
               <div className="text-primary text-sm font-bold">
-                {isLoading
-                  ? "Customer Name"
-                  : `${profile?.first_name || ""} ${profile?.last_name || ""}`}
+                {isLoading ? (
+                  <LoaderPinwheel className="h-4 w-4 animate-spin" />
+                ) : (
+                  `${profile?.first_name || ""} ${profile?.last_name || ""}`
+                )}
               </div>
             </div>
           </div>

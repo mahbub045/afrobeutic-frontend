@@ -34,7 +34,7 @@ const CustomerProfileContainer: React.FC = () => {
     return (
       <div className="grid min-h-[60vh] place-items-center">
         <div className="flex flex-col items-center gap-2">
-          <LoaderPinwheel className="text-primary h-8 w-8 animate-spin" />
+          <LoaderPinwheel className="text-primary h-6 w-6 animate-spin" />
           <p className="text-muted-foreground text-sm">Loading profile…</p>
         </div>
       </div>
