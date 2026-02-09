@@ -3,6 +3,7 @@
 import { LoaderPinwheel } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import CustomerFooter from "./CustomerFooter";
 import CustomerNavBar from "./CustomerNavBar";
 import CustomerSideBar from "./CustomerSideBar";
 
@@ -61,6 +62,7 @@ export default function CustomerLayoutComponent({
           {children}
         </main>
       </div>
+      <CustomerFooter />
     </div>
   );
 }

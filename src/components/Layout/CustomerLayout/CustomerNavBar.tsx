@@ -7,25 +7,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { useGetCustomerProfileQuery } from "@/Redux/Api/CustomerBaseApi";
 
 interface NavBarProps {
   onMobileMenuToggle?: () => void;
 }
 
-const CUSTOMER_TOKEN_KEY = "customer_token";
-
 export default function CustomerNavBar({ onMobileMenuToggle }: NavBarProps) {
   const { theme, setTheme } = useTheme();
-  const router = useRouter();
-
-  const handleLogout = () => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem(CUSTOMER_TOKEN_KEY);
-      // Broadcast logout for other tabs if desired
-      localStorage.setItem("logout-event", Date.now().toString());
-    }
-    router.replace("/auth/customer-login");
-  };
+  const { data: profile, isLoading } = useGetCustomerProfileQuery(undefined);
 
   return (
     <nav className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b shadow-md backdrop-blur dark:shadow-gray-600">
@@ -56,7 +46,7 @@ export default function CustomerNavBar({ onMobileMenuToggle }: NavBarProps) {
             </Link>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-4">
             <Button
               variant="ghost"
               size="icon"
@@ -68,9 +58,13 @@ export default function CustomerNavBar({ onMobileMenuToggle }: NavBarProps) {
               <span className="sr-only">Toggle theme</span>
             </Button>
 
-            <Button variant="outline" onClick={handleLogout} className="ml-2 shadow-md dark:shadow-gray-600">
-              Log out
-            </Button>
+            <div className="flex flex-col items-end rounded-md p-2 text-right shadow-md dark:shadow-gray-600">
+              <div className="text-primary text-sm font-bold">
+                {isLoading
+                  ? "Customer Name"
+                  : `${profile?.first_name || ""} ${profile?.last_name || ""}`}
+              </div>
+            </div>
           </div>
         </div>
       </div>

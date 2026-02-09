@@ -1,7 +1,5 @@
-import React from 'react'
+import CustomerProfileContainer from "@/components/Customer/Profile";
 
 export default function CustomerProfilePage() {
-  return (
-    <div>page</div>
-  )
+  return <CustomerProfileContainer />;
 }
