@@ -2,7 +2,7 @@ import { baseApi } from "@/Redux/Api/BaseApi";
 import {
   AccountAccesserQueryParams,
   AccountAccesserResponse,
-} from "@/Types/ClientPanel/SwitchAccountTypes/SwitchAccounType";
+} from "@/Types/ClientPanel/Accounts/SwitchAccounType";
 
 export const SwitchAccountApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAccountSwitch } from "@/hooks/use-account-switch";
 import { formatChoiceFieldValue } from "@/lib/utils";
-import { useGetAccountAccesserQuery } from "@/Redux/Reducers/ClientPanel/SwitchAccount/SwitchAccountApi";
+import { useGetAccountAccesserQuery } from "@/Redux/Reducers/ClientPanel/Accounts/SwitchAccount/SwitchAccountApi";
 import { ArrowRight, LoaderPinwheel, Star } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";

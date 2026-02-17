@@ -1,8 +1,6 @@
-"use client";
-
 import Link from "next/link";
 
-const Footer: React.FC = () => {
+export default function CustomerFooter() {
   return (
     <footer>
       <div className="mx-auto flex flex-col items-center justify-end gap-10 px-8 py-4 md:flex-row">
@@ -20,6 +18,4 @@ const Footer: React.FC = () => {
       </div>
     </footer>
   );
-};
-
-export default Footer;
+}

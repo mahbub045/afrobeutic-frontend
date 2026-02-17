@@ -133,7 +133,7 @@ export const baseApi = createApi({
     // Common Tags
     "UserProfile",
     "Filters",
-    // Client Panlel Tags
+    // Client Panel Tags
     "AcceptInvitation",
     "CommonCategories",
     "Members",
@@ -156,7 +156,8 @@ export const baseApi = createApi({
     "SupportTickets",
     "SalonAnalytics",
     "BillingInfo",
-    "SalonData",
+    "WhatsAppOnBoardData",
+    "MetaConfigurationData",
     // Admin Panel Tags
     "ManagementsList",
     "CustomersList",

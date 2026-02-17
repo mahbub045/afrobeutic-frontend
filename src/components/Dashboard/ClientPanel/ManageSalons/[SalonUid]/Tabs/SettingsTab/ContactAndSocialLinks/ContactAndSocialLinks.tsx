@@ -20,7 +20,7 @@ const ContactAndSocialLinks: React.FC<DashboardTabProps> = ({
   const [openContactDialog, setOpenContactDialog] = useState(false);
 
   return (
-    <Card className="border-0 shadow-md transition-shadow duration-300 hover:shadow-lg dark:shadow-gray-600">
+    <Card className="border-0 py-2 shadow-md transition-shadow duration-300 hover:shadow-lg dark:shadow-gray-600">
       <CardContent className="p-4">
         <div className="mb-8 flex items-center justify-between">
           {isLoading ? (
@@ -45,13 +45,6 @@ const ContactAndSocialLinks: React.FC<DashboardTabProps> = ({
           )}
         </div>
 
-        {/* Dialog */}
-        <EditContactAndSocialLinkDialog
-          singleSalonData={singleSalonData}
-          isOpen={openContactDialog}
-          onClose={() => setOpenContactDialog(false)}
-        />
-
         <div className="space-y-4">
           {/* Phone */}
           {isLoading ? (
@@ -71,7 +64,7 @@ const ContactAndSocialLinks: React.FC<DashboardTabProps> = ({
                 <p className="text-xs font-semibold tracking-wide text-gray-500 uppercase dark:text-gray-400">
                   Phone
                 </p>
-                <p className="mt-1 text-lg font-semibold text-gray-900 dark:text-white">
+                <p className="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
                   {singleSalonData?.phone_number_one || "Not Specified"}
                 </p>
               </div>
@@ -96,7 +89,7 @@ const ContactAndSocialLinks: React.FC<DashboardTabProps> = ({
                 <p className="text-xs font-semibold tracking-wide text-gray-500 uppercase dark:text-gray-400">
                   Email
                 </p>
-                <p className="mt-1 text-lg font-semibold text-gray-900 dark:text-white">
+                <p className="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
                   {singleSalonData?.email || "Not Specified"}
                 </p>
               </div>
@@ -104,8 +97,8 @@ const ContactAndSocialLinks: React.FC<DashboardTabProps> = ({
           )}
 
           {/* Social Links */}
-          <div className="pt-2">
-            <p className="mb-4 text-xs font-semibold tracking-wide text-gray-500 uppercase dark:text-gray-400">
+          <div>
+            <p className="mb-2 text-xs font-semibold tracking-wide text-gray-500 uppercase dark:text-gray-400">
               Follow Us
             </p>
 
@@ -151,6 +144,12 @@ const ContactAndSocialLinks: React.FC<DashboardTabProps> = ({
           </div>
         </div>
       </CardContent>
+      {/* Dialog */}
+      <EditContactAndSocialLinkDialog
+        singleSalonData={singleSalonData}
+        isOpen={openContactDialog}
+        onClose={() => setOpenContactDialog(false)}
+      />
     </Card>
   );
 };

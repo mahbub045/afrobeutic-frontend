@@ -143,6 +143,14 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
                 Pricing Plans
               </Link>
             </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link
+                className="cursor-pointer"
+                href="/dashboard/client-panel/accounts/meta-configuration"
+              >
+                Meta Configuration
+              </Link>
+            </DropdownMenuItem>
           </>
         )}
         {isManagementRole && (

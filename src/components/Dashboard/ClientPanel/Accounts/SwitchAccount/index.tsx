@@ -1,5 +1,6 @@
 "use client";
-import Breadcrumbs from "../../CommonComponents/Breadcrumbs";
+
+import Breadcrumbs from "@/components/Dashboard/CommonComponents/Breadcrumbs";
 import AccountList from "./AccountList/AccountList";
 
 const SwitchAccountContainer: React.FC = () => {
