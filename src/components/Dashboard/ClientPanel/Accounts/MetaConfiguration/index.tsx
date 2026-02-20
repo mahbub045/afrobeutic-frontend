@@ -104,7 +104,7 @@ const MetaConfigurationContainer: React.FC = () => {
           extras: {
             sessionInfoVersion: 3, // Required to get WABA ID
             setup: {
-              solutionID: "KEEP_IN_QUOTES_BUT_REPLACE_WITH_YOUR_SOLUTION_ID", // This is the Partner Solution ID
+              solutionID: process.env.NEXT_PUBLIC_META_SOLUTION_ID, // This is the Partner Solution ID
             },
           },
         },
