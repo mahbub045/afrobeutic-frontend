@@ -97,14 +97,14 @@ const MetaConfigurationContainer: React.FC = () => {
           console.log("Meta signup response:", response);
         },
         {
-          config_id: process.env.NEXT_PUBLIC_META_CONFIG_ID,
+          config_id: "process.env.NEXT_PUBLIC_META_CONFIG_ID",
           auth_type: "rerequest", // Avoids 'user is already logged' in errors if users click the button again before refreshing the page
           response_type: "code",
           override_default_response_type: true,
           extras: {
             sessionInfoVersion: 3, // Required to get WABA ID
             setup: {
-              solutionID: process.env.NEXT_PUBLIC_META_SOLUTION_ID, // This is the Partner Solution ID
+              solutionID: "process.env.NEXT_PUBLIC_META_SOLUTION_ID", // This is the Partner Solution ID
             },
           },
         },
