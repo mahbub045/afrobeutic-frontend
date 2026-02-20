@@ -103,6 +103,9 @@ const MetaConfigurationContainer: React.FC = () => {
           override_default_response_type: true,
           extras: {
             sessionInfoVersion: 3, // Required to get WABA ID
+            setup: {
+              solutionID: "KEEP_IN_QUOTES_BUT_REPLACE_WITH_YOUR_SOLUTION_ID", // This is the Partner Solution ID
+            },
           },
         },
       );
