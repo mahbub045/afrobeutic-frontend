@@ -149,7 +149,7 @@ export default function VerifyErrorPage() {
     <Suspense
       fallback={
         <div className="grid min-h-screen place-items-center">
-          <LoaderPinwheel className="h-10 w-10 animate-spin" />
+          <LoaderPinwheel className="text-primary h-10 w-10 animate-spin" />
         </div>
       }
     >

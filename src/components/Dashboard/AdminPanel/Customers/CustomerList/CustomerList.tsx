@@ -231,7 +231,7 @@ const CustomerList: React.FC = () => {
             <TableRow>
               <TableCell colSpan={6} className="py-8 text-center">
                 <div className="flex items-center justify-center">
-                  <LoaderPinwheel className="h-6 w-6 animate-spin" />
+                  <LoaderPinwheel className="text-primary h-6 w-6 animate-spin" />
                 </div>
               </TableCell>
             </TableRow>

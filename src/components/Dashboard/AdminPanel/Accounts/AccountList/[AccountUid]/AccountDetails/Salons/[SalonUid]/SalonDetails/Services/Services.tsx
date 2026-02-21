@@ -94,7 +94,9 @@ const Services: React.FC = () => {
             <TableHead className="text-primary">Time Slots</TableHead>
             <TableHead className="text-primary">Gender</TableHead>
             <TableHead className="text-primary">Discount</TableHead>
-            <TableHead className="text-primary text-center">Assigned Employees</TableHead>
+            <TableHead className="text-primary text-center">
+              Assigned Employees
+            </TableHead>
             <TableHead className="text-primary">Created</TableHead>
           </tr>
         </TableHeader>
@@ -103,7 +105,7 @@ const Services: React.FC = () => {
             <TableRow>
               <TableCell colSpan={10} className="py-8">
                 <div className="flex items-center justify-center">
-                  <LoaderPinwheel className="h-6 w-6 animate-spin" />
+                  <LoaderPinwheel className="text-primary h-6 w-6 animate-spin" />
                 </div>
               </TableCell>
             </TableRow>

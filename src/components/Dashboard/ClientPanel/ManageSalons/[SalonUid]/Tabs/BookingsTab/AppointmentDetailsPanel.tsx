@@ -167,7 +167,7 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
           {selectedAppointment ? (
             isSingleBookingLoading ? (
               <div className="flex items-center justify-center py-12">
-                <LoaderPinwheel className="h-8 w-8 animate-spin" />
+                <LoaderPinwheel className="text-primary h-8 w-8 animate-spin" />
               </div>
             ) : (
               <div className="space-y-5">
@@ -554,7 +554,7 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                 {selectedAppointment ? (
                   isSingleBookingLoading ? (
                     <div className="flex items-center justify-center py-12">
-                      <LoaderPinwheel className="h-8 w-8 animate-spin" />
+                      <LoaderPinwheel className="text-primary h-8 w-8 animate-spin" />
                     </div>
                   ) : (
                     <div className="space-y-5">

@@ -1,7 +1,5 @@
-import React from 'react'
+import BookingsContainer from "@/components/Customer/Bookings";
 
 export default function BookingsPage() {
-  return (
-    <div>page</div>
-  )
+  return <BookingsContainer />;
 }

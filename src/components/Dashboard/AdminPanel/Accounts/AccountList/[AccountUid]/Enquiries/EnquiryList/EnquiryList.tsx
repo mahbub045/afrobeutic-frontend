@@ -99,7 +99,7 @@ const EnquiryList: React.FC = () => {
             <TableRow>
               <TableCell colSpan={9} className="py-8">
                 <div className="flex items-center justify-center">
-                  <LoaderPinwheel className="h-6 w-6 animate-spin" />
+                  <LoaderPinwheel className="h-6 w-6 animate-spin text-primary" />
                 </div>
               </TableCell>
             </TableRow>
