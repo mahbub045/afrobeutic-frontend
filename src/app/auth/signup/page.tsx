@@ -660,7 +660,7 @@ const SignUp: React.FC = () => {
                       >
                         {isSubmitting || isLoading ? (
                           <>
-                            <LoaderPinwheel className="mr-2 inline-block h-5 w-5 animate-spin" />
+                            <LoaderPinwheel className="text-primary mr-2 inline-block h-5 w-5 animate-spin" />
                             Creating Account...
                           </>
                         ) : (

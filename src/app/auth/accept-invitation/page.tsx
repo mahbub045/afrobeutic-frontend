@@ -480,7 +480,7 @@ const AcceptInvitationContent: React.FC = () => {
                         >
                           {isSubmitting || isLoading ? (
                             <>
-                              <LoaderPinwheel className="mr-2 inline animate-spin text-white" />
+                              <LoaderPinwheel className="text-primary mr-2 inline animate-spin" />
                             </>
                           ) : (
                             "Sign Up"
@@ -513,7 +513,7 @@ const AcceptInvitation: React.FC = () => {
     <Suspense
       fallback={
         <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-white via-slate-50 to-slate-100 dark:from-[#050816] dark:via-[#071020] dark:to-[#000000]">
-          <LoaderPinwheel className="h-12 w-12 animate-spin" />
+          <LoaderPinwheel className="text-primary h-12 w-12 animate-spin" />
         </div>
       }
     >

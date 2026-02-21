@@ -72,7 +72,7 @@ const OthersInfo: React.FC = () => {
         <CardContent className="space-y-4 pt-2">
           {!session ? (
             <div className="flex items-center justify-center py-8">
-              <LoaderPinwheel className="h-5 w-5 animate-spin" />
+              <LoaderPinwheel className="text-primary h-5 w-5 animate-spin" />
             </div>
           ) : (
             <>

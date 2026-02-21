@@ -45,7 +45,7 @@ const SalonOverviews: React.FC = () => {
       </CardHeader>
       <CardContent className="flex-1">
         {cardLoading ? (
-          <LoaderPinwheel className="animate-spin text-white" />
+          <LoaderPinwheel className="text-primary animate-spin" />
         ) : (
           <div className="text-3xl font-bold text-white">{value}</div>
         )}

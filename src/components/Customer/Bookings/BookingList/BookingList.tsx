@@ -100,7 +100,7 @@ const BookingList: React.FC = () => {
     <div>
       {isLoading || isFetching ? (
         <div className="flex justify-center py-12">
-          <LoaderPinwheel className="h-8 w-8 animate-spin" />
+          <LoaderPinwheel className="text-primary h-8 w-8 animate-spin" />
         </div>
       ) : isError ? (
         <div className="text-center text-red-600">Failed to load bookings.</div>
@@ -162,7 +162,7 @@ const BookingList: React.FC = () => {
                           onClick={() => handleDownload(b.uid)}
                         >
                           {downloadingUid === b.uid ? (
-                            <LoaderPinwheel className="h-4 w-4 animate-spin" />
+                            <LoaderPinwheel className="text-primary h-4 w-4 animate-spin" />
                           ) : (
                             <Download className="h-4 w-4" />
                           )}
