@@ -6,7 +6,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { LogOut, Scissors, User } from "lucide-react";
+import { Home, LogOut, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -25,7 +25,7 @@ export default function CustomerSideBar({
   const router = useRouter();
 
   const items = [
-    { label: "Bookings", href: "/customer/bookings", Icon: Scissors },
+    { label: "Bookings", href: "/customer/bookings", Icon: Home },
     { label: "Profile", href: "/customer/profile", Icon: User },
   ];
 
