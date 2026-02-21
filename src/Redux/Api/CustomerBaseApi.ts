@@ -35,8 +35,16 @@ export const customerApi = createApi({
       invalidatesTags: ["CustomerProfile"],
     }),
 
-    getCustomerBookings: builder.query({
-      query: () => ({ url: "/consumers/bookings", method: "GET" }),
+
+    getCustomerBookings: builder.query<
+      import("@/Types/Customer/BookingTypes").CustomerBookingsResponse,
+      Record<string, unknown> | void
+    >({
+      query: (params) => ({
+        url: "/consumers/bookings",
+        method: "GET",
+        params: params || {},
+      }),
       providesTags: ["CustomerBookings"],
     }),
 
