@@ -37,8 +37,11 @@ const BookingDetails: React.FC = () => {
     );
   }
 
-  const services = (booking.services ?? []) as string[];
-  const products = (booking.products ?? []) as string[];
+  // the API now returns full objects rather than just uids
+  const services = (booking.services ??
+    []) as import("@/Types/Customer/BookingTypes").BookingService[];
+  const products = (booking.products ??
+    []) as import("@/Types/Customer/BookingTypes").BookingProduct[];
 
   return (
     <div className="space-y-4">

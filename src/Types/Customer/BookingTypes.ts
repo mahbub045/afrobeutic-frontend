@@ -3,6 +3,27 @@ export interface CustomerSalon {
   name: string;
 }
 
+export interface BookingService {
+  uid: string;
+  name: string;
+  category: number;
+  price: string;
+  description: string;
+  service_duration?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BookingProduct {
+  uid: string;
+  name: string;
+  category: number;
+  price: string;
+  description: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface CustomerBooking {
   uid: string;
   salon: CustomerSalon;
@@ -14,8 +35,8 @@ export interface CustomerBooking {
   cancellation_reason?: string | null;
   completed_at?: string | null;
   notes?: string | null;
-  services?: string[];
-  products?: string[];
+  services?: BookingService[];
+  products?: BookingProduct[];
   total_services?: number;
   total_services_price?: number;
   total_products?: number;

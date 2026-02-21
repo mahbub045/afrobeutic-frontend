@@ -2,9 +2,15 @@ import { Card } from "@/components/ui/card";
 import { Package, Scissors } from "lucide-react";
 import React from "react";
 
+interface Item {
+  uid: string;
+  name: string;
+  price: string;
+}
+
 interface Props {
   type: "services" | "products";
-  items: string[];
+  items: Item[];
   count: number;
   price: number;
 }
@@ -41,15 +47,20 @@ const BookingItemsCard: React.FC<Props> = ({ type, items, count, price }) => {
       {/* Item list */}
       {items.length > 0 ? (
         <ul className="space-y-2">
-          {items.map((uid, idx) => (
+          {items.map((item, idx) => (
             <li
-              key={uid}
-              className="text-muted-foreground flex items-center gap-2.5 rounded-lg border px-3 py-2 text-xs"
+              key={item.uid}
+              className="flex items-center gap-3 rounded-lg border px-3 py-2 text-xs"
             >
               <span className="bg-muted text-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-medium">
                 {idx + 1}
               </span>
-              <span className="truncate font-mono">{uid}</span>
+              <div className="min-w-0 flex-1">
+                <span className="block truncate font-medium">{item.name}</span>
+              </div>
+              <span className="text-muted-foreground text-xs">
+                ${parseFloat(item.price).toFixed(2)}
+              </span>
             </li>
           ))}
         </ul>
