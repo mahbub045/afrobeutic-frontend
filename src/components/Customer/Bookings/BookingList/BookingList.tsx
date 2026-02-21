@@ -16,7 +16,7 @@ import {
   CustomerBooking,
   CustomerBookingsResponse,
 } from "@/Types/Customer/BookingTypes";
-import { ChevronLeft, ChevronRight, LoaderPinwheel } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, LoaderPinwheel } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -117,6 +117,7 @@ const BookingList: React.FC = () => {
                   <TableCell className="text-center">
                     <Link href={`/customer/bookings/${b.uid}`}>
                       <Button size="sm" variant="outline">
+                        <Eye />
                         View
                       </Button>
                     </Link>

@@ -2,6 +2,7 @@
 
 import { useGetCustomerBookingDetailsQuery } from "@/Redux/Api/CustomerBaseApi";
 import { formatDateTime } from "@/lib/utils";
+import { LoaderPinwheel } from "lucide-react";
 import { useParams } from "next/navigation";
 import React from "react";
 
@@ -18,7 +19,11 @@ const BookingDetails: React.FC = () => {
   });
 
   if (isLoading) {
-    return <div className="py-8 text-center">Loading booking...</div>;
+    return (
+      <div className="flex items-center justify-center py-8">
+        <LoaderPinwheel className="h-6 w-6 animate-spin" />
+      </div>
+    );
   }
 
   if (isError || !booking) {
