@@ -24,7 +24,7 @@ const BookingDetails: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <LoaderPinwheel className="text-primary h-7 w-7 animate-spin" />
+        <LoaderPinwheel className="text-primary h-6 w-6 animate-spin" />
       </div>
     );
   }
