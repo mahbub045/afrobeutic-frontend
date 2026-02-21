@@ -35,7 +35,6 @@ export const customerApi = createApi({
       invalidatesTags: ["CustomerProfile"],
     }),
 
-
     getCustomerBookings: builder.query<
       import("@/Types/Customer/BookingTypes").CustomerBookingsResponse,
       Record<string, unknown> | void
@@ -48,7 +47,10 @@ export const customerApi = createApi({
       providesTags: ["CustomerBookings"],
     }),
 
-    getCustomerBookingDetails: builder.query({
+    getCustomerBookingDetails: builder.query<
+      import("@/Types/Customer/BookingTypes").CustomerBookingDetail,
+      string
+    >({
       query: (bookingUid) => ({
         url: `/consumers/bookings/${bookingUid}`,
         method: "GET",

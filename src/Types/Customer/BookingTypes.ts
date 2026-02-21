@@ -14,8 +14,8 @@ export interface CustomerBooking {
   cancellation_reason?: string | null;
   completed_at?: string | null;
   notes?: string | null;
-  services?: unknown[];
-  products?: unknown[];
+  services?: string[];
+  products?: string[];
   total_services?: number;
   total_services_price?: number;
   total_products?: number;
@@ -28,6 +28,9 @@ export interface CustomerBooking {
   created_at: string;
   updated_at?: string;
 }
+
+/** Alias – single booking detail response has the same shape */
+export type CustomerBookingDetail = CustomerBooking;
 
 export interface CustomerBookingsResponse {
   count: number;

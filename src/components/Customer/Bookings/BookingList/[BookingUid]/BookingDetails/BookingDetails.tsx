@@ -1,10 +1,14 @@
 "use client";
 
 import { useGetCustomerBookingDetailsQuery } from "@/Redux/Api/CustomerBaseApi";
-import { formatDateTime } from "@/lib/utils";
 import { LoaderPinwheel } from "lucide-react";
 import { useParams } from "next/navigation";
 import React from "react";
+import BookingDateTime from "./Components/BookingDateTime";
+import BookingHeader from "./Components/BookingHeader";
+import BookingItemsCard from "./Components/BookingItemsCard";
+import BookingNotes from "./Components/BookingNotes";
+import BookingPricingSummary from "./Components/BookingPricingSummary";
 
 const BookingDetails: React.FC = () => {
   const params = useParams();
@@ -20,40 +24,52 @@ const BookingDetails: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-8">
-        <LoaderPinwheel className="h-6 w-6 animate-spin" />
+      <div className="flex items-center justify-center py-16">
+        <LoaderPinwheel className="h-7 w-7 animate-spin text-primary" />
       </div>
     );
   }
 
   if (isError || !booking) {
     return (
-      <div className="py-8 text-center text-red-600">
-        Unable to load booking details.
+      <div className="rounded-xl border border-destructive/40 bg-destructive/5 py-10 text-center text-sm text-destructive">
+        Unable to load booking details. Please try again.
       </div>
     );
   }
 
+  const services = (booking.services ?? []) as string[];
+  const products = (booking.products ?? []) as string[];
+
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Booking {booking.booking_id}</h3>
-      <p>
-        <strong>Salon:</strong> {booking.salon?.name || "-"}
-      </p>
-      <p>
-        <strong>Date/Time:</strong>{" "}
-        {formatDateTime(`${booking.booking_date}T${booking.booking_time}`)}
-      </p>
-      <p>
-        <strong>Status:</strong> {booking.status}
-      </p>
-      <p>
-        <strong>Total:</strong> ${booking.total_price?.toFixed(2) || "0.00"}
-      </p>
-      <p>
-        <strong>Final:</strong> ${booking.final_price?.toFixed(2) || "0.00"}
-      </p>
-      {/* additional details can be rendered here as needed */}
+      {/* 1 – Overview header row */}
+      <BookingHeader booking={booking} />
+
+      {/* 2 – Date & Time info */}
+      <BookingDateTime booking={booking} />
+
+      {/* 3 – Services & Products side-by-side on wider screens */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <BookingItemsCard
+          type="services"
+          items={services}
+          count={booking.total_services ?? 0}
+          price={booking.total_services_price ?? 0}
+        />
+        <BookingItemsCard
+          type="products"
+          items={products}
+          count={booking.total_products ?? 0}
+          price={booking.total_products_price ?? 0}
+        />
+      </div>
+
+      {/* 4 – Pricing summary */}
+      <BookingPricingSummary booking={booking} />
+
+      {/* 5 – Notes / Cancellation reason (rendered only when present) */}
+      <BookingNotes booking={booking} />
     </div>
   );
 };
