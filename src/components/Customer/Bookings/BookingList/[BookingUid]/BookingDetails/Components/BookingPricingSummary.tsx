@@ -1,7 +1,9 @@
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { useDownloadReceiptMutation } from "@/Redux/Api/CustomerBaseApi";
 import { CustomerBookingDetail } from "@/Types/Customer/BookingTypes";
-import { ReceiptText } from "lucide-react";
+import { Download, LoaderPinwheel, ReceiptText } from "lucide-react";
 import React from "react";
 
 interface Props {
@@ -38,11 +40,49 @@ const LineItem: React.FC<LineItemProps> = ({
 const fmt = (n?: number) => `$${(n ?? 0).toFixed(2)}`;
 
 const BookingPricingSummary: React.FC<Props> = ({ booking }) => {
+  const [downloadReceipt, { isLoading: isDownloading }] =
+    useDownloadReceiptMutation();
+
+  const handleDownload = async () => {
+    try {
+      const { url, fileName } = await downloadReceipt(booking.uid).unwrap();
+      if (url) {
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = fileName || "receipt";
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        setTimeout(() => window.URL.revokeObjectURL(url), 10000);
+      }
+    } catch (e) {
+      console.error("receipt download failed", e);
+    }
+  };
+
   return (
     <Card className="space-y-4 rounded-xl border p-5 shadow-md dark:shadow-gray-600">
-      <div className="text-muted-foreground flex items-center gap-2 text-sm font-semibold tracking-wider uppercase">
-        <ReceiptText className="h-4 w-4" />
-        Pricing Summary
+      <div className="flex items-center justify-between">
+        <div className="text-muted-foreground flex items-center gap-2 text-sm font-semibold tracking-wider uppercase">
+          <ReceiptText className="h-4 w-4" />
+          Pricing Summary
+        </div>
+
+        <div>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleDownload}
+            disabled={isDownloading}
+          >
+            {isDownloading ? (
+              <LoaderPinwheel className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
+            <span className="ml-2">Download Receipt</span>
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-2">
