@@ -1,5 +1,4 @@
 "use client";
-
 import { useGetCustomerBookingDetailsQuery } from "@/Redux/Api/CustomerBaseApi";
 import { LoaderPinwheel } from "lucide-react";
 import { useParams } from "next/navigation";
@@ -25,14 +24,14 @@ const BookingDetails: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <LoaderPinwheel className="h-7 w-7 animate-spin text-primary" />
+        <LoaderPinwheel className="text-primary h-7 w-7 animate-spin" />
       </div>
     );
   }
 
   if (isError || !booking) {
     return (
-      <div className="rounded-xl border border-destructive/40 bg-destructive/5 py-10 text-center text-sm text-destructive">
+      <div className="border-destructive/40 bg-destructive/5 text-destructive rounded-xl border py-10 text-center text-sm">
         Unable to load booking details. Please try again.
       </div>
     );

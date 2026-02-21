@@ -11,17 +11,28 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatChoiceFieldValue, formatDateTime } from "@/lib/utils";
-import { useGetCustomerBookingsQuery } from "@/Redux/Api/CustomerBaseApi";
+import {
+  useDownloadReceiptMutation,
+  useGetCustomerBookingsQuery,
+} from "@/Redux/Api/CustomerBaseApi";
 import {
   CustomerBooking,
   CustomerBookingsResponse,
 } from "@/Types/Customer/BookingTypes";
-import { ChevronLeft, ChevronRight, Eye, LoaderPinwheel } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Eye,
+  LoaderPinwheel,
+} from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
 const BookingList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [downloadingUid, setDownloadingUid] = useState<string | null>(null);
+  const [downloadReceipt] = useDownloadReceiptMutation();
 
   const {
     data: bookingsData,
@@ -61,6 +72,27 @@ const BookingList: React.FC = () => {
         return "secondary";
       default:
         return "outline";
+    }
+  };
+
+  const handleDownload = async (uid: string) => {
+    setDownloadingUid(uid);
+    try {
+      const { url, fileName } = await downloadReceipt(uid).unwrap();
+      if (url) {
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = fileName || "receipt";
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        // revoke after a short delay
+        setTimeout(() => window.URL.revokeObjectURL(url), 10000);
+      }
+    } catch (e) {
+      console.error("receipt download failed", e);
+    } finally {
+      setDownloadingUid(null);
     }
   };
 
@@ -115,12 +147,29 @@ const BookingList: React.FC = () => {
                     {b.final_price?.toFixed(2) ?? "0.00"}
                   </TableCell>
                   <TableCell className="text-center">
-                    <Link href={`/customer/bookings/${b.uid}`}>
-                      <Button size="sm" variant="outline">
-                        <Eye />
-                        View
-                      </Button>
-                    </Link>
+                    <div className="flex items-center justify-center gap-1">
+                      <Link href={`/customer/bookings/${b.uid}`}>
+                        <Button size="sm" variant="outline">
+                          <Eye />
+                          View
+                        </Button>
+                      </Link>
+                      {b.status === "COMPLETED" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={downloadingUid === b.uid}
+                          onClick={() => handleDownload(b.uid)}
+                        >
+                          {downloadingUid === b.uid ? (
+                            <LoaderPinwheel className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Download className="h-4 w-4" />
+                          )}
+                          {downloadingUid === b.uid ? "Saving" : "Receipt"}
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

@@ -57,12 +57,35 @@ export const customerApi = createApi({
       }),
       providesTags: ["CustomerBookings"],
     }),
-    deleteCustomerBooking: builder.mutation({
+    downloadReceipt: builder.mutation<
+      { url: string; fileName?: string },
+      string
+    >({
       query: (bookingUid) => ({
-        url: `/consumers/bookings/${bookingUid}`,
-        method: "DELETE",
+        url: `/consumers/bookings/${bookingUid}/receipt`,
+        method: "GET",
+        /* customer side expects binary PDF/stream; convert to object URL for download */
+        responseHandler: async (response) => {
+          const blob = await response.blob();
+          const disposition = response.headers.get("Content-Disposition");
+          let fileName: string | undefined;
+
+          if (disposition) {
+            const match = /filename="?([^";]+)"?/i.exec(disposition);
+            if (match?.[1]) {
+              fileName = match[1];
+            }
+          }
+
+          if (typeof window === "undefined") {
+            return { url: "", fileName } as { url: string; fileName?: string };
+          }
+
+          const url = window.URL.createObjectURL(blob);
+          return { url, fileName } as { url: string; fileName?: string };
+        },
       }),
-      invalidatesTags: ["CustomerBookings"],
+      invalidatesTags: ["CustomerProfile"],
     }),
   }),
 });
@@ -72,5 +95,5 @@ export const {
   useUpdateCustomerProfileMutation,
   useGetCustomerBookingsQuery,
   useGetCustomerBookingDetailsQuery,
-  useDeleteCustomerBookingMutation,
+  useDownloadReceiptMutation,
 } = customerApi;
