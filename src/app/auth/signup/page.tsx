@@ -1,5 +1,4 @@
 "use client";
-
 import { Button } from "@/components/ui/button";
 import { countries } from "@/data/countries";
 import apiClient from "@/services/api-client";
@@ -660,7 +659,7 @@ const SignUp: React.FC = () => {
                       >
                         {isSubmitting || isLoading ? (
                           <>
-                            <LoaderPinwheel className="text-primary mr-2 inline-block h-5 w-5 animate-spin" />
+                            <LoaderPinwheel className="mr-2 inline-block h-5 w-5 animate-spin" />
                             Creating Account...
                           </>
                         ) : (

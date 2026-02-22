@@ -241,7 +241,7 @@ function LoginForm() {
           className="btn-full btn-primary"
         >
           {loading ? (
-            <LoaderPinwheel className="mr-2 inline h-5 w-5 animate-spin text-primary" />
+            <LoaderPinwheel className="mr-2 inline h-5 w-5 animate-spin" />
           ) : (
             "Log in"
           )}
