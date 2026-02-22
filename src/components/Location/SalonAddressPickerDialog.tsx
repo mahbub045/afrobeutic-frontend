@@ -125,21 +125,16 @@ export default function SalonAddressPickerDialog({
   };
 
   const canUse = Boolean(apiKey) && isLoaded && !loadError;
-  const canConfirm = Boolean(marker) && !isGeocoding && canUse;
-
-  const buildReturnSelection = (): SalonAddressSelection | null => {
-    if (!marker) return null;
-    if (selection) return selection;
-    return {
-      latitude: marker.lat,
-      longitude: marker.lng,
-      formatted_address: "",
-      google_place_id: undefined,
-      city: "",
-      postal_code: "",
-      country: "",
-    };
-  };
+  const hasRequired =
+    Boolean(selection?.city) &&
+    Boolean(selection?.country) &&
+    Boolean(selection?.postal_code);
+  const canConfirm =
+    Boolean(marker) &&
+    Boolean(selection) &&
+    hasRequired &&
+    !isGeocoding &&
+    canUse;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -204,6 +199,12 @@ export default function SalonAddressPickerDialog({
                   <div>
                     Lat: {selection.latitude} • Lng: {selection.longitude}
                   </div>
+                  {!hasRequired ? (
+                    <div className="pt-1 text-red-600">
+                      City, postal code, and country are required. Please click
+                      a nearby location.
+                    </div>
+                  ) : null}
                 </div>
               ) : (
                 <div className="text-muted-foreground mt-1">
@@ -224,9 +225,8 @@ export default function SalonAddressPickerDialog({
                 className="text-white"
                 disabled={!canConfirm}
                 onClick={() => {
-                  const nextSelection = buildReturnSelection();
-                  if (!nextSelection) return;
-                  onSelect(nextSelection);
+                  if (!selection) return;
+                  onSelect(selection);
                   onOpenChange(false);
                 }}
               >

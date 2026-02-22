@@ -52,9 +52,9 @@ const salonDetailsValidationSchema = Yup.object().shape({
   name: Yup.string().required("Salon name is required"),
   formatted_address: Yup.string(),
   google_place_id: Yup.string(),
-  city: Yup.string(),
-  postal_code: Yup.string(),
-  country: Yup.string(),
+  city: Yup.string().required("City is required"),
+  postal_code: Yup.string().required("Postal code is required"),
+  country: Yup.string().required("Country is required"),
   latitude: Yup.number().required("Latitude is required"),
   longitude: Yup.number().required("Longitude is required"),
 });
@@ -167,9 +167,9 @@ const validationSchema = Yup.object().shape({
   facebook: Yup.string().url("Invalid URL"),
   instagram: Yup.string().url("Invalid URL"),
   youtube: Yup.string().url("Invalid URL"),
-  city: Yup.string(),
-  postal_code: Yup.string(),
-  country: Yup.string(),
+  city: Yup.string().required("City is required"),
+  postal_code: Yup.string().required("Postal code is required"),
+  country: Yup.string().required("Country is required"),
   latitude: Yup.number().required("Latitude is required"),
   longitude: Yup.number().required("Longitude is required"),
   opening_hours: Yup.array().of(
@@ -1460,7 +1460,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <div>
                         <Label htmlFor="city" className="mb-2">
-                          City / Town
+                          City / Town<span className="text-danger">*</span>
                         </Label>
                         <Field
                           name="city"
@@ -1478,7 +1478,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                       </div>
                       <div>
                         <Label htmlFor="postal_code" className="mb-2">
-                          Postal Code
+                          Postal Code<span className="text-danger">*</span>
                         </Label>
                         <Field
                           name="postal_code"
@@ -1499,7 +1499,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                     {/* Country */}
                     <div>
                       <Label htmlFor="country" className="mb-2">
-                        Country
+                        Country<span className="text-danger">*</span>
                       </Label>
                       <Field
                         name="country"
@@ -1550,6 +1550,9 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                             } else {
                               const basicFields = [
                                 "name",
+                                "city",
+                                "postal_code",
+                                "country",
                                 "latitude",
                                 "longitude",
                               ];
