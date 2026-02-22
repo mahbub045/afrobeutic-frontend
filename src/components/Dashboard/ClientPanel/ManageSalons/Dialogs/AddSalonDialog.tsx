@@ -1,4 +1,4 @@
-import SalonAddressPickerDialog from "@/components/Location/SalonAddressPickerDialog";
+import AddressPickerDialog from "@/components/Location/AddressPickerDialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -2030,7 +2030,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                   </TabsContent>
                 </Tabs>
 
-                <SalonAddressPickerDialog
+                <AddressPickerDialog
                   open={isAddressPickerOpen}
                   onOpenChange={setIsAddressPickerOpen}
                   initialCenter={

@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 export type SalonAddressSelection = {
   latitude: number;
@@ -69,7 +70,7 @@ function transformGeocoderResult(
   };
 }
 
-export default function SalonAddressPickerDialog({
+export default function AddressPickerDialog({
   open,
   onOpenChange,
   initialCenter,
@@ -94,6 +95,7 @@ export default function SalonAddressPickerDialog({
   );
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [error, setError] = useState<string>("");
+  const [postalCodeQuery, setPostalCodeQuery] = useState("");
 
   const geocodeLatLng = async (lat: number, lng: number) => {
     if (typeof window === "undefined") return;
@@ -119,6 +121,50 @@ export default function SalonAddressPickerDialog({
     } catch {
       setSelection(null);
       setError("Failed to fetch address. Please try again.");
+    } finally {
+      setIsGeocoding(false);
+    }
+  };
+
+  const geocodePostalCode = async () => {
+    const query = postalCodeQuery.trim();
+    if (!query) {
+      setError("Please enter a postal code.");
+      return;
+    }
+    if (typeof window === "undefined") return;
+    if (!window.google?.maps?.Geocoder) {
+      setError("Google Maps failed to load.");
+      return;
+    }
+
+    setIsGeocoding(true);
+    setError("");
+
+    try {
+      const geocoder = new window.google.maps.Geocoder();
+      const { results } = await geocoder.geocode({ address: query });
+      const top = results?.[0];
+      if (!top) {
+        setSelection(null);
+        setError("No results found for that postal code.");
+        return;
+      }
+
+      const location = top.geometry?.location;
+      if (!location) {
+        setSelection(null);
+        setError("No location found for that postal code.");
+        return;
+      }
+
+      const lat = location.lat();
+      const lng = location.lng();
+      setMarker({ lat, lng });
+      setSelection(transformGeocoderResult(top, lat, lng));
+    } catch {
+      setSelection(null);
+      setError("Failed to search postal code. Please try again.");
     } finally {
       setIsGeocoding(false);
     }
@@ -158,6 +204,31 @@ export default function SalonAddressPickerDialog({
           <div className="text-sm">Loading map…</div>
         ) : (
           <div className="space-y-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <div className="flex-1">
+                <Input
+                  value={postalCodeQuery}
+                  onChange={(e) => setPostalCodeQuery(e.target.value)}
+                  placeholder="Search by postal code"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      void geocodePostalCode();
+                    }
+                  }}
+                  disabled={isGeocoding}
+                />
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void geocodePostalCode()}
+                disabled={isGeocoding || !postalCodeQuery.trim()}
+              >
+                Search
+              </Button>
+            </div>
+
             <div className="overflow-hidden rounded-md border">
               <GoogleMap
                 mapContainerStyle={{ width: "100%", height: 360 }}
