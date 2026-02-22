@@ -208,6 +208,7 @@ export default function AddressPickerDialog({
               <div className="flex-1">
                 <Input
                   value={postalCodeQuery}
+                  type="text"
                   onChange={(e) => setPostalCodeQuery(e.target.value)}
                   placeholder="Search by postal code"
                   onKeyDown={(e) => {
@@ -221,7 +222,7 @@ export default function AddressPickerDialog({
               </div>
               <Button
                 type="button"
-                variant="outline"
+                variant="default"
                 onClick={() => void geocodePostalCode()}
                 disabled={isGeocoding || !postalCodeQuery.trim()}
               >

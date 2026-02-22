@@ -1385,34 +1385,35 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
 
                     {/* Address Picker */}
                     <div>
-                      <div className="flex items-end gap-3">
-                        <div className="flex-1">
-                          <Label htmlFor="formatted_address" className="mb-2">
-                            Address
-                          </Label>
-                          <Field
-                            name="formatted_address"
-                            id="formatted_address"
-                            as="input"
-                            type="text"
-                            readOnly
-                            placeholder="Click ‘Get Address’ to select on map"
-                            className="w-full"
-                          />
-                          <ErrorMessage
-                            name="formatted_address"
-                            component="div"
-                            className="text-danger mt-1 text-xs"
-                          />
-                        </div>
+                      <Label htmlFor="formatted_address" className="mb-2">
+                        Address
+                      </Label>
+
+                      <div className="flex items-center gap-3">
+                        <Field
+                          name="formatted_address"
+                          id="formatted_address"
+                          as="input"
+                          type="text"
+                          readOnly
+                          placeholder="Click ‘Get Address’ to select on map"
+                          className="w-full flex-1"
+                        />
                         <Button
                           type="button"
-                          variant="outline"
+                          variant="default"
                           onClick={() => setIsAddressPickerOpen(true)}
+                          className="shrink-0"
                         >
                           Get Address
                         </Button>
                       </div>
+
+                      <ErrorMessage
+                        name="formatted_address"
+                        component="div"
+                        className="text-danger mt-1 text-xs"
+                      />
                       <Field type="hidden" name="google_place_id" />
                     </div>
 

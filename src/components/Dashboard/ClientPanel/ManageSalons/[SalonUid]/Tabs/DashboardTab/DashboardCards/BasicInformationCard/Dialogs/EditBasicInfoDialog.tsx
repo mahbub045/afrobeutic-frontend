@@ -228,33 +228,35 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="md:col-span-2">
-                    <div className="flex items-end gap-2">
-                      <div className="flex-1">
-                        <Label htmlFor="formatted_address" className="mb-2">
-                          Address
-                        </Label>
-                        <Field
-                          id="formatted_address"
-                          name="formatted_address"
-                          type="text"
-                          as="input"
-                          readOnly
-                        />
-                        <ErrorMessage
-                          name="formatted_address"
-                          component="div"
-                          className="text-danger mt-1 text-xs"
-                        />
-                      </div>
+                    <Label htmlFor="formatted_address" className="mb-2">
+                      Address
+                    </Label>
+
+                    <div className="flex items-center gap-2">
+                      <Field
+                        id="formatted_address"
+                        name="formatted_address"
+                        type="text"
+                        as="input"
+                        readOnly
+                        className="w-full flex-1"
+                      />
                       <Button
                         type="button"
-                        variant="outline"
+                        variant="default"
                         onClick={() => setIsAddressPickerOpen(true)}
                         disabled={isLoading}
+                        className="shrink-0"
                       >
                         Get Address
                       </Button>
                     </div>
+
+                    <ErrorMessage
+                      name="formatted_address"
+                      component="div"
+                      className="text-danger mt-1 text-xs"
+                    />
                   </div>
                 </div>
 
