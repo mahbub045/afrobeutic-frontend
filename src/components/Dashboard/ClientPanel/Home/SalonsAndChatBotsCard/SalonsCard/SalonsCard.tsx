@@ -99,7 +99,7 @@ const SalonsCard: React.FC = () => {
                       {salon.name}
                     </h4>
                     <p className="text-muted-foreground text-xs">
-                      {salon.city || salon.street || "No location"}
+                      {salon.city || "No location"}
                     </p>
                   </div>
                 </div>

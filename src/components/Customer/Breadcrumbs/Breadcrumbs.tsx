@@ -8,7 +8,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Home, Scissors } from "lucide-react";
+import { Home } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
