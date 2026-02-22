@@ -1,5 +1,6 @@
 "use client";
 import { useGetCustomerBookingDetailsQuery } from "@/Redux/Api/CustomerBaseApi";
+import { BookingProduct, BookingService } from "@/Types/Customer/BookingTypes";
 import { LoaderPinwheel } from "lucide-react";
 import { useParams } from "next/navigation";
 import React from "react";
@@ -38,10 +39,8 @@ const BookingDetails: React.FC = () => {
   }
 
   // the API now returns full objects rather than just uids
-  const services = (booking.services ??
-    []) as import("@/Types/Customer/BookingTypes").BookingService[];
-  const products = (booking.products ??
-    []) as import("@/Types/Customer/BookingTypes").BookingProduct[];
+  const services = (booking.services ?? []) as BookingService[];
+  const products = (booking.products ?? []) as BookingProduct[];
 
   return (
     <div className="space-y-4">
