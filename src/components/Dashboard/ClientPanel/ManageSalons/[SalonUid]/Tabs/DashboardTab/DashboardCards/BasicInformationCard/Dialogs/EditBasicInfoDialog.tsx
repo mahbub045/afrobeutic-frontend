@@ -50,7 +50,6 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
     city: Yup.string().required("City is required"),
     postal_code: Yup.string().required("Postal code is required"),
     country: Yup.string().required("Country is required"),
-    address: Yup.string().nullable(),
   });
 
   const handleSubmit = async (
@@ -69,7 +68,6 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
         formData.append("city", values.city);
         formData.append("postal_code", values.postal_code);
         formData.append("country", values.country);
-        formData.append("address", values.address || "");
 
         await editBasicInfo({
           salonUid: salonuid as string,
@@ -133,7 +131,6 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
             city: singleSalonData?.city || "",
             postal_code: singleSalonData?.postal_code || "",
             country: singleSalonData?.country || "",
-            address: singleSalonData?.address || "",
           }}
           validationSchema={basicSchema}
           onSubmit={handleSubmit}

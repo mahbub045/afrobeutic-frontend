@@ -56,13 +56,8 @@ const AddressSection: React.FC<DashboardTabProps> = ({
                   <p className="text-xs font-semibold tracking-wide text-gray-500 uppercase dark:text-gray-400">
                     Address
                   </p>
-                  <p className="mt-1 text-lg font-semibold text-gray-900 dark:text-white">
-                    {[
-                      singleSalonData?.address_one,
-                      singleSalonData?.address_two,
-                    ]
-                      .filter(Boolean)
-                      .join(", ") || "Not Specified"}
+                  <p className="mt-1 font-semibold text-gray-900 dark:text-white">
+                    {singleSalonData?.formatted_address || "Not Specified"}
                   </p>
                 </div>
 
@@ -71,7 +66,7 @@ const AddressSection: React.FC<DashboardTabProps> = ({
                     <p className="text-xs font-semibold tracking-wide text-gray-500 uppercase dark:text-gray-400">
                       City
                     </p>
-                    <p className="mt-1 text-lg font-semibold text-gray-900 dark:text-white">
+                    <p className="mt-1 font-semibold text-gray-900 dark:text-white">
                       {singleSalonData?.city || "Not Specified"}
                     </p>
                   </div>
@@ -79,33 +74,43 @@ const AddressSection: React.FC<DashboardTabProps> = ({
                     <p className="text-xs font-semibold tracking-wide text-gray-500 uppercase dark:text-gray-400">
                       Postal Code
                     </p>
-                    <p className="mt-1 text-lg font-semibold text-gray-900 dark:text-white">
+                    <p className="mt-1 font-semibold text-gray-900 dark:text-white">
                       {singleSalonData?.postal_code || "Not Specified"}
                     </p>
                   </div>
                 </div>
 
-                <div>
-                  <p className="text-xs font-semibold tracking-wide text-gray-500 uppercase dark:text-gray-400">
-                    Country
-                  </p>
-                  <p className="mt-1 text-lg font-semibold text-gray-900 dark:text-white">
-                    {(() => {
-                      const stored = singleSalonData?.country;
-                      if (!stored) return "Not Specified";
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs font-semibold tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                      Country
+                    </p>
+                    <p className="mt-1 font-semibold text-gray-900 dark:text-white">
+                      {(() => {
+                        const stored = singleSalonData?.country;
+                        if (!stored) return "Not Specified";
 
-                      const code =
-                        typeof stored === "string" && stored.length === 2
-                          ? stored.toUpperCase()
-                          : null;
-                      if (code) {
-                        const found = countries.find((c) => c.code === code);
-                        if (found) return found.name;
-                      }
+                        const code =
+                          typeof stored === "string" && stored.length === 2
+                            ? stored.toUpperCase()
+                            : null;
+                        if (code) {
+                          const found = countries.find((c) => c.code === code);
+                          if (found) return found.name;
+                        }
 
-                      return stored;
-                    })()}
-                  </p>
+                        return stored;
+                      })()}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                      Google Place ID
+                    </p>
+                    <p className="mt-1 font-semibold text-gray-900 dark:text-white">
+                      {singleSalonData?.google_place_id || "Not Specified"}
+                    </p>
+                  </div>
                 </div>
               </>
             )}

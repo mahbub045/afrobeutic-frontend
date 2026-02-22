@@ -46,7 +46,6 @@ const EditAddressDialog: React.FC<EditDashboardProps> = ({
     city: Yup.string().required("City is required"),
     postal_code: Yup.string().required("Postal code is required"),
     country: Yup.string().required("Country is required"),
-    address: Yup.string().nullable(),
   });
 
   const handleSubmit = async (
@@ -61,7 +60,6 @@ const EditAddressDialog: React.FC<EditDashboardProps> = ({
         city: values.city,
         postal_code: values.postal_code,
         country: values.country,
-        address: values.address || "",
       };
 
       await editProfile({
@@ -105,7 +103,6 @@ const EditAddressDialog: React.FC<EditDashboardProps> = ({
             city: singleSalonData?.city || "",
             postal_code: singleSalonData?.postal_code || "",
             country: singleSalonData?.country || "",
-            address: singleSalonData?.address || "",
           }}
           validationSchema={basicSchema}
           onSubmit={handleSubmit}

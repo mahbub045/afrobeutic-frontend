@@ -49,7 +49,8 @@ const getTimeDifference = (startTime: string, endTime: string): number => {
 // Validation schema for salon details tab (basic info only)
 const salonDetailsValidationSchema = Yup.object().shape({
   name: Yup.string().required("Salon name is required"),
-  address_one: Yup.string().required("Address is required"),
+  formatted_address: Yup.string().required("Address is required"),
+  google_place_id: Yup.string().required("Google Place ID is required"),
   address_two: Yup.string(),
   city: Yup.string().required("City is required"),
   postal_code: Yup.string().required("Postal code is required"),
