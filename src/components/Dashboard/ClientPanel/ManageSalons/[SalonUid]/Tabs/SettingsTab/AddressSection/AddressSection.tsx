@@ -56,7 +56,7 @@ const AddressSection: React.FC<DashboardTabProps> = ({
                   <p className="text-xs font-semibold tracking-wide text-gray-500 uppercase dark:text-gray-400">
                     Address
                   </p>
-                  <p className="mt-1 font-semibold text-gray-900 dark:text-white">
+                  <p className="mt-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap text-gray-900 dark:text-white">
                     {singleSalonData?.formatted_address || "Not Specified"}
                   </p>
                 </div>
@@ -107,7 +107,7 @@ const AddressSection: React.FC<DashboardTabProps> = ({
                     <p className="text-xs font-semibold tracking-wide text-gray-500 uppercase dark:text-gray-400">
                       Google Place ID
                     </p>
-                    <p className="mt-1 font-semibold text-gray-900 dark:text-white">
+                    <p className="mt-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap text-gray-900 dark:text-white">
                       {singleSalonData?.google_place_id || "Not Specified"}
                     </p>
                   </div>

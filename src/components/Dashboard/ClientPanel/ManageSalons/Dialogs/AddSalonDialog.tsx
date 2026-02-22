@@ -1,3 +1,4 @@
+import SalonAddressPickerDialog from "@/components/Location/SalonAddressPickerDialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -49,14 +50,13 @@ const getTimeDifference = (startTime: string, endTime: string): number => {
 // Validation schema for salon details tab (basic info only)
 const salonDetailsValidationSchema = Yup.object().shape({
   name: Yup.string().required("Salon name is required"),
-  formatted_address: Yup.string().required("Address is required"),
-  google_place_id: Yup.string().required("Google Place ID is required"),
-  address_two: Yup.string(),
-  city: Yup.string().required("City is required"),
-  postal_code: Yup.string().required("Postal code is required"),
-  country: Yup.string().required("Country is required"),
-  website: Yup.string().url("Invalid URL"),
-  address: Yup.string().url("Invalid URL").notRequired(),
+  formatted_address: Yup.string(),
+  google_place_id: Yup.string(),
+  city: Yup.string(),
+  postal_code: Yup.string(),
+  country: Yup.string(),
+  latitude: Yup.number().required("Latitude is required"),
+  longitude: Yup.number().required("Longitude is required"),
 });
 
 // Validation schema for contacts and social links tab
@@ -167,13 +167,11 @@ const validationSchema = Yup.object().shape({
   facebook: Yup.string().url("Invalid URL"),
   instagram: Yup.string().url("Invalid URL"),
   youtube: Yup.string().url("Invalid URL"),
-  website: Yup.string().url("Invalid URL"),
-  address_one: Yup.string().required("Address is required"),
-  address_two: Yup.string(),
-  city: Yup.string().required("City is required"),
-  postal_code: Yup.string().required("Postal code is required"),
-  country: Yup.string().required("Country is required"),
-  address: Yup.string().url("Invalid URL").notRequired(),
+  city: Yup.string(),
+  postal_code: Yup.string(),
+  country: Yup.string(),
+  latitude: Yup.number().required("Latitude is required"),
+  longitude: Yup.number().required("Longitude is required"),
   opening_hours: Yup.array().of(
     Yup.object().shape({
       day: Yup.string().required("Day is required"),
@@ -208,6 +206,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
   const [addSalon, { isLoading }] = useAddSalonMutation();
   const [activeTab, setActiveTab] = useState("salon-category");
   const [showBridalInServicesTab, setShowBridalInServicesTab] = useState(false);
+  const [isAddressPickerOpen, setIsAddressPickerOpen] = useState(false);
 
   // Helper function to convert time HH:MM to HH:MM:SS format
   const convertTimeToAPIFormat = (time: string): string => {
@@ -255,16 +254,21 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
           : null,
         country_dial_code: formData.country_dial_code,
         country_dial_code_two: formData.country_dial_code_two || undefined,
-        website: formData.website,
+
         facebook: formData.facebook,
         instagram: formData.instagram,
         youtube: formData.youtube,
-        address_one: formData.address_one,
-        address_two: formData.address_two || null,
+        formatted_address: formData.formatted_address || undefined,
+        google_place_id: formData.google_place_id || undefined,
         city: formData.city,
         postal_code: formData.postal_code,
         country: formData.country,
-        address: formData.address,
+        latitude:
+          typeof formData.latitude === "number" ? formData.latitude : undefined,
+        longitude:
+          typeof formData.longitude === "number"
+            ? formData.longitude
+            : undefined,
         opening_hours: formData.opening_hours.map((oh) => ({
           day: oh.day,
           opening_time: convertTimeToAPIFormat(oh.opening_time),
@@ -446,13 +450,13 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
       await salonDetailsValidationSchema.validate(
         {
           name: values.name,
-          address_one: values.address_one,
-          address_two: values.address_two,
+          formatted_address: values.formatted_address,
+          google_place_id: values.google_place_id,
           city: values.city,
           postal_code: values.postal_code,
           country: values.country,
-          website: values.website,
-          address: values.address,
+          latitude: values.latitude,
+          longitude: values.longitude,
         },
         { abortEarly: false },
       );
@@ -647,12 +651,15 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
               facebook: "",
               instagram: "",
               youtube: "",
-              address_one: "",
-              address_two: "",
+
+              formatted_address: "",
+              google_place_id: "",
+              latitude: undefined,
+              longitude: undefined,
+
               city: "",
               postal_code: "",
               country: "",
-              address: "",
               opening_hours: days.map((d) => ({
                 day: d,
                 opening_time: "08:00",
@@ -678,7 +685,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
               }
             }}
           >
-            {({ values, setFieldTouched }) => (
+            {({ values, setFieldTouched, setFieldValue }) => (
               <FormikForm className="flex w-full flex-1 flex-col items-center">
                 <Tabs
                   value={activeTab}
@@ -692,6 +699,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold">
                         Please choose which best describes your salon
+                        <span className="text-danger">*</span>
                       </h3>
                       <div className="grid gap-3">
                         {salonCategories.map((category) => (
@@ -1175,7 +1183,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                           <div className="flex flex-col justify-center">
                             <h3 className="text-base font-semibold tracking-tight">
                               Please confirm which services your salon also
-                              includes
+                              includes <span className="text-danger">*</span>
                             </h3>
                             <div className="mt-2 space-y-2">
                               {[
@@ -1284,7 +1292,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold">
                         Is this salon a Barbershop / Men’s Salon or a Unisex
-                        Salon?
+                        Salon? <span className="text-danger">*</span>
                       </h3>
                       <div className="grid gap-3">
                         {salonTypes.map((type) => (
@@ -1375,60 +1383,91 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                       />
                     </div>
 
-                    {/* Address 1 */}
+                    {/* Address Picker */}
                     <div>
-                      <Label htmlFor="address_one" className="mb-2">
-                        Address 1<span className="text-danger">*</span>
-                      </Label>
-                      <Field
-                        name="address_one"
-                        id="address_one"
-                        as="input"
-                        type="text"
-                        placeholder="Enter address"
-                        className="w-full"
-                      />
-                      <ErrorMessage
-                        name="address_one"
-                        component="div"
-                        className="text-danger mt-1 text-xs"
-                      />
+                      <div className="flex items-end gap-3">
+                        <div className="flex-1">
+                          <Label htmlFor="formatted_address" className="mb-2">
+                            Address
+                          </Label>
+                          <Field
+                            name="formatted_address"
+                            id="formatted_address"
+                            as="input"
+                            type="text"
+                            readOnly
+                            placeholder="Click ‘Get Address’ to select on map"
+                            className="w-full"
+                          />
+                          <ErrorMessage
+                            name="formatted_address"
+                            component="div"
+                            className="text-danger mt-1 text-xs"
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setIsAddressPickerOpen(true)}
+                        >
+                          Get Address
+                        </Button>
+                      </div>
+                      <Field type="hidden" name="google_place_id" />
                     </div>
 
-                    {/* Address 2 (Optional) */}
-                    <div>
-                      <Label htmlFor="address_two" className="mb-2">
-                        Address 2{" "}
-                        <span className="text-muted-foreground text-xs">
-                          (Optional)
-                        </span>
-                      </Label>
-                      <Field
-                        name="address_two"
-                        id="address_two"
-                        as="input"
-                        type="text"
-                        placeholder="Apartment, suite, etc."
-                        className="w-full"
-                      />
-                      <ErrorMessage
-                        name="address_two"
-                        component="div"
-                        className="text-danger mt-1 text-xs"
-                      />
+                    {/* Latitude / Longitude */}
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div>
+                        <Label htmlFor="latitude" className="mb-2">
+                          Latitude<span className="text-danger">*</span>
+                        </Label>
+                        <Field
+                          name="latitude"
+                          id="latitude"
+                          as="input"
+                          type="number"
+                          readOnly
+                          placeholder="Select address"
+                        />
+                        <ErrorMessage
+                          name="latitude"
+                          component="div"
+                          className="text-danger mt-1 text-xs"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="longitude" className="mb-2">
+                          Longitude<span className="text-danger">*</span>
+                        </Label>
+                        <Field
+                          name="longitude"
+                          id="longitude"
+                          as="input"
+                          type="number"
+                          readOnly
+                          placeholder="Select address"
+                        />
+                        <ErrorMessage
+                          name="longitude"
+                          component="div"
+                          className="text-danger mt-1 text-xs"
+                        />
+                      </div>
                     </div>
 
                     {/* City and Postal Code */}
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <div>
                         <Label htmlFor="city" className="mb-2">
-                          City / Town<span className="text-danger">*</span>
+                          City / Town
                         </Label>
                         <Field
                           name="city"
                           id="city"
                           as="input"
                           type="text"
+                          readOnly
                           placeholder="Enter city"
                         />
                         <ErrorMessage
@@ -1439,13 +1478,14 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                       </div>
                       <div>
                         <Label htmlFor="postal_code" className="mb-2">
-                          Postal Code<span className="text-danger">*</span>
+                          Postal Code
                         </Label>
                         <Field
                           name="postal_code"
                           id="postal_code"
                           as="input"
                           type="text"
+                          readOnly
                           placeholder="Enter postal code"
                         />
                         <ErrorMessage
@@ -1459,13 +1499,14 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                     {/* Country */}
                     <div>
                       <Label htmlFor="country" className="mb-2">
-                        Country<span className="text-danger">*</span>
+                        Country
                       </Label>
                       <Field
                         name="country"
                         id="country"
                         as="select"
                         className="w-full"
+                        disabled
                       >
                         <option value="" disabled>
                           Select a country
@@ -1482,52 +1523,6 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                         className="text-danger mt-1 text-xs"
                       />
                     </div>
-
-                    {/* Website */}
-                    {/* <div>
-                      <Label htmlFor="website" className="mb-2">
-                        Website{" "}
-                        <span className="text-muted-foreground text-xs">
-                          (Optional)
-                        </span>
-                      </Label>
-                      <Field
-                        name="website"
-                        id="website"
-                        as="input"
-                        type="text"
-                        placeholder="https://"
-                        className="w-full"
-                      />
-                      <ErrorMessage
-                        name="website"
-                        component="div"
-                        className="text-danger mt-1 text-xs"
-                      />
-                    </div> */}
-
-                    {/* Google Location Link */}
-                    {/* <div>
-                      <Label htmlFor="address" className="mb-2">
-                        Google Location Link{" "}
-                        <span className="text-muted-foreground text-xs">
-                          (Optional)
-                        </span>
-                      </Label>
-                      <Field
-                        name="address"
-                        id="address"
-                        as="input"
-                        type="text"
-                        placeholder="https://maps.google.com/..."
-                        className="w-full"
-                      />
-                      <ErrorMessage
-                        name="address"
-                        component="div"
-                        className="text-danger mt-1 text-xs"
-                      />
-                    </div> */}
 
                     <div className="mt-6 flex items-center justify-between gap-3">
                       <Button
@@ -1555,10 +1550,8 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                             } else {
                               const basicFields = [
                                 "name",
-                                "address_one",
-                                "city",
-                                "postal_code",
-                                "country",
+                                "latitude",
+                                "longitude",
                               ];
                               basicFields.forEach((field) =>
                                 setFieldTouched(field, true),
@@ -2033,6 +2026,32 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                     </div>
                   </TabsContent>
                 </Tabs>
+
+                <SalonAddressPickerDialog
+                  open={isAddressPickerOpen}
+                  onOpenChange={setIsAddressPickerOpen}
+                  initialCenter={
+                    typeof values.latitude === "number" &&
+                    typeof values.longitude === "number"
+                      ? { lat: values.latitude, lng: values.longitude }
+                      : undefined
+                  }
+                  onSelect={(selection) => {
+                    setFieldValue(
+                      "formatted_address",
+                      selection.formatted_address,
+                    );
+                    setFieldValue(
+                      "google_place_id",
+                      selection.google_place_id || "",
+                    );
+                    setFieldValue("city", selection.city);
+                    setFieldValue("postal_code", selection.postal_code);
+                    setFieldValue("country", selection.country);
+                    setFieldValue("latitude", selection.latitude);
+                    setFieldValue("longitude", selection.longitude);
+                  }}
+                />
               </FormikForm>
             )}
           </Formik>
