@@ -67,7 +67,7 @@ const PricingPlanList: React.FC = () => {
 
       {isLoading ? (
         <div className="flex items-center justify-center">
-          <LoaderPinwheel size={30} className="animate-spin" />
+          <LoaderPinwheel size={30} className="text-primary animate-spin" />
         </div>
       ) : !pricingPlanData || pricingPlanData.results.length === 0 ? (
         <div className="text-muted-foreground text-center">

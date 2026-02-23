@@ -1,4 +1,5 @@
 "use client";
+import AddressPickerDialog from "@/components/Location/AddressPickerDialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,7 +25,7 @@ import {
 } from "formik";
 import { useTheme } from "next-themes";
 import { useParams } from "next/navigation";
-import React from "react";
+import React, { useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
@@ -37,16 +38,22 @@ const EditAddressDialog: React.FC<EditDashboardProps> = ({
   const { salonuid } = useParams();
   const { resolvedTheme } = useTheme();
 
+  const [isAddressPickerOpen, setIsAddressPickerOpen] = useState(false);
+
   // RTK hooks
   const [editProfile, { isLoading }] = useEditSingleSalonMutation();
 
   const basicSchema = Yup.object().shape({
-    address_one: Yup.string(),
-    address_two: Yup.string(),
+    formatted_address: Yup.string(),
     city: Yup.string().required("City is required"),
     postal_code: Yup.string().required("Postal code is required"),
     country: Yup.string().required("Country is required"),
-    address: Yup.string().nullable(),
+    latitude: Yup.number()
+      .typeError("Latitude is required")
+      .required("Latitude is required"),
+    longitude: Yup.number()
+      .typeError("Longitude is required")
+      .required("Longitude is required"),
   });
 
   const handleSubmit = async (
@@ -56,12 +63,13 @@ const EditAddressDialog: React.FC<EditDashboardProps> = ({
     setSubmitting(true);
     try {
       const payload: Partial<SalonProps> = {
-        address_one: values.address_one,
-        address_two: values.address_two,
+        formatted_address: values.formatted_address || "",
+        google_place_id: values.google_place_id,
         city: values.city,
         postal_code: values.postal_code,
         country: values.country,
-        address: values.address || "",
+        latitude: values.latitude,
+        longitude: values.longitude,
       };
 
       await editProfile({
@@ -97,52 +105,51 @@ const EditAddressDialog: React.FC<EditDashboardProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <Formik
+        <Formik<AddressFormValues>
           enableReinitialize
           initialValues={{
-            address_one: singleSalonData?.address_one || "",
-            address_two: singleSalonData?.address_two || "",
+            formatted_address: singleSalonData?.formatted_address || "",
+            google_place_id: singleSalonData?.google_place_id || undefined,
             city: singleSalonData?.city || "",
             postal_code: singleSalonData?.postal_code || "",
             country: singleSalonData?.country || "",
-            address: singleSalonData?.address || "",
+            latitude: singleSalonData?.latitude,
+            longitude: singleSalonData?.longitude,
           }}
           validationSchema={basicSchema}
           onSubmit={handleSubmit}
         >
-          {() => (
+          {({ values, setFieldValue }) => (
             <FormikForm>
               <div className="grid grid-cols-1 gap-4">
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div>
-                    <Label htmlFor="address_one" className="mb-2">
-                      Address Line 1
+                  <div className="md:col-span-2">
+                    <Label htmlFor="formatted_address" className="mb-2">
+                      Address
                     </Label>
-                    <Field
-                      id="address_one"
-                      name="address_one"
-                      type="text"
-                      as="input"
-                    />
-                    <ErrorMessage
-                      name="address_one"
-                      component="div"
-                      className="text-danger mt-1 text-xs"
-                    />
-                  </div>
 
-                  <div>
-                    <Label htmlFor="address_two" className="mb-2">
-                      Address Line 2
-                    </Label>
-                    <Field
-                      id="address_two"
-                      name="address_two"
-                      type="text"
-                      as="input"
-                    />
+                    <div className="flex items-center gap-2">
+                      <Field
+                        id="formatted_address"
+                        name="formatted_address"
+                        type="text"
+                        as="input"
+                        readOnly
+                        className="w-full flex-1"
+                      />
+                      <Button
+                        type="button"
+                        variant="default"
+                        onClick={() => setIsAddressPickerOpen(true)}
+                        disabled={isLoading}
+                        className="shrink-0"
+                      >
+                        Get Address
+                      </Button>
+                    </div>
+
                     <ErrorMessage
-                      name="address_two"
+                      name="formatted_address"
                       component="div"
                       className="text-danger mt-1 text-xs"
                     />
@@ -154,7 +161,13 @@ const EditAddressDialog: React.FC<EditDashboardProps> = ({
                     <Label htmlFor="city" className="mb-2">
                       City
                     </Label>
-                    <Field id="city" name="city" type="text" as="input" />
+                    <Field
+                      id="city"
+                      name="city"
+                      type="text"
+                      as="input"
+                      readOnly
+                    />
                     <ErrorMessage
                       name="city"
                       component="div"
@@ -170,6 +183,7 @@ const EditAddressDialog: React.FC<EditDashboardProps> = ({
                       name="postal_code"
                       type="text"
                       as="input"
+                      readOnly
                     />
                     <ErrorMessage
                       name="postal_code"
@@ -182,7 +196,7 @@ const EditAddressDialog: React.FC<EditDashboardProps> = ({
                     <Label htmlFor="country" className="mb-2">
                       Country
                     </Label>
-                    <Field id="country" name="country" as="select">
+                    <Field id="country" name="country" as="select" disabled>
                       <option value="" disabled>
                         Select a country
                       </option>
@@ -199,6 +213,69 @@ const EditAddressDialog: React.FC<EditDashboardProps> = ({
                     />
                   </div>
                 </div>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
+                    <Label htmlFor="latitude" className="mb-2">
+                      Latitude
+                    </Label>
+                    <Field
+                      id="latitude"
+                      name="latitude"
+                      type="number"
+                      as="input"
+                      readOnly
+                    />
+                    <ErrorMessage
+                      name="latitude"
+                      component="div"
+                      className="text-danger mt-1 text-xs"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="longitude" className="mb-2">
+                      Longitude
+                    </Label>
+                    <Field
+                      id="longitude"
+                      name="longitude"
+                      type="number"
+                      as="input"
+                      readOnly
+                    />
+                    <ErrorMessage
+                      name="longitude"
+                      component="div"
+                      className="text-danger mt-1 text-xs"
+                    />
+                  </div>
+                </div>
+
+                <AddressPickerDialog
+                  open={isAddressPickerOpen}
+                  onOpenChange={setIsAddressPickerOpen}
+                  initialCenter={
+                    values.latitude != null && values.longitude != null
+                      ? { lat: values.latitude, lng: values.longitude }
+                      : undefined
+                  }
+                  onSelect={(selection) => {
+                    setFieldValue(
+                      "formatted_address",
+                      selection.formatted_address || "",
+                    );
+                    setFieldValue(
+                      "google_place_id",
+                      selection.google_place_id || "",
+                    );
+                    setFieldValue("city", selection.city || "");
+                    setFieldValue("postal_code", selection.postal_code || "");
+                    setFieldValue("country", selection.country || "");
+                    setFieldValue("latitude", selection.latitude);
+                    setFieldValue("longitude", selection.longitude);
+                  }}
+                />
 
                 <div className="mt-4 flex justify-end gap-3">
                   <Button

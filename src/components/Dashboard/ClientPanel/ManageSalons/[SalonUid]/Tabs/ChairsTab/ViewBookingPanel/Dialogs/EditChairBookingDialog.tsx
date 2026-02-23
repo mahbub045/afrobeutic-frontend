@@ -139,16 +139,69 @@ const EditChairBookingDialog: React.FC<EditChairBookingDialogProps> = ({
         ? values.booking_time
         : `${values.booking_time}:00.000Z`;
 
-      const bookingPayload = {
-        customer: values.customer,
-        booking_date: values.booking_date,
-        booking_time: formattedTime,
-        status: values.status || "PLACED",
-        notes: values.notes || "",
-        services: values.services,
-        products: values.products || [],
-        employee: values.employee,
+      // Helper to compare arrays (order-independent)
+      const arraysEqual = (a: string[], b: string[]) => {
+        if (a.length !== b.length) return false;
+        const sa = [...a].sort();
+        const sb = [...b].sort();
+        return sa.every((v, i) => v === sb[i]);
       };
+
+      // Snapshot of original values (mirrors Formik initialValues)
+      const orig = {
+        customer: {
+          first_name: selectedChairBookingData.customer.first_name || "",
+          last_name: selectedChairBookingData.customer.last_name || "",
+          phone: selectedChairBookingData.customer.phone || "",
+        },
+        booking_date:
+          selectedChairBookingData.booking_date ||
+          new Date().toISOString().split("T")[0],
+        booking_time: initialBookingTime,
+        status: selectedChairBookingData.status || "PLACED",
+        notes: selectedChairBookingData.notes || "",
+        services: Array.isArray(selectedChairBookingData.services)
+          ? selectedChairBookingData.services.map((s) => s.uid)
+          : [],
+        products: Array.isArray(selectedChairBookingData.products)
+          ? selectedChairBookingData.products.map((p) => p.uid)
+          : [],
+        employee: selectedChairBookingData.employee?.uid || "",
+      };
+
+      // Build patch payload — only include changed fields
+      const bookingPayload: Record<string, unknown> = {};
+
+      // Customer sub-fields
+      const customerChanges: Record<string, string> = {};
+      if (values.customer.first_name !== orig.customer.first_name)
+        customerChanges.first_name = values.customer.first_name;
+      if (values.customer.last_name !== orig.customer.last_name)
+        customerChanges.last_name = values.customer.last_name;
+      if (values.customer.phone !== orig.customer.phone)
+        customerChanges.phone = values.customer.phone;
+      if (Object.keys(customerChanges).length > 0)
+        bookingPayload.customer = customerChanges;
+
+      if (values.booking_date !== orig.booking_date)
+        bookingPayload.booking_date = values.booking_date;
+
+      if (values.booking_time !== orig.booking_time)
+        bookingPayload.booking_time = formattedTime;
+
+      if (values.status !== orig.status) bookingPayload.status = values.status;
+
+      if ((values.notes || "") !== orig.notes)
+        bookingPayload.notes = values.notes || "";
+
+      if (!arraysEqual(values.services, orig.services))
+        bookingPayload.services = values.services;
+
+      if (!arraysEqual(values.products || [], orig.products))
+        bookingPayload.products = values.products || [];
+
+      if (values.employee !== orig.employee)
+        bookingPayload.employee = values.employee;
 
       console.log("Booking Payload:", bookingPayload); // Debug log
 

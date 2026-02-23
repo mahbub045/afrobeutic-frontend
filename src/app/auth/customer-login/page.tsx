@@ -222,7 +222,7 @@ export default function CustomerLoginPage() {
                   className="btn-full btn-primary"
                 >
                   {loading ? (
-                    <LoaderPinwheel className="mr-2 inline h-5 w-5 animate-spin text-white" />
+                    <LoaderPinwheel className="mr-2 inline h-5 w-5 animate-spin" />
                   ) : (
                     "Send OTP"
                   )}
@@ -266,7 +266,7 @@ export default function CustomerLoginPage() {
               className="btn-full btn-primary"
             >
               {loading ? (
-                <LoaderPinwheel className="mr-2 inline h-5 w-5 animate-spin text-white" />
+                <LoaderPinwheel className="mr-2 inline h-5 w-5 animate-spin" />
               ) : (
                 "Verify & continue"
               )}

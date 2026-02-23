@@ -145,12 +145,7 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
                     Address
                   </p>
                   <p className="text-foreground mt-1 text-sm">
-                    {[
-                      singleSalonData?.address_one,
-                      singleSalonData?.address_two,
-                    ]
-                      .filter(Boolean)
-                      .join(", ") || "Not Specified"}
+                    {singleSalonData?.formatted_address || "Not Specified"}
                   </p>
                 </div>
 

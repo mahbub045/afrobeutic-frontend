@@ -480,7 +480,7 @@ const AcceptInvitationContent: React.FC = () => {
                         >
                           {isSubmitting || isLoading ? (
                             <>
-                              <LoaderPinwheel className="mr-2 inline animate-spin text-white" />
+                              <LoaderPinwheel className="mr-2 inline animate-spin" />
                             </>
                           ) : (
                             "Sign Up"

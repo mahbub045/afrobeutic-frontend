@@ -27,8 +27,6 @@ export interface SalonProps {
   logo?: string;
   salon_type?: string;
   hair_service_types?: string[];
-  address_one?: string;
-  address_two?: string | null;
   email?: string;
   phone_number_one?: string;
   phone_number_two?: string | null;
@@ -36,14 +34,14 @@ export interface SalonProps {
   instagram?: string;
   youtube?: string | null;
   website?: string;
-  street?: string;
+  formatted_address?: string;
+  google_place_id?: string;
   city?: string;
   postal_code?: string;
   country?: string;
   latitude?: number;
   longitude?: number;
   status?: string;
-  address?: string;
   opening_hours: OpeningHour[];
   professional_career_details?: string;
   about_salon?: string;
@@ -83,12 +81,13 @@ export interface FormValues {
   facebook?: string;
   instagram?: string;
   youtube?: string;
-  address_one: string;
-  address_two?: string;
+  formatted_address: string;
+  google_place_id?: string;
   city: string;
   postal_code: string;
   country: string;
-  address?: string;
+  latitude?: number;
+  longitude?: number;
   opening_hours: OpeningHour[];
 }
 
@@ -110,12 +109,14 @@ export interface BasicInfoFormValues {
   logoPreview: string;
   name: string;
   salon_type: string;
-  address_one: string;
-  address_two: string;
+  formatted_address: string;
+  google_place_id?: string;
+  street: string;
   city: string;
   postal_code: string;
   country: string;
-  address: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface ProfileInfoFormValues {
@@ -126,12 +127,13 @@ export interface ProfileInfoFormValues {
 }
 
 export interface AddressFormValues {
-  address_one: string;
-  address_two: string;
+  formatted_address: string;
+  google_place_id?: string;
   city: string;
   postal_code: string;
   country: string;
-  address: string;
+  latitude?: number;
+  longitude?: number;
 }
 export interface ContactValues {
   phone_number_one: string;

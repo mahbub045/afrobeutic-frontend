@@ -11,9 +11,6 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        // <div className="grid min-h-screen place-items-center">
-        //   <LoaderPinwheel className="h-10 w-10 animate-spin" />
-        // </div>
         <div className="grid min-h-screen place-items-center bg-white dark:bg-gray-900">
           <div className="flex flex-col items-center gap-2">
             <Image
@@ -30,7 +27,7 @@ export default function LoginPage() {
               height={100}
               className="block dark:hidden"
             />
-            <LoaderPinwheel className="h-6 w-6 animate-spin" />
+            <LoaderPinwheel className="text-primary h-6 w-6 animate-spin" />
           </div>
         </div>
       }
@@ -102,7 +99,7 @@ function LoginForm() {
             height={100}
             className="block dark:hidden"
           />
-          <LoaderPinwheel className="h-6 w-6 animate-spin" />
+          <LoaderPinwheel className="text-primary h-6 w-6 animate-spin" />
         </div>
       </div>
     );
@@ -244,7 +241,7 @@ function LoginForm() {
           className="btn-full btn-primary"
         >
           {loading ? (
-            <LoaderPinwheel className="mr-2 inline h-5 w-5 animate-spin text-white" />
+            <LoaderPinwheel className="mr-2 inline h-5 w-5 animate-spin" />
           ) : (
             "Log in"
           )}

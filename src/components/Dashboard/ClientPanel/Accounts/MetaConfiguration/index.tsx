@@ -52,9 +52,55 @@ const MetaConfigurationContainer: React.FC = () => {
                 .then(() => {
                   toast.success("Meta account connected successfully!");
                 })
-                .catch((error) => {
-                  console.error("Error sending Meta config info:", error);
-                  toast.error("Failed to save Meta account information");
+                .catch((err: unknown) => {
+                  console.error("Error sending Meta config info:", err);
+
+                  // Normalize error structure similar to other dialogs
+                  interface ApiErrorResponse {
+                    data?: unknown;
+                    message?: string;
+                    status?: number;
+                  }
+
+                  const isApiError = (obj: unknown): obj is ApiErrorResponse =>
+                    typeof obj === "object" &&
+                    obj !== null &&
+                    ("data" in (obj as object) || "message" in (obj as object));
+
+                  const apiError: ApiErrorResponse = isApiError(err)
+                    ? (err as ApiErrorResponse)
+                    : { message: String(err) };
+
+                  let message = "Failed to save Meta account information";
+
+                  if (apiError.data) {
+                    if (typeof apiError.data === "string") {
+                      message = apiError.data;
+                    } else if (Array.isArray(apiError.data)) {
+                      message = apiError.data.map(String).join(" ");
+                    } else if (
+                      typeof apiError.data === "object" &&
+                      apiError.data !== null
+                    ) {
+                      // try to dig for message property inside
+                      let maybeMsg: unknown;
+                      if ("message" in apiError.data) {
+                        // safe access when key exists
+                        maybeMsg = (apiError.data as { message?: unknown })
+                          .message;
+                      }
+                      if (typeof maybeMsg === "string") {
+                        message = maybeMsg;
+                      } else {
+                        // fallback to JSON
+                        message = JSON.stringify(apiError.data);
+                      }
+                    }
+                  } else if (apiError.message) {
+                    message = apiError.message;
+                  }
+
+                  toast.error(`Meta configuration failed: ${message}`);
                 });
             } else {
               console.warn(

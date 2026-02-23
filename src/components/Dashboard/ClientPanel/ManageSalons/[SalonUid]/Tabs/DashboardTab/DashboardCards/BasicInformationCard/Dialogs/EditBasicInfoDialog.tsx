@@ -1,3 +1,4 @@
+import AddressPickerDialog from "@/components/Location/AddressPickerDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,12 +22,11 @@ import {
   Formik,
   Form as FormikForm,
   FormikHelpers,
-  FormikProps,
 } from "formik";
 import { Scissors } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useParams } from "next/navigation";
-import React from "react";
+import React, { useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
@@ -39,18 +39,24 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
   const { salonuid } = useParams();
   const { resolvedTheme } = useTheme();
 
+  const [isAddressPickerOpen, setIsAddressPickerOpen] = useState(false);
+
   // RTK hooks
   const [editBasicInfo, { isLoading }] = useEditSingleSalonMutation();
 
   const basicSchema = Yup.object().shape({
     name: Yup.string().required("Salon name is required"),
     salon_type: Yup.string().required("Salon type is required"),
-    address_one: Yup.string(),
-    address_two: Yup.string(),
+    formatted_address: Yup.string(),
     city: Yup.string().required("City is required"),
     postal_code: Yup.string().required("Postal code is required"),
     country: Yup.string().required("Country is required"),
-    address: Yup.string().nullable(),
+    latitude: Yup.number()
+      .typeError("Latitude is required")
+      .required("Latitude is required"),
+    longitude: Yup.number()
+      .typeError("Longitude is required")
+      .required("Longitude is required"),
   });
 
   const handleSubmit = async (
@@ -64,12 +70,15 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
         formData.append("logo", values.logoFile);
         formData.append("name", values.name);
         formData.append("salon_type", values.salon_type);
-        formData.append("address_one", values.address_one || "");
-        formData.append("address_two", values.address_two || "");
+        formData.append("formatted_address", values.formatted_address || "");
+        if (values.google_place_id) {
+          formData.append("google_place_id", values.google_place_id);
+        }
         formData.append("city", values.city);
         formData.append("postal_code", values.postal_code);
         formData.append("country", values.country);
-        formData.append("address", values.address || "");
+        formData.append("latitude", String(values.latitude ?? ""));
+        formData.append("longitude", String(values.longitude ?? ""));
 
         await editBasicInfo({
           salonUid: salonuid as string,
@@ -79,11 +88,13 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
         const payload: Partial<SalonProps> = {
           name: values.name,
           salon_type: values.salon_type,
-          address_one: values.address_one || "",
-          address_two: values.address_two || "",
+          formatted_address: values.formatted_address || "",
+          google_place_id: values.google_place_id,
           city: values.city,
           postal_code: values.postal_code,
           country: values.country,
+          latitude: values.latitude,
+          longitude: values.longitude,
         };
 
         await editBasicInfo({
@@ -121,24 +132,26 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <Formik
+        <Formik<BasicInfoFormValues>
           enableReinitialize
           initialValues={{
             logoFile: null as File | null,
             logoPreview: singleSalonData?.logo || "",
             name: singleSalonData?.name || "",
             salon_type: singleSalonData?.salon_type || "",
-            address_one: singleSalonData?.address_one || "",
-            address_two: singleSalonData?.address_two || "",
+            formatted_address: singleSalonData?.formatted_address || "",
+            google_place_id: singleSalonData?.google_place_id || undefined,
+            street: "",
             city: singleSalonData?.city || "",
             postal_code: singleSalonData?.postal_code || "",
             country: singleSalonData?.country || "",
-            address: singleSalonData?.address || "",
+            latitude: singleSalonData?.latitude,
+            longitude: singleSalonData?.longitude,
           }}
           validationSchema={basicSchema}
           onSubmit={handleSubmit}
         >
-          {({ values, setFieldValue }: FormikProps<BasicInfoFormValues>) => (
+          {({ values, setFieldValue }) => (
             <FormikForm>
               <div className="grid grid-cols-1 gap-4">
                 <div className="flex items-center gap-4">
@@ -214,35 +227,33 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div>
-                    <Label htmlFor="address_one" className="mb-2">
-                      Address Line 1
+                  <div className="md:col-span-2">
+                    <Label htmlFor="formatted_address" className="mb-2">
+                      Address
                     </Label>
-                    <Field
-                      id="address_one"
-                      name="address_one"
-                      type="text"
-                      as="input"
-                    />
-                    <ErrorMessage
-                      name="address_one"
-                      component="div"
-                      className="text-danger mt-1 text-xs"
-                    />
-                  </div>
 
-                  <div>
-                    <Label htmlFor="address_two" className="mb-2">
-                      Address Line 2
-                    </Label>
-                    <Field
-                      id="address_two"
-                      name="address_two"
-                      type="text"
-                      as="input"
-                    />
+                    <div className="flex items-center gap-2">
+                      <Field
+                        id="formatted_address"
+                        name="formatted_address"
+                        type="text"
+                        as="input"
+                        readOnly
+                        className="w-full flex-1"
+                      />
+                      <Button
+                        type="button"
+                        variant="default"
+                        onClick={() => setIsAddressPickerOpen(true)}
+                        disabled={isLoading}
+                        className="shrink-0"
+                      >
+                        Get Address
+                      </Button>
+                    </div>
+
                     <ErrorMessage
-                      name="address_two"
+                      name="formatted_address"
                       component="div"
                       className="text-danger mt-1 text-xs"
                     />
@@ -254,7 +265,13 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
                     <Label htmlFor="city" className="mb-2">
                       City
                     </Label>
-                    <Field id="city" name="city" type="text" as="input" />
+                    <Field
+                      id="city"
+                      name="city"
+                      type="text"
+                      as="input"
+                      readOnly
+                    />
                     <ErrorMessage
                       name="city"
                       component="div"
@@ -270,6 +287,7 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
                       name="postal_code"
                       type="text"
                       as="input"
+                      readOnly
                     />
                     <ErrorMessage
                       name="postal_code"
@@ -282,7 +300,7 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
                     <Label htmlFor="country" className="mb-2">
                       Country
                     </Label>
-                    <Field id="country" name="country" as="select">
+                    <Field id="country" name="country" as="select" disabled>
                       <option value="" disabled>
                         Select a country
                       </option>
@@ -299,6 +317,70 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
                     />
                   </div>
                 </div>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
+                    <Label htmlFor="latitude" className="mb-2">
+                      Latitude
+                    </Label>
+                    <Field
+                      id="latitude"
+                      name="latitude"
+                      type="number"
+                      as="input"
+                      readOnly
+                    />
+                    <ErrorMessage
+                      name="latitude"
+                      component="div"
+                      className="text-danger mt-1 text-xs"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="longitude" className="mb-2">
+                      Longitude
+                    </Label>
+                    <Field
+                      id="longitude"
+                      name="longitude"
+                      type="number"
+                      as="input"
+                      readOnly
+                    />
+                    <ErrorMessage
+                      name="longitude"
+                      component="div"
+                      className="text-danger mt-1 text-xs"
+                    />
+                  </div>
+                </div>
+
+                <AddressPickerDialog
+                  open={isAddressPickerOpen}
+                  onOpenChange={setIsAddressPickerOpen}
+                  initialCenter={
+                    values.latitude != null && values.longitude != null
+                      ? { lat: values.latitude, lng: values.longitude }
+                      : undefined
+                  }
+                  onSelect={(selection) => {
+                    setFieldValue(
+                      "formatted_address",
+                      selection.formatted_address || "",
+                    );
+                    setFieldValue(
+                      "google_place_id",
+                      selection.google_place_id || "",
+                    );
+                    setFieldValue("street", "");
+                    setFieldValue("city", selection.city || "");
+                    setFieldValue("postal_code", selection.postal_code || "");
+                    setFieldValue("country", selection.country || "");
+                    setFieldValue("latitude", selection.latitude);
+                    setFieldValue("longitude", selection.longitude);
+                  }}
+                />
                 {/* <div className="grid grid-cols-1">
                   <Label htmlFor="address" className="mb-2">
                     Google Location Link

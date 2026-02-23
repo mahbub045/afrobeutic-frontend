@@ -8,7 +8,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Scissors } from "lucide-react";
+import { Home } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
@@ -34,13 +34,13 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items }) => {
             <BreadcrumbItem>
               {index === items.length - 1 || !item.href ? (
                 <BreadcrumbPage className="flex items-center gap-2">
-                  {index === 0 && <Scissors className="h-4 w-4" />}
+                  {index === 0 && <Home className="h-4 w-4" />}
                   {item.label}
                 </BreadcrumbPage>
               ) : (
                 <BreadcrumbLink asChild>
                   <Link href={item.href} className="flex items-center gap-2">
-                    {index === 0 && <Scissors className="h-4 w-4" />}
+                    {index === 0 && <Home className="h-4 w-4" />}
                     {item.label}
                   </Link>
                 </BreadcrumbLink>
