@@ -14,6 +14,7 @@ import {
   useGetMetaConfigInfoQuery,
   usePassMetaConfigInfoMutation,
 } from "@/Redux/Reducers/ClientPanel/Accounts/MetaConfiguration/MetaConfigurationApi";
+import { Eye, EyeOff, LoaderPinwheel } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import DeleteMetaConfigurationDialog from "./Dialogs/DeleteMetaConfigurationDialog";
@@ -42,6 +43,15 @@ const MetaConfigurationContainer: React.FC = () => {
     usePassMetaConfigInfoMutation();
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showWaba, setShowWaba] = useState(false);
+  const [showSid, setShowSid] = useState(false);
+  const [showToken, setShowToken] = useState(false);
+
+  const mask = (val?: string) => {
+    if (!val) return "-";
+    return "*".repeat(val.length);
+  };
 
   // Define session handler for Meta embedded signup
   useEffect(() => {
@@ -241,9 +251,13 @@ const MetaConfigurationContainer: React.FC = () => {
           <CardHeader className="border-b">
             <div className="flex items-center gap-2">
               <CardTitle className="text-base">Meta Business Account</CardTitle>
-              <Badge variant={hasMetaConfig ? "secondary" : "outline"}>
-                {hasMetaConfig ? "Connected" : "Not connected"}
-              </Badge>
+              {isMetaConfigInfoLoading ? (
+                <LoaderPinwheel className="text-secondary h-4 w-4 animate-spin" />
+              ) : (
+                <Badge variant={hasMetaConfig ? "secondary" : "outline"}>
+                  {hasMetaConfig ? "Connected" : "Not connected"}
+                </Badge>
+              )}
             </div>
             <CardDescription>
               Connect your Meta Business Account to enable WhatsApp Business API
@@ -252,21 +266,36 @@ const MetaConfigurationContainer: React.FC = () => {
             </CardDescription>
 
             <CardAction>
-              {hasMetaConfig ? (
+              {isMetaConfigInfoLoading ? (
+                <LoaderPinwheel className="text-primary h-6 w-6 animate-spin" />
+              ) : hasMetaConfig ? (
                 <Button
                   variant="destructive"
                   onClick={() => setIsDeleteDialogOpen(true)}
+                  disabled={isDeleting}
                 >
-                  Remove Configuration
+                  {isDeleting ? (
+                    <span className="flex items-center gap-1">
+                      <LoaderPinwheel className="h-4 w-4 animate-spin" />
+                      Removing...
+                    </span>
+                  ) : (
+                    "Remove Configuration"
+                  )}
                 </Button>
               ) : (
                 <Button
                   onClick={launchEmbeddedSignup}
                   disabled={isMetaConfigInfoLoading || isMetaConfigLoading}
                 >
-                  {isMetaConfigLoading
-                    ? "Connecting..."
-                    : "Connect with Facebook"}
+                  {isMetaConfigLoading ? (
+                    <span className="flex items-center gap-1">
+                      <LoaderPinwheel className="h-4 w-4 animate-spin" />
+                      Connecting...
+                    </span>
+                  ) : (
+                    "Connect with Facebook"
+                  )}
                 </Button>
               )}
             </CardAction>
@@ -274,27 +303,66 @@ const MetaConfigurationContainer: React.FC = () => {
 
           <CardContent className="space-y-3">
             {isMetaConfigInfoLoading ? (
-              <p className="text-muted-foreground text-sm">
-                Loading configuration...
+              <p className="text-muted-foreground flex items-center justify-center gap-1">
+                <LoaderPinwheel className="text-primary h-6 w-6 animate-spin" />
               </p>
             ) : hasMetaConfig ? (
               <dl className="grid gap-3 sm:grid-cols-3">
                 <div className="space-y-1">
                   <dt className="text-muted-foreground text-xs">WABA ID</dt>
-                  <dd className="font-mono text-xs break-all">
-                    {metaConfigInfo?.waba_id || "-"}
+                  <dd className="flex items-center gap-1 font-mono text-xs break-all">
+                    {showWaba
+                      ? metaConfigInfo?.waba_id || "-"
+                      : mask(metaConfigInfo?.waba_id)}
+                    <button
+                      type="button"
+                      className="text-muted-foreground hover:text-foreground"
+                      onClick={() => setShowWaba((v) => !v)}
+                    >
+                      {showWaba ? (
+                        <EyeOff className="text-warning h-4 w-4" />
+                      ) : (
+                        <Eye className="text-warning h-4 w-4" />
+                      )}
+                    </button>
                   </dd>
                 </div>
                 <div className="space-y-1">
                   <dt className="text-muted-foreground text-xs">Account SID</dt>
-                  <dd className="font-mono text-xs break-all">
-                    {metaConfigInfo?.account_sid || "-"}
+                  <dd className="flex items-center gap-1 font-mono text-xs break-all">
+                    {showSid
+                      ? metaConfigInfo?.account_sid || "-"
+                      : mask(metaConfigInfo?.account_sid)}
+                    <button
+                      type="button"
+                      className="text-muted-foreground hover:text-foreground"
+                      onClick={() => setShowSid((v) => !v)}
+                    >
+                      {showSid ? (
+                        <EyeOff className="text-warning h-4 w-4" />
+                      ) : (
+                        <Eye className="text-warning h-4 w-4" />
+                      )}
+                    </button>
                   </dd>
                 </div>
                 <div className="space-y-1">
                   <dt className="text-muted-foreground text-xs">Auth Token</dt>
-                  <dd className="font-mono text-xs break-all">
-                    {metaConfigInfo?.auth_token || "-"}
+                  <dd className="flex items-center gap-1 font-mono text-xs break-all">
+                    {showToken
+                      ? metaConfigInfo?.auth_token || "-"
+                      : mask(metaConfigInfo?.auth_token)}
+                    <button
+                      type="button"
+                      className="text-muted-foreground hover:text-foreground"
+                      onClick={() => setShowToken((v) => !v)}
+                    >
+                      {showToken ? (
+                        <EyeOff className="text-warning h-4 w-4" />
+                      ) : (
+                        <Eye className="text-warning h-4 w-4" />
+                      )}
+                    </button>
                   </dd>
                 </div>
               </dl>
@@ -310,6 +378,7 @@ const MetaConfigurationContainer: React.FC = () => {
       <DeleteMetaConfigurationDialog
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
+        onDeletingChange={setIsDeleting}
       />
     </div>
   );

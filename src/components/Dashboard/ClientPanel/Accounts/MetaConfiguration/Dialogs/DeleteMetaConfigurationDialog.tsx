@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,15 +15,17 @@ import Swal from "sweetalert2";
 interface DeleteMetaConfigurationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onDeletingChange?: (deleting: boolean) => void;
 }
 
 const DeleteMetaConfigurationDialog: React.FC<
   DeleteMetaConfigurationDialogProps
-> = ({ open, onOpenChange }) => {
+> = ({ open, onOpenChange, onDeletingChange }) => {
   const { resolvedTheme } = useTheme();
   const [deleteMetaConfig, { isLoading }] = useDeleteMetaConfigInfoMutation();
 
   const handleDelete = async () => {
+    onDeletingChange?.(true);
     try {
       await deleteMetaConfig(undefined).unwrap();
       Swal.fire({
@@ -39,6 +42,8 @@ const DeleteMetaConfigurationDialog: React.FC<
     } catch (error) {
       console.error("Failed to delete meta configuration:", error);
       toast.error("Failed to delete configuration. Please try again.");
+    } finally {
+      onDeletingChange?.(false);
     }
   };
 
