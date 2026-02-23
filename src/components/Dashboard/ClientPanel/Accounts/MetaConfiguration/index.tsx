@@ -14,6 +14,7 @@ import {
   useGetMetaConfigInfoQuery,
   usePassMetaConfigInfoMutation,
 } from "@/Redux/Reducers/ClientPanel/Accounts/MetaConfiguration/MetaConfigurationApi";
+import { DetailResponse } from "@/Types/ClientPanel/Accounts/MetaConfigurationTypes";
 import { Eye, EyeOff, LoaderPinwheel } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -22,13 +23,6 @@ import DeleteMetaConfigurationDialog from "./Dialogs/DeleteMetaConfigurationDial
 const MetaConfigurationContainer: React.FC = () => {
   const { data: metaConfigInfo, isLoading: isMetaConfigInfoLoading } =
     useGetMetaConfigInfoQuery(undefined);
-
-  // sometimes the API returns an object with a `detail` key when there is
-  // no configuration; treat that as an empty result and show the connect
-  // button instead.
-  interface DetailResponse {
-    detail: string;
-  }
 
   const isDetailResponse = (obj: unknown): obj is DetailResponse =>
     typeof obj === "object" && obj !== null && "detail" in obj;
