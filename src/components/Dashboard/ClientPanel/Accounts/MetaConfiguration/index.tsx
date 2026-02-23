@@ -82,23 +82,49 @@ const MetaConfigurationContainer: React.FC = () => {
                       typeof apiError.data === "object" &&
                       apiError.data !== null
                     ) {
-                      // try to dig for message property inside
-                      let maybeMsg: unknown;
-                      if ("message" in apiError.data) {
-                        // safe access when key exists
-                        maybeMsg = (apiError.data as { message?: unknown })
-                          .message;
-                      }
-                      if (typeof maybeMsg === "string") {
-                        message = maybeMsg;
+                      // If the object is simple with a single key, prefer its value.
+                      const keys = Object.keys(apiError.data as object);
+                      if (keys.length === 1) {
+                        const dataObj = apiError.data as Record<string, unknown>;
+                        const maybeValue = dataObj[keys[0]];
+                        if (typeof maybeValue === "string") {
+                          message = maybeValue;
+                        } else {
+                          // try to dig for message property inside
+                          let maybeMsg: unknown;
+                          if ("message" in dataObj) {
+                            // safe access when key exists
+                            maybeMsg = (dataObj as { message?: unknown }).message;
+                          }
+                          if (typeof maybeMsg === "string") {
+                            message = maybeMsg;
+                          } else {
+                            // fallback to JSON
+                            message = JSON.stringify(dataObj);
+                          }
+                        }
                       } else {
-                        // fallback to JSON
-                        message = JSON.stringify(apiError.data);
+                        // try to dig for message property inside
+                        let maybeMsg: unknown;
+                        if ("message" in apiError.data) {
+                          // safe access when key exists
+                          maybeMsg = (apiError.data as { message?: unknown })
+                            .message;
+                        }
+                        if (typeof maybeMsg === "string") {
+                          message = maybeMsg;
+                        } else {
+                          // fallback to JSON
+                          message = JSON.stringify(apiError.data);
+                        }
                       }
                     }
                   } else if (apiError.message) {
                     message = apiError.message;
                   }
+
+                  // remove any leading key labels like "error: " to keep messages clean
+                  message = message.replace(/^\s*\w+:\s*/, "");
 
                   toast.error(`Meta configuration failed: ${message}`);
                 });
