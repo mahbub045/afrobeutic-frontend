@@ -2,13 +2,38 @@
 import Breadcrumbs from "@/components/Dashboard/CommonComponents/Breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { usePassMetaConfigInfoMutation } from "@/Redux/Reducers/ClientPanel/Accounts/MetaConfiguration/MetaConfigurationApi";
-import { useEffect } from "react";
+import {
+  useGetMetaConfigInfoQuery,
+  usePassMetaConfigInfoMutation,
+} from "@/Redux/Reducers/ClientPanel/Accounts/MetaConfiguration/MetaConfigurationApi";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import DeleteMetaConfigurationDialog from "./Dialogs/DeleteMetaConfigurationDialog";
 
 const MetaConfigurationContainer: React.FC = () => {
+  const { data: metaConfigInfo, isLoading: isMetaConfigInfoLoading } =
+    useGetMetaConfigInfoQuery(undefined);
+
+  // sometimes the API returns an object with a `detail` key when there is
+  // no configuration; treat that as an empty result and show the connect
+  // button instead.
+  interface DetailResponse {
+    detail: string;
+  }
+
+  const isDetailResponse = (obj: unknown): obj is DetailResponse =>
+    typeof obj === "object" && obj !== null && "detail" in obj;
+
+  const hasMetaConfig =
+    metaConfigInfo &&
+    !(
+      isDetailResponse(metaConfigInfo) &&
+      metaConfigInfo.detail === "Meta configuration not available."
+    );
   const [metaConfig, { isLoading: isMetaConfigLoading }] =
     usePassMetaConfigInfoMutation();
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   // Define session handler for Meta embedded signup
   useEffect(() => {
@@ -85,7 +110,10 @@ const MetaConfigurationContainer: React.FC = () => {
                       // If the object is simple with a single key, prefer its value.
                       const keys = Object.keys(apiError.data as object);
                       if (keys.length === 1) {
-                        const dataObj = apiError.data as Record<string, unknown>;
+                        const dataObj = apiError.data as Record<
+                          string,
+                          unknown
+                        >;
                         const maybeValue = dataObj[keys[0]];
                         if (typeof maybeValue === "string") {
                           message = maybeValue;
@@ -94,7 +122,8 @@ const MetaConfigurationContainer: React.FC = () => {
                           let maybeMsg: unknown;
                           if ("message" in dataObj) {
                             // safe access when key exists
-                            maybeMsg = (dataObj as { message?: unknown }).message;
+                            maybeMsg = (dataObj as { message?: unknown })
+                              .message;
                           }
                           if (typeof maybeMsg === "string") {
                             message = maybeMsg;
@@ -126,7 +155,7 @@ const MetaConfigurationContainer: React.FC = () => {
                   // remove any leading key labels like "error: " to keep messages clean
                   message = message.replace(/^\s*\w+:\s*/, "");
 
-                  toast.error(`Meta configuration failed: ${message}`);
+                  toast.error(`Failed: ${message}`);
                 });
             } else {
               console.warn(
@@ -215,15 +244,53 @@ const MetaConfigurationContainer: React.FC = () => {
               </p>
             </div>
 
-            <Button
-              onClick={launchEmbeddedSignup}
-              disabled={isMetaConfigLoading}
-            >
-              Connect with Facebook
-            </Button>
+            {hasMetaConfig ? (
+              <div className="flex items-center gap-2">
+                <div className="text-sm">
+                  <p>
+                    <strong>WABA ID:</strong> {metaConfigInfo.waba_id || "-"}
+                  </p>
+                  {metaConfigInfo.account_sid && (
+                    <p>
+                      <strong>Account SID:</strong> {metaConfigInfo.account_sid}
+                    </p>
+                  )}
+                  {metaConfigInfo.auth_token && (
+                    <p>
+                      <strong>Auth Token:</strong> {metaConfigInfo.auth_token}
+                    </p>
+                  )}
+                </div>
+                <Button
+                  variant="destructive"
+                  onClick={() => setIsDeleteDialogOpen(true)}
+                >
+                  Remove Configuration
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {metaConfigInfo && isDetailResponse(metaConfigInfo) && (
+                  <p className="text-muted-foreground text-sm">
+                    {metaConfigInfo.detail}
+                  </p>
+                )}
+                <Button
+                  onClick={launchEmbeddedSignup}
+                  disabled={isMetaConfigLoading}
+                >
+                  Connect with Facebook
+                </Button>
+              </div>
+            )}
           </div>
         </Card>
       </div>
+
+      <DeleteMetaConfigurationDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      />
     </div>
   );
 };
