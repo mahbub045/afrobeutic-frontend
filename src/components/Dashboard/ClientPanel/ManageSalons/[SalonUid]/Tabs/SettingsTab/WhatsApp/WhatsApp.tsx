@@ -133,10 +133,6 @@ const WhatsApp: React.FC = () => {
                 <Skeleton className="h-4 w-full" />
               </div>
             </div>
-
-            <div className="flex justify-end pt-2">
-              <Skeleton className="h-10 w-36 rounded-md" />
-            </div>
           </>
         ) : (
           <>
