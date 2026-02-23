@@ -10,3 +10,9 @@ export interface ConnectWhatsAppDialogProps {
   isOpen: boolean;
   onClose: (isOpen: boolean) => void;
 }
+
+export interface DeleteWhatsAppDialogProps {
+  isOpen: boolean;
+  onClose: (open: boolean) => void;
+  whatsappData?: WhatsAppOnboardData;
+}
