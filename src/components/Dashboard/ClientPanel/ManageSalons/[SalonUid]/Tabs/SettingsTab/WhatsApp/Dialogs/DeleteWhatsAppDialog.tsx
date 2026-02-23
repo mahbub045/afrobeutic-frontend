@@ -7,16 +7,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useDeleteWhatsAppOnboardMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/WhatsApp/WhatsAppApi";
-import { WhatsAppOnboardData } from "@/Types/ClientPanel/ManageSalonTypes/WhatsAppTypes/WhatsAppTypes";
+import { DeleteWhatsAppDialogProps } from "@/Types/ClientPanel/ManageSalonTypes/WhatsAppTypes/WhatsAppTypes";
 import { useParams } from "next/navigation";
 import React from "react";
 import { toast } from "react-toastify";
-
-interface DeleteWhatsAppDialogProps {
-  isOpen: boolean;
-  onClose: (open: boolean) => void;
-  whatsappData?: WhatsAppOnboardData;
-}
 
 const DeleteWhatsAppDialog: React.FC<DeleteWhatsAppDialogProps> = ({
   isOpen,
