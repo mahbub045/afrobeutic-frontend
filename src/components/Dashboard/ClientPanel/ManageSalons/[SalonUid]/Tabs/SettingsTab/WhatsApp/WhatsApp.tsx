@@ -6,10 +6,11 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetWhatsAppOnboardDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/WhatsApp/WhatsAppApi";
 import { WhatsAppOnboardData } from "@/Types/ClientPanel/ManageSalonTypes/WhatsAppTypes/WhatsAppTypes";
-import { Plus } from "lucide-react";
+import { Plus, Trash } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import ConnectWhatsAppDialog from "./Dialogs/ConnectWhatsAppDialog";
+import DeleteWhatsAppDialog from "./Dialogs/DeleteWhatsAppDialog";
 
 const WhatsApp: React.FC = () => {
   const { salonuid } = useParams();
@@ -25,10 +26,26 @@ const WhatsApp: React.FC = () => {
     setConnectWhatsAppDialogOpen(true);
   };
 
-  const { data: whatsAppOnboardData, isLoading } =
-    useGetWhatsAppOnboardDataQuery({ salonUid: salonuid });
+  const {
+    data: whatsAppOnboardData,
+    isLoading,
+    error: whatsAppError,
+  } = useGetWhatsAppOnboardDataQuery({ salonUid: salonuid });
 
   const whatsappStatus = whatsAppOnboardData?.status?.toUpperCase() ?? null;
+
+  // if the server explicitly reports no sender registered we should treat
+  // that the same as having no data so the "connect" button is shown rather
+  // than the remove button
+  const noSenderError =
+    (whatsAppError as { data?: { detail?: string } })?.data?.detail ===
+    "No WhatsApp sender registered for this salon";
+
+  // treat as connected only when we actually have a sender number and
+  // there isn't a 'no sender' error.  sometimes the API returns an object
+  // without a number which should behave like not-connected.
+  const isConnected =
+    !!whatsAppOnboardData?.whatsapp_sender_number && !noSenderError;
 
   const getStatusBadge = () => {
     switch (whatsappStatus) {
@@ -136,10 +153,27 @@ const WhatsApp: React.FC = () => {
               </div>
               <div>
                 <div className="flex justify-end">
-                  <Button disabled={isLoading} onClick={handleConnectWhatsApp}>
-                    <Plus />
-                    Connect WhatsApp
-                  </Button>
+                  {isConnected ? (
+                    <Button
+                      disabled={isLoading}
+                      variant="danger"
+                      onClick={() => {
+                        setSelectedWhatsAppData(whatsAppOnboardData);
+                        setDeleteWhatsAppDialogOpen(true);
+                      }}
+                    >
+                      <Trash />
+                      Remove Chatbot
+                    </Button>
+                  ) : (
+                    <Button
+                      disabled={isLoading}
+                      onClick={handleConnectWhatsApp}
+                    >
+                      <Plus />
+                      Connect WhatsApp
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
@@ -171,11 +205,11 @@ const WhatsApp: React.FC = () => {
         isOpen={connectWhatsAppDialogOpen}
         onClose={setConnectWhatsAppDialogOpen}
       />
-      {/* <DeleteWhatsAppDialog
+      <DeleteWhatsAppDialog
         isOpen={deleteWhatsAppDialogOpen}
         onClose={setDeleteWhatsAppDialogOpen}
         whatsappData={selectedWhatsAppData}
-      /> */}
+      />
     </Card>
   );
 };
