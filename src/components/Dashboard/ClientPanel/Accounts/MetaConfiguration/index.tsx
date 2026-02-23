@@ -1,7 +1,15 @@
 "use client";
 import Breadcrumbs from "@/components/Dashboard/CommonComponents/Breadcrumbs";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   useGetMetaConfigInfoQuery,
   usePassMetaConfigInfoMutation,
@@ -228,62 +236,74 @@ const MetaConfigurationContainer: React.FC = () => {
         ]}
       />
 
-      <div className="max-w-3xls mx-auto">
-        <Card className="border-0 shadow-md transition-shadow duration-300 hover:shadow-lg dark:shadow-gray-600">
-          <div className="flex items-center justify-between gap-3 p-6">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-semibold">
-                  Meta Business Account
-                </h3>
-              </div>
-              <p className="text-muted-foreground text-sm">
-                Connect your Meta Business Account to enable WhatsApp Business
-                API integration across all your salons. This is a one-time setup
-                for your entire account.
-              </p>
+      <div className="mx-auto w-full">
+        <Card className="transition-shadow duration-300 hover:shadow-md">
+          <CardHeader className="border-b">
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-base">Meta Business Account</CardTitle>
+              <Badge variant={hasMetaConfig ? "secondary" : "outline"}>
+                {hasMetaConfig ? "Connected" : "Not connected"}
+              </Badge>
             </div>
+            <CardDescription>
+              Connect your Meta Business Account to enable WhatsApp Business API
+              integration across all your salons. This is a one-time setup for
+              your entire account.
+            </CardDescription>
 
-            {hasMetaConfig ? (
-              <div className="flex items-center gap-2">
-                <div className="text-sm">
-                  <p>
-                    <strong>WABA ID:</strong> {metaConfigInfo.waba_id || "-"}
-                  </p>
-                  {metaConfigInfo.account_sid && (
-                    <p>
-                      <strong>Account SID:</strong> {metaConfigInfo.account_sid}
-                    </p>
-                  )}
-                  {metaConfigInfo.auth_token && (
-                    <p>
-                      <strong>Auth Token:</strong> {metaConfigInfo.auth_token}
-                    </p>
-                  )}
-                </div>
+            <CardAction>
+              {hasMetaConfig ? (
                 <Button
                   variant="destructive"
                   onClick={() => setIsDeleteDialogOpen(true)}
                 >
                   Remove Configuration
                 </Button>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {metaConfigInfo && isDetailResponse(metaConfigInfo) && (
-                  <p className="text-muted-foreground text-sm">
-                    {metaConfigInfo.detail}
-                  </p>
-                )}
+              ) : (
                 <Button
                   onClick={launchEmbeddedSignup}
-                  disabled={isMetaConfigLoading}
+                  disabled={isMetaConfigInfoLoading || isMetaConfigLoading}
                 >
-                  Connect with Facebook
+                  {isMetaConfigLoading
+                    ? "Connecting..."
+                    : "Connect with Facebook"}
                 </Button>
-              </div>
-            )}
-          </div>
+              )}
+            </CardAction>
+          </CardHeader>
+
+          <CardContent className="space-y-3">
+            {isMetaConfigInfoLoading ? (
+              <p className="text-muted-foreground text-sm">
+                Loading configuration...
+              </p>
+            ) : hasMetaConfig ? (
+              <dl className="grid gap-3 sm:grid-cols-3">
+                <div className="space-y-1">
+                  <dt className="text-muted-foreground text-xs">WABA ID</dt>
+                  <dd className="font-mono text-xs break-all">
+                    {metaConfigInfo?.waba_id || "-"}
+                  </dd>
+                </div>
+                <div className="space-y-1">
+                  <dt className="text-muted-foreground text-xs">Account SID</dt>
+                  <dd className="font-mono text-xs break-all">
+                    {metaConfigInfo?.account_sid || "-"}
+                  </dd>
+                </div>
+                <div className="space-y-1">
+                  <dt className="text-muted-foreground text-xs">Auth Token</dt>
+                  <dd className="font-mono text-xs break-all">
+                    {metaConfigInfo?.auth_token || "-"}
+                  </dd>
+                </div>
+              </dl>
+            ) : metaConfigInfo && isDetailResponse(metaConfigInfo) ? (
+              <p className="text-muted-foreground text-sm">
+                {metaConfigInfo.detail}
+              </p>
+            ) : null}
+          </CardContent>
         </Card>
       </div>
 
