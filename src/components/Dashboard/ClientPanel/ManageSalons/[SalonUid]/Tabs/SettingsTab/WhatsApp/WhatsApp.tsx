@@ -1,15 +1,15 @@
 "use client";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetWhatsAppOnboardDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/WhatsApp/WhatsAppApi";
 import { WhatsAppOnboardData } from "@/Types/ClientPanel/ManageSalonTypes/WhatsAppTypes/WhatsAppTypes";
-import { Plus } from "lucide-react";
+import { Plus, Trash } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import ConnectWhatsAppDialog from "./Dialogs/ConnectWhatsAppDialog";
+import DeleteWhatsAppDialog from "./Dialogs/DeleteWhatsAppDialog";
 
 const WhatsApp: React.FC = () => {
   const { salonuid } = useParams();
@@ -25,10 +25,26 @@ const WhatsApp: React.FC = () => {
     setConnectWhatsAppDialogOpen(true);
   };
 
-  const { data: whatsAppOnboardData, isLoading } =
-    useGetWhatsAppOnboardDataQuery({ salonUid: salonuid });
+  const {
+    data: whatsAppOnboardData,
+    isLoading,
+    error: whatsAppError,
+  } = useGetWhatsAppOnboardDataQuery({ salonUid: salonuid });
 
   const whatsappStatus = whatsAppOnboardData?.status?.toUpperCase() ?? null;
+
+  // if the server explicitly reports no sender registered we should treat
+  // that the same as having no data so the "connect" button is shown rather
+  // than the remove button
+  const noSenderError =
+    (whatsAppError as { data?: { detail?: string } })?.data?.detail ===
+    "No WhatsApp sender registered for this salon";
+
+  // treat as connected only when we actually have a sender number and
+  // there isn't a 'no sender' error.  sometimes the API returns an object
+  // without a number which should behave like not-connected.
+  const isConnected =
+    !!whatsAppOnboardData?.whatsapp_sender_number && !noSenderError;
 
   const getStatusBadge = () => {
     switch (whatsappStatus) {
@@ -117,77 +133,65 @@ const WhatsApp: React.FC = () => {
                 <Skeleton className="h-4 w-full" />
               </div>
             </div>
-
-            <div className="flex justify-end pt-2">
-              <Skeleton className="h-10 w-36 rounded-md" />
-            </div>
           </>
         ) : (
           <>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-semibold">WhatsApp</h3>
-                {getStatusBadge()}
+            <div className="flex justify-between space-y-1">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-semibold">WhatsApp</h3>
+                  {getStatusBadge()}
+                </div>
+                <p className="text-muted-foreground text-xs">
+                  {getStatusDescription()}
+                </p>
               </div>
-              <p className="text-muted-foreground text-xs">
-                {getStatusDescription()}
-              </p>
+              <div>
+                <div className="flex justify-end">
+                  {isConnected ? (
+                    <Button
+                      disabled={isLoading}
+                      variant="danger"
+                      onClick={() => {
+                        setSelectedWhatsAppData(whatsAppOnboardData);
+                        setDeleteWhatsAppDialogOpen(true);
+                      }}
+                    >
+                      <Trash />
+                      Remove Chatbot
+                    </Button>
+                  ) : (
+                    <Button
+                      disabled={isLoading}
+                      onClick={handleConnectWhatsApp}
+                    >
+                      <Plus />
+                      Connect WhatsApp
+                    </Button>
+                  )}
+                </div>
+              </div>
             </div>
 
-            {whatsAppOnboardData && (
-              <div className="space-y-3 border-t pt-4">
-                {whatsAppOnboardData.chatbot_name && (
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                      Chatbot Name
-                    </span>
-                    <span className="text-sm text-gray-900 dark:text-gray-100">
-                      {whatsAppOnboardData.chatbot_name || "Not Available"}
-                    </span>
-                  </div>
-                )}
-
-                {whatsAppOnboardData.whatsapp_sender_number && (
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                      WhatsApp Number
-                    </span>
-                    <span className="text-sm text-gray-900 dark:text-gray-100">
-                      {whatsAppOnboardData.whatsapp_sender_number ||
-                        "Not Available"}
-                    </span>
-                  </div>
-                )}
-
-                {whatsAppOnboardData.waba_id && (
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                      WABA ID
-                    </span>
-                    <span className="font-mono text-sm text-gray-900 dark:text-gray-100">
-                      {whatsAppOnboardData.waba_id || "Not Available"}
-                    </span>
-                  </div>
-                )}
-
-                {whatsAppOnboardData.sender_sid && (
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                      Sender SID
-                    </span>
-                    <span className="font-mono text-sm text-gray-900 dark:text-gray-100">
-                      {whatsAppOnboardData.sender_sid || "Not Available"}
-                    </span>
-                  </div>
-                )}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                  Chatbot Name
+                </span>
+                <span className="text-sm text-gray-900 dark:text-gray-100">
+                  {whatsAppOnboardData?.chatbot_name ?? "Not Available"}
+                </span>
               </div>
-            )}
 
-            <div className="flex justify-end">
-              <Button disabled={isLoading} onClick={handleConnectWhatsApp}>
-                <Plus />
-                Connect WhatsApp
-              </Button>
+              <div className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                  WhatsApp Number
+                </span>
+                <span className="text-sm text-gray-900 dark:text-gray-100">
+                  {whatsAppOnboardData?.whatsapp_sender_number ??
+                    "Not Available"}
+                </span>
+              </div>
             </div>
           </>
         )}
@@ -196,11 +200,11 @@ const WhatsApp: React.FC = () => {
         isOpen={connectWhatsAppDialogOpen}
         onClose={setConnectWhatsAppDialogOpen}
       />
-      {/* <DeleteWhatsAppDialog
+      <DeleteWhatsAppDialog
         isOpen={deleteWhatsAppDialogOpen}
         onClose={setDeleteWhatsAppDialogOpen}
         whatsappData={selectedWhatsAppData}
-      /> */}
+      />
     </Card>
   );
 };

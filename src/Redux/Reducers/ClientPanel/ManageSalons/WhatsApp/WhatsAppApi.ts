@@ -3,7 +3,7 @@ import { baseApi } from "@/Redux/Api/BaseApi";
 export const WhatsAppApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     getWhatsAppOnboardData: build.query({
-      query: (salonUid) => ({
+      query: ({salonUid}) => ({
         url: `/salons/${salonUid}/whatsapp`,
         method: "GET",
       }),
