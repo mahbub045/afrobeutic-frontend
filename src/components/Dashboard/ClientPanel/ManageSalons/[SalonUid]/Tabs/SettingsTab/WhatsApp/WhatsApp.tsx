@@ -124,70 +124,45 @@ const WhatsApp: React.FC = () => {
           </>
         ) : (
           <>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-semibold">WhatsApp</h3>
-                {getStatusBadge()}
+            <div className="flex justify-between space-y-1">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-semibold">WhatsApp</h3>
+                  {getStatusBadge()}
+                </div>
+                <p className="text-muted-foreground text-xs">
+                  {getStatusDescription()}
+                </p>
               </div>
-              <p className="text-muted-foreground text-xs">
-                {getStatusDescription()}
-              </p>
+              <div>
+                <div className="flex justify-end">
+                  <Button disabled={isLoading} onClick={handleConnectWhatsApp}>
+                    <Plus />
+                    Connect WhatsApp
+                  </Button>
+                </div>
+              </div>
             </div>
 
-            {whatsAppOnboardData && (
-              <div className="space-y-3 border-t pt-4">
-                {whatsAppOnboardData.chatbot_name && (
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                      Chatbot Name
-                    </span>
-                    <span className="text-sm text-gray-900 dark:text-gray-100">
-                      {whatsAppOnboardData.chatbot_name || "Not Available"}
-                    </span>
-                  </div>
-                )}
-
-                {whatsAppOnboardData.whatsapp_sender_number && (
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                      WhatsApp Number
-                    </span>
-                    <span className="text-sm text-gray-900 dark:text-gray-100">
-                      {whatsAppOnboardData.whatsapp_sender_number ||
-                        "Not Available"}
-                    </span>
-                  </div>
-                )}
-
-                {whatsAppOnboardData.waba_id && (
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                      WABA ID
-                    </span>
-                    <span className="font-mono text-sm text-gray-900 dark:text-gray-100">
-                      {whatsAppOnboardData.waba_id || "Not Available"}
-                    </span>
-                  </div>
-                )}
-
-                {whatsAppOnboardData.sender_sid && (
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                      Sender SID
-                    </span>
-                    <span className="font-mono text-sm text-gray-900 dark:text-gray-100">
-                      {whatsAppOnboardData.sender_sid || "Not Available"}
-                    </span>
-                  </div>
-                )}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                  Chatbot Name
+                </span>
+                <span className="text-sm text-gray-900 dark:text-gray-100">
+                  {whatsAppOnboardData?.chatbot_name ?? "Not Available"}
+                </span>
               </div>
-            )}
 
-            <div className="flex justify-end">
-              <Button disabled={isLoading} onClick={handleConnectWhatsApp}>
-                <Plus />
-                Connect WhatsApp
-              </Button>
+              <div className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                  WhatsApp Number
+                </span>
+                <span className="text-sm text-gray-900 dark:text-gray-100">
+                  {whatsAppOnboardData?.whatsapp_sender_number ??
+                    "Not Available"}
+                </span>
+              </div>
             </div>
           </>
         )}
