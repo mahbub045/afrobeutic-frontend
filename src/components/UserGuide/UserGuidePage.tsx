@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import * as React from "react";
 
 import {
@@ -12,34 +13,7 @@ import {
 import UserGuideSidebar, {
   type GuideSection,
 } from "@/components/UserGuide/UserGuideSidebar";
-
-const SECTIONS: GuideSection[] = [
-  {
-    id: "overview",
-    title: "Overview",
-    description: "Quick orientation for using Afrobeutic.",
-  },
-  {
-    id: "accounts",
-    title: "Accounts & Switching",
-    description: "How to switch between accounts within one session.",
-  },
-  {
-    id: "bookings",
-    title: "Bookings",
-    description: "Creating, viewing, and managing bookings.",
-  },
-  {
-    id: "profile",
-    title: "Profile",
-    description: "Updating your personal details and preferences.",
-  },
-  {
-    id: "support",
-    title: "Support",
-    description: "Where to go when something isn’t working.",
-  },
-];
+import { GUIDE_CONTENT } from "@/data/UserGuide/guide-content";
 
 function scrollToSection(sectionId: string) {
   const target = document.getElementById(sectionId);
@@ -54,6 +28,16 @@ function scrollToSection(sectionId: string) {
 }
 
 export default function UserGuidePage() {
+  const sections: GuideSection[] = React.useMemo(
+    () =>
+      GUIDE_CONTENT.map(({ id, title, description }) => ({
+        id,
+        title,
+        description,
+      })),
+    [],
+  );
+
   React.useEffect(() => {
     const hash = window.location.hash?.replace("#", "");
     if (!hash) return;
@@ -66,7 +50,7 @@ export default function UserGuidePage() {
     <div className="w-full px-4 py-8">
       <div className="flex flex-col gap-6 md:block">
         <aside className="md:fixed md:top-16 md:left-0 md:h-[calc(100vh-4rem)] md:w-72 md:p-4">
-          <UserGuideSidebar sections={SECTIONS} onNavigate={scrollToSection} />
+          <UserGuideSidebar sections={sections} onNavigate={scrollToSection} />
         </aside>
 
         <main className="min-w-0 flex-1 md:ml-72 md:pl-6">
@@ -85,7 +69,7 @@ export default function UserGuidePage() {
               </CardContent>
             </Card>
 
-            {SECTIONS.map((section) => (
+            {GUIDE_CONTENT.map((section) => (
               <section
                 key={section.id}
                 id={section.id}
@@ -99,9 +83,36 @@ export default function UserGuidePage() {
                     ) : null}
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground text-sm">
-                      Content for this section will be added soon.
-                    </p>
+                    <div className="space-y-3">
+                      {section.paragraphs.map((paragraph) => (
+                        <p
+                          key={paragraph}
+                          className="text-muted-foreground text-sm"
+                        >
+                          {paragraph}
+                        </p>
+                      ))}
+
+                      {section.images?.map((image) => (
+                        <figure
+                          key={`${section.id}-${image.src}`}
+                          className="space-y-2"
+                        >
+                          <Image
+                            src={image.src}
+                            alt={image.alt}
+                            width={image.width}
+                            height={image.height}
+                            className="w-full rounded-md border object-cover"
+                          />
+                          {image.caption ? (
+                            <figcaption className="text-muted-foreground text-xs">
+                              {image.caption}
+                            </figcaption>
+                          ) : null}
+                        </figure>
+                      ))}
+                    </div>
                   </CardContent>
                 </Card>
               </section>
