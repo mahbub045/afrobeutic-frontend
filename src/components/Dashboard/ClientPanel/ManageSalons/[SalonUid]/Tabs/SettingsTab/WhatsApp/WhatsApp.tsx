@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetWhatsAppOnboardDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/WhatsApp/WhatsAppApi";
-import { WhatsAppOnboardData } from "@/Types/ClientPanel/ManageSalonTypes/WhatsAppTypes/WhatsAppTypes";
 import { Plus } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
@@ -15,11 +14,6 @@ const WhatsApp: React.FC = () => {
   const { salonuid } = useParams();
   const [connectWhatsAppDialogOpen, setConnectWhatsAppDialogOpen] =
     useState(false);
-  const [deleteWhatsAppDialogOpen, setDeleteWhatsAppDialogOpen] =
-    useState(false);
-  const [selectedWhatsAppData, setSelectedWhatsAppData] = useState<
-    WhatsAppOnboardData | undefined
-  >(undefined);
 
   const handleConnectWhatsApp = () => {
     setConnectWhatsAppDialogOpen(true);
