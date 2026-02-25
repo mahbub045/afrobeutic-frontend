@@ -1,14 +1,51 @@
 "use client";
 import Breadcrumbs from "@/components/Dashboard/CommonComponents/Breadcrumbs";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { usePassMetaConfigInfoMutation } from "@/Redux/Reducers/ClientPanel/Accounts/MetaConfiguration/MetaConfigurationApi";
-import { useEffect } from "react";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  useGetMetaConfigInfoQuery,
+  usePassMetaConfigInfoMutation,
+} from "@/Redux/Reducers/ClientPanel/Accounts/MetaConfiguration/MetaConfigurationApi";
+import { DetailResponse } from "@/Types/ClientPanel/Accounts/MetaConfigurationTypes";
+import { Eye, EyeOff, LoaderPinwheel } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import DeleteMetaConfigurationDialog from "./Dialogs/DeleteMetaConfigurationDialog";
 
 const MetaConfigurationContainer: React.FC = () => {
+  const { data: metaConfigInfo, isLoading: isMetaConfigInfoLoading } =
+    useGetMetaConfigInfoQuery(undefined);
+
+  const isDetailResponse = (obj: unknown): obj is DetailResponse =>
+    typeof obj === "object" && obj !== null && "detail" in obj;
+
+  const hasMetaConfig =
+    metaConfigInfo &&
+    !(
+      isDetailResponse(metaConfigInfo) &&
+      metaConfigInfo.detail === "Meta configuration not available."
+    );
   const [metaConfig, { isLoading: isMetaConfigLoading }] =
     usePassMetaConfigInfoMutation();
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showWaba, setShowWaba] = useState(false);
+  const [showSid, setShowSid] = useState(false);
+  const [showToken, setShowToken] = useState(false);
+
+  const mask = (val?: string) => {
+    if (!val) return "-";
+    return "*".repeat(val.length);
+  };
 
   // Define session handler for Meta embedded signup
   useEffect(() => {
@@ -52,9 +89,85 @@ const MetaConfigurationContainer: React.FC = () => {
                 .then(() => {
                   toast.success("Meta account connected successfully!");
                 })
-                .catch((error) => {
-                  console.error("Error sending Meta config info:", error);
-                  toast.error("Failed to save Meta account information");
+                .catch((err: unknown) => {
+                  console.error("Error sending Meta config info:", err);
+
+                  // Normalize error structure similar to other dialogs
+                  interface ApiErrorResponse {
+                    data?: unknown;
+                    message?: string;
+                    status?: number;
+                  }
+
+                  const isApiError = (obj: unknown): obj is ApiErrorResponse =>
+                    typeof obj === "object" &&
+                    obj !== null &&
+                    ("data" in (obj as object) || "message" in (obj as object));
+
+                  const apiError: ApiErrorResponse = isApiError(err)
+                    ? (err as ApiErrorResponse)
+                    : { message: String(err) };
+
+                  let message = "Failed to save Meta account information";
+
+                  if (apiError.data) {
+                    if (typeof apiError.data === "string") {
+                      message = apiError.data;
+                    } else if (Array.isArray(apiError.data)) {
+                      message = apiError.data.map(String).join(" ");
+                    } else if (
+                      typeof apiError.data === "object" &&
+                      apiError.data !== null
+                    ) {
+                      // If the object is simple with a single key, prefer its value.
+                      const keys = Object.keys(apiError.data as object);
+                      if (keys.length === 1) {
+                        const dataObj = apiError.data as Record<
+                          string,
+                          unknown
+                        >;
+                        const maybeValue = dataObj[keys[0]];
+                        if (typeof maybeValue === "string") {
+                          message = maybeValue;
+                        } else {
+                          // try to dig for message property inside
+                          let maybeMsg: unknown;
+                          if ("message" in dataObj) {
+                            // safe access when key exists
+                            maybeMsg = (dataObj as { message?: unknown })
+                              .message;
+                          }
+                          if (typeof maybeMsg === "string") {
+                            message = maybeMsg;
+                          } else {
+                            // fallback to JSON
+                            message = JSON.stringify(dataObj);
+                          }
+                        }
+                      } else {
+                        // try to dig for message property inside
+                        let maybeMsg: unknown;
+                        if ("message" in apiError.data) {
+                          // safe access when key exists
+                          maybeMsg = (apiError.data as { message?: unknown })
+                            .message;
+                        }
+                        if (typeof maybeMsg === "string") {
+                          message = maybeMsg;
+                        } else {
+                          // fallback to JSON
+                          message = JSON.stringify(apiError.data);
+                        }
+                      }
+                    }
+                  } else if (apiError.message) {
+                    message = apiError.message;
+                  }
+
+                  // remove any leading key labels like "error: " to keep messages clean
+                  message = message.replace(/^\s*\w+:\s*/, "");
+
+                  toast.error(`Failed: ${message}`);
                 });
             } else {
               console.warn(
@@ -127,31 +240,140 @@ const MetaConfigurationContainer: React.FC = () => {
         ]}
       />
 
-      <div className="max-w-3xls mx-auto">
-        <Card className="border-0 shadow-md transition-shadow duration-300 hover:shadow-lg dark:shadow-gray-600">
-          <div className="flex items-center justify-between gap-3 p-6">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-semibold">
-                  Meta Business Account
-                </h3>
-              </div>
-              <p className="text-muted-foreground text-sm">
-                Connect your Meta Business Account to enable WhatsApp Business
-                API integration across all your salons. This is a one-time setup
-                for your entire account.
-              </p>
+      <div className="mx-auto w-full">
+        <Card className="transition-shadow duration-300 hover:shadow-md">
+          <CardHeader className="border-b">
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-base">Meta Business Account</CardTitle>
+              {isMetaConfigInfoLoading ? (
+                <LoaderPinwheel className="text-secondary h-4 w-4 animate-spin" />
+              ) : (
+                <Badge variant={hasMetaConfig ? "secondary" : "outline"}>
+                  {hasMetaConfig ? "Connected" : "Not connected"}
+                </Badge>
+              )}
             </div>
+            <CardDescription>
+              Connect your Meta Business Account to enable WhatsApp Business API
+              integration across all your salons. This is a one-time setup for
+              your entire account.
+            </CardDescription>
 
-            <Button
-              onClick={launchEmbeddedSignup}
-              disabled={isMetaConfigLoading}
-            >
-              Connect with Facebook
-            </Button>
-          </div>
+            <CardAction>
+              {isMetaConfigInfoLoading ? (
+                <LoaderPinwheel className="text-primary h-6 w-6 animate-spin" />
+              ) : hasMetaConfig ? (
+                <Button
+                  variant="destructive"
+                  onClick={() => setIsDeleteDialogOpen(true)}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? (
+                    <span className="flex items-center gap-1">
+                      <LoaderPinwheel className="h-4 w-4 animate-spin" />
+                      Removing...
+                    </span>
+                  ) : (
+                    "Remove Configuration"
+                  )}
+                </Button>
+              ) : (
+                <Button
+                  onClick={launchEmbeddedSignup}
+                  disabled={isMetaConfigInfoLoading || isMetaConfigLoading}
+                >
+                  {isMetaConfigLoading ? (
+                    <span className="flex items-center gap-1">
+                      <LoaderPinwheel className="h-4 w-4 animate-spin" />
+                      Connecting...
+                    </span>
+                  ) : (
+                    "Connect with Facebook"
+                  )}
+                </Button>
+              )}
+            </CardAction>
+          </CardHeader>
+
+          <CardContent className="space-y-3">
+            {isMetaConfigInfoLoading ? (
+              <p className="text-muted-foreground flex items-center justify-center gap-1">
+                <LoaderPinwheel className="text-primary h-6 w-6 animate-spin" />
+              </p>
+            ) : hasMetaConfig ? (
+              <dl className="grid gap-3 sm:grid-cols-3">
+                <div className="space-y-1">
+                  <dt className="text-muted-foreground text-xs">WABA ID</dt>
+                  <dd className="flex items-center gap-1 font-mono text-xs break-all">
+                    {showWaba
+                      ? metaConfigInfo?.waba_id || "-"
+                      : mask(metaConfigInfo?.waba_id)}
+                    <button
+                      type="button"
+                      className="text-muted-foreground hover:text-foreground"
+                      onClick={() => setShowWaba((v) => !v)}
+                    >
+                      {showWaba ? (
+                        <EyeOff className="text-warning h-4 w-4" />
+                      ) : (
+                        <Eye className="text-warning h-4 w-4" />
+                      )}
+                    </button>
+                  </dd>
+                </div>
+                <div className="space-y-1">
+                  <dt className="text-muted-foreground text-xs">Account SID</dt>
+                  <dd className="flex items-center gap-1 font-mono text-xs break-all">
+                    {showSid
+                      ? metaConfigInfo?.account_sid || "-"
+                      : mask(metaConfigInfo?.account_sid)}
+                    <button
+                      type="button"
+                      className="text-muted-foreground hover:text-foreground"
+                      onClick={() => setShowSid((v) => !v)}
+                    >
+                      {showSid ? (
+                        <EyeOff className="text-warning h-4 w-4" />
+                      ) : (
+                        <Eye className="text-warning h-4 w-4" />
+                      )}
+                    </button>
+                  </dd>
+                </div>
+                <div className="space-y-1">
+                  <dt className="text-muted-foreground text-xs">Auth Token</dt>
+                  <dd className="flex items-center gap-1 font-mono text-xs break-all">
+                    {showToken
+                      ? metaConfigInfo?.auth_token || "-"
+                      : mask(metaConfigInfo?.auth_token)}
+                    <button
+                      type="button"
+                      className="text-muted-foreground hover:text-foreground"
+                      onClick={() => setShowToken((v) => !v)}
+                    >
+                      {showToken ? (
+                        <EyeOff className="text-warning h-4 w-4" />
+                      ) : (
+                        <Eye className="text-warning h-4 w-4" />
+                      )}
+                    </button>
+                  </dd>
+                </div>
+              </dl>
+            ) : metaConfigInfo && isDetailResponse(metaConfigInfo) ? (
+              <p className="text-muted-foreground text-sm">
+                {metaConfigInfo.detail}
+              </p>
+            ) : null}
+          </CardContent>
         </Card>
       </div>
+
+      <DeleteMetaConfigurationDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onDeletingChange={setIsDeleting}
+      />
     </div>
   );
 };

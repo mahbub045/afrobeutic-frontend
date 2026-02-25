@@ -20,6 +20,7 @@ import {
   FormikProps,
 } from "formik";
 import { useParams } from "next/navigation";
+import { useState } from "react";
 import PhoneInput from "react-phone-input-2";
 import { toast } from "react-toastify";
 import * as Yup from "yup";
@@ -32,6 +33,9 @@ const ConnectWhatsAppDialog: React.FC<ConnectWhatsAppDialogProps> = ({
 
   const [whatsAppOnboard, { isLoading: isAdding }] =
     useWhatsAppOnboardMutation();
+
+  // holds a human-readable message (or raw error) from the API
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const initialValues = {
     whatsapp_sender_number: "",
@@ -51,6 +55,7 @@ const ConnectWhatsAppDialog: React.FC<ConnectWhatsAppDialogProps> = ({
     { setSubmitting, setFieldError }: FormikHelpers<typeof initialValues>,
   ) => {
     setSubmitting(true);
+    setApiError(null);
     try {
       await whatsAppOnboard({
         salonUid: salonuid as string,
@@ -65,6 +70,8 @@ const ConnectWhatsAppDialog: React.FC<ConnectWhatsAppDialogProps> = ({
         whatsapp_sender_number?: string[];
         non_field_errors?: string[];
         message?: string | null;
+        detail?: string;
+        [key: string]: unknown;
       };
 
       const typedError =
@@ -72,7 +79,10 @@ const ConnectWhatsAppDialog: React.FC<ConnectWhatsAppDialogProps> = ({
 
       const serverMsg =
         (typedError.data &&
-          (typedError.data.non_field_errors?.[0] || typedError.data.message)) ||
+          (typedError.data.non_field_errors?.[0] ||
+            typedError.data.message ||
+            typedError.data.error ||
+            typedError.data.detail)) ||
         (typeof typedError.message === "string" && typedError.message) ||
         (typeof err === "string" ? err : "Failed to connect WhatsApp.");
 
@@ -83,7 +93,10 @@ const ConnectWhatsAppDialog: React.FC<ConnectWhatsAppDialogProps> = ({
         );
       }
 
-      toast.error(serverMsg as string);
+      // fallback to raw object when message isn’t available (useful for full JSON)
+      const displayMsg = serverMsg || JSON.stringify(err, null, 2);
+      setApiError(displayMsg as string);
+      toast.error(displayMsg as string);
     } finally {
       setSubmitting(false);
     }
@@ -170,6 +183,12 @@ const ConnectWhatsAppDialog: React.FC<ConnectWhatsAppDialogProps> = ({
                     )}
                   </Field>
                 </div>
+
+                {apiError && (
+                  <div className="text-danger mt-2 text-sm whitespace-pre-wrap">
+                    {apiError}
+                  </div>
+                )}
 
                 <div className="flex justify-end gap-3">
                   <Button
