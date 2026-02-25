@@ -18,6 +18,7 @@ import {
   useGetServicesFiltersQuery,
 } from "@/Redux/Reducers/Common/FiltersApi";
 import { BookingFormValues } from "@/Types/ClientPanel/ManageSalonTypes/ChairsTypes/ChairBookingTypes";
+import { AddIndividualBookingDialogProps } from "@/Types/ClientPanel/ManageSalonTypes/IndividualBookingTypes/IndividualBookingTypes";
 import { ProductProps } from "@/Types/ClientPanel/ManageSalonTypes/ProductsTypes/ProductsType";
 import { ServiceProps } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import {
@@ -36,11 +37,6 @@ import PhoneInput from "react-phone-input-2";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
-
-export interface AddIndividualBookingDialogProps {
-  isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
-}
 
 const AddIndividualBookingDialog: React.FC<AddIndividualBookingDialogProps> = ({
   isOpen,

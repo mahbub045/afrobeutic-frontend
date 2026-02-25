@@ -59,7 +59,7 @@ const ViewBookingDetailsDialog: React.FC<ViewBookingDetailsDialogProps> = ({
                 label="Status"
                 value={formatChoiceFieldValue(booking.status) ?? booking.status}
               />
-              <FieldRow label="Duration" value={booking.booking_duration} />
+              <FieldRow label="Duration" value={booking?.booking_duration || "N/A"} />
               <FieldRow label="Created At" value={booking.created_at} />
               <FieldRow label="Completed At" value={booking.completed_at} />
               <FieldRow label="Cancelled By" value={booking.cancelled_by} />

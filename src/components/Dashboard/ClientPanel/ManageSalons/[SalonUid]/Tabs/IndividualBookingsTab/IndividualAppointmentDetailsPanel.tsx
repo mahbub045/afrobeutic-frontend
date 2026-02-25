@@ -15,6 +15,10 @@ import type {
   BookingProduct,
   BookingService,
 } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
+import {
+  IndBookingUiStatus,
+  IndividualAppointmentDetailsPanelProps,
+} from "@/Types/ClientPanel/ManageSalonTypes/IndividualBookingTypes/IndividualBookingTypes";
 import { Calendar as CalendarIcon, Edit } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
@@ -24,83 +28,6 @@ import EditBookingProductsDialog from "./Dialogs/EditBookingProductsDialog";
 import EditBookingServicesDialog from "./Dialogs/EditBookingServicesDialog";
 import EditBookingStatusDialog from "./Dialogs/EditBookingStatusDialog";
 import EditBookingTimeAndDateDialog from "./Dialogs/EditBookingTimeAndDateDialog";
-
-type UiStatus =
-  | "placed"
-  | "in-progress"
-  | "rescheduled"
-  | "completed"
-  | "cancelled";
-
-export interface IndividualAppointment {
-  id: string;
-  service: string;
-  client: string;
-  startTime: string;
-  status: UiStatus;
-  bookingDate?: string;
-  bookingDuration?: string;
-  services?: {
-    uid?: string;
-    name: string;
-    price?: string;
-    service_duration?: string;
-  }[];
-  products?: {
-    uid?: string;
-    name: string;
-    price?: string;
-  }[];
-  notes?: string | null;
-  finalPrice?: number;
-  tipsAmount?: number;
-  paymentType?: string;
-  // Optional totals coming from the API (support both snake_case and camelCase)
-  total_services?: number;
-  total_services_price?: number;
-  totalServicesPrice?: number;
-  total_products?: number;
-  total_products_price?: number;
-  totalProductsPrice?: number;
-  services_discount_price?: number;
-  servicesDiscountPrice?: number;
-  total_price?: number;
-  total_rice?: number;
-  final_price?: number;
-  tips_amount?: number | string;
-}
-
-interface IndividualAppointmentDetailsPanelProps {
-  selectedAppointment: IndividualAppointment | null;
-  /** Formatted date label, e.g. "Tuesday, January 17" */
-  dateLabel: string;
-  /** Controls the mobile sheet */
-  isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
-  isCancelled?: boolean;
-  cancellationReason?: string;
-  onStatusUpdated?: (status: string) => void;
-  onDateTimeUpdated?: (data: {
-    booking_date: string;
-    booking_time: string;
-    notes?: string;
-  }) => void;
-  onServicesUpdated?: (
-    services: {
-      uid: string;
-      name: string;
-      price: string;
-      service_duration?: string;
-    }[],
-  ) => void;
-  onProductsUpdated?: (
-    products: { uid: string; name: string; price: string }[],
-  ) => void;
-  onCheckoutUpdated?: (data: {
-    tips_amount: number;
-    payment_type: string;
-  }) => void;
-}
 
 const IndividualAppointmentDetailsPanel: React.FC<
   IndividualAppointmentDetailsPanelProps
@@ -127,7 +54,8 @@ const IndividualAppointmentDetailsPanel: React.FC<
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
   const [viewReceipt, { isLoading: isViewReceiptLoading }] =
     useViewReceiptMutation();
-  const effectiveStatus: UiStatus | undefined = selectedAppointment?.status;
+  const effectiveStatus: IndBookingUiStatus | undefined =
+    selectedAppointment?.status;
 
   const handleViewReceipt = async () => {
     if (!selectedAppointment?.id) {
@@ -520,7 +448,7 @@ const IndividualAppointmentDetailsPanel: React.FC<
         uid: selectedAppointment.id,
         booking_date: selectedAppointment.bookingDate,
         booking_time: selectedAppointment.startTime,
-        booking_duration: selectedAppointment.bookingDuration,
+        booking_duration: selectedAppointment.bookingDuration || null,
         notes: selectedAppointment.notes,
         services: selectedAppointment.services,
         products: selectedAppointment.products,

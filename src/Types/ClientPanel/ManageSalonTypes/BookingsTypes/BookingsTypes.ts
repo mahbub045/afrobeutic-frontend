@@ -40,7 +40,7 @@ export interface Booking {
   uid: string;
   booking_date: string;
   booking_time: string;
-  booking_duration: string;
+  booking_duration: string | null;
   completed_at: string | null;
   status: "PLACED" | "INPROGRESS" | "RESCHEDULED" | "COMPLETED";
   notes: string;
@@ -100,7 +100,7 @@ export interface EditBookingDialogProps {
     uid: string;
     booking_date: string;
     booking_time: string;
-    booking_duration: string;
+    booking_duration: string | null;
     cancellation_reason?: string;
     status: string;
     notes: string;

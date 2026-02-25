@@ -9,6 +9,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { baseApi } from "@/Redux/Api/BaseApi";
 import { useUpdateIndividualBookingStatusMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/IndividualBookings/IndividualBookingsApi";
+import { AddLookBookImageDialogProps } from "@/Types/ClientPanel/ManageSalonTypes/IndividualBookingTypes/IndividualBookingTypes";
 import { Upload, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
@@ -17,13 +18,6 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
 import Swal from "sweetalert2";
-
-interface AddLookBookImageDialogProps {
-  isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
-  bookingUid?: string;
-  onSuccess?: () => void;
-}
 
 const AddLookBookImageDialog: React.FC<AddLookBookImageDialogProps> = ({
   isOpen,

@@ -381,17 +381,6 @@ const EditBasicInfoDialog: React.FC<EditDashboardProps> = ({
                     setFieldValue("longitude", selection.longitude);
                   }}
                 />
-                {/* <div className="grid grid-cols-1">
-                  <Label htmlFor="address" className="mb-2">
-                    Google Location Link
-                  </Label>
-                  <Field id="address" name="address" type="text" as="input" />
-                  <ErrorMessage
-                    name="address"
-                    component="div"
-                    className="text-danger mt-1 text-xs"
-                  />
-                </div> */}
 
                 <div className="mt-4 flex justify-end gap-3">
                   <Button
