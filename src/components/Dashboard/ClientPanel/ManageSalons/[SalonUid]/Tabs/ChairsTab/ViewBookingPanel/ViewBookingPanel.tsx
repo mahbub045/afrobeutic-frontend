@@ -209,7 +209,11 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
                 </TableCell>
                 <TableCell>{formatDate(booking.booking_date)}</TableCell>
                 <TableCell>{formatTime(booking.booking_time)}</TableCell>
-                <TableCell>{formatTime(booking.booking_duration)}</TableCell>
+                <TableCell>
+                  {booking.booking_duration
+                    ? formatTime(booking.booking_duration)
+                    : "N/A"}
+                </TableCell>
                 <TableCell>
                   <Badge variant={getStatusVariant(booking?.status)}>
                     {formatChoiceFieldValue(booking?.status)}
@@ -332,7 +336,9 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
                   </p>
                   <p className="text-sm">
                     <span className="font-medium">Duration:</span>{" "}
-                    {formatTime(selectedBooking.booking_duration)}
+                    {selectedBooking.booking_duration
+                      ? formatTime(selectedBooking.booking_duration)
+                      : "N/A"}
                   </p>
                   <p className="flex items-center gap-2 text-sm">
                     <span className="font-medium">Status:</span>

@@ -31,7 +31,7 @@ export interface CustomerBooking {
   booking_date: string;
   booking_time: string;
   status: string;
-  booking_duration?: string;
+  booking_duration?: string | null;
   cancellation_reason?: string | null;
   completed_at?: string | null;
   notes?: string | null;

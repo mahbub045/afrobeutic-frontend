@@ -254,7 +254,7 @@ const CustomerDetail: React.FC = () => {
                     </div>
                     <div className="text-right">
                       <p className="font-mono text-sm">
-                        {booking.booking_duration}
+                        {booking?.booking_duration || "N/A"}
                       </p>
                     </div>
                   </div>
