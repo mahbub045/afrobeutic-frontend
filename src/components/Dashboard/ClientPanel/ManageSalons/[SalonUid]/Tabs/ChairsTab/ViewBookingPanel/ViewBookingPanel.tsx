@@ -212,7 +212,8 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
                 <TableCell>
                   {booking.booking_duration
                     ? formatTime(booking.booking_duration)
-                    : "N/A"}
+                    : "N/A"}{" "}
+                  <small>Hours</small>
                 </TableCell>
                 <TableCell>
                   <Badge variant={getStatusVariant(booking?.status)}>
@@ -338,7 +339,8 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
                     <span className="font-medium">Duration:</span>{" "}
                     {selectedBooking.booking_duration
                       ? formatTime(selectedBooking.booking_duration)
-                      : "N/A"}
+                      : "N/A"}{" "}
+                    <small>Hours</small>
                   </p>
                   <p className="flex items-center gap-2 text-sm">
                     <span className="font-medium">Status:</span>
