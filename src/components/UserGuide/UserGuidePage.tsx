@@ -57,14 +57,15 @@ export default function UserGuidePage() {
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Under construction</CardTitle>
+                <CardTitle>Afrobeutic User Guide</CardTitle>
                 <CardDescription>
-                  This guide is being written — sections below are placeholders.
+                  Use the menu to jump between sections.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground text-sm">
-                  Click any section in the sidebar to scroll.
+                  You can share a link to any section using the URL hash (for
+                  example: #accounts).
                 </p>
               </CardContent>
             </Card>
