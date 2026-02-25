@@ -24,6 +24,7 @@ import {
   IndAppointment,
   IndBookingApiStatus,
   IndBookingUiStatus,
+  IndividualAppointment,
   IndividualBookingApi,
 } from "@/Types/ClientPanel/ManageSalonTypes/IndividualBookingTypes/IndividualBookingTypes";
 import {
@@ -36,9 +37,7 @@ import {
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import AddIndividualBookingDialog from "./Dialogs/AddIndividualBookingDialog";
-import IndividualAppointmentDetailsPanel, {
-  IndividualAppointment,
-} from "./IndividualAppointmentDetailsPanel";
+import IndividualAppointmentDetailsPanel from "./IndividualAppointmentDetailsPanel";
 
 // Generate time slots (e.g. 08:00-09:00, 09:00-10:00 ...)
 const generateTimeSlots = (
