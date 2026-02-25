@@ -15,11 +15,6 @@ const WhatsApp: React.FC = () => {
   const { salonuid } = useParams();
   const [connectWhatsAppDialogOpen, setConnectWhatsAppDialogOpen] =
     useState(false);
-  const [deleteWhatsAppDialogOpen, setDeleteWhatsAppDialogOpen] =
-    useState(false);
-  const [selectedWhatsAppData, setSelectedWhatsAppData] = useState<
-    WhatsAppOnboardData | undefined
-  >(undefined);
 
   const handleConnectWhatsApp = () => {
     setConnectWhatsAppDialogOpen(true);

@@ -21,6 +21,13 @@ import type {
   Service,
 } from "@/Types/ClientPanel/ManageSalonTypes/BookingsTypes/BookingsTypes";
 import {
+  IndAppointment,
+  IndBookingApiStatus,
+  IndBookingUiStatus,
+  IndividualAppointment,
+  IndividualBookingApi,
+} from "@/Types/ClientPanel/ManageSalonTypes/IndividualBookingTypes/IndividualBookingTypes";
+import {
   Calendar as CalendarIcon,
   CalendarSearch,
   ChevronLeft,
@@ -30,87 +37,7 @@ import {
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import AddIndividualBookingDialog from "./Dialogs/AddIndividualBookingDialog";
-import IndividualAppointmentDetailsPanel, {
-  IndividualAppointment,
-} from "./IndividualAppointmentDetailsPanel";
-
-type ApiStatus =
-  | "PLACED"
-  | "INPROGRESS"
-  | "COMPLETED"
-  | "RESCHEDULED"
-  | "CANCELLED";
-
-type UiStatus =
-  | "placed"
-  | "in-progress"
-  | "rescheduled"
-  | "completed"
-  | "cancelled";
-
-interface Appointment {
-  id: string;
-  service: string;
-  client: string;
-  startTime: string;
-  status: UiStatus;
-  color: string;
-  bookingDate?: string;
-  bookingDuration?: string;
-  services?: IndividualBookingApi["services"];
-  products?: IndividualBookingApi["products"];
-  notes?: string | null;
-  // Pricing fields used in the details panel
-  total_services?: number;
-  total_services_price?: number;
-  services_discount_price?: number;
-  total_products?: number;
-  total_products_price?: number;
-  total_price?: number;
-  final_price?: number;
-  tips_amount?: number;
-  finalPrice?: number;
-  tipsAmount?: number;
-  paymentType?: string;
-}
-
-// Shape of a single booking item returned from the API
-interface IndividualBookingApi {
-  uid?: string;
-  booking_id: string;
-  booking_date: string; // YYYY-MM-DD
-  booking_time: string; // HH:MM:SS
-  booking_duration?: string; // HH:MM:SS
-  status: ApiStatus;
-  cancellation_reason?: string;
-  customer?: {
-    first_name?: string | null;
-    last_name?: string | null;
-    phone?: string | null;
-  } | null;
-  services?: {
-    uid?: string;
-    name: string;
-    price?: string;
-    service_duration?: string;
-  }[];
-  products?: {
-    uid?: string;
-    name: string;
-    price?: string;
-  }[];
-  notes?: string | null;
-  // Pricing summary fields coming from the API
-  total_services?: number;
-  total_services_price?: number;
-  services_discount_price?: number;
-  total_products?: number;
-  total_products_price?: number;
-  total_price?: number;
-  final_price?: number;
-  tips_amount?: number;
-  payment_type?: string;
-}
+import IndividualAppointmentDetailsPanel from "./IndividualAppointmentDetailsPanel";
 
 // Generate time slots (e.g. 08:00-09:00, 09:00-10:00 ...)
 const generateTimeSlots = (
@@ -195,7 +122,7 @@ const toLocalYMD = (date: Date) => {
 
 const timeSlots = generateTimeSlots(8, 20, 1); // 08:00–20:00 hourly
 
-const statusColorMap: Record<ApiStatus, string> = {
+const statusColorMap: Record<IndBookingApiStatus, string> = {
   PLACED: "bg-gradient-to-r from-blue-400 to-cyan-300",
   INPROGRESS: "bg-gradient-to-r from-amber-300 to-orange-400",
   COMPLETED: "bg-gradient-to-r from-emerald-300 to-teal-400",
@@ -203,7 +130,7 @@ const statusColorMap: Record<ApiStatus, string> = {
   CANCELLED: "bg-gradient-to-r from-red-400 to-rose-500",
 };
 
-const statusMap: Record<ApiStatus, UiStatus> = {
+const statusMap: Record<IndBookingApiStatus, IndBookingUiStatus> = {
   PLACED: "placed",
   INPROGRESS: "in-progress",
   COMPLETED: "completed",
@@ -214,7 +141,9 @@ const statusMap: Record<ApiStatus, UiStatus> = {
 const IndividualBookingsTab: React.FC = () => {
   const { salonuid } = useParams();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [statusFilter, setStatusFilter] = useState<"ALL" | ApiStatus>("ALL");
+  const [statusFilter, setStatusFilter] = useState<"ALL" | IndBookingApiStatus>(
+    "ALL",
+  );
   const [selectedAppointment, setSelectedAppointment] =
     useState<IndividualAppointment | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -232,9 +161,7 @@ const IndividualBookingsTab: React.FC = () => {
   }
 
   // RTK Hooks
-  const {
-    data: individualBookingsData,
-  } = useGetIndividualBookingsQuery({
+  const { data: individualBookingsData } = useGetIndividualBookingsQuery({
     salonUid: salonuid as string,
     params: filters,
   });
@@ -249,7 +176,7 @@ const IndividualBookingsTab: React.FC = () => {
   });
 
   const handleStatusUpdated = (newApiStatus: string) => {
-    const apiStatus = newApiStatus as ApiStatus;
+    const apiStatus = newApiStatus as IndBookingApiStatus;
     setSelectedAppointment((prev) => {
       if (!prev) return prev;
       return {
@@ -349,8 +276,8 @@ const IndividualBookingsTab: React.FC = () => {
     });
   };
 
-  const appointments: Appointment[] = filteredBookings.map((booking) => {
-    const apiStatus = booking.status as ApiStatus;
+  const appointments: IndAppointment[] = filteredBookings.map((booking) => {
+    const apiStatus = booking.status as IndBookingApiStatus;
 
     const customerName = booking.customer
       ? `${booking.customer.first_name ?? ""} ${booking.customer.last_name ?? ""}`.trim()
@@ -366,10 +293,10 @@ const IndividualBookingsTab: React.FC = () => {
       service: serviceName.toUpperCase(),
       client: customerName || booking.customer?.phone || "Unknown Customer",
       startTime: booking.booking_time,
-      status: (statusMap[apiStatus] ?? "placed") as UiStatus,
+      status: (statusMap[apiStatus] ?? "placed") as IndBookingUiStatus,
       color: statusColorMap[apiStatus] ?? statusColorMap["PLACED"],
       bookingDate: booking.booking_date,
-      bookingDuration: booking.booking_duration,
+      bookingDuration: booking.booking_duration || null,
       services: booking.services,
       products: booking.products,
       notes: booking.notes,
@@ -446,7 +373,9 @@ const IndividualBookingsTab: React.FC = () => {
           {/* Status Filter */}
           <Select
             value={statusFilter}
-            onValueChange={(v) => setStatusFilter(v as "ALL" | ApiStatus)}
+            onValueChange={(v) =>
+              setStatusFilter(v as "ALL" | IndBookingApiStatus)
+            }
           >
             <SelectTrigger className="h-7 w-[130px] text-xs font-semibold sm:h-8 sm:w-[150px]">
               <SelectValue placeholder="Status" />
@@ -543,7 +472,8 @@ const IndividualBookingsTab: React.FC = () => {
                                 startTime: appointment.startTime,
                                 status: appointment.status,
                                 bookingDate: appointment.bookingDate,
-                                bookingDuration: appointment.bookingDuration,
+                                bookingDuration:
+                                  appointment.bookingDuration || null,
                                 services: appointment.services,
                                 products: appointment.products,
                                 notes: appointment.notes,

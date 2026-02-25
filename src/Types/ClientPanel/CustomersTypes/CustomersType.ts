@@ -70,7 +70,7 @@ export interface Booking {
   booking_time: string;
   status: string;
   notes: string | null;
-  booking_duration: string;
+  booking_duration: string | null;
   completed_at: string | null;
   cancellation_reason: string | null;
   cancelled_by: string | null;
