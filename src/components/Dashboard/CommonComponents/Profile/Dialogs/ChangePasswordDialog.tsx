@@ -16,7 +16,14 @@ import {
   ChangePasswordErrors,
   ChangePasswordPayload,
 } from "@/Types/Common/ProfileType";
-import { ErrorMessage, Field, FieldProps, Form, Formik } from "formik";
+import {
+  ErrorMessage,
+  Field,
+  FieldProps,
+  Form,
+  Formik,
+  FormikHelpers,
+} from "formik";
 import { Check, Eye, EyeOff, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import React, { useEffect, useMemo, useState } from "react";
@@ -160,6 +167,46 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
     if (!open) onClose();
   };
 
+  const handleSubmit = async (
+    values: ChangePasswordPayload,
+    {
+      setSubmitting,
+      setErrors,
+      resetForm,
+    }: FormikHelpers<ChangePasswordPayload>,
+  ) => {
+    try {
+      await changePassword(values).unwrap();
+
+      Swal.fire({
+        icon: "success",
+        iconColor: "#037375",
+        title: "Password updated",
+        html: "Your password has been updated successfully.",
+        background: resolvedTheme === "dark" ? "#0f1724" : undefined,
+        color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
+        confirmButtonColor: "#037375",
+        timer: 2000,
+      });
+
+      resetForm();
+      onClose();
+    } catch (error: unknown) {
+      const { fieldErrors, messages } = getApiFieldErrors(error);
+
+      if (Object.keys(fieldErrors).length > 0) {
+        // Inline only when backend returns field-specific keys
+        setErrors(fieldErrors as unknown as ChangePasswordErrors);
+      } else if (messages.length) {
+        toast.error(messages[0]);
+      } else {
+        toast.error("Failed to change password. Please try again.");
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="shadow-md dark:shadow-gray-500">
@@ -176,39 +223,7 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
           validationSchema={validationSchema}
           validateOnChange={false}
           validateOnBlur={true}
-          onSubmit={async (values, { setSubmitting, setErrors, resetForm }) => {
-            try {
-              await changePassword(values).unwrap();
-
-              Swal.fire({
-                icon: "success",
-                iconColor: "#037375",
-                title: "Password updated",
-                html: "Your password has been updated successfully.",
-                background: resolvedTheme === "dark" ? "#0f1724" : undefined,
-                color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
-                confirmButtonColor: "#037375",
-                timer: 2000,
-              });
-
-              resetForm();
-              onClose();
-            } catch (error: unknown) {
-              // console.error("Change password failed:", error);
-              const { fieldErrors, messages } = getApiFieldErrors(error);
-
-              if (Object.keys(fieldErrors).length > 0) {
-                // Inline only when backend returns field-specific keys
-                setErrors(fieldErrors as unknown as ChangePasswordErrors);
-              } else if (messages.length) {
-                toast.error(messages[0]);
-              } else {
-                toast.error("Failed to change password. Please try again.");
-              }
-            } finally {
-              setSubmitting(false);
-            }
-          }}
+          onSubmit={handleSubmit}
         >
           {({ handleChange, isSubmitting, values }) => (
             <Form className="space-y-4">
