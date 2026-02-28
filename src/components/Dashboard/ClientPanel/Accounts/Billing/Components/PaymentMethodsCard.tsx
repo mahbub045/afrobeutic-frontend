@@ -33,13 +33,11 @@ const parsePageFromUrl = (url: string | null): number | null => {
   if (!url) return null;
 
   try {
-    const parsed = new URL(
-      url,
-      typeof window !== "undefined"
-        ? window.location.origin
-        : "http://localhost",
-    );
-    const pageParam = parsed.searchParams.get("page");
+    const query = url.includes("?") ? (url.split("?")[1] ?? "") : "";
+    const queryWithoutHash = query.includes("#")
+      ? (query.split("#")[0] ?? "")
+      : query;
+    const pageParam = new URLSearchParams(queryWithoutHash).get("page");
     if (!pageParam) return null;
     const page = Number(pageParam);
     return Number.isFinite(page) && page > 0 ? page : null;
@@ -108,12 +106,16 @@ const PaymentMethodTile: React.FC<{ card: SavedCardItem }> = ({ card }) => {
 
       <div className="mt-5 flex items-center justify-between">
         {!card.is_default ? (
-          <Button variant="outline">Set as default</Button>
+          <Button size="sm" variant="outline">
+            Set as default
+          </Button>
         ) : (
           <span />
         )}
 
-        <Button variant="danger">Delete</Button>
+        <Button size="sm" variant="danger">
+          Delete
+        </Button>
       </div>
     </div>
   );
@@ -224,7 +226,7 @@ const PaymentMethodsCard: React.FC = () => {
         ) : null}
 
         <div className="mt-6">
-          <Button asChild variant="outline" disabled={isFetching}>
+          <Button variant="outline" disabled={isFetching}>
             <Plus />
             Add payment method
           </Button>
