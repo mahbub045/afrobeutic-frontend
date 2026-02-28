@@ -226,7 +226,15 @@ const EditProfileDialog: React.FC<{
 
               <DialogFooter>
                 <div className="flex w-full justify-end gap-2">
-                  <Button variant="outline" onClick={() => setOpen(false)}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setSelectedFile(null);
+                      setOpen(false);
+                    }}
+                  >
                     Cancel
                   </Button>
                   <Button

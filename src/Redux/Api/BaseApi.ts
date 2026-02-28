@@ -158,6 +158,7 @@ export const baseApi = createApi({
     "BillingInfo",
     "WhatsAppOnBoardData",
     "MetaConfigurationData",
+    "ChatBots",
     // Admin Panel Tags
     "ManagementsList",
     "CustomersList",
