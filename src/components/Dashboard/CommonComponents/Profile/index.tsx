@@ -10,11 +10,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { formatChoiceFieldValue, getCountryName } from "@/lib/utils";
+import {
+  formatChoiceFieldValue,
+  formatDateTime,
+  getCountryName,
+} from "@/lib/utils";
 import { useGetProfileDataQuery } from "@/Redux/Reducers/Common/ProfileApi";
 import { LoaderPinwheel } from "lucide-react";
 import * as React from "react";
 import Breadcrumbs from "../Breadcrumbs";
+import EditAccountNameDialog from "./Dialogs/EditAccountNameDialog";
 import EditProfileDialog from "./Dialogs/EditProfileDialog";
 
 function initials(name = "") {
@@ -129,15 +134,36 @@ const ProfileConatiner: React.FC = () => {
 
             <Card className="shadow-md dark:shadow-gray-500">
               <CardHeader>
-                <CardTitle>Account</CardTitle>
-                <CardDescription>Role and access</CardDescription>
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <CardTitle>Account</CardTitle>
+                    <CardDescription>Role and access</CardDescription>
+                  </div>
+                  <EditAccountNameDialog
+                    accountName={userData?.account?.name}
+                    isFetching={isLoading}
+                  />
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <p className="text-muted-foreground text-sm">Role</p>
+                    <p className="text-muted-foreground text-sm">
+                      Account Name
+                    </p>
+                    <Badge variant="default" className="text-sm">
+                      {userData?.account.name || "-"}
+                    </Badge>
+                  </div>
+
+                  <div>
+                    <p className="text-muted-foreground text-sm">
+                      Account Type
+                    </p>
                     <Badge variant="secondary" className="text-sm">
-                      {formatChoiceFieldValue(userData?.role || "-")}
+                      {formatChoiceFieldValue(
+                        userData?.account.account_type || "-",
+                      )}
                     </Badge>
                   </div>
 
@@ -146,8 +172,8 @@ const ProfileConatiner: React.FC = () => {
                       Member since
                     </p>
                     <p className="font-medium">
-                      {userData?.created_at ? (
-                        userData?.created_at
+                      {userData?.account.created_at ? (
+                        formatDateTime(userData.account.created_at)
                       ) : (
                         <small className="text-muted-foreground">
                           Not Available
