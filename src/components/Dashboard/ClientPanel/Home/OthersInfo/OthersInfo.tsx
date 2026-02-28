@@ -55,7 +55,7 @@ const OthersInfo: React.FC = () => {
             prepared enough documentation so that you can manage this online
             platform like a Pro!
           </p>
-          <Link href="/documentation" passHref>
+          <Link href="/user-guide" passHref>
             <Button className="w-full gap-2 bg-teal-600 text-white hover:bg-teal-700 sm:w-auto">
               Afrobeutic.com User Guide
               <ArrowRight className="h-4 w-4" />

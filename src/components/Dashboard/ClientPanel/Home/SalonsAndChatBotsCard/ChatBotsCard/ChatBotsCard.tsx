@@ -1,8 +1,8 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useGetChatBotsQuery } from "@/Redux/Reducers/ClientPanel/Home/ChatBotsApi";
-import { ChatBot } from "@/Types/ClientPanel/HomeTypes/ChatBotsTypes";
+import { useGetChatBotsQuery } from "@/Redux/Reducers/ClientPanel/ChatBots/ChatBotsApi";
+import { ChatBot } from "@/Types/ClientPanel/ChatBots/ChatBotsTypes";
 import { Bot } from "lucide-react";
 
 const getStatusBadge = (whatsappStatus?: string | null) => {
@@ -97,22 +97,21 @@ const ChatBotsCard: React.FC = () => {
                     <h4 className="truncate text-sm font-semibold">
                       {chatbot.chatbot_name}
                     </h4>
-                    <span className="shrink-0 text-xs">
-                      {getStatusBadge(chatbot.status)}
-                    </span>
+                    <div className="flex items-center gap-1">
+                      <Badge variant="outline" className="max-w-full text-xs">
+                        <span className="truncate">
+                          Salon: {chatbot.salon || "-"}
+                        </span>
+                      </Badge>{" "}
+                      <span className="shrink-0 text-xs">
+                        {getStatusBadge(chatbot.status)}
+                      </span>
+                    </div>
                   </div>
 
                   <p className="text-muted-foreground truncate text-xs">
                     {chatbot.whatsapp_sender_number}
                   </p>
-
-                  <div className="pt-1">
-                    <Badge variant="secondary" className="max-w-full text-xs">
-                      <span className="truncate">
-                        Salon: {chatbot.salon || "-"}
-                      </span>
-                    </Badge>
-                  </div>
                 </div>
               </div>
             ))}
