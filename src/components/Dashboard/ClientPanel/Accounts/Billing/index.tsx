@@ -8,7 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatChoiceFieldValue, formatDateTime } from "@/lib/utils";
-import { CircleAlert, RefreshCcw, Sparkles } from "lucide-react";
+import { CircleAlert, Sparkles } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import Breadcrumbs from "../../../CommonComponents/Breadcrumbs";
@@ -29,7 +29,6 @@ const BillingContainer: React.FC = () => {
     data: billingData,
     isLoading,
     isError,
-    isFetching,
     refetch,
   } = useGetBillingInfoQuery(undefined);
 
@@ -41,7 +40,6 @@ const BillingContainer: React.FC = () => {
   const {
     data: billingHistoryData,
     isLoading: isBillingHistoryLoading,
-    isFetching: isBillingHistoryFetching,
     isError: isBillingHistoryError,
     refetch: refetchBillingHistory,
   } = useGetbillingHistoryQuery(billingHistoryParams);
@@ -88,15 +86,6 @@ const BillingContainer: React.FC = () => {
             <Link href="/dashboard/client-panel/accounts/pricing-plans">
               <Sparkles className="mr-2 h-4 w-4" /> Pricing plans
             </Link>
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => refetch()}
-            disabled={isFetching || isBillingHistoryFetching}
-          >
-            <RefreshCcw className="mr-2 h-4 w-4" />
-            {isFetching || isBillingHistoryFetching ? "Refreshing…" : "Refresh"}
           </Button>
         </div>
       </div>

@@ -1,7 +1,4 @@
 "use client";
-
-import * as React from "react";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,12 +18,17 @@ import {
 } from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatChoiceFieldValue } from "@/lib/utils";
-import { useGetAddCardListQuery } from "@/Redux/Reducers/ClientPanel/Accounts/Billing/BillingApi";
+import {
+  useGetAddCardListQuery,
+  useSetAsDefaultCardMutation,
+} from "@/Redux/Reducers/ClientPanel/Accounts/Billing/BillingApi";
 import type {
   PaginatedResponse,
   SavedCardItem,
 } from "@/Types/ClientPanel/Accounts/BillingTypes";
 import { Plus } from "lucide-react";
+import * as React from "react";
+import { toast } from "react-toastify";
 import BillingErrorAlert from "./BillingErrorAlert";
 import AddPaymentMethodDialog from "./Dialogs/AddPaymentMethodDialog";
 import DeletePaymentMethodDialog from "./Dialogs/DeletePaymentMethodDialog";
@@ -80,7 +82,9 @@ const LoadingState: React.FC = () => {
 const PaymentMethodTile: React.FC<{
   card: SavedCardItem;
   onDelete: (card: SavedCardItem) => void;
-}> = ({ card, onDelete }) => {
+  onSetDefault: (card: SavedCardItem) => void;
+  isSettingDefault?: boolean;
+}> = ({ card, onDelete, onSetDefault, isSettingDefault }) => {
   const brandLabel = formatChoiceFieldValue(card.card_brand).toUpperCase();
   const expiryMonth = String(card.expiry_month).padStart(2, "0");
   const expiryYear = String(card.expiry_year);
@@ -111,8 +115,14 @@ const PaymentMethodTile: React.FC<{
 
       <div className="flex items-center justify-between">
         {!card.is_default ? (
-          <Button size="sm" variant="outline">
-            Set as default
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => onSetDefault(card)}
+            disabled={isSettingDefault}
+          >
+            {isSettingDefault ? "Setting..." : "Set as default"}
           </Button>
         ) : (
           <span />
@@ -138,16 +148,26 @@ const PaymentMethodsCard: React.FC = () => {
   const [selectedCard, setSelectedCard] = React.useState<SavedCardItem | null>(
     null,
   );
+  const [settingDefaultUid, setSettingDefaultUid] = React.useState<
+    string | null
+  >(null);
 
   const params = React.useMemo(() => ({ page }), [page]);
 
-  const { data, isLoading, isError, isFetching, refetch } =
-    useGetAddCardListQuery(params);
+  const {
+    data: cardListData,
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+  } = useGetAddCardListQuery(params);
+
+  const [setAsDefaultCard] = useSetAsDefaultCardMutation();
 
   if (isLoading) return <LoadingState />;
   if (isError) return <BillingErrorAlert onRetry={() => refetch()} />;
 
-  const payload = data as PaginatedResponse<SavedCardItem> | undefined;
+  const payload = cardListData as PaginatedResponse<SavedCardItem> | undefined;
   const results = payload?.results ?? [];
 
   const nextPage =
@@ -165,6 +185,32 @@ const PaymentMethodsCard: React.FC = () => {
     if (!target || target < 1) return;
     if (target === page) return;
     setPage(target);
+  };
+
+  const handleSetDefault = async (card: SavedCardItem) => {
+    if (card.is_default) return;
+
+    try {
+      setSettingDefaultUid(card.uid);
+
+      const formData = new FormData();
+      formData.append("is_default", "true");
+
+      await setAsDefaultCard({
+        card_uid: card.uid,
+        payload: formData,
+      }).unwrap();
+      toast.success("Default payment method updated.");
+      refetch();
+    } catch (e) {
+      console.error(e);
+      const message =
+        (e as { data?: { message?: string } })?.data?.message ||
+        "Failed to set default payment method. Please try again.";
+      toast.error(message);
+    } finally {
+      setSettingDefaultUid(null);
+    }
   };
 
   return (
@@ -195,6 +241,8 @@ const PaymentMethodsCard: React.FC = () => {
                   setSelectedCard(target);
                   setDeleteDialogOpen(true);
                 }}
+                onSetDefault={handleSetDefault}
+                isSettingDefault={settingDefaultUid === card.uid}
               />
             ))}
           </div>
