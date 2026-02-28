@@ -97,22 +97,21 @@ const ChatBotsCard: React.FC = () => {
                     <h4 className="truncate text-sm font-semibold">
                       {chatbot.chatbot_name}
                     </h4>
-                    <span className="shrink-0 text-xs">
-                      {getStatusBadge(chatbot.status)}
-                    </span>
+                    <div className="flex items-center gap-1">
+                      <Badge variant="outline" className="max-w-full text-xs">
+                        <span className="truncate">
+                          Salon: {chatbot.salon || "-"}
+                        </span>
+                      </Badge>{" "}
+                      <span className="shrink-0 text-xs">
+                        {getStatusBadge(chatbot.status)}
+                      </span>
+                    </div>
                   </div>
 
                   <p className="text-muted-foreground truncate text-xs">
                     {chatbot.whatsapp_sender_number}
                   </p>
-
-                  <div className="pt-1">
-                    <Badge variant="secondary" className="max-w-full text-xs">
-                      <span className="truncate">
-                        Salon: {chatbot.salon || "-"}
-                      </span>
-                    </Badge>
-                  </div>
                 </div>
               </div>
             ))}
