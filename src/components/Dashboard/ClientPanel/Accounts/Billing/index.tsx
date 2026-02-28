@@ -6,13 +6,6 @@ import {
 import { BillingSubscription } from "@/Types/ClientPanel/Accounts/BillingTypes";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatChoiceFieldValue, formatDateTime } from "@/lib/utils";
 import { CircleAlert, RefreshCcw, Sparkles } from "lucide-react";
@@ -25,6 +18,7 @@ import BillingLoadingSkeleton from "./Components/BillingLoadingSkeleton";
 import CurrentPlanCard from "./Components/CurrentPlanCard";
 import NoSubscriptionCard from "./Components/NoSubscriptionCard";
 import NotesCard from "./Components/NotesCard";
+import PaymentMethodsCard from "./Components/PaymentMethodsCard";
 import PlanLimitsCard from "./Components/PlanLimitsCard";
 import SubscriptionDetailsCard from "./Components/SubscriptionDetailsCard";
 
@@ -178,21 +172,7 @@ const BillingContainer: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="payment-methods">
-          <Card>
-            <CardHeader className="border-b">
-              <CardTitle>Payment methods</CardTitle>
-              <CardDescription>
-                Update your payment method from the pricing plans flow.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button asChild variant="outline">
-                <Link href="/dashboard/client-panel/accounts/pricing-plans">
-                  Manage via pricing plans
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
+          <PaymentMethodsCard />
         </TabsContent>
 
         <TabsContent value="billing-history" className="space-y-6">

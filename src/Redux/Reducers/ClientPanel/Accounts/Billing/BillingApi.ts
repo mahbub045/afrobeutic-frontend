@@ -2,6 +2,7 @@ import { baseApi } from "@/Redux/Api/BaseApi";
 import type {
   BillingHistoryItem,
   PaginatedResponse,
+  SavedCardItem,
 } from "@/Types/ClientPanel/Accounts/BillingTypes";
 
 export const BillingApi = baseApi.injectEndpoints({
@@ -61,6 +62,17 @@ export const BillingApi = baseApi.injectEndpoints({
       }),
       providesTags: ["BillingInfo"],
     }),
+    getAddCardList: builder.query<
+      PaginatedResponse<SavedCardItem>,
+      { page?: number } | undefined
+    >({
+      query: (params) => ({
+        url: "/accounts/cards",
+        method: "GET",
+        params: params ?? undefined,
+      }),
+      providesTags: ["BillingInfo"],
+    }),
   }),
 });
 export const {
@@ -68,4 +80,5 @@ export const {
   useCreateOrUpdateSubscriptionMutation,
   useUpdateSubscriptionAutoRenewMutation,
   useGetbillingHistoryQuery,
+  useGetAddCardListQuery,
 } = BillingApi;

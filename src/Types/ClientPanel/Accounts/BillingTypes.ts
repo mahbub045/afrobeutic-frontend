@@ -36,3 +36,12 @@ export interface BillingHistoryItem {
   created_at: string;
   invoice_url?: string | null;
 }
+
+export interface SavedCardItem {
+  uid: string;
+  card_brand: string;
+  last_four: string;
+  expiry_month: number;
+  expiry_year: number;
+  is_default: boolean;
+}
