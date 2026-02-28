@@ -28,6 +28,7 @@ import type {
 } from "@/Types/ClientPanel/Accounts/BillingTypes";
 import { Plus } from "lucide-react";
 import BillingErrorAlert from "./BillingErrorAlert";
+import AddPaymentMethodDialog from "./Dialogs/AddPaymentMethodDialog";
 
 const parsePageFromUrl = (url: string | null): number | null => {
   if (!url) return null;
@@ -54,7 +55,7 @@ const EmptyState: React.FC = () => {
 
 const LoadingState: React.FC = () => {
   return (
-    <Card>
+    <Card className="shadow-md dark:shadow-gray-600">
       <CardHeader className="border-b">
         <div className="space-y-2">
           <Skeleton className="h-5 w-40" />
@@ -81,7 +82,7 @@ const PaymentMethodTile: React.FC<{ card: SavedCardItem }> = ({ card }) => {
   const expiryYear = String(card.expiry_year);
 
   return (
-    <div className="bg-card rounded-xl border p-6">
+    <Card className="p-2 shadow-md dark:shadow-gray-600">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <Badge className="border-transparent bg-black p-2">
@@ -104,7 +105,7 @@ const PaymentMethodTile: React.FC<{ card: SavedCardItem }> = ({ card }) => {
         ) : null}
       </div>
 
-      <div className="mt-5 flex items-center justify-between">
+      <div className="flex items-center justify-between">
         {!card.is_default ? (
           <Button size="sm" variant="outline">
             Set as default
@@ -117,12 +118,13 @@ const PaymentMethodTile: React.FC<{ card: SavedCardItem }> = ({ card }) => {
           Delete
         </Button>
       </div>
-    </div>
+    </Card>
   );
 };
 
 const PaymentMethodsCard: React.FC = () => {
   const [page, setPage] = React.useState(1);
+  const [addDialogOpen, setAddDialogOpen] = React.useState(false);
 
   const params = React.useMemo(() => ({ page }), [page]);
 
@@ -153,7 +155,7 @@ const PaymentMethodsCard: React.FC = () => {
   };
 
   return (
-    <Card>
+    <Card className="shadow-md dark:shadow-gray-600">
       <CardHeader className="border-b">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-1">
@@ -226,11 +228,24 @@ const PaymentMethodsCard: React.FC = () => {
         ) : null}
 
         <div className="mt-6">
-          <Button variant="outline" disabled={isFetching}>
+          <Button
+            type="button"
+            variant="default"
+            disabled={isFetching}
+            onClick={() => setAddDialogOpen(true)}
+          >
             <Plus />
             Add payment method
           </Button>
         </div>
+
+        <AddPaymentMethodDialog
+          open={addDialogOpen}
+          onOpenChange={setAddDialogOpen}
+          onSuccess={() => {
+            refetch();
+          }}
+        />
       </CardContent>
     </Card>
   );

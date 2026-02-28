@@ -73,6 +73,22 @@ export const BillingApi = baseApi.injectEndpoints({
       }),
       providesTags: ["BillingInfo"],
     }),
+    addPaymentMethod: builder.mutation<
+      unknown,
+      { payment_method_id: string }
+    >({
+      query: ({ payment_method_id }) => {
+        const formData = new FormData();
+        formData.append("payment_method_id", payment_method_id);
+
+        return {
+          url: "/accounts/cards",
+          method: "POST",
+          body: formData,
+        };
+      },
+      invalidatesTags: ["BillingInfo"],
+    }),
   }),
 });
 export const {
@@ -81,4 +97,5 @@ export const {
   useUpdateSubscriptionAutoRenewMutation,
   useGetbillingHistoryQuery,
   useGetAddCardListQuery,
+  useAddPaymentMethodMutation,
 } = BillingApi;
