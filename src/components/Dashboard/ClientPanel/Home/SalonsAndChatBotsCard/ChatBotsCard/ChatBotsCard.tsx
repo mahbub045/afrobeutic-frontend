@@ -1,8 +1,8 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useGetChatBotsQuery } from "@/Redux/Reducers/ClientPanel/Home/ChatBotsApi";
-import { ChatBot } from "@/Types/ClientPanel/HomeTypes/ChatBotsTypes";
+import { useGetChatBotsQuery } from "@/Redux/Reducers/ClientPanel/ChatBots/ChatBotsApi";
+import { ChatBot } from "@/Types/ClientPanel/ChatBots/ChatBotsTypes";
 import { Bot } from "lucide-react";
 
 const getStatusBadge = (whatsappStatus?: string | null) => {
