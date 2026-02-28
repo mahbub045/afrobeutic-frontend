@@ -45,3 +45,10 @@ export interface SavedCardItem {
   expiry_year: number;
   is_default: boolean;
 }
+
+export type CardDeleteProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  card: SavedCardItem | null;
+  onSuccess?: () => void;
+};

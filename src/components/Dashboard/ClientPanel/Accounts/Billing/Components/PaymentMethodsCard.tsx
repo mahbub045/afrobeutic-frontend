@@ -29,6 +29,7 @@ import type {
 import { Plus } from "lucide-react";
 import BillingErrorAlert from "./BillingErrorAlert";
 import AddPaymentMethodDialog from "./Dialogs/AddPaymentMethodDialog";
+import DeletePaymentMethodDialog from "./Dialogs/DeletePaymentMethodDialog";
 
 const parsePageFromUrl = (url: string | null): number | null => {
   if (!url) return null;
@@ -76,7 +77,10 @@ const LoadingState: React.FC = () => {
   );
 };
 
-const PaymentMethodTile: React.FC<{ card: SavedCardItem }> = ({ card }) => {
+const PaymentMethodTile: React.FC<{
+  card: SavedCardItem;
+  onDelete: (card: SavedCardItem) => void;
+}> = ({ card, onDelete }) => {
   const brandLabel = formatChoiceFieldValue(card.card_brand).toUpperCase();
   const expiryMonth = String(card.expiry_month).padStart(2, "0");
   const expiryYear = String(card.expiry_year);
@@ -114,7 +118,12 @@ const PaymentMethodTile: React.FC<{ card: SavedCardItem }> = ({ card }) => {
           <span />
         )}
 
-        <Button size="sm" variant="danger">
+        <Button
+          type="button"
+          size="sm"
+          variant="danger"
+          onClick={() => onDelete(card)}
+        >
           Delete
         </Button>
       </div>
@@ -125,6 +134,10 @@ const PaymentMethodTile: React.FC<{ card: SavedCardItem }> = ({ card }) => {
 const PaymentMethodsCard: React.FC = () => {
   const [page, setPage] = React.useState(1);
   const [addDialogOpen, setAddDialogOpen] = React.useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+  const [selectedCard, setSelectedCard] = React.useState<SavedCardItem | null>(
+    null,
+  );
 
   const params = React.useMemo(() => ({ page }), [page]);
 
@@ -175,7 +188,14 @@ const PaymentMethodsCard: React.FC = () => {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {results.map((card) => (
-              <PaymentMethodTile key={card.uid} card={card} />
+              <PaymentMethodTile
+                key={card.uid}
+                card={card}
+                onDelete={(target) => {
+                  setSelectedCard(target);
+                  setDeleteDialogOpen(true);
+                }}
+              />
             ))}
           </div>
         )}
@@ -242,6 +262,18 @@ const PaymentMethodsCard: React.FC = () => {
         <AddPaymentMethodDialog
           open={addDialogOpen}
           onOpenChange={setAddDialogOpen}
+          onSuccess={() => {
+            refetch();
+          }}
+        />
+
+        <DeletePaymentMethodDialog
+          open={deleteDialogOpen}
+          onOpenChange={(open) => {
+            setDeleteDialogOpen(open);
+            if (!open) setSelectedCard(null);
+          }}
+          card={selectedCard}
           onSuccess={() => {
             refetch();
           }}

@@ -73,10 +73,7 @@ export const BillingApi = baseApi.injectEndpoints({
       }),
       providesTags: ["BillingInfo"],
     }),
-    addPaymentMethod: builder.mutation<
-      unknown,
-      { payment_method_id: string }
-    >({
+    addPaymentMethod: builder.mutation<unknown, { payment_method_id: string }>({
       query: ({ payment_method_id }) => {
         const formData = new FormData();
         formData.append("payment_method_id", payment_method_id);
@@ -85,6 +82,26 @@ export const BillingApi = baseApi.injectEndpoints({
           url: "/accounts/cards",
           method: "POST",
           body: formData,
+        };
+      },
+      invalidatesTags: ["BillingInfo"],
+    }),
+    setAsDefaultCard: builder.mutation({
+      query: ({ card_uid, payload }) => {
+        return {
+          url: `/accounts/cards/${card_uid}`,
+          method: "PATCH",
+          body: payload,
+        };
+      },
+      invalidatesTags: ["BillingInfo"],
+    }),
+    deleteCard: builder.mutation({
+      query: ({ card_uid, payload }) => {
+        return {
+          url: `/accounts/cards/${card_uid}`,
+          method: "DELETE",
+          body: payload,
         };
       },
       invalidatesTags: ["BillingInfo"],
@@ -98,4 +115,6 @@ export const {
   useGetbillingHistoryQuery,
   useGetAddCardListQuery,
   useAddPaymentMethodMutation,
+  useSetAsDefaultCardMutation,
+  useDeleteCardMutation,
 } = BillingApi;
