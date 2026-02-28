@@ -18,7 +18,9 @@ import {
 import { useGetProfileDataQuery } from "@/Redux/Reducers/Common/ProfileApi";
 import { LoaderPinwheel } from "lucide-react";
 import * as React from "react";
+import { useState } from "react";
 import Breadcrumbs from "../Breadcrumbs";
+import ChangePasswordDialog from "./Dialogs/ChangePasswordDialog";
 import EditAccountNameDialog from "./Dialogs/EditAccountNameDialog";
 import EditProfileDialog from "./Dialogs/EditProfileDialog";
 
@@ -30,7 +32,12 @@ function initials(name = "") {
 }
 
 const ProfileConatiner: React.FC = () => {
+  const [isOpenChangePassword, setIsOpenChangePassword] = useState(false);
   const { data: userData, isLoading } = useGetProfileDataQuery(undefined);
+
+  const toggleChangePasswordDialog = () => {
+    setIsOpenChangePassword((prev) => !prev);
+  };
 
   const fullName = `${userData?.first_name} ${userData?.last_name}`.trim();
 
@@ -89,7 +96,11 @@ const ProfileConatiner: React.FC = () => {
 
                 <div className="mt-2 flex gap-2">
                   <EditProfileDialog data={userData} isFetching={isLoading} />
-                  <Button variant="outline" size="sm">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={toggleChangePasswordDialog}
+                  >
                     Change Password
                   </Button>
                 </div>
@@ -187,6 +198,10 @@ const ProfileConatiner: React.FC = () => {
           </div>
         </div>
       </div>
+      <ChangePasswordDialog
+        isOpen={isOpenChangePassword}
+        onClose={toggleChangePasswordDialog}
+      />
     </div>
   );
 };

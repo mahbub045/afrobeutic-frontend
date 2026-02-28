@@ -17,7 +17,17 @@ export const UserProfileApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["UserProfile"],
     }),
+    changePassword: builder.mutation({
+      query: (passwordData) => ({
+        url: "/auth/change-password",
+        method: "POST",
+        body: passwordData,
+      }),
+    }),
   }),
 });
-export const { useGetProfileDataQuery, useEditProfileMutation } =
-  UserProfileApi;
+export const {
+  useGetProfileDataQuery,
+  useEditProfileMutation,
+  useChangePasswordMutation,
+} = UserProfileApi;
