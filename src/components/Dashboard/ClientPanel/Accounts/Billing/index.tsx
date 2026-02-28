@@ -1,43 +1,19 @@
 "use client";
-import {
-  useGetBillingInfoQuery,
-  useUpdateSubscriptionAutoRenewMutation,
-} from "@/Redux/Reducers/ClientPanel/Accounts/Billing/BillingApi";
+import { useGetBillingInfoQuery } from "@/Redux/Reducers/ClientPanel/Accounts/Billing/BillingApi";
 import { BillingSubscription } from "@/Types/ClientPanel/Accounts/BillingTypes";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Switch } from "@/components/ui/switch";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  formatChoiceFieldValue,
-  formatDateTime,
-  formatPrice,
-  safe,
-} from "@/lib/utils";
-import {
-  BadgeCheck,
-  Calendar,
-  CircleAlert,
-  CreditCard,
-  Info,
-  RefreshCcw,
-  Sparkles,
-} from "lucide-react";
+import { formatChoiceFieldValue, formatDateTime } from "@/lib/utils";
+import { CircleAlert, RefreshCcw, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
 import Breadcrumbs from "../../../CommonComponents/Breadcrumbs";
+import BillingErrorAlert from "./Components/BillingErrorAlert";
+import BillingLoadingSkeleton from "./Components/BillingLoadingSkeleton";
+import CurrentPlanCard from "./Components/CurrentPlanCard";
+import NoSubscriptionCard from "./Components/NoSubscriptionCard";
+import NotesCard from "./Components/NotesCard";
+import PlanLimitsCard from "./Components/PlanLimitsCard";
+import SubscriptionDetailsCard from "./Components/SubscriptionDetailsCard";
 
 const BillingContainer: React.FC = () => {
   const {
@@ -65,53 +41,6 @@ const BillingContainer: React.FC = () => {
     if (normalized === "EXPIRED") return "bg-zinc-700 text-white";
     return "bg-secondary text-white";
   })();
-
-  function AutoRenewControl({
-    subscriptionAutoRenew,
-  }: {
-    subscriptionAutoRenew: boolean;
-  }) {
-    const [value, setValue] = useState<boolean>(subscriptionAutoRenew);
-
-    useEffect(() => {
-      setValue(subscriptionAutoRenew);
-    }, [subscriptionAutoRenew]);
-
-    const [updateAutoRenew, { isLoading }] =
-      useUpdateSubscriptionAutoRenewMutation();
-
-    const handleToggle = async (checked: boolean | undefined) => {
-      const newValue = !!checked;
-      const prev = value;
-      setValue(newValue);
-
-      try {
-        await updateAutoRenew({ auto_renew: newValue }).unwrap();
-        toast.success("Auto-renew updated.");
-      } catch (e) {
-        console.error(e);
-        setValue(prev);
-        const message =
-          (e as { data?: { message?: string } })?.data?.message ||
-          "Failed to update auto-renew. Please try again.";
-        toast.error(message);
-      }
-    };
-
-    return (
-      <div className="flex items-center gap-2">
-        <Badge variant={value ? "default" : "danger"}>
-          {value ? "Enabled" : "Disabled"}
-        </Badge>
-
-        <Switch
-          checked={value}
-          onCheckedChange={handleToggle}
-          disabled={isLoading}
-        />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -151,201 +80,21 @@ const BillingContainer: React.FC = () => {
       </div>
 
       {isLoading ? (
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="space-y-6 lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <Skeleton className="h-6 w-40" />
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Skeleton className="h-9 w-64" />
-                <Skeleton className="h-4 w-96" />
-                <Skeleton className="h-4 w-80" />
-                <Separator />
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <Skeleton className="h-10 w-full" />
-                  <Skeleton className="h-10 w-full" />
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <Skeleton className="h-6 w-44" />
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-10/12" />
-              </CardContent>
-            </Card>
-          </div>
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <Skeleton className="h-6 w-44" />
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Skeleton className="h-6 w-24" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-11/12" />
-                <Skeleton className="h-4 w-10/12" />
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <Skeleton className="h-6 w-28" />
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-11/12" />
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+        <BillingLoadingSkeleton />
       ) : isError ? (
-        <Alert variant="destructive">
-          <CircleAlert />
-          <AlertTitle>Couldn’t load billing information</AlertTitle>
-          <AlertDescription>
-            <p>Please try again. If the issue persists, contact support.</p>
-            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={() => refetch()}
-              >
-                Retry
-              </Button>
-              <Button asChild variant="outline">
-                <Link href="/dashboard/client-panel">Back to dashboard</Link>
-              </Button>
-            </div>
-          </AlertDescription>
-        </Alert>
+        <BillingErrorAlert onRetry={() => refetch()} />
       ) : !subscription ? (
-        <Card className="shadow-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Info className="h-4 w-4" /> No subscription found
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-muted-foreground text-sm">
-              We couldn’t find an active subscription for this account.
-            </p>
-            <Button asChild>
-              <Link href="/dashboard/client-panel/accounts/pricing-plans">
-                View pricing plans
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
+        <NoSubscriptionCard />
       ) : (
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
-            <Card className="shadow-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between gap-3">
-                  <span className="flex items-center gap-2">
-                    <CreditCard className="h-5 w-5" /> Current plan
-                  </span>
-                  <Badge className={statusColorClass}>
-                    <BadgeCheck className="h-3.5 w-3.5" /> {statusLabel}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                  <div className="space-y-1">
-                    <div className="text-primary text-2xl font-semibold">
-                      {safe(plan?.name)}
-                    </div>
-                    <div className="text-muted-foreground text-sm">
-                      {plan?.description
-                        ? plan.description
-                        : "No description provided."}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-3xl font-bold">
-                      {formatPrice(plan?.price)}
-                      <span className="text-muted-foreground ml-1 text-sm font-normal">
-                        /month
-                      </span>
-                    </div>
-                  </div>
-                </div>
+            <CurrentPlanCard
+              plan={plan}
+              statusColorClass={statusColorClass}
+              statusLabel={statusLabel}
+            />
 
-                <Separator />
-
-                <div className="flex flex-col gap-2 sm:flex-row">
-                  <Button asChild className="sm:w-auto">
-                    <Link href="/dashboard/client-panel/accounts/pricing-plans">
-                      Change plan
-                    </Link>
-                  </Button>
-                  {/* <Button
-                    type="button"
-                    variant="outline"
-                    className="sm:w-auto"
-                    disabled
-                    title="Coming soon"
-                  >
-                    Manage payment method
-                  </Button> */}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-sm">
-              <CardHeader>
-                <CardTitle>Plan limits</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-lg border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="text-primary text-lg font-bold">
-                          Feature
-                        </TableHead>
-                        <TableHead className="text-primary text-right text-lg font-bold">
-                          Limit
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>Salon limit</TableCell>
-                        <TableCell className="text-right">
-                          {safe(plan?.salon_limit)}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>WhatsApp chatbot limit</TableCell>
-                        <TableCell className="text-right">
-                          {safe(plan?.whatsapp_chatbot_limit)}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>Messages per chatbot</TableCell>
-                        <TableCell className="text-right">
-                          {safe(plan?.whatsapp_messages_per_chatbot)}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>Broadcasting</TableCell>
-                        <TableCell className="text-right">
-                          {plan?.has_broadcasting
-                            ? `Yes (Limit -> ${safe(plan?.broadcasting_message_limit)})`
-                            : "No"}
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
+            <PlanLimitsCard plan={plan} />
           </div>
 
           <div className="space-y-6">
@@ -365,63 +114,13 @@ const BillingContainer: React.FC = () => {
               </Alert>
             ) : null}
 
-            <Card className="shadow-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" /> Subscription details
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-muted-foreground text-sm">Status</span>
-                  <Badge className={statusColorClass}>{statusLabel}</Badge>
-                </div>
+            <SubscriptionDetailsCard
+              subscription={subscription}
+              statusColorClass={statusColorClass}
+              statusLabel={statusLabel}
+            />
 
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-muted-foreground text-sm">
-                    Auto renew
-                  </span>
-
-                  {/* Editable auto-renew control */}
-                  <AutoRenewControl
-                    subscriptionAutoRenew={!!subscription?.auto_renew}
-                  />
-                </div>
-
-                <Separator />
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-muted-foreground">Start date</span>
-                    <span className="font-medium">
-                      {formatDateTime(subscription.start_date)}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-muted-foreground">End date</span>
-                    <span className="font-medium">
-                      {formatDateTime(subscription.end_date)}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-muted-foreground">Next billing</span>
-                    <span className="font-medium">
-                      {formatDateTime(subscription.next_billing_date)}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-sm">
-              <CardHeader>
-                <CardTitle>Notes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground text-sm">
-                  {subscription.notes ? subscription.notes : "No notes."}
-                </p>
-              </CardContent>
-            </Card>
+            <NotesCard notes={subscription.notes} />
           </div>
         </div>
       )}
