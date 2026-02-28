@@ -1,64 +1,14 @@
 "use client";
+import { getWhatsAppStatusBadge } from "@/components/Dashboard/ClientPanel/CommonComponents/whatsapp-status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetChatBotsQuery } from "@/Redux/Reducers/ClientPanel/ChatBots/ChatBotsApi";
-import { ChatBot } from "@/Types/ClientPanel/ChatBots/ChatBotsTypes";
+import {
+  ChatBot,
+  ChatBotsListResponse,
+} from "@/Types/ClientPanel/ChatBots/ChatBotsTypes";
 import { Bot } from "lucide-react";
-
-type ChatBotsListResponse = {
-  count?: number;
-  results?: ChatBot[];
-};
-
-const getStatusBadge = (whatsappStatus?: string | null) => {
-  switch (whatsappStatus) {
-    case "ONLINE":
-      return (
-        <Badge className="bg-primary text-primary-foreground hover:bg-primary/90">
-          Online
-        </Badge>
-      );
-    case "CREATING":
-      return (
-        <Badge className="bg-secondary text-secondary-foreground hover:bg-secondary/80">
-          Creating
-        </Badge>
-      );
-    case "OFFLINE":
-      return <Badge variant="secondary">Offline</Badge>;
-    case "PENDING_VERIFICATION":
-      return (
-        <Badge className="bg-accent text-accent-foreground hover:bg-accent/80">
-          Pending Verification
-        </Badge>
-      );
-    case "VERIFYING":
-      return (
-        <Badge className="bg-accent text-accent-foreground hover:bg-accent/80">
-          Verifying
-        </Badge>
-      );
-    case "ONLINE_UPDATING":
-      return (
-        <Badge className="bg-secondary text-secondary-foreground hover:bg-secondary/80">
-          Updating
-        </Badge>
-      );
-    case "TWILIO_REVIEW":
-      return (
-        <Badge className="bg-accent text-accent-foreground hover:bg-accent/80">
-          Under Review
-        </Badge>
-      );
-    case "DRAFT":
-      return <Badge variant="secondary">Draft</Badge>;
-    case "STUBBED":
-      return <Badge variant="outline">Stubbed</Badge>;
-    default:
-      return <Badge variant="secondary">Not Connected</Badge>;
-  }
-};
 
 const ChatBotList = () => {
   const {
@@ -156,7 +106,7 @@ const ChatBotList = () => {
                     </span>
                   </Badge>
                   <span className="shrink-0 text-xs">
-                    {getStatusBadge(chatbot.status)}
+                    {getWhatsAppStatusBadge(chatbot.status)}
                   </span>
                 </div>
               </div>

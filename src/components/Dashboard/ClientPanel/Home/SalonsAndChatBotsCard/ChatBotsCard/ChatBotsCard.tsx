@@ -1,61 +1,28 @@
 "use client";
+import { getWhatsAppStatusBadge } from "@/components/Dashboard/ClientPanel/CommonComponents/whatsapp-status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGetChatBotsQuery } from "@/Redux/Reducers/ClientPanel/ChatBots/ChatBotsApi";
-import { ChatBot } from "@/Types/ClientPanel/ChatBots/ChatBotsTypes";
+import {
+  ChatBot,
+  ChatBotsListResponse,
+} from "@/Types/ClientPanel/ChatBots/ChatBotsTypes";
 import { Bot } from "lucide-react";
 
-const getStatusBadge = (whatsappStatus?: string | null) => {
-  switch (whatsappStatus) {
-    case "ONLINE":
-      return (
-        <Badge className="bg-primary text-primary-foreground hover:bg-primary/90">
-          Online
-        </Badge>
-      );
-    case "CREATING":
-      return (
-        <Badge className="bg-secondary text-secondary-foreground hover:bg-secondary/80">
-          Creating
-        </Badge>
-      );
-    case "OFFLINE":
-      return <Badge variant="secondary">Offline</Badge>;
-    case "PENDING_VERIFICATION":
-      return (
-        <Badge className="bg-accent text-accent-foreground hover:bg-accent/80">
-          Pending Verification
-        </Badge>
-      );
-    case "VERIFYING":
-      return (
-        <Badge className="bg-accent text-accent-foreground hover:bg-accent/80">
-          Verifying
-        </Badge>
-      );
-    case "ONLINE_UPDATING":
-      return (
-        <Badge className="bg-secondary text-secondary-foreground hover:bg-secondary/80">
-          Updating
-        </Badge>
-      );
-    case "TWILIO_REVIEW":
-      return (
-        <Badge className="bg-accent text-accent-foreground hover:bg-accent/80">
-          Under Review
-        </Badge>
-      );
-    case "DRAFT":
-      return <Badge variant="secondary">Draft</Badge>;
-    case "STUBBED":
-      return <Badge variant="outline">Stubbed</Badge>;
-    default:
-      return <Badge variant="secondary">Not Connected</Badge>;
-  }
-};
-
 const ChatBotsCard: React.FC = () => {
-  const { data: chatBotsData, isLoading } = useGetChatBotsQuery(undefined);
+  const {
+    data: chatBotsData,
+    isLoading,
+    isError,
+  } = useGetChatBotsQuery(undefined);
+
+  const normalized = chatBotsData as
+    | ChatBotsListResponse
+    | ChatBot[]
+    | undefined;
+  const chatbots = Array.isArray(normalized)
+    ? normalized
+    : (normalized?.results ?? []);
 
   return (
     <Card className="h-full shadow-md dark:shadow-gray-600">
@@ -72,7 +39,16 @@ const ChatBotsCard: React.FC = () => {
               </p>
             </div>
           </div>
-        ) : chatBotsData && chatBotsData.length === 0 ? (
+        ) : isError ? (
+          <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50/50 p-8 text-center dark:border-gray-700 dark:bg-gray-900/50">
+            <div className="space-y-2">
+              <Bot className="text-muted-foreground/50 mx-auto h-10 w-10" />
+              <p className="text-muted-foreground text-sm">
+                Failed to load chatbots.
+              </p>
+            </div>
+          </div>
+        ) : chatbots.length === 0 ? (
           <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50/50 p-8 text-center dark:border-gray-700 dark:bg-gray-900/50">
             <div className="space-y-2">
               <Bot className="text-muted-foreground/50 mx-auto h-10 w-10" />
@@ -84,7 +60,7 @@ const ChatBotsCard: React.FC = () => {
           </div>
         ) : (
           <div className="max-h-[340px] space-y-3 overflow-y-auto pr-2">
-            {chatBotsData?.results?.map((chatbot: ChatBot, index: number) => (
+            {chatbots.map((chatbot: ChatBot, index: number) => (
               <div
                 key={index}
                 className="bg-card hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-4 shadow-md transition-colors dark:shadow-gray-600"
@@ -104,7 +80,7 @@ const ChatBotsCard: React.FC = () => {
                         </span>
                       </Badge>{" "}
                       <span className="shrink-0 text-xs">
-                        {getStatusBadge(chatbot.status)}
+                        {getWhatsAppStatusBadge(chatbot.status)}
                       </span>
                     </div>
                   </div>

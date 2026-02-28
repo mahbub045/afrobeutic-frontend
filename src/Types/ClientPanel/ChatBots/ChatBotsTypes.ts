@@ -4,3 +4,8 @@ export interface ChatBot {
   status: string;
   salon: string;
 }
+
+export type ChatBotsListResponse = {
+  count?: number;
+  results?: ChatBot[];
+};
