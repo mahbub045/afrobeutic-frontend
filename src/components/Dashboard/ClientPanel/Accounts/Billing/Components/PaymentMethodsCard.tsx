@@ -26,7 +26,7 @@ import type {
   PaginatedResponse,
   SavedCardItem,
 } from "@/Types/ClientPanel/Accounts/BillingTypes";
-import Link from "next/link";
+import { Plus } from "lucide-react";
 import BillingErrorAlert from "./BillingErrorAlert";
 
 const parsePageFromUrl = (url: string | null): number | null => {
@@ -225,9 +225,8 @@ const PaymentMethodsCard: React.FC = () => {
 
         <div className="mt-6">
           <Button asChild variant="outline" disabled={isFetching}>
-            <Link href="/dashboard/client-panel/accounts/pricing-plans">
-              Add payment method
-            </Link>
+            <Plus />
+            Add payment method
           </Button>
         </div>
       </CardContent>
