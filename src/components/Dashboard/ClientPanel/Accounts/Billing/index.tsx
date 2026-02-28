@@ -6,6 +6,14 @@ import {
 import { BillingSubscription } from "@/Types/ClientPanel/Accounts/BillingTypes";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatChoiceFieldValue, formatDateTime } from "@/lib/utils";
 import { CircleAlert, RefreshCcw, Sparkles } from "lucide-react";
 import Link from "next/link";
@@ -39,6 +47,7 @@ const BillingContainer: React.FC = () => {
   const {
     data: billingHistoryData,
     isLoading: isBillingHistoryLoading,
+    isFetching: isBillingHistoryFetching,
     isError: isBillingHistoryError,
     refetch: refetchBillingHistory,
   } = useGetbillingHistoryQuery(billingHistoryParams);
@@ -90,72 +99,116 @@ const BillingContainer: React.FC = () => {
             type="button"
             variant="secondary"
             onClick={() => refetch()}
-            disabled={isFetching}
+            disabled={isFetching || isBillingHistoryFetching}
           >
             <RefreshCcw className="mr-2 h-4 w-4" />
-            {isFetching ? "Refreshing…" : "Refresh"}
+            {isFetching || isBillingHistoryFetching ? "Refreshing…" : "Refresh"}
           </Button>
         </div>
       </div>
 
-      {isLoading ? (
-        <BillingLoadingSkeleton />
-      ) : isError ? (
-        <BillingErrorAlert onRetry={() => refetch()} />
-      ) : !subscription ? (
-        <NoSubscriptionCard />
-      ) : (
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="space-y-6 lg:col-span-2">
-            <CurrentPlanCard
-              plan={plan}
-              statusColorClass={statusColorClass}
-              statusLabel={statusLabel}
+      <Tabs defaultValue="overview" className="gap-4">
+        <TabsList className="!h-auto !w-full justify-start gap-6 !rounded-none border-b !bg-transparent !p-0">
+          <TabsTrigger
+            value="overview"
+            className="!text-muted-foreground data-[state=active]:!border-foreground data-[state=active]:!text-foreground !h-auto !flex-none !rounded-none !border-x-0 !border-t-0 !border-b-2 !border-transparent !bg-transparent !px-0 !py-3 !shadow-none"
+          >
+            Overview
+          </TabsTrigger>
+          <TabsTrigger
+            value="payment-methods"
+            className="!text-muted-foreground data-[state=active]:!border-foreground data-[state=active]:!text-foreground !h-auto !flex-none !rounded-none !border-x-0 !border-t-0 !border-b-2 !border-transparent !bg-transparent !px-0 !py-3 !shadow-none"
+          >
+            Payment methods
+          </TabsTrigger>
+          <TabsTrigger
+            value="billing-history"
+            className="!text-muted-foreground data-[state=active]:!border-foreground data-[state=active]:!text-foreground !h-auto !flex-none !rounded-none !border-x-0 !border-t-0 !border-b-2 !border-transparent !bg-transparent !px-0 !py-3 !shadow-none"
+          >
+            Billing history
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-6">
+          {isLoading ? (
+            <BillingLoadingSkeleton />
+          ) : isError ? (
+            <BillingErrorAlert onRetry={() => refetch()} />
+          ) : !subscription ? (
+            <NoSubscriptionCard />
+          ) : (
+            <div className="grid gap-6 lg:grid-cols-3">
+              <div className="space-y-6 lg:col-span-2">
+                <CurrentPlanCard
+                  plan={plan}
+                  statusColorClass={statusColorClass}
+                  statusLabel={statusLabel}
+                />
+
+                <PlanLimitsCard plan={plan} />
+              </div>
+
+              <div className="space-y-6">
+                {subscription?.cancelled_at ? (
+                  <Alert className="border-warning/40 bg-warning/10">
+                    <CircleAlert className="text-warning" />
+                    <AlertTitle>Cancellation scheduled</AlertTitle>
+                    <AlertDescription>
+                      <p>
+                        Your subscription is set to cancel on{" "}
+                        <span className="font-medium">
+                          {formatDateTime(subscription.cancelled_at)}
+                        </span>
+                        .
+                      </p>
+                    </AlertDescription>
+                  </Alert>
+                ) : null}
+
+                <SubscriptionDetailsCard
+                  subscription={subscription}
+                  statusColorClass={statusColorClass}
+                  statusLabel={statusLabel}
+                />
+
+                <NotesCard notes={subscription.notes} />
+              </div>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="payment-methods">
+          <Card>
+            <CardHeader className="border-b">
+              <CardTitle>Payment methods</CardTitle>
+              <CardDescription>
+                Update your payment method from the pricing plans flow.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild variant="outline">
+                <Link href="/dashboard/client-panel/accounts/pricing-plans">
+                  Manage via pricing plans
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="billing-history" className="space-y-6">
+          {isBillingHistoryLoading ? (
+            <BillingLoadingSkeleton />
+          ) : isBillingHistoryError ? (
+            <BillingErrorAlert onRetry={() => refetchBillingHistory()} />
+          ) : billingHistoryData ? (
+            <BillingHistoryCard
+              data={billingHistoryData}
+              page={billingHistoryPage}
+              onPageChange={setBillingHistoryPage}
             />
-
-            <PlanLimitsCard plan={plan} />
-          </div>
-
-          <div className="space-y-6">
-            {subscription?.cancelled_at ? (
-              <Alert className="border-warning/40 bg-warning/10">
-                <CircleAlert className="text-warning" />
-                <AlertTitle>Cancellation scheduled</AlertTitle>
-                <AlertDescription>
-                  <p>
-                    Your subscription is set to cancel on{" "}
-                    <span className="font-medium">
-                      {formatDateTime(subscription.cancelled_at)}
-                    </span>
-                    .
-                  </p>
-                </AlertDescription>
-              </Alert>
-            ) : null}
-
-            <SubscriptionDetailsCard
-              subscription={subscription}
-              statusColorClass={statusColorClass}
-              statusLabel={statusLabel}
-            />
-
-            <NotesCard notes={subscription.notes} />
-          </div>
-        </div>
-      )}
-      {isBillingHistoryLoading ? (
-        <BillingLoadingSkeleton />
-      ) : isBillingHistoryError ? (
-        <BillingErrorAlert onRetry={() => refetchBillingHistory()} />
-      ) : billingHistoryData ? (
-        <div>
-          <BillingHistoryCard
-            data={billingHistoryData}
-            page={billingHistoryPage}
-            onPageChange={setBillingHistoryPage}
-          />
-        </div>
-      ) : null}
+          ) : null}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
