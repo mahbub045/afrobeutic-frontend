@@ -1,13 +1,18 @@
 "use client";
-import { useGetBillingInfoQuery } from "@/Redux/Reducers/ClientPanel/Accounts/Billing/BillingApi";
+import {
+  useGetbillingHistoryQuery,
+  useGetBillingInfoQuery,
+} from "@/Redux/Reducers/ClientPanel/Accounts/Billing/BillingApi";
 import { BillingSubscription } from "@/Types/ClientPanel/Accounts/BillingTypes";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { formatChoiceFieldValue, formatDateTime } from "@/lib/utils";
 import { CircleAlert, RefreshCcw, Sparkles } from "lucide-react";
 import Link from "next/link";
+import React from "react";
 import Breadcrumbs from "../../../CommonComponents/Breadcrumbs";
 import BillingErrorAlert from "./Components/BillingErrorAlert";
+import BillingHistoryCard from "./Components/BillingHistoryCard";
 import BillingLoadingSkeleton from "./Components/BillingLoadingSkeleton";
 import CurrentPlanCard from "./Components/CurrentPlanCard";
 import NoSubscriptionCard from "./Components/NoSubscriptionCard";
@@ -16,6 +21,8 @@ import PlanLimitsCard from "./Components/PlanLimitsCard";
 import SubscriptionDetailsCard from "./Components/SubscriptionDetailsCard";
 
 const BillingContainer: React.FC = () => {
+  const [billingHistoryPage, setBillingHistoryPage] = React.useState(1);
+
   const {
     data: billingData,
     isLoading,
@@ -23,6 +30,18 @@ const BillingContainer: React.FC = () => {
     isFetching,
     refetch,
   } = useGetBillingInfoQuery(undefined);
+
+  const billingHistoryParams = React.useMemo(
+    () => ({ page: billingHistoryPage }),
+    [billingHistoryPage],
+  );
+
+  const {
+    data: billingHistoryData,
+    isLoading: isBillingHistoryLoading,
+    isError: isBillingHistoryError,
+    refetch: refetchBillingHistory,
+  } = useGetbillingHistoryQuery(billingHistoryParams);
 
   const subscription = billingData as BillingSubscription | undefined;
   const plan = subscription?.pricing_plan;
@@ -124,6 +143,19 @@ const BillingContainer: React.FC = () => {
           </div>
         </div>
       )}
+      {isBillingHistoryLoading ? (
+        <BillingLoadingSkeleton />
+      ) : isBillingHistoryError ? (
+        <BillingErrorAlert onRetry={() => refetchBillingHistory()} />
+      ) : billingHistoryData ? (
+        <div>
+          <BillingHistoryCard
+            data={billingHistoryData}
+            page={billingHistoryPage}
+            onPageChange={setBillingHistoryPage}
+          />
+        </div>
+      ) : null}
     </div>
   );
 };

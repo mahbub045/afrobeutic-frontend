@@ -1,4 +1,8 @@
 import { baseApi } from "@/Redux/Api/BaseApi";
+import type {
+  BillingHistoryItem,
+  PaginatedResponse,
+} from "@/Types/ClientPanel/Accounts/BillingTypes";
 
 export const BillingApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -46,10 +50,22 @@ export const BillingApi = baseApi.injectEndpoints({
       },
       invalidatesTags: ["BillingInfo"],
     }),
+    getbillingHistory: builder.query<
+      PaginatedResponse<BillingHistoryItem>,
+      { page?: number } | undefined
+    >({
+      query: (params) => ({
+        url: "/accounts/billing-history",
+        method: "GET",
+        params: params ?? undefined,
+      }),
+      providesTags: ["BillingInfo"],
+    }),
   }),
 });
 export const {
   useGetBillingInfoQuery,
   useCreateOrUpdateSubscriptionMutation,
   useUpdateSubscriptionAutoRenewMutation,
+  useGetbillingHistoryQuery,
 } = BillingApi;

@@ -1,4 +1,3 @@
-
 /** Pricing plan associated with a billing/subscription */
 export interface PricingPlan {
   uid: string;
@@ -21,4 +20,19 @@ export interface BillingSubscription {
   notes?: string | null;
   pricing_plan: PricingPlan;
   auto_renew: boolean;
+}
+
+export interface PaginatedResponse<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+}
+
+export interface BillingHistoryItem {
+  plan_name: string;
+  transaction_status: string;
+  amount: string;
+  created_at: string;
+  invoice_url?: string | null;
 }
