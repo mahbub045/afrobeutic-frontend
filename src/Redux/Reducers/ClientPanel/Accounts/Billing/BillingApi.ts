@@ -17,12 +17,12 @@ export const BillingApi = baseApi.injectEndpoints({
 
     createOrUpdateSubscription: builder.mutation<
       unknown,
-      { pricing_plan: string; payment_method_id: string }
+      { pricing_plan: string; payment_card?: string }
     >({
-      query: ({ pricing_plan, payment_method_id }) => {
+      query: ({ pricing_plan, payment_card }) => {
         const formData = new FormData();
         formData.append("pricing_plan", pricing_plan);
-        formData.append("payment_method_id", payment_method_id);
+        formData.append("payment_card", payment_card ?? "");
 
         return {
           url: "/accounts/subscription",

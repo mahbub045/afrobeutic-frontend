@@ -17,6 +17,7 @@ import {
 } from "@/lib/utils";
 import { useGetProfileDataQuery } from "@/Redux/Reducers/Common/ProfileApi";
 import { LoaderPinwheel } from "lucide-react";
+import { useSession } from "next-auth/react";
 import * as React from "react";
 import { useState } from "react";
 import Breadcrumbs from "../Breadcrumbs";
@@ -32,6 +33,7 @@ function initials(name = "") {
 }
 
 const ProfileConatiner: React.FC = () => {
+  const { data: session } = useSession();
   const [isOpenChangePassword, setIsOpenChangePassword] = useState(false);
   const { data: userData, isLoading } = useGetProfileDataQuery(undefined);
 
@@ -143,58 +145,61 @@ const ProfileConatiner: React.FC = () => {
               </CardContent>
             </Card>
 
-            <Card className="shadow-md dark:shadow-gray-500">
-              <CardHeader>
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <CardTitle>Account</CardTitle>
-                    <CardDescription>Role and access</CardDescription>
+            {session?.user?.role === "MANAGEMENT_ADMIN" ||
+            session?.user?.role === "MANAGEMENT_STAFF" ? null : (
+              <Card className="shadow-md dark:shadow-gray-500">
+                <CardHeader>
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <CardTitle>Account</CardTitle>
+                      <CardDescription>Role and access</CardDescription>
+                    </div>
+                    <EditAccountNameDialog
+                      accountName={userData?.account?.name}
+                      isFetching={isLoading}
+                    />
                   </div>
-                  <EditAccountNameDialog
-                    accountName={userData?.account?.name}
-                    isFetching={isLoading}
-                  />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-muted-foreground text-sm">
-                      Account Name
-                    </p>
-                    <Badge variant="default" className="text-sm">
-                      {userData?.account.name || "-"}
-                    </Badge>
-                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-muted-foreground text-sm">
+                        Account Name
+                      </p>
+                      <Badge variant="default" className="text-sm">
+                        {userData?.account?.name || "-"}
+                      </Badge>
+                    </div>
 
-                  <div>
-                    <p className="text-muted-foreground text-sm">
-                      Account Type
-                    </p>
-                    <Badge variant="secondary" className="text-sm">
-                      {formatChoiceFieldValue(
-                        userData?.account.account_type || "-",
-                      )}
-                    </Badge>
-                  </div>
+                    <div>
+                      <p className="text-muted-foreground text-sm">
+                        Account Type
+                      </p>
+                      <Badge variant="secondary" className="text-sm">
+                        {formatChoiceFieldValue(
+                          userData?.account?.account_type || "-",
+                        )}
+                      </Badge>
+                    </div>
 
-                  <div>
-                    <p className="text-muted-foreground text-sm">
-                      Member since
-                    </p>
-                    <p className="font-medium">
-                      {userData?.account.created_at ? (
-                        formatDateTime(userData.account.created_at)
-                      ) : (
-                        <small className="text-muted-foreground">
-                          Not Available
-                        </small>
-                      )}
-                    </p>
+                    <div>
+                      <p className="text-muted-foreground text-sm">
+                        Member since
+                      </p>
+                      <p className="font-medium">
+                        {userData?.account?.created_at ? (
+                          formatDateTime(userData?.account?.created_at)
+                        ) : (
+                          <small className="text-muted-foreground">
+                            Not Available
+                          </small>
+                        )}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>
