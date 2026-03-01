@@ -139,15 +139,26 @@ export default function SubscribeToPlanDialog({
 
     // Normalize uid across possible backend shapes: { uid } or { card_uid }.
     const normalized = raw
-      .map((card) => {
+      .map((card, index) => {
         const obj = card as Record<string, unknown>;
         const uid = normalizeCardUid(obj.uid ?? obj.card_uid);
         if (!uid) return null;
-        return { ...obj, uid } as unknown as SavedCardItem;
+        return {
+          card: { ...obj, uid } as unknown as SavedCardItem,
+          index,
+        };
       })
-      .filter(Boolean) as SavedCardItem[];
+      .filter(Boolean) as Array<{ card: SavedCardItem; index: number }>;
 
-    return normalized;
+    // Ensure default card is always listed first.
+    normalized.sort((a, b) => {
+      const aDefault = a.card.is_default ? 1 : 0;
+      const bDefault = b.card.is_default ? 1 : 0;
+      if (aDefault !== bDefault) return bDefault - aDefault;
+      return a.index - b.index;
+    });
+
+    return normalized.map((x) => x.card);
   }, [cardListData]);
 
   const defaultCard = useMemo(

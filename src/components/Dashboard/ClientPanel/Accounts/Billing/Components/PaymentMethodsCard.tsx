@@ -117,7 +117,7 @@ const PaymentMethodTile: React.FC<{
         {!card.is_default ? (
           <Button
             type="button"
-            size="sm"
+            size="xs"
             variant="outline"
             onClick={() => onSetDefault(card)}
             disabled={isSettingDefault}
@@ -130,7 +130,7 @@ const PaymentMethodTile: React.FC<{
 
         <Button
           type="button"
-          size="sm"
+          size="xs"
           variant="danger"
           onClick={() => onDelete(card)}
         >
@@ -164,11 +164,19 @@ const PaymentMethodsCard: React.FC = () => {
 
   const [setAsDefaultCard] = useSetAsDefaultCardMutation();
 
+  const payload = cardListData as PaginatedResponse<SavedCardItem> | undefined;
+  const results = (payload?.results ?? [])
+    .map((card, index) => ({ card, index }))
+    .sort((a, b) => {
+      const aDefault = a.card.is_default ? 1 : 0;
+      const bDefault = b.card.is_default ? 1 : 0;
+      if (aDefault !== bDefault) return bDefault - aDefault;
+      return a.index - b.index;
+    })
+    .map((x) => x.card);
+
   if (isLoading) return <LoadingState />;
   if (isError) return <BillingErrorAlert onRetry={() => refetch()} />;
-
-  const payload = cardListData as PaginatedResponse<SavedCardItem> | undefined;
-  const results = payload?.results ?? [];
 
   const nextPage =
     parsePageFromUrl(payload?.next ?? null) ??
@@ -297,7 +305,7 @@ const PaymentMethodsCard: React.FC = () => {
 
         <div className="mt-6">
           <Button
-            type="button"
+            size="sm"
             variant="default"
             disabled={isFetching}
             onClick={() => setAddDialogOpen(true)}
