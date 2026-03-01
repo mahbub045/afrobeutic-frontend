@@ -159,6 +159,7 @@ export const baseApi = createApi({
     "WhatsAppOnBoardData",
     "MetaConfigurationData",
     "ChatBots",
+    "OverviewStats",
     // Admin Panel Tags
     "ManagementsList",
     "CustomersList",
@@ -167,6 +168,7 @@ export const baseApi = createApi({
     "EnquiryList",
     "PricingPlans",
     "SubscriptionsList",
+    "AdminOverviewStats",
   ],
   endpoints: () => ({}),
 });
