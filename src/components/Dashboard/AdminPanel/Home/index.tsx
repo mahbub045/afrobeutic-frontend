@@ -13,10 +13,10 @@ const AdminPanelContainer: React.FC = () => {
       />
       <WelcomeMessage />
       <Overview />
-      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+      {/* <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <CustomerGrowthRateChart />
         <SalonPerformanceRateChart />
-      </div>
+      </div> */}
     </div>
   );
 };

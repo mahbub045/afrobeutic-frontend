@@ -168,6 +168,7 @@ export const baseApi = createApi({
     "EnquiryList",
     "PricingPlans",
     "SubscriptionsList",
+    "AdminOverviewStats",
   ],
   endpoints: () => ({}),
 });
