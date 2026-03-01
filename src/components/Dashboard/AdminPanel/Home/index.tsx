@@ -1,8 +1,6 @@
 "use client";
 import Breadcrumbs from "../../CommonComponents/Breadcrumbs";
 import WelcomeMessage from "../../CommonComponents/WelcomeMessage";
-import CustomerGrowthRateChart from "./CustomerGRAndSalonPerformanceRate/CustomerGrowthRateChart";
-import SalonPerformanceRateChart from "./CustomerGRAndSalonPerformanceRate/SalonPerformanceRateChart";
 import Overview from "./Overview/Overview";
 
 const AdminPanelContainer: React.FC = () => {
@@ -13,10 +11,10 @@ const AdminPanelContainer: React.FC = () => {
       />
       <WelcomeMessage />
       <Overview />
-      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+      {/* <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <CustomerGrowthRateChart />
         <SalonPerformanceRateChart />
-      </div>
+      </div> */}
     </div>
   );
 };

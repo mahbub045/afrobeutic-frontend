@@ -103,18 +103,20 @@ const PricingPlanList: React.FC = () => {
                     </li>
                   </ul>
                 </CardContent>
-                <CardFooter className="flex justify-center gap-2">
-                  <Button
-                    variant="default"
-                    className="w-full shadow-md dark:shadow-gray-600"
-                    onClick={() => {
-                      setSelectedPricingPlan(plan);
-                      setSubscribeOpen(true);
-                    }}
-                  >
-                    Get Now
-                  </Button>
-                </CardFooter>
+                {plan.price === "0.00" ? null : (
+                  <CardFooter className="flex justify-center gap-2">
+                    <Button
+                      variant="default"
+                      className="w-full shadow-md dark:shadow-gray-600"
+                      onClick={() => {
+                        setSelectedPricingPlan(plan);
+                        setSubscribeOpen(true);
+                      }}
+                    >
+                      Get Now
+                    </Button>
+                  </CardFooter>
+                )}
               </Card>
             ))}
           </div>

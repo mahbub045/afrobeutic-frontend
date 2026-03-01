@@ -1,5 +1,5 @@
 "use client";
-import { Badge } from "@/components/ui/badge";
+import { getWhatsAppStatusBadge } from "@/components/Dashboard/ClientPanel/CommonComponents/whatsapp-status-badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -46,48 +46,7 @@ const WhatsApp: React.FC = () => {
   const isConnected =
     !!whatsAppOnboardData?.whatsapp_sender_number && !noSenderError;
 
-  const getStatusBadge = () => {
-    switch (whatsappStatus) {
-      case "ONLINE":
-        return (
-          <Badge className="bg-green-600 hover:bg-green-700">Online</Badge>
-        );
-      case "CREATING":
-        return (
-          <Badge className="bg-blue-600 hover:bg-blue-700">Creating</Badge>
-        );
-      case "OFFLINE":
-        return <Badge className="bg-gray-600 hover:bg-gray-700">Offline</Badge>;
-      case "PENDING_VERIFICATION":
-        return (
-          <Badge className="bg-yellow-600 hover:bg-yellow-700">
-            Pending Verification
-          </Badge>
-        );
-      case "VERIFYING":
-        return (
-          <Badge className="bg-yellow-600 hover:bg-yellow-700">Verifying</Badge>
-        );
-      case "ONLINE_UPDATING":
-        return (
-          <Badge className="bg-blue-600 hover:bg-blue-700">Updating</Badge>
-        );
-      case "TWILIO_REVIEW":
-        return (
-          <Badge className="bg-orange-600 hover:bg-orange-700">
-            Under Review
-          </Badge>
-        );
-      case "DRAFT":
-        return <Badge className="bg-gray-500 hover:bg-gray-600">Draft</Badge>;
-      case "STUBBED":
-        return (
-          <Badge className="bg-purple-600 hover:bg-purple-700">Stubbed</Badge>
-        );
-      default:
-        return <Badge variant="secondary">Not Connected</Badge>;
-    }
-  };
+  const getStatusBadge = () => getWhatsAppStatusBadge(whatsappStatus);
 
   const getStatusDescription = () => {
     switch (whatsappStatus) {

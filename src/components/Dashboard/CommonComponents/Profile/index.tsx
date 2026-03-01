@@ -10,11 +10,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { formatChoiceFieldValue, getCountryName } from "@/lib/utils";
+import {
+  formatChoiceFieldValue,
+  formatDateTime,
+  getCountryName,
+} from "@/lib/utils";
 import { useGetProfileDataQuery } from "@/Redux/Reducers/Common/ProfileApi";
 import { LoaderPinwheel } from "lucide-react";
+import { useSession } from "next-auth/react";
 import * as React from "react";
+import { useState } from "react";
 import Breadcrumbs from "../Breadcrumbs";
+import ChangePasswordDialog from "./Dialogs/ChangePasswordDialog";
+import EditAccountNameDialog from "./Dialogs/EditAccountNameDialog";
 import EditProfileDialog from "./Dialogs/EditProfileDialog";
 
 function initials(name = "") {
@@ -25,7 +33,13 @@ function initials(name = "") {
 }
 
 const ProfileConatiner: React.FC = () => {
+  const { data: session } = useSession();
+  const [isOpenChangePassword, setIsOpenChangePassword] = useState(false);
   const { data: userData, isLoading } = useGetProfileDataQuery(undefined);
+
+  const toggleChangePasswordDialog = () => {
+    setIsOpenChangePassword((prev) => !prev);
+  };
 
   const fullName = `${userData?.first_name} ${userData?.last_name}`.trim();
 
@@ -84,7 +98,11 @@ const ProfileConatiner: React.FC = () => {
 
                 <div className="mt-2 flex gap-2">
                   <EditProfileDialog data={userData} isFetching={isLoading} />
-                  <Button variant="outline" size="sm">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={toggleChangePasswordDialog}
+                  >
                     Change Password
                   </Button>
                 </div>
@@ -127,40 +145,68 @@ const ProfileConatiner: React.FC = () => {
               </CardContent>
             </Card>
 
-            <Card className="shadow-md dark:shadow-gray-500">
-              <CardHeader>
-                <CardTitle>Account</CardTitle>
-                <CardDescription>Role and access</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-muted-foreground text-sm">Role</p>
-                    <Badge variant="secondary" className="text-sm">
-                      {formatChoiceFieldValue(userData?.role || "-")}
-                    </Badge>
+            {session?.user?.role === "MANAGEMENT_ADMIN" ||
+            session?.user?.role === "MANAGEMENT_STAFF" ? null : (
+              <Card className="shadow-md dark:shadow-gray-500">
+                <CardHeader>
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <CardTitle>Account</CardTitle>
+                      <CardDescription>Role and access</CardDescription>
+                    </div>
+                    <EditAccountNameDialog
+                      accountName={userData?.account?.name}
+                      isFetching={isLoading}
+                    />
                   </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-muted-foreground text-sm">
+                        Account Name
+                      </p>
+                      <Badge variant="default" className="text-sm">
+                        {userData?.account?.name || "-"}
+                      </Badge>
+                    </div>
 
-                  <div>
-                    <p className="text-muted-foreground text-sm">
-                      Member since
-                    </p>
-                    <p className="font-medium">
-                      {userData?.created_at ? (
-                        userData?.created_at
-                      ) : (
-                        <small className="text-muted-foreground">
-                          Not Available
-                        </small>
-                      )}
-                    </p>
+                    <div>
+                      <p className="text-muted-foreground text-sm">
+                        Account Type
+                      </p>
+                      <Badge variant="secondary" className="text-sm">
+                        {formatChoiceFieldValue(
+                          userData?.account?.account_type || "-",
+                        )}
+                      </Badge>
+                    </div>
+
+                    <div>
+                      <p className="text-muted-foreground text-sm">
+                        Member since
+                      </p>
+                      <p className="font-medium">
+                        {userData?.account?.created_at ? (
+                          formatDateTime(userData?.account?.created_at)
+                        ) : (
+                          <small className="text-muted-foreground">
+                            Not Available
+                          </small>
+                        )}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>
+      <ChangePasswordDialog
+        isOpen={isOpenChangePassword}
+        onClose={toggleChangePasswordDialog}
+      />
     </div>
   );
 };

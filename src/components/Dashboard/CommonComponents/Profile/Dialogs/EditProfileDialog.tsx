@@ -56,9 +56,85 @@ const EditProfileDialog: React.FC<{
     };
   }, [selectedFile]);
 
+  // helper to flatten/collect messages from arbitrary error shapes
+  const collectErrorMessages = (value: unknown): string[] => {
+    if (value == null) return [];
+    if (typeof value === "string") return [value];
+    if (Array.isArray(value))
+      return value.map((v) => (typeof v === "string" ? v : JSON.stringify(v)));
+    if (typeof value === "object") {
+      try {
+        // value is object but could be null which is handled above
+        return Object.values(value as Record<string, unknown>).flatMap((v) =>
+          collectErrorMessages(v),
+        );
+      } catch {
+        return [String(value)];
+      }
+    }
+    return [String(value)];
+  };
+
+  // returns a single string for general toast notifications
+  // numeric values (e.g. HTTP status codes) are considered unhelpful and
+  // will be treated as empty, allowing callers to skip toasting them.
+  const getErrorMessage = (err: unknown): string => {
+    if (err == null) return "Unknown error";
+    if (typeof err === "number") return ""; // ignore codes like 400
+    if (typeof err === "string") return err;
+
+    // use optional chaining only after narrowing to object
+    if (typeof err === "object" && err !== null) {
+      const obj = err as Record<string, unknown>;
+
+      const msgs = collectErrorMessages(err);
+      if (msgs.length) return msgs.join(", ");
+
+      if (obj.data && typeof obj.data === "object") {
+        const msgs2 = collectErrorMessages(obj.data);
+        if (msgs2.length) return msgs2.join(", ");
+      }
+
+      if (typeof obj.error === "string") return obj.error;
+      if (typeof obj.message === "string") {
+        if (/status code/i.test(obj.message)) return "Server returned an error";
+        return obj.message;
+      }
+    }
+
+    try {
+      return JSON.stringify(err);
+    } catch {
+      return "";
+    }
+  };
+
+  // convert a nested error object coming from the API into Formik's errors map
+  const mapToFormikErrors = (data: unknown): Record<string, string> => {
+    const out: Record<string, string> = {};
+    if (!data || typeof data !== "object") return out;
+
+    Object.entries(data as Record<string, unknown>).forEach(([k, v]) => {
+      if (typeof v === "string") out[k] = v;
+      else if (Array.isArray(v)) out[k] = v.join(", ");
+      else if (typeof v === "object" && v !== null) {
+        // flatten deeper objects as well
+        const msgs = collectErrorMessages(v);
+        if (msgs.length) out[k] = msgs.join(", ");
+      } else {
+        out[k] = String(v);
+      }
+    });
+
+    return out;
+  };
+
   const handleSubmit = async (
     values: { first_name: string; last_name: string; country: string },
-    { setSubmitting }: { setSubmitting: (b: boolean) => void },
+    helpers: {
+      setSubmitting: (b: boolean) => void;
+      setErrors: (errs: Record<string, string>) => void;
+    },
   ) => {
     try {
       const form = new FormData();
@@ -94,14 +170,53 @@ const EditProfileDialog: React.FC<{
 
       setSelectedFile(null);
       setOpen(false);
-    } catch (e) {
+    } catch (e: unknown) {
       console.error(e);
-      toast.error("Failed to update profile. Please try again.");
+
+      let fieldErrors: Record<string, string> = {};
+
+      if (typeof e === "object" && e !== null && "data" in e) {
+        const maybeObj = e as Record<string, unknown>;
+        if (typeof maybeObj.data === "object" && maybeObj.data !== null) {
+          const dataObj = maybeObj.data as Record<string, unknown>;
+          // top‑level field errors
+          fieldErrors = mapToFormikErrors(dataObj);
+          // also handle nested `errors` property that some backends use
+          if (
+            "errors" in dataObj &&
+            typeof dataObj.errors === "object" &&
+            dataObj.errors !== null
+          ) {
+            const nested = mapToFormikErrors(
+              dataObj.errors as Record<string, unknown>,
+            );
+            fieldErrors = { ...fieldErrors, ...nested };
+          }
+          if (Object.keys(fieldErrors).length) {
+            helpers.setErrors(fieldErrors);
+          }
+        }
+      }
+
+      // show a toast only for non‑field (generic) messages
+      const msg = getErrorMessage(e);
+      if (msg) {
+        // if the message is identical to one of the field error values, skip toasting
+        const matchesField = Object.values(fieldErrors).some((v) =>
+          msg.includes(v),
+        );
+        if (!matchesField) {
+          msg.split(/,\s*/).forEach((m) => {
+            // ignore bare codes
+            if (/^\d+$/.test(m.trim())) return;
+            toast.error(m);
+          });
+        }
+      }
     } finally {
-      setSubmitting(false);
+      helpers.setSubmitting(false);
     }
   };
-
   const initialValues = {
     first_name: userData?.first_name ?? "",
     last_name: userData?.last_name ?? "",
@@ -125,7 +240,7 @@ const EditProfileDialog: React.FC<{
           validationSchema={schema}
           onSubmit={handleSubmit}
         >
-          {({ handleChange, isSubmitting }) => (
+          {({ handleChange, isSubmitting, errors }) => (
             <Form className="space-y-4">
               <div>
                 <Label htmlFor="avatar" className="mb-1">
@@ -167,6 +282,14 @@ const EditProfileDialog: React.FC<{
                     }}
                   />
                 </div>
+                {/* display any error returned for avatar / file-related keys */}
+                {Object.entries(errors)
+                  .filter(([k]) => /avatar|file/i.test(k))
+                  .map(([k, v]) => (
+                    <div key={k} className="text-destructive text-sm">
+                      {v as string}
+                    </div>
+                  ))}
               </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -226,7 +349,15 @@ const EditProfileDialog: React.FC<{
 
               <DialogFooter>
                 <div className="flex w-full justify-end gap-2">
-                  <Button variant="outline" onClick={() => setOpen(false)}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setSelectedFile(null);
+                      setOpen(false);
+                    }}
+                  >
                     Cancel
                   </Button>
                   <Button

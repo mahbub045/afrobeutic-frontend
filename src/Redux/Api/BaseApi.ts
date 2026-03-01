@@ -27,6 +27,8 @@ const baseQuery = fetchBaseQuery({
     }
     if (accountId) {
       headers.set("X-ACCOUNT-ID", accountId);
+    }else {
+      headers.delete("X-ACCOUNT-ID");
     }
     return headers;
   },
@@ -158,6 +160,8 @@ export const baseApi = createApi({
     "BillingInfo",
     "WhatsAppOnBoardData",
     "MetaConfigurationData",
+    "ChatBots",
+    "OverviewStats",
     // Admin Panel Tags
     "ManagementsList",
     "CustomersList",
@@ -166,6 +170,7 @@ export const baseApi = createApi({
     "EnquiryList",
     "PricingPlans",
     "SubscriptionsList",
+    "AdminOverviewStats",
   ],
   endpoints: () => ({}),
 });

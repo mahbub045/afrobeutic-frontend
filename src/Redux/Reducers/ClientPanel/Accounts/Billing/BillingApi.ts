@@ -1,4 +1,9 @@
 import { baseApi } from "@/Redux/Api/BaseApi";
+import type {
+  BillingHistoryItem,
+  PaginatedResponse,
+  SavedCardItem,
+} from "@/Types/ClientPanel/Accounts/BillingTypes";
 
 export const BillingApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -12,12 +17,16 @@ export const BillingApi = baseApi.injectEndpoints({
 
     createOrUpdateSubscription: builder.mutation<
       unknown,
-      { pricing_plan: string; payment_method_id: string }
+      { pricing_plan: string; payment_card?: string }
     >({
-      query: ({ pricing_plan, payment_method_id }) => {
+      query: ({ pricing_plan, payment_card }) => {
         const formData = new FormData();
         formData.append("pricing_plan", pricing_plan);
-        formData.append("payment_method_id", payment_method_id);
+        const cleanedPaymentCard =
+          typeof payment_card === "string" ? payment_card.trim() : "";
+        if (cleanedPaymentCard && cleanedPaymentCard !== "undefined") {
+          formData.append("payment_card", cleanedPaymentCard);
+        }
 
         return {
           url: "/accounts/subscription",
@@ -46,10 +55,70 @@ export const BillingApi = baseApi.injectEndpoints({
       },
       invalidatesTags: ["BillingInfo"],
     }),
+    getbillingHistory: builder.query<
+      PaginatedResponse<BillingHistoryItem>,
+      { page?: number } | undefined
+    >({
+      query: (params) => ({
+        url: "/accounts/billing-history",
+        method: "GET",
+        params: params ?? undefined,
+      }),
+      providesTags: ["BillingInfo"],
+    }),
+    getAddCardList: builder.query<
+      PaginatedResponse<SavedCardItem>,
+      { page?: number } | undefined
+    >({
+      query: (params) => ({
+        url: "/accounts/cards",
+        method: "GET",
+        params: params ?? undefined,
+      }),
+      providesTags: ["BillingInfo"],
+    }),
+    addPaymentMethod: builder.mutation<unknown, { payment_method_id: string }>({
+      query: ({ payment_method_id }) => {
+        const formData = new FormData();
+        formData.append("payment_method_id", payment_method_id);
+
+        return {
+          url: "/accounts/cards",
+          method: "POST",
+          body: formData,
+        };
+      },
+      invalidatesTags: ["BillingInfo"],
+    }),
+    setAsDefaultCard: builder.mutation({
+      query: ({ card_uid, payload }) => {
+        return {
+          url: `/accounts/cards/${card_uid}`,
+          method: "PATCH",
+          body: payload,
+        };
+      },
+      invalidatesTags: ["BillingInfo"],
+    }),
+    deleteCard: builder.mutation({
+      query: ({ card_uid, payload }) => {
+        return {
+          url: `/accounts/cards/${card_uid}`,
+          method: "DELETE",
+          body: payload,
+        };
+      },
+      invalidatesTags: ["BillingInfo"],
+    }),
   }),
 });
 export const {
   useGetBillingInfoQuery,
   useCreateOrUpdateSubscriptionMutation,
   useUpdateSubscriptionAutoRenewMutation,
+  useGetbillingHistoryQuery,
+  useGetAddCardListQuery,
+  useAddPaymentMethodMutation,
+  useSetAsDefaultCardMutation,
+  useDeleteCardMutation,
 } = BillingApi;
