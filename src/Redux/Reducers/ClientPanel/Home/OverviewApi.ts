@@ -1,11 +1,14 @@
 import { baseApi } from "@/Redux/Api/BaseApi";
-import type { OverviewStatsResponse } from "@/Types/ClientPanel/Home/OverviewTypes";
+import type {
+  OverviewStatsQueryParams,
+  OverviewStatsResponse,
+} from "@/Types/ClientPanel/Home/OverviewTypes";
 
 export const overviewApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getOverviewStats: builder.query<
       OverviewStatsResponse,
-      Record<string, unknown> | undefined
+      OverviewStatsQueryParams | undefined
     >({
       query: (params) => ({
         url: "/accounts/dashboard",

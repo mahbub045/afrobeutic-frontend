@@ -15,18 +15,54 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Progress } from "@/components/ui/progress";
 import { useGetOverviewStatsQuery } from "@/Redux/Reducers/ClientPanel/Home/OverviewApi";
-import type { OverviewStatsResponse } from "@/Types/ClientPanel/Home/OverviewTypes";
+import type {
+  DashboardFilterValue,
+  OverviewStatsResponse,
+} from "@/Types/ClientPanel/Home/OverviewTypes";
 import { Calendar, ChevronDown, DollarSign, Inbox, Users } from "lucide-react";
 import React from "react";
 
 const Overview: React.FC = () => {
-  const {
-    data: overviewData,
-    isLoading,
-    isError,
-  } = useGetOverviewStatsQuery(undefined);
+  const filterOptions: Array<{ label: string; value: DashboardFilterValue }> = [
+    { label: "Last 7 days", value: "last_7_days" },
+    { label: "Last 30 days", value: "last_30_days" },
+    { label: "This month", value: "this_month" },
+    { label: "This year", value: "this_year" },
+    { label: "All time", value: "all_time" },
+  ];
 
-  const data: OverviewStatsResponse | undefined = overviewData;
+  const [bookingsFilter, setBookingsFilter] =
+    React.useState<DashboardFilterValue>("last_7_days");
+  const [incomeFilter, setIncomeFilter] =
+    React.useState<DashboardFilterValue>("last_7_days");
+  const [requestsFilter, setRequestsFilter] =
+    React.useState<DashboardFilterValue>("last_7_days");
+  const [clientsFilter, setClientsFilter] =
+    React.useState<DashboardFilterValue>("last_7_days");
+
+  const {
+    data: bookingsData,
+    isLoading: isBookingsLoading,
+    isError: isBookingsError,
+  } = useGetOverviewStatsQuery({ bookings_filter: bookingsFilter });
+
+  const {
+    data: incomeData,
+    isLoading: isIncomeLoading,
+    isError: isIncomeError,
+  } = useGetOverviewStatsQuery({ income_filter: incomeFilter });
+
+  const {
+    data: requestsData,
+    isLoading: isRequestsLoading,
+    isError: isRequestsError,
+  } = useGetOverviewStatsQuery({ requests_filter: requestsFilter });
+
+  const {
+    data: clientsData,
+    isLoading: isClientsLoading,
+    isError: isClientsError,
+  } = useGetOverviewStatsQuery({ clients_filter: clientsFilter });
 
   const normalizePercent = (value?: number) => {
     const n = Number(value ?? 0);
@@ -41,15 +77,26 @@ const Overview: React.FC = () => {
     return `$${n.toFixed(2)}`;
   };
 
-  const totalBookings = data?.card_1?.total_bookings ?? 0;
-  const completionRatePct = normalizePercent(
-    data?.card_1?.booking_completion_rate,
-  );
-  const totalIncome = fmtMoney(data?.card_2?.total_income);
-  const clientRequests = data?.card_3?.client_requests ?? 0;
-  const totalClients = data?.card_4?.total_clients ?? 0;
+  const data1: OverviewStatsResponse | undefined = bookingsData;
+  const data2: OverviewStatsResponse | undefined = incomeData;
+  const data3: OverviewStatsResponse | undefined = requestsData;
+  const data4: OverviewStatsResponse | undefined = clientsData;
 
-  const showFallback = isLoading || isError;
+  const totalBookings = data1?.card_1?.total_bookings ?? 0;
+  const completionRatePct = normalizePercent(
+    data1?.card_1?.booking_completion_rate,
+  );
+  const totalIncome = fmtMoney(data2?.card_2?.total_income);
+  const clientRequests = data3?.card_3?.client_requests ?? 0;
+  const totalClients = data4?.card_4?.total_clients ?? 0;
+
+  const showBookingsFallback = isBookingsLoading || isBookingsError;
+  const showIncomeFallback = isIncomeLoading || isIncomeError;
+  const showRequestsFallback = isRequestsLoading || isRequestsError;
+  const showClientsFallback = isClientsLoading || isClientsError;
+
+  const getFilterLabel = (value: DashboardFilterValue) =>
+    filterOptions.find((o) => o.value === value)?.label ?? "Last 7 days";
 
   return (
     <section className="mt-6">
@@ -70,16 +117,19 @@ const Overview: React.FC = () => {
                     size="sm"
                     className="gap-1 px-2 py-1 text-white hover:bg-orange-600 hover:text-white dark:shadow-gray-600"
                   >
-                    Last 7 days
+                    {getFilterLabel(bookingsFilter)}
                     <ChevronDown className="size-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="text-dark">
-                  <DropdownMenuItem>Last 7 days</DropdownMenuItem>
-                  <DropdownMenuItem>Last 30 days</DropdownMenuItem>
-                  <DropdownMenuItem>This month</DropdownMenuItem>
-                  <DropdownMenuItem>This year</DropdownMenuItem>
-                  <DropdownMenuItem>All time</DropdownMenuItem>
+                  {filterOptions.map((option) => (
+                    <DropdownMenuItem
+                      key={option.value}
+                      onSelect={() => setBookingsFilter(option.value)}
+                    >
+                      {option.label}
+                    </DropdownMenuItem>
+                  ))}
                 </DropdownMenuContent>
               </DropdownMenu>
             </CardAction>
@@ -87,13 +137,13 @@ const Overview: React.FC = () => {
           <CardContent className="text-white">
             <h6>BOOKINGS</h6>
             <div className="text-2xl font-bold text-white dark:text-orange-100">
-              {showFallback ? 0 : totalBookings}
+              {showBookingsFallback ? 0 : totalBookings}
             </div>
             <CardDescription className="mt-2 mb-1 text-white">
               Completed rate
             </CardDescription>
             <Progress
-              value={showFallback ? 0 : completionRatePct}
+              value={showBookingsFallback ? 0 : completionRatePct}
               className="h-1.5"
             />
           </CardContent>
@@ -115,16 +165,19 @@ const Overview: React.FC = () => {
                     size="sm"
                     className="gap-1 px-2 py-1 text-white hover:bg-green-600 hover:text-white dark:shadow-gray-600"
                   >
-                    Last 7 days
+                    {getFilterLabel(incomeFilter)}
                     <ChevronDown className="size-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="text-dark">
-                  <DropdownMenuItem>Last 7 days</DropdownMenuItem>
-                  <DropdownMenuItem>Last 30 days</DropdownMenuItem>
-                  <DropdownMenuItem>This month</DropdownMenuItem>
-                  <DropdownMenuItem>This year</DropdownMenuItem>
-                  <DropdownMenuItem>All time</DropdownMenuItem>
+                  {filterOptions.map((option) => (
+                    <DropdownMenuItem
+                      key={option.value}
+                      onSelect={() => setIncomeFilter(option.value)}
+                    >
+                      {option.label}
+                    </DropdownMenuItem>
+                  ))}
                 </DropdownMenuContent>
               </DropdownMenu>
             </CardAction>
@@ -132,7 +185,7 @@ const Overview: React.FC = () => {
           <CardContent>
             <h6 className="text-white">TOTAL INCOME</h6>
             <div className="text-2xl font-bold text-white dark:text-green-100">
-              {showFallback ? "$0.00" : totalIncome}
+              {showIncomeFallback ? "$0.00" : totalIncome}
             </div>
           </CardContent>
         </Card>
@@ -153,16 +206,19 @@ const Overview: React.FC = () => {
                     size="sm"
                     className="gap-1 px-2 py-1 text-white hover:bg-blue-600 hover:text-white dark:shadow-gray-600"
                   >
-                    Last 7 days
+                    {getFilterLabel(requestsFilter)}
                     <ChevronDown className="size-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="text-dark">
-                  <DropdownMenuItem>Last 7 days</DropdownMenuItem>
-                  <DropdownMenuItem>Last 30 days</DropdownMenuItem>
-                  <DropdownMenuItem>This month</DropdownMenuItem>
-                  <DropdownMenuItem>This year</DropdownMenuItem>
-                  <DropdownMenuItem>All time</DropdownMenuItem>
+                  {filterOptions.map((option) => (
+                    <DropdownMenuItem
+                      key={option.value}
+                      onSelect={() => setRequestsFilter(option.value)}
+                    >
+                      {option.label}
+                    </DropdownMenuItem>
+                  ))}
                 </DropdownMenuContent>
               </DropdownMenu>
             </CardAction>
@@ -170,7 +226,7 @@ const Overview: React.FC = () => {
           <CardContent>
             <h6 className="text-white">CLIENT REQUESTS</h6>
             <div className="text-2xl font-bold text-white dark:text-blue-100">
-              {showFallback ? 0 : clientRequests}
+              {showRequestsFallback ? 0 : clientRequests}
             </div>
           </CardContent>
         </Card>
@@ -191,16 +247,19 @@ const Overview: React.FC = () => {
                     size="sm"
                     className="gap-1 px-2 py-1 text-white hover:bg-purple-600 hover:text-white dark:shadow-gray-600"
                   >
-                    Last 7 days
+                    {getFilterLabel(clientsFilter)}
                     <ChevronDown className="size-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="text-dark">
-                  <DropdownMenuItem>Last 7 days</DropdownMenuItem>
-                  <DropdownMenuItem>Last 30 days</DropdownMenuItem>
-                  <DropdownMenuItem>This month</DropdownMenuItem>
-                  <DropdownMenuItem>This year</DropdownMenuItem>
-                  <DropdownMenuItem>All time</DropdownMenuItem>
+                  {filterOptions.map((option) => (
+                    <DropdownMenuItem
+                      key={option.value}
+                      onSelect={() => setClientsFilter(option.value)}
+                    >
+                      {option.label}
+                    </DropdownMenuItem>
+                  ))}
                 </DropdownMenuContent>
               </DropdownMenu>
             </CardAction>
@@ -208,7 +267,7 @@ const Overview: React.FC = () => {
           <CardContent>
             <h6 className="text-white">TOTAL CLIENTS</h6>
             <div className="text-2xl font-bold text-white dark:text-purple-100">
-              {showFallback ? 0 : totalClients}
+              {showClientsFallback ? 0 : totalClients}
             </div>
           </CardContent>
         </Card>
