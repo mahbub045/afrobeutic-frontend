@@ -14,10 +14,43 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Progress } from "@/components/ui/progress";
+import { useGetOverviewStatsQuery } from "@/Redux/Reducers/ClientPanel/Home/OverviewApi";
+import type { OverviewStatsResponse } from "@/Types/ClientPanel/Home/OverviewTypes";
 import { Calendar, ChevronDown, DollarSign, Inbox, Users } from "lucide-react";
 import React from "react";
 
 const Overview: React.FC = () => {
+  const {
+    data: overviewData,
+    isLoading,
+    isError,
+  } = useGetOverviewStatsQuery(undefined);
+
+  const data: OverviewStatsResponse | undefined = overviewData;
+
+  const normalizePercent = (value?: number) => {
+    const n = Number(value ?? 0);
+    // Accept either fraction (0..1) or percent (0..100)
+    const pct = n <= 1 ? n * 100 : n;
+    return Math.max(0, Math.min(100, pct));
+  };
+
+  const fmtMoney = (value?: number) => {
+    const n = Number(value ?? 0);
+    if (!Number.isFinite(n)) return "$0.00";
+    return `$${n.toFixed(2)}`;
+  };
+
+  const totalBookings = data?.card_1?.total_bookings ?? 0;
+  const completionRatePct = normalizePercent(
+    data?.card_1?.booking_completion_rate,
+  );
+  const totalIncome = fmtMoney(data?.card_2?.total_income);
+  const clientRequests = data?.card_3?.client_requests ?? 0;
+  const totalClients = data?.card_4?.total_clients ?? 0;
+
+  const showFallback = isLoading || isError;
+
   return (
     <section className="mt-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -41,10 +74,7 @@ const Overview: React.FC = () => {
                     <ChevronDown className="size-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="text-dark"
-                >
+                <DropdownMenuContent align="end" className="text-dark">
                   <DropdownMenuItem>Last 7 days</DropdownMenuItem>
                   <DropdownMenuItem>Last 30 days</DropdownMenuItem>
                   <DropdownMenuItem>This month</DropdownMenuItem>
@@ -57,12 +87,15 @@ const Overview: React.FC = () => {
           <CardContent className="text-white">
             <h6>BOOKINGS</h6>
             <div className="text-2xl font-bold text-white dark:text-orange-100">
-              0
+              {showFallback ? 0 : totalBookings}
             </div>
             <CardDescription className="mt-2 mb-1 text-white">
               Completed rate
             </CardDescription>
-            <Progress value={50} className="h-1.5" />
+            <Progress
+              value={showFallback ? 0 : completionRatePct}
+              className="h-1.5"
+            />
           </CardContent>
         </Card>
 
@@ -86,10 +119,7 @@ const Overview: React.FC = () => {
                     <ChevronDown className="size-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className=" text-dark"
-                >
+                <DropdownMenuContent align="end" className="text-dark">
                   <DropdownMenuItem>Last 7 days</DropdownMenuItem>
                   <DropdownMenuItem>Last 30 days</DropdownMenuItem>
                   <DropdownMenuItem>This month</DropdownMenuItem>
@@ -102,7 +132,7 @@ const Overview: React.FC = () => {
           <CardContent>
             <h6 className="text-white">TOTAL INCOME</h6>
             <div className="text-2xl font-bold text-white dark:text-green-100">
-              $0
+              {showFallback ? "$0.00" : totalIncome}
             </div>
           </CardContent>
         </Card>
@@ -127,10 +157,7 @@ const Overview: React.FC = () => {
                     <ChevronDown className="size-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className=" text-dark"
-                >
+                <DropdownMenuContent align="end" className="text-dark">
                   <DropdownMenuItem>Last 7 days</DropdownMenuItem>
                   <DropdownMenuItem>Last 30 days</DropdownMenuItem>
                   <DropdownMenuItem>This month</DropdownMenuItem>
@@ -143,7 +170,7 @@ const Overview: React.FC = () => {
           <CardContent>
             <h6 className="text-white">CLIENT REQUESTS</h6>
             <div className="text-2xl font-bold text-white dark:text-blue-100">
-              0
+              {showFallback ? 0 : clientRequests}
             </div>
           </CardContent>
         </Card>
@@ -168,10 +195,7 @@ const Overview: React.FC = () => {
                     <ChevronDown className="size-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className=" text-dark"
-                >
+                <DropdownMenuContent align="end" className="text-dark">
                   <DropdownMenuItem>Last 7 days</DropdownMenuItem>
                   <DropdownMenuItem>Last 30 days</DropdownMenuItem>
                   <DropdownMenuItem>This month</DropdownMenuItem>
@@ -184,7 +208,7 @@ const Overview: React.FC = () => {
           <CardContent>
             <h6 className="text-white">TOTAL CLIENTS</h6>
             <div className="text-2xl font-bold text-white dark:text-purple-100">
-              0
+              {showFallback ? 0 : totalClients}
             </div>
           </CardContent>
         </Card>
