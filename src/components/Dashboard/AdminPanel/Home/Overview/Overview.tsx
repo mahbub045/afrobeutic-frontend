@@ -1,6 +1,7 @@
+"use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGetAdminOverviewStatsQuery } from "@/Redux/Reducers/AdminPanel/Home/OverviewApi";
-import { CreditCard, Scissors, Users } from "lucide-react";
+import { CreditCard, LoaderPinwheel, Scissors, Users } from "lucide-react";
 import React from "react";
 
 const Overview: React.FC = () => {
@@ -14,9 +15,19 @@ const Overview: React.FC = () => {
   const totalAccounts = overviewStats?.accounts ?? 0;
   const totalSalons = overviewStats?.salons ?? 0;
 
+  // helper to show spinner or value inside cards
+  const renderStat = (value: number) => {
+    if (isLoading) {
+      return (
+        <LoaderPinwheel className="mx-auto h-6 w-6 animate-spin text-white" />
+      );
+    }
+    return value;
+  };
+
   return (
     <section className="mt-6">
-      {isLoading && <p className="text-center">Loading...</p>}
+      {/* overall error/loading states still shown above grid */}
       {isError && (
         <p className="text-center text-red-500">
           Failed to load overview stats.
@@ -37,7 +48,7 @@ const Overview: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white dark:text-orange-100">
-              {totalManagementUsers}
+              {renderStat(totalManagementUsers)}
             </div>
           </CardContent>
         </Card>
@@ -54,7 +65,7 @@ const Overview: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white dark:text-blue-100">
-              {totalAccounts}
+              {renderStat(totalAccounts)}
             </div>
           </CardContent>
         </Card>
@@ -71,7 +82,7 @@ const Overview: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white dark:text-purple-100">
-              {totalSalons}
+              {renderStat(totalSalons)}
             </div>
           </CardContent>
         </Card>

@@ -27,6 +27,8 @@ const baseQuery = fetchBaseQuery({
     }
     if (accountId) {
       headers.set("X-ACCOUNT-ID", accountId);
+    }else {
+      headers.delete("X-ACCOUNT-ID");
     }
     return headers;
   },
