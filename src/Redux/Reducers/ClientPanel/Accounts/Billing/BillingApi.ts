@@ -22,7 +22,11 @@ export const BillingApi = baseApi.injectEndpoints({
       query: ({ pricing_plan, payment_card }) => {
         const formData = new FormData();
         formData.append("pricing_plan", pricing_plan);
-        formData.append("payment_card", payment_card ?? "");
+        const cleanedPaymentCard =
+          typeof payment_card === "string" ? payment_card.trim() : "";
+        if (cleanedPaymentCard && cleanedPaymentCard !== "undefined") {
+          formData.append("payment_card", cleanedPaymentCard);
+        }
 
         return {
           url: "/accounts/subscription",

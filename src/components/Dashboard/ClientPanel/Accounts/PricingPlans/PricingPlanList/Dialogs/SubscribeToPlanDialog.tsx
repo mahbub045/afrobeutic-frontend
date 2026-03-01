@@ -29,6 +29,7 @@ import { skipToken } from "@reduxjs/toolkit/query";
 import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
@@ -99,12 +100,20 @@ function extractCardUidFromAddCardResponse(response: unknown): string | null {
   return null;
 }
 
+function normalizeCardUid(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const cleaned = value.trim();
+  if (!cleaned || cleaned === "undefined") return null;
+  return cleaned;
+}
+
 export default function SubscribeToPlanDialog({
   open,
   onOpenChange,
   plan,
   onSuccess,
 }: Props) {
+  const router = useRouter();
   const stripe = useStripe();
   const elements = useElements();
   const { data: session } = useSession();
@@ -125,9 +134,20 @@ export default function SubscribeToPlanDialog({
   } = useGetAddCardListQuery(open ? { page: 1 } : skipToken);
 
   const savedCards: SavedCardItem[] = useMemo(() => {
-    return (
-      (cardListData as { results?: SavedCardItem[] } | undefined)?.results ?? []
-    );
+    const raw =
+      (cardListData as { results?: unknown[] } | undefined)?.results ?? [];
+
+    // Normalize uid across possible backend shapes: { uid } or { card_uid }.
+    const normalized = raw
+      .map((card) => {
+        const obj = card as Record<string, unknown>;
+        const uid = normalizeCardUid(obj.uid ?? obj.card_uid);
+        if (!uid) return null;
+        return { ...obj, uid } as unknown as SavedCardItem;
+      })
+      .filter(Boolean) as SavedCardItem[];
+
+    return normalized;
   }, [cardListData]);
 
   const defaultCard = useMemo(
@@ -189,7 +209,13 @@ export default function SubscribeToPlanDialog({
       let cardUidToUse: string | undefined;
 
       if (selectedSavedCard) {
-        cardUidToUse = selectedSavedCard.uid;
+        cardUidToUse = normalizeCardUid(selectedSavedCard.uid) ?? undefined;
+        if (!cardUidToUse) {
+          toast.error(
+            "Selected saved card is missing a valid UID. Please re-select a card or add a new one.",
+          );
+          return;
+        }
       } else {
         // "New card" flow
         if (!stripe || !elements) {
@@ -276,8 +302,13 @@ export default function SubscribeToPlanDialog({
             return Boolean(brandMatches && last4Matches && expMatches);
           });
 
-          if (matched?.uid) {
-            cardUidToUse = matched.uid;
+          const matchedUid = normalizeCardUid(
+            (matched as unknown as Record<string, unknown> | undefined)?.uid ??
+              (matched as unknown as Record<string, unknown> | undefined)
+                ?.card_uid,
+          );
+          if (matchedUid) {
+            cardUidToUse = matchedUid;
           }
         }
 
@@ -330,6 +361,7 @@ export default function SubscribeToPlanDialog({
       toast.success("Subscription created successfully.");
       onOpenChange(false);
       onSuccess?.();
+      router.push("/dashboard/client-panel/accounts/billing");
     } catch (e) {
       console.error(e);
       const message =
