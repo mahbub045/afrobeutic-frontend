@@ -1,8 +1,6 @@
 "use client";
 import Breadcrumbs from "../../CommonComponents/Breadcrumbs";
 import WelcomeMessage from "../../CommonComponents/WelcomeMessage";
-import CustomerGrowthRateChart from "./CustomerGRAndSalonPerformanceRate/CustomerGrowthRateChart";
-import SalonPerformanceRateChart from "./CustomerGRAndSalonPerformanceRate/SalonPerformanceRateChart";
 import Overview from "./Overview/Overview";
 
 const AdminPanelContainer: React.FC = () => {
