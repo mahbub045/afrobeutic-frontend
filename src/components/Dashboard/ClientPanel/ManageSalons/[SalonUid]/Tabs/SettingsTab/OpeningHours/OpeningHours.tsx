@@ -15,6 +15,44 @@ import React, { useState } from "react";
 import EditAllOpeningHoursDialog from "./Dialogs/EditAllOpeningHoursDialog";
 import EditSingleOpeningHoursDialog from "./Dialogs/EditSingleOpeningHoursDialog";
 
+const getApiErrorMessage = (error: unknown, fallback: string): string => {
+  const extractMessage = (value: unknown): string | null => {
+    if (!value) return null;
+
+    if (typeof value === "string") {
+      return value.trim() ? value : null;
+    }
+
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        const msg = extractMessage(item);
+        if (msg) return msg;
+      }
+      return null;
+    }
+
+    if (typeof value === "object") {
+      const record = value as Record<string, unknown>;
+
+      const priorityKeys = ["message", "error", "detail", "non_field_errors"];
+
+      for (const key of priorityKeys) {
+        const msg = extractMessage(record[key]);
+        if (msg) return msg;
+      }
+
+      for (const key of Object.keys(record)) {
+        const msg = extractMessage(record[key]);
+        if (msg) return msg;
+      }
+    }
+
+    return null;
+  };
+
+  return extractMessage(error) ?? fallback;
+};
+
 const DAY_ORDER = [
   "MONDAY",
   "TUESDAY",
@@ -40,6 +78,7 @@ const OpeningHours: React.FC = () => {
     data: salonData,
     isLoading,
     isError,
+    error,
   } = useGetSingleSalonDataQuery({ salonUid: salonuid });
 
   type OpeningEntry = {
@@ -103,14 +142,17 @@ const OpeningHours: React.FC = () => {
   }
 
   if (isError) {
+    const errorMessage = getApiErrorMessage(
+      error,
+      "There was a problem fetching opening hours. Try refreshing the page.",
+    );
+
     return (
       <div className="rounded border border-red-100 bg-red-50 p-4">
         <h3 className="font-semibold text-red-700">
           Could not load opening hours
         </h3>
-        <p className="text-sm text-red-600">
-          There was a problem fetching opening hours. Try refreshing the page.
-        </p>
+        <p className="text-sm text-red-600">{errorMessage}</p>
       </div>
     );
   }

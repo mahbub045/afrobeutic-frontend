@@ -28,6 +28,44 @@ import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
 
+const getApiErrorMessage = (error: unknown, fallback: string): string => {
+  const extractMessage = (value: unknown): string | null => {
+    if (!value) return null;
+
+    if (typeof value === "string") {
+      return value.trim() ? value : null;
+    }
+
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        const msg = extractMessage(item);
+        if (msg) return msg;
+      }
+      return null;
+    }
+
+    if (typeof value === "object") {
+      const record = value as Record<string, unknown>;
+
+      const priorityKeys = ["message", "error", "detail", "non_field_errors"];
+
+      for (const key of priorityKeys) {
+        const msg = extractMessage(record[key]);
+        if (msg) return msg;
+      }
+
+      for (const key of Object.keys(record)) {
+        const msg = extractMessage(record[key]);
+        if (msg) return msg;
+      }
+    }
+
+    return null;
+  };
+
+  return extractMessage(error) ?? fallback;
+};
+
 interface EditSingleProps extends EditDashboardProps {
   selectedOpening?: OpeningHour | null;
 }
@@ -184,7 +222,12 @@ const EditSingleOpeningHoursDialog: React.FC<EditSingleProps> = ({
       onClose();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update opening hour. Please try again.");
+      toast.error(
+        getApiErrorMessage(
+          err,
+          "Failed to update opening hour. Please try again.",
+        ),
+      );
     } finally {
       setSubmitting(false);
     }
