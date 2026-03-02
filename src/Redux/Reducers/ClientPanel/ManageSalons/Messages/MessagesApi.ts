@@ -4,10 +4,10 @@ import { Message } from "@/Types/ClientPanel/ManageSalonTypes/MessagesTypes/Mess
 export const MessagesApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getMessages: builder.query<Message[], { salonUid: string; page?: number }>({
-      query: ({ salonUid, page = 1 }) => ({
+      query: ({ salonUid, page }) => ({
         url: `/salons/${salonUid}/messages`,
         method: "GET",
-        params: { page },
+        params: page ? { page } : undefined,
       }),
     }),
   }),

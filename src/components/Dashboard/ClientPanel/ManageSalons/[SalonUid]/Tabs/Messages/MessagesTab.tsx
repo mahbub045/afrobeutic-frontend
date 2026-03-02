@@ -47,8 +47,6 @@ function parseMarkdown(text: string): React.ReactNode {
   });
 }
 
-const PAGE_SIZE = 20;
-
 type ConversationEntry = {
   customer: MessageCustomer;
   lastMessage: Message;
@@ -60,55 +58,68 @@ type ConversationEntry = {
 const MessagesTab: React.FC = () => {
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
+  const canQuery = Boolean(salonUid);
 
-  const [page, setPage] = useState(1);
   const [allMessages, setAllMessages] = useState<Message[]>([]);
   const [selectedUid, setSelectedUid] = useState<string | null>(null);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+  const [showSyncing, setShowSyncing] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
-  const prevScrollHeightRef = useRef(0);
   const isFirstLoadRef = useRef(true);
   const prevCountRef = useRef(0);
-  const isInitializedRef = useRef(false);
+
+  const scrollToBottom = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        el.scrollTop = el.scrollHeight;
+      });
+    });
+  }, []);
 
   const {
     data: fetched,
     isLoading,
     isFetching,
   } = useGetMessagesQuery(
-    { salonUid, page },
-    { pollingInterval: page === 1 ? 5000 : 0 },
+    { salonUid },
+    {
+      skip: !canQuery,
+      pollingInterval: canQuery ? 5000 : 0,
+    },
   );
 
-  // ── Merge pages ──────────────────────────────────────────────────────────
+  // ── Reset state when salon changes ──────────────────────────────────────
+  useEffect(() => {
+    setAllMessages([]);
+    setSelectedUid(null);
+    setShowSyncing(false);
+    isFirstLoadRef.current = true;
+    prevCountRef.current = 0;
+  }, [salonUid]);
+
+  // ── Debounce polling indicator (avoid flicker) ──────────────────────────
+  useEffect(() => {
+    if (!canQuery || allMessages.length === 0) {
+      setShowSyncing(false);
+      return;
+    }
+
+    if (!isFetching) {
+      setShowSyncing(false);
+      return;
+    }
+
+    const t = window.setTimeout(() => setShowSyncing(true), 300);
+    return () => window.clearTimeout(t);
+  }, [isFetching, canQuery, allMessages.length]);
+
+  // ── Sync messages (API returns full list; poll refreshes it) ──────────────
   useEffect(() => {
     if (!fetched) return;
-
-    if (fetched.length < PAGE_SIZE) setHasMore(false);
-
-    setAllMessages((prev) => {
-      const key = (m: Message) => `${m.customer.uid}::${m.sent_at}`;
-
-      if (page === 1) {
-        // Polling refresh: merge new bottom messages
-        const prevSet = new Set(prev.map(key));
-        const genuinelyNew = fetched.filter((m) => !prevSet.has(key(m)));
-        if (genuinelyNew.length === 0 && prev.length > 0) return prev;
-        const fetchedSet = new Set(fetched.map(key));
-        const olderPages = prev.filter((m) => !fetchedSet.has(key(m)));
-        return [...olderPages, ...fetched];
-      } else {
-        // Prepend older page
-        const fetchedSet = new Set(fetched.map(key));
-        const existing = prev.filter((m) => !fetchedSet.has(key(m)));
-        return [...fetched, ...existing];
-      }
-    });
-
-    setIsLoadingMore(false);
-  }, [fetched]); // eslint-disable-line react-hooks/exhaustive-deps
+    setAllMessages(fetched);
+  }, [fetched]);
 
   // ── Auto-select first customer ────────────────────────────────────────────
   useEffect(() => {
@@ -125,62 +136,29 @@ const MessagesTab: React.FC = () => {
     const msgs = allMessages.filter((m) => m.customer.uid === selectedUid);
 
     if (isFirstLoadRef.current && msgs.length > 0) {
-      el.scrollTop = el.scrollHeight;
+      scrollToBottom();
       isFirstLoadRef.current = false;
-      isInitializedRef.current = true;
       prevCountRef.current = msgs.length;
       return;
     }
 
     if (msgs.length > prevCountRef.current) {
-      const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 150;
-      if (nearBottom) el.scrollTop = el.scrollHeight;
+      scrollToBottom();
       prevCountRef.current = msgs.length;
     }
-  }, [allMessages, selectedUid]);
-
-  // ── Restore scroll after loading older messages ───────────────────────────
-  useEffect(() => {
-    if (!isLoadingMore && prevScrollHeightRef.current > 0) {
-      const el = scrollRef.current;
-      if (el) {
-        el.scrollTop = el.scrollHeight - prevScrollHeightRef.current;
-        prevScrollHeightRef.current = 0;
-      }
-    }
-  }, [isLoadingMore, allMessages]);
-
-  // ── Scroll listener – reaching top triggers load more ──────────────────────
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-
-    const handleScroll = () => {
-      if (!isInitializedRef.current || !hasMore || isLoadingMore || isFetching)
-        return;
-
-      if (el.scrollTop < 80) {
-        prevScrollHeightRef.current = el.scrollHeight;
-        setIsLoadingMore(true);
-        setPage((p) => p + 1);
-      }
-    };
-
-    el.addEventListener("scroll", handleScroll, { passive: true });
-    return () => el.removeEventListener("scroll", handleScroll);
-  }, [hasMore, isLoadingMore, isFetching]);
+  }, [allMessages, selectedUid, scrollToBottom]);
 
   // ── Select conversation ───────────────────────────────────────────────────
-  const handleSelect = useCallback((uid: string) => {
-    setSelectedUid(uid);
-    isFirstLoadRef.current = true;
-    prevCountRef.current = 0;
-    // scroll to bottom after state update
-    setTimeout(() => {
-      const el = scrollRef.current;
-      if (el) el.scrollTop = el.scrollHeight;
-    }, 50);
-  }, []);
+  const handleSelect = useCallback(
+    (uid: string) => {
+      setSelectedUid(uid);
+      isFirstLoadRef.current = true;
+      prevCountRef.current = 0;
+      // scroll to bottom after state update + layout
+      scrollToBottom();
+    },
+    [scrollToBottom],
+  );
 
   // ── Derive conversations list ─────────────────────────────────────────────
   const conversations = useMemo<ConversationEntry[]>(() => {
@@ -226,7 +204,7 @@ const MessagesTab: React.FC = () => {
   )?.customer;
 
   // ─── Skeleton loading state ──────────────────────────────────────────────
-  if (isLoading && allMessages.length === 0) {
+  if ((!canQuery || isLoading) && allMessages.length === 0) {
     return (
       <div className="border-border bg-card flex h-[calc(100vh-200px)] overflow-hidden rounded-xl border shadow-sm">
         {/* sidebar skeletons */}
@@ -333,7 +311,7 @@ const MessagesTab: React.FC = () => {
 
                   <div className="mt-1 flex items-center gap-1.5">
                     <Badge
-                      variant="outline"
+                      variant="secondary"
                       className="h-4 px-1.5 py-0 text-[9px] font-normal"
                     >
                       {customer.source}
@@ -373,7 +351,7 @@ const MessagesTab: React.FC = () => {
                   <span>{selectedCustomer.phone}</span>
                   <span>·</span>
                   <Badge
-                    variant="outline"
+                    variant="secondary"
                     className="h-4 px-1.5 py-0 text-[9px]"
                   >
                     {selectedCustomer.source}
@@ -397,12 +375,12 @@ const MessagesTab: React.FC = () => {
               "repeating-linear-gradient(135deg, transparent, transparent 23px, hsl(var(--border)/0.3) 23px, hsl(var(--border)/0.3) 24px)",
           }}
         >
-          {/* Load-more indicator */}
-          {isLoadingMore && (
+          {/* Polling indicator (subtle) */}
+          {showSyncing && (
             <div className="flex justify-center pb-2">
               <div className="text-muted-foreground bg-card/90 border-border inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs shadow-sm backdrop-blur-sm">
                 <Loader2 className="h-3 w-3 animate-spin" />
-                Loading earlier messages…
+                Syncing…
               </div>
             </div>
           )}
