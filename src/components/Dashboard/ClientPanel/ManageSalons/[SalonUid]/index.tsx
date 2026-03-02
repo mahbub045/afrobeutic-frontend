@@ -9,6 +9,7 @@ import {
   Clock,
   Home,
   Image,
+  MessageCircle,
   Scissors,
   Settings,
   Users,
@@ -23,6 +24,7 @@ import DashboardTab from "./Tabs/DashboardTab/DashboardTab";
 import EmployeesTab from "./Tabs/EmployeesTab/EmployeesTab";
 import IndividualBookingsTab from "./Tabs/IndividualBookingsTab/IndividualBookingsTab";
 import LookbookTab from "./Tabs/LookbookTab/LookbookTab";
+import MessagesTab from "./Tabs/Messages/MessagesTab";
 import OpeningHoursTab from "./Tabs/OpeningHoursTab/OpeningHoursTab";
 import ProductsTab from "./Tabs/ProductsTab/ProductsTab";
 import ServicesTab from "./Tabs/ServicesTab/ServicesTab";
@@ -56,6 +58,7 @@ const SingleSalonContainer: React.FC = () => {
 
       { label: "Lookbooks", href: `lookbooks`, Icon: Image },
       { label: "Employees", href: `employees`, Icon: Users },
+      { label: "Messages", href: `messages`, Icon: MessageCircle },
       { label: "Analytics", href: `analytics`, Icon: BarChart2 },
       { label: "Settings", href: `settings`, Icon: Settings },
     ],
@@ -138,6 +141,7 @@ const SingleSalonContainer: React.FC = () => {
           activeTab === "indBookings" && <IndividualBookingsTab />}
         {activeTab === "lookbooks" && <LookbookTab />}
         {activeTab === "employees" && <EmployeesTab />}
+        {activeTab === "messages" && <MessagesTab />}
         {activeTab === "analytics" && <AnalyticsTab />}
         {activeTab === "settings" && <SettingsTab />}
       </section>
