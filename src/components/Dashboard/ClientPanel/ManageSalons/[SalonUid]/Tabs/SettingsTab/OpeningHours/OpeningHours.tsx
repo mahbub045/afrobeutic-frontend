@@ -31,7 +31,7 @@ function formatTimeShort(time?: string | null) {
   return `${String(hh).padStart(2, "0")}:${mm}`;
 }
 
-const OpeningHoursTab: React.FC = () => {
+const OpeningHours: React.FC = () => {
   const { data: session } = useSession();
   const { salonuid } = useParams();
 
@@ -136,7 +136,7 @@ const OpeningHoursTab: React.FC = () => {
 
       <div className="flex flex-col gap-4">
         {sorted.map((entry: OpeningEntry) => (
-          <Card key={entry.uid} className="py-2">
+          <Card key={entry.uid} className="py-2 shadow-md dark:shadow-gray-600">
             <CardHeader className="flex items-center justify-between">
               <CardTitle className="relative">
                 {entry.day}
@@ -210,4 +210,4 @@ const OpeningHoursTab: React.FC = () => {
   );
 };
 
-export default OpeningHoursTab;
+export default OpeningHours;
