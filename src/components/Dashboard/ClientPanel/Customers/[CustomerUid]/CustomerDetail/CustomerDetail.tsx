@@ -117,7 +117,7 @@ const CustomerDetail: React.FC = () => {
       </div>
 
       {/* Booking Summary Stats */}
-      {customerData.booking.length > 0 && (
+      {(customerData.booking ?? []).length > 0 && (
         <Card className="shadow-md dark:shadow-gray-600">
           <CardHeader>
             <CardTitle>Booking Statistics</CardTitle>
@@ -129,7 +129,7 @@ const CustomerDetail: React.FC = () => {
                   Total Bookings
                 </p>
                 <p className="mt-2 text-2xl font-bold text-blue-900 dark:text-blue-100">
-                  {customerData.booking.length}
+                  {(customerData.booking ?? []).length}
                 </p>
               </div>
               <div className="rounded-lg bg-green-50 p-4 dark:bg-green-950">
@@ -138,8 +138,9 @@ const CustomerDetail: React.FC = () => {
                 </p>
                 <p className="mt-2 text-2xl font-bold text-green-900 dark:text-green-100">
                   {
-                    customerData.booking.filter((b) => b.status === "COMPLETED")
-                      .length
+                    (customerData.booking ?? []).filter(
+                      (b) => b.status === "COMPLETED",
+                    ).length
                   }
                 </p>
               </div>
@@ -149,7 +150,7 @@ const CustomerDetail: React.FC = () => {
                 </p>
                 <p className="mt-2 text-2xl font-bold text-yellow-900 dark:text-yellow-100">
                   {
-                    customerData.booking.filter(
+                    (customerData.booking ?? []).filter(
                       (b) =>
                         b.status === "PLACED" || b.status === "RESCHEDULED",
                     ).length
@@ -162,8 +163,9 @@ const CustomerDetail: React.FC = () => {
                 </p>
                 <p className="mt-2 text-2xl font-bold text-red-900 dark:text-red-100">
                   {
-                    customerData.booking.filter((b) => b.status === "CANCELLED")
-                      .length
+                    (customerData.booking ?? []).filter(
+                      (b) => b.status === "CANCELLED",
+                    ).length
                   }
                 </p>
               </div>
@@ -233,7 +235,7 @@ const CustomerDetail: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {customerData.booking.map((booking) => (
+              {(customerData.booking ?? []).map((booking) => (
                 <div
                   key={booking.uid}
                   className="hover:bg-accent/50 space-y-3 rounded-lg border p-4 shadow-md dark:shadow-gray-600"
@@ -265,7 +267,7 @@ const CustomerDetail: React.FC = () => {
                       <label className="text-muted-foreground font-medium">
                         Salon
                       </label>
-                      <p>{booking.salon.name}</p>
+                      <p>{booking.salon?.name ?? "-"}</p>
                     </div>
                   </div>
 
@@ -275,30 +277,30 @@ const CustomerDetail: React.FC = () => {
                       <label className="text-muted-foreground font-medium">
                         Employee
                       </label>
-                      <p>{booking.employee.name}</p>
+                      <p>{booking.employee?.name ?? "-"}</p>
                       <p className="text-muted-foreground text-xs">
-                        {booking.employee.designation}
+                        {booking.employee?.designation ?? "-"}
                       </p>
                     </div>
                     <div>
                       <label className="text-muted-foreground font-medium">
                         Chair
                       </label>
-                      <p>{booking.chair.name}</p>
+                      <p>{booking.chair?.name ?? "-"}</p>
                       <p className="text-muted-foreground text-xs">
-                        {booking.chair.type}
+                        {booking.chair?.type ?? "-"}
                       </p>
                     </div>
                   </div>
 
                   {/* Services */}
-                  {booking.services.length > 0 && (
+                  {(booking.services ?? []).length > 0 && (
                     <div className="border-t pt-3">
                       <label className="text-muted-foreground text-sm font-medium">
                         Services
                       </label>
                       <div className="mt-2 space-y-1">
-                        {booking.services.map((service) => (
+                        {(booking.services ?? []).map((service) => (
                           <div
                             key={service.uid}
                             className="bg-primary/10 flex items-center justify-between rounded px-2 py-3 text-sm"
@@ -314,13 +316,13 @@ const CustomerDetail: React.FC = () => {
                   )}
 
                   {/* Products */}
-                  {booking.products.length > 0 && (
+                  {(booking.products ?? []).length > 0 && (
                     <div className="border-t pt-3">
                       <label className="text-muted-foreground text-sm font-medium">
                         Products
                       </label>
                       <div className="mt-2 space-y-1">
-                        {booking.products.map((product) => (
+                        {(booking.products ?? []).map((product) => (
                           <div
                             key={product.uid}
                             className="bg-secondary/10 flex items-center justify-between rounded px-2 py-3 text-sm"

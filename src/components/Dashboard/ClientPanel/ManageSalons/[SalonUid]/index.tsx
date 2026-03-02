@@ -58,7 +58,7 @@ const SingleSalonContainer: React.FC = () => {
 
       { label: "Lookbooks", href: `lookbooks`, Icon: Image },
       { label: "Employees", href: `employees`, Icon: Users },
-      { label: "Messages", href: `messages`, Icon: MessageCircle },
+      { label: "WhatsApp Messages", href: `messages`, Icon: MessageCircle },
       { label: "Analytics", href: `analytics`, Icon: BarChart2 },
       { label: "Settings", href: `settings`, Icon: Settings },
     ],
