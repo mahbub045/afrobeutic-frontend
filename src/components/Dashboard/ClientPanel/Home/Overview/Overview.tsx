@@ -19,7 +19,7 @@ import type {
   DashboardFilterValue,
   OverviewStatsResponse,
 } from "@/Types/ClientPanel/Home/OverviewTypes";
-import { Calendar, ChevronDown, DollarSign, Inbox, Users } from "lucide-react";
+import { Calendar, ChevronDown, DollarSign, Inbox, LoaderPinwheel, Users } from "lucide-react";
 import React from "react";
 
 const Overview: React.FC = () => {
@@ -137,7 +137,11 @@ const Overview: React.FC = () => {
           <CardContent className="text-white">
             <h6>BOOKINGS</h6>
             <div className="text-2xl font-bold text-white dark:text-orange-100">
-              {showBookingsFallback ? 0 : totalBookings}
+              {showBookingsFallback ? (
+                <LoaderPinwheel className="h-6 w-6 animate-spin" />
+              ) : (
+                totalBookings
+              )}
             </div>
             <CardDescription className="mt-2 mb-1 text-white">
               Completed rate
@@ -185,7 +189,11 @@ const Overview: React.FC = () => {
           <CardContent>
             <h6 className="text-white">TOTAL INCOME</h6>
             <div className="text-2xl font-bold text-white dark:text-green-100">
-              {showIncomeFallback ? "$0.00" : totalIncome}
+              {showIncomeFallback ? (
+                <LoaderPinwheel className="h-6 w-6 animate-spin" />
+              ) : (
+                totalIncome
+              )}
             </div>
           </CardContent>
         </Card>
@@ -226,7 +234,11 @@ const Overview: React.FC = () => {
           <CardContent>
             <h6 className="text-white">CLIENT REQUESTS</h6>
             <div className="text-2xl font-bold text-white dark:text-blue-100">
-              {showRequestsFallback ? 0 : clientRequests}
+              {showRequestsFallback ? (
+                <LoaderPinwheel className="h-6 w-6 animate-spin" />
+              ) : (
+                clientRequests
+              )}
             </div>
           </CardContent>
         </Card>
@@ -267,7 +279,11 @@ const Overview: React.FC = () => {
           <CardContent>
             <h6 className="text-white">TOTAL CLIENTS</h6>
             <div className="text-2xl font-bold text-white dark:text-purple-100">
-              {showClientsFallback ? 0 : totalClients}
+              {showClientsFallback ? (
+                <LoaderPinwheel className="h-6 w-6 animate-spin" />
+              ) : (
+                totalClients
+              )}
             </div>
           </CardContent>
         </Card>

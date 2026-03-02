@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useEditProfileMutation } from "@/Redux/Reducers/Common/ProfileApi";
 import { ErrorMessage, Field, FieldProps, Form, Formik } from "formik";
+import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
@@ -27,6 +28,7 @@ const EditAccountNameDialog: React.FC<{
   accountName?: string | null;
   isFetching?: boolean;
 }> = ({ accountName, isFetching }) => {
+  const {data:session} = useSession();
   const [open, setOpen] = useState(false);
   const { resolvedTheme } = useTheme();
 
@@ -68,11 +70,13 @@ const EditAccountNameDialog: React.FC<{
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
+      {session?.user?.role === "OWNER" && (
       <DialogTrigger asChild>
         <Button size="sm" variant="outline">
           Edit
         </Button>
       </DialogTrigger>
+      )}
 
       <DialogContent className="shadow-md dark:shadow-gray-500">
         <DialogHeader>

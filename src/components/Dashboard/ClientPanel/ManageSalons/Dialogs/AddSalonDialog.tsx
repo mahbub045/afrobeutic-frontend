@@ -25,6 +25,7 @@ import {
   FieldInputProps,
   FieldProps,
   Formik,
+  FormikErrors,
   Form as FormikForm,
   FormikProps,
 } from "formik";
@@ -208,6 +209,128 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
   const [showBridalInServicesTab, setShowBridalInServicesTab] = useState(false);
   const [isAddressPickerOpen, setIsAddressPickerOpen] = useState(false);
 
+  const flattenErrorPaths = (errors: unknown, prefix = ""): string[] => {
+    if (!errors) return [];
+
+    if (typeof errors === "string") {
+      return prefix ? [prefix] : [];
+    }
+
+    if (Array.isArray(errors)) {
+      return errors.flatMap((val, idx) =>
+        flattenErrorPaths(val, prefix ? `${prefix}.${idx}` : String(idx)),
+      );
+    }
+
+    if (typeof errors === "object") {
+      const obj = errors as Record<string, unknown>;
+      return Object.keys(obj).flatMap((key) =>
+        flattenErrorPaths(obj[key], prefix ? `${prefix}.${key}` : key),
+      );
+    }
+
+    return [];
+  };
+
+  const errorsToTouched = (errors: unknown): unknown => {
+    if (!errors) return undefined;
+
+    if (typeof errors === "string") return true;
+
+    if (Array.isArray(errors)) {
+      return errors.map((val) => errorsToTouched(val));
+    }
+
+    if (typeof errors === "object") {
+      const obj = errors as Record<string, unknown>;
+      return Object.keys(obj).reduce(
+        (acc, key) => {
+          acc[key] = errorsToTouched(obj[key]);
+          return acc;
+        },
+        {} as Record<string, unknown>,
+      );
+    }
+
+    return true;
+  };
+
+  const getFirstErrorTabId = (
+    errors: FormikErrors<FormValues>,
+  ): string | null => {
+    const paths = flattenErrorPaths(errors);
+    if (paths.length === 0) return null;
+
+    const tabMatchers: Array<{ id: string; match: (p: string) => boolean }> = [
+      { id: "salon-category", match: (p) => p.startsWith("salon_category") },
+      {
+        id: "is_provide_hair_styles",
+        match: (p) => p.startsWith("is_provide_hair_styles"),
+      },
+      {
+        id: "services",
+        match: (p) =>
+          p.startsWith("hair_service_types") ||
+          p.startsWith("is_provide_bridal_makeup_services"),
+      },
+      {
+        id: "service-options",
+        match: (p) =>
+          p.startsWith("bridal_makeup_service_types") ||
+          p.startsWith("additional_service_types"),
+      },
+      { id: "salon-type", match: (p) => p.startsWith("salon_type") },
+      {
+        id: "salon-details",
+        match: (p) =>
+          p.startsWith("name") ||
+          p.startsWith("formatted_address") ||
+          p.startsWith("google_place_id") ||
+          p.startsWith("latitude") ||
+          p.startsWith("longitude") ||
+          p.startsWith("city") ||
+          p.startsWith("postal_code") ||
+          p.startsWith("country"),
+      },
+      {
+        id: "contacts",
+        match: (p) =>
+          p.startsWith("email") ||
+          p.startsWith("phone_number_one") ||
+          p.startsWith("phone_number_two") ||
+          p.startsWith("facebook") ||
+          p.startsWith("instagram") ||
+          p.startsWith("youtube"),
+      },
+      {
+        id: "opening-hours",
+        match: (p) => p.startsWith("opening_hours"),
+      },
+    ];
+
+    for (const tab of tabMatchers) {
+      if (paths.some(tab.match)) return tab.id;
+    }
+    return null;
+  };
+
+  const syncServicesSubStepForErrors = (
+    values: FormValues,
+    errors: FormikErrors<FormValues>,
+  ) => {
+    if (values.is_provide_hair_styles !== true) return;
+    const paths = flattenErrorPaths(errors);
+    const hasHairTypesError = paths.some((p) =>
+      p.startsWith("hair_service_types"),
+    );
+    const hasBridalFlagError = paths.some((p) =>
+      p.startsWith("is_provide_bridal_makeup_services"),
+    );
+
+    if (hasHairTypesError) setShowBridalInServicesTab(false);
+    else if (hasBridalFlagError) setShowBridalInServicesTab(true);
+  };
+
   // Helper function to convert time HH:MM to HH:MM:SS format
   const convertTimeToAPIFormat = (time: string): string => {
     if (!time || time === "" || time === "00:00") return "00:00:00";
@@ -220,7 +343,8 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
   // Return true on success so caller (Formik) can reset the form and close dialog
   const handleSubmit = async (
     formData: FormValues,
-    setErrors?: (errors: import("formik").FormikErrors<FormValues>) => void,
+    setErrors?: (errors: FormikErrors<FormValues>) => void,
+    setTouched?: (touched: FormikProps<FormValues>["touched"]) => void,
   ) => {
     try {
       // Transform the data to match API payload format
@@ -362,9 +486,29 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
         traverse(apiErrors as Record<string, unknown>);
 
         if (setErrors) {
-          setErrors(
-            formikErrors as unknown as import("formik").FormikErrors<FormValues>,
+          setErrors(formikErrors as unknown as FormikErrors<FormValues>);
+        }
+
+        if (setTouched) {
+          setTouched(
+            errorsToTouched(
+              formikErrors as unknown as FormikErrors<FormValues>,
+            ) as FormikProps<FormValues>["touched"],
           );
+        }
+
+        // Jump to the first tab that contains an error.
+        const tabId = getFirstErrorTabId(
+          formikErrors as unknown as FormikErrors<FormValues>,
+        );
+        if (tabId) {
+          if (tabId === "services") {
+            syncServicesSubStepForErrors(
+              formData,
+              formikErrors as unknown as FormikErrors<FormValues>,
+            );
+          }
+          setActiveTab(tabId);
         }
 
         if (messages.length > 0) {
@@ -670,10 +814,10 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
             validationSchema={validationSchema}
             onSubmit={async (
               values,
-              { resetForm, setSubmitting, setErrors },
+              { resetForm, setSubmitting, setErrors, setTouched },
             ) => {
               setSubmitting(true);
-              const success = await handleSubmit(values, setErrors);
+              const success = await handleSubmit(values, setErrors, setTouched);
               setSubmitting(false);
               if (success) {
                 resetForm();
@@ -685,7 +829,14 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
               }
             }}
           >
-            {({ values, setFieldTouched, setFieldValue }) => (
+            {({
+              values,
+              setFieldTouched,
+              setFieldValue,
+              validateForm,
+              submitForm,
+              setTouched,
+            }) => (
               <FormikForm className="flex w-full flex-1 flex-col items-center">
                 <Tabs
                   value={activeTab}
@@ -2020,9 +2171,37 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
                           Cancel
                         </Button>
                         <Button
-                          type="submit"
+                          type="button"
                           disabled={isLoading}
                           className="w-40 text-white"
+                          onClick={async () => {
+                            const errors = await validateForm();
+                            const paths = flattenErrorPaths(errors);
+                            if (paths.length > 0) {
+                              const tabId = getFirstErrorTabId(errors);
+                              if (tabId) {
+                                if (tabId === "services") {
+                                  syncServicesSubStepForErrors(values, errors);
+                                }
+                                setActiveTab(tabId);
+                              }
+
+                              // Mark the whole form as touched so error messages show.
+                              setTouched(
+                                errorsToTouched(
+                                  errors,
+                                ) as FormikProps<FormValues>["touched"],
+                                true,
+                              );
+
+                              toast.error(
+                                "Please fix the highlighted errors before submitting.",
+                              );
+                              return;
+                            }
+
+                            submitForm();
+                          }}
                         >
                           {isLoading ? "Adding..." : "Add New Salon"}
                         </Button>
