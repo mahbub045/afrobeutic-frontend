@@ -27,6 +27,44 @@ import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
 
+const getApiErrorMessage = (error: unknown, fallback: string): string => {
+  const extractMessage = (value: unknown): string | null => {
+    if (!value) return null;
+
+    if (typeof value === "string") {
+      return value.trim() ? value : null;
+    }
+
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        const msg = extractMessage(item);
+        if (msg) return msg;
+      }
+      return null;
+    }
+
+    if (typeof value === "object") {
+      const record = value as Record<string, unknown>;
+
+      const priorityKeys = ["message", "error", "detail", "non_field_errors"];
+
+      for (const key of priorityKeys) {
+        const msg = extractMessage(record[key]);
+        if (msg) return msg;
+      }
+
+      for (const key of Object.keys(record)) {
+        const msg = extractMessage(record[key]);
+        if (msg) return msg;
+      }
+    }
+
+    return null;
+  };
+
+  return extractMessage(error) ?? fallback;
+};
+
 interface DayEntry {
   day: string;
   opening_time: string; // HH:MM
@@ -118,10 +156,8 @@ const EditAllOpeningHoursDialog: React.FC<EditDashboardProps> = ({
       singleSalonData?.opening_hours && singleSalonData.opening_hours.length > 0
         ? singleSalonData?.opening_hours.map((oh) => ({
             day: oh.day,
-            opening_time:
-              formatTimeForInput(oh.opening_time) || "08:00",
-            closing_time:
-              formatTimeForInput(oh.closing_time) || "22:00",
+            opening_time: formatTimeForInput(oh.opening_time) || "08:00",
+            closing_time: formatTimeForInput(oh.closing_time) || "22:00",
             is_closed: oh.is_closed || false,
           }))
         : days.map((d) => ({
@@ -141,12 +177,8 @@ const EditAllOpeningHoursDialog: React.FC<EditDashboardProps> = ({
     try {
       const updated = values.opening_hours.map((d) => ({
         day: d.day,
-        opening_time: d.opening_time
-          ? `${d.opening_time}:00`
-          : "00:00:00",
-        closing_time: d.closing_time
-          ? `${d.closing_time}:00`
-          : "00:00:00",
+        opening_time: d.opening_time ? `${d.opening_time}:00` : "00:00:00",
+        closing_time: d.closing_time ? `${d.closing_time}:00` : "00:00:00",
         is_closed: !!d.is_closed,
       }));
 
@@ -168,7 +200,12 @@ const EditAllOpeningHoursDialog: React.FC<EditDashboardProps> = ({
       onClose();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update opening hours. Please try again.");
+      toast.error(
+        getApiErrorMessage(
+          err,
+          "Failed to update opening hours. Please try again.",
+        ),
+      );
     } finally {
       setSubmitting(false);
     }
@@ -298,8 +335,7 @@ const EditAllOpeningHoursDialog: React.FC<EditDashboardProps> = ({
                                                 form.values.opening_hours[idx];
                                               if (
                                                 !current.opening_time ||
-                                                current.opening_time ===
-                                                  "00:00"
+                                                current.opening_time === "00:00"
                                               ) {
                                                 form.setFieldValue(
                                                   `opening_hours.${idx}.opening_time`,
@@ -308,8 +344,7 @@ const EditAllOpeningHoursDialog: React.FC<EditDashboardProps> = ({
                                               }
                                               if (
                                                 !current.closing_time ||
-                                                current.closing_time ===
-                                                  "00:00"
+                                                current.closing_time === "00:00"
                                               ) {
                                                 form.setFieldValue(
                                                   `opening_hours.${idx}.closing_time`,

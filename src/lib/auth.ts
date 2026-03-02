@@ -9,6 +9,7 @@ interface UserWithToken extends NextAuthUser {
   refreshToken?: string;
   uid?: string;
   account_id?: string; // Added account id from login response
+  account_name?: string;
   account_type?: string;
   avatar?: string | null;
   first_name?: string;
@@ -25,6 +26,7 @@ declare module "next-auth" {
       email?: string | null;
       uid?: string;
       account_id?: string; // session account id
+      account_name?: string;
       account_type?: string;
       avatar?: string | null;
       first_name?: string;
@@ -41,6 +43,7 @@ declare module "next-auth" {
     refreshToken?: string;
     uid?: string;
     account_id?: string;
+    account_name?: string;
     account_type?: string;
     avatar?: string | null;
     first_name?: string;
@@ -54,6 +57,7 @@ declare module "next-auth" {
     refreshToken?: string;
     uid?: string;
     account_id?: string;
+    account_name?: string;
     account_type?: string;
     avatar?: string | null;
     first_name?: string;
@@ -126,8 +130,11 @@ export const authOptions: NextAuthOptions = {
               refreshToken:
                 loginResponse.data.refresh || loginResponse.data.refreshToken,
               account_id: loginResponse.data.account_id,
+              account_name: userInfo.account?.name,
               account_type:
-                loginResponse.data.account_type || userInfo.account_type,
+                loginResponse.data.account_type ||
+                userInfo.account?.account_type ||
+                userInfo.account_type,
             };
           }
           return null;
@@ -170,6 +177,9 @@ export const authOptions: NextAuthOptions = {
         if (userWithToken.account_id) {
           token.account_id = userWithToken.account_id;
         }
+        if (userWithToken.account_name) {
+          token.account_name = userWithToken.account_name;
+        }
         if (userWithToken.account_type) {
           token.account_type = userWithToken.account_type;
         }
@@ -207,6 +217,9 @@ export const authOptions: NextAuthOptions = {
         if (session.user.account_type !== undefined) {
           token.account_type = session.user.account_type;
         }
+        if (session.user.account_name !== undefined) {
+          token.account_name = session.user.account_name;
+        }
       }
 
       return token;
@@ -217,6 +230,7 @@ export const authOptions: NextAuthOptions = {
         ...session.user,
         uid: token.uid as string | undefined,
         account_id: token.account_id as string | undefined,
+        account_name: token.account_name as string | undefined,
         account_type: token.account_type as string | undefined,
         avatar: token.avatar as string | null | undefined,
         first_name: token.first_name as string | undefined,

@@ -6,7 +6,6 @@ import {
   BarChart2,
   Box,
   Calendar,
-  Clock,
   Home,
   Image,
   MessageCircle,
@@ -25,7 +24,6 @@ import EmployeesTab from "./Tabs/EmployeesTab/EmployeesTab";
 import IndividualBookingsTab from "./Tabs/IndividualBookingsTab/IndividualBookingsTab";
 import LookbookTab from "./Tabs/LookbookTab/LookbookTab";
 import MessagesTab from "./Tabs/Messages/MessagesTab";
-import OpeningHoursTab from "./Tabs/OpeningHoursTab/OpeningHoursTab";
 import ProductsTab from "./Tabs/ProductsTab/ProductsTab";
 import ServicesTab from "./Tabs/ServicesTab/ServicesTab";
 import SettingsTab from "./Tabs/SettingsTab/SettingsTab";
@@ -43,7 +41,6 @@ const SingleSalonContainer: React.FC = () => {
   const salonNavMenus: MenuItemProps[] = useMemo(
     () => [
       { label: "Dashboard", href: `dashboard`, Icon: Home },
-      { label: "Opening Hours", href: `opening-hours`, Icon: Clock },
       { label: "Services", href: `services`, Icon: Scissors },
       { label: "Products", href: `products`, Icon: Box },
       ...(session?.user?.account_type !== "INDIVIDUAL_STYLIST"
@@ -58,7 +55,7 @@ const SingleSalonContainer: React.FC = () => {
 
       { label: "Lookbooks", href: `lookbooks`, Icon: Image },
       { label: "Employees", href: `employees`, Icon: Users },
-      { label: "Messages", href: `messages`, Icon: MessageCircle },
+      { label: "WhatsApp Messages", href: `messages`, Icon: MessageCircle },
       { label: "Analytics", href: `analytics`, Icon: BarChart2 },
       { label: "Settings", href: `settings`, Icon: Settings },
     ],
@@ -74,7 +71,9 @@ const SingleSalonContainer: React.FC = () => {
       const hash =
         typeof window !== "undefined" ? window.location.hash.slice(1) : "";
       if (hash) {
-        setActiveTab(hash);
+        setActiveTab(
+          salonNavMenus.some((m) => m.href === hash) ? hash : "dashboard",
+        );
         return;
       }
       const seg =
@@ -130,7 +129,6 @@ const SingleSalonContainer: React.FC = () => {
       {/* Tab content area */}
       <section className="mt-6">
         {activeTab === "dashboard" && <DashboardTab />}
-        {activeTab === "opening-hours" && <OpeningHoursTab />}
         {activeTab === "services" && <ServicesTab />}
         {activeTab === "products" && <ProductsTab />}
         {session?.user?.account_type !== "INDIVIDUAL_STYLIST" &&

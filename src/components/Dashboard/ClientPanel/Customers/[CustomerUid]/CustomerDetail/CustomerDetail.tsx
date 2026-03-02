@@ -15,6 +15,7 @@ import {
 import {
   AlertCircle,
   ChevronLeft,
+  ChevronRight,
   LoaderPinwheel,
   Phone,
   User,
@@ -117,7 +118,7 @@ const CustomerDetail: React.FC = () => {
       </div>
 
       {/* Booking Summary Stats */}
-      {customerData.booking.length > 0 && (
+      {(customerData.booking ?? []).length > 0 && (
         <Card className="shadow-md dark:shadow-gray-600">
           <CardHeader>
             <CardTitle>Booking Statistics</CardTitle>
@@ -129,7 +130,7 @@ const CustomerDetail: React.FC = () => {
                   Total Bookings
                 </p>
                 <p className="mt-2 text-2xl font-bold text-blue-900 dark:text-blue-100">
-                  {customerData.booking.length}
+                  {(customerData.booking ?? []).length}
                 </p>
               </div>
               <div className="rounded-lg bg-green-50 p-4 dark:bg-green-950">
@@ -138,8 +139,9 @@ const CustomerDetail: React.FC = () => {
                 </p>
                 <p className="mt-2 text-2xl font-bold text-green-900 dark:text-green-100">
                   {
-                    customerData.booking.filter((b) => b.status === "COMPLETED")
-                      .length
+                    (customerData.booking ?? []).filter(
+                      (b) => b.status === "COMPLETED",
+                    ).length
                   }
                 </p>
               </div>
@@ -149,7 +151,7 @@ const CustomerDetail: React.FC = () => {
                 </p>
                 <p className="mt-2 text-2xl font-bold text-yellow-900 dark:text-yellow-100">
                   {
-                    customerData.booking.filter(
+                    (customerData.booking ?? []).filter(
                       (b) =>
                         b.status === "PLACED" || b.status === "RESCHEDULED",
                     ).length
@@ -162,8 +164,9 @@ const CustomerDetail: React.FC = () => {
                 </p>
                 <p className="mt-2 text-2xl font-bold text-red-900 dark:text-red-100">
                   {
-                    customerData.booking.filter((b) => b.status === "CANCELLED")
-                      .length
+                    (customerData.booking ?? []).filter(
+                      (b) => b.status === "CANCELLED",
+                    ).length
                   }
                 </p>
               </div>
@@ -233,121 +236,127 @@ const CustomerDetail: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {customerData.booking.map((booking) => (
-                <div
-                  key={booking.uid}
-                  className="hover:bg-accent/50 space-y-3 rounded-lg border p-4 shadow-md dark:shadow-gray-600"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="font-semibold">{booking.booking_id}</p>
-                        <Badge className={getStatusColor(booking.status)}>
-                          {booking.status}
-                        </Badge>
-                      </div>
-                      <p className="text-muted-foreground text-sm">
-                        {new Date(
-                          `${booking.booking_date}T${booking.booking_time}`,
-                        ).toLocaleString()}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-mono text-sm">
-                        {booking?.booking_duration || "N/A"}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Salon Info */}
-                  <div className="space-y-2 border-t pt-3">
-                    <div className="text-sm">
-                      <label className="text-muted-foreground font-medium">
-                        Salon
-                      </label>
-                      <p>{booking.salon.name}</p>
-                    </div>
-                  </div>
-
-                  {/* Employee & Chair Info */}
-                  <div className="grid gap-3 border-t pt-3 text-sm md:grid-cols-2">
-                    <div>
-                      <label className="text-muted-foreground font-medium">
-                        Employee
-                      </label>
-                      <p>{booking.employee.name}</p>
-                      <p className="text-muted-foreground text-xs">
-                        {booking.employee.designation}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-muted-foreground font-medium">
-                        Chair
-                      </label>
-                      <p>{booking.chair.name}</p>
-                      <p className="text-muted-foreground text-xs">
-                        {booking.chair.type}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Services */}
-                  {booking.services.length > 0 && (
-                    <div className="border-t pt-3">
-                      <label className="text-muted-foreground text-sm font-medium">
-                        Services
-                      </label>
-                      <div className="mt-2 space-y-1">
-                        {booking.services.map((service) => (
-                          <div
-                            key={service.uid}
-                            className="bg-primary/10 flex items-center justify-between rounded px-2 py-3 text-sm"
-                          >
-                            <span>{service.name}</span>
-                            <span className="font-semibold">
-                              £{service.price}
-                            </span>
+              {(customerData.booking ?? []).map((booking) => {
+                return (
+                  <details
+                    key={booking.uid}
+                    className="group hover:bg-accent/50 rounded-lg border shadow-md dark:shadow-gray-600"
+                  >
+                    <summary className="flex cursor-pointer items-start justify-between gap-4 p-4">
+                      <div className="flex flex-1 items-center gap-2">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-semibold">
+                              {booking.booking_id}
+                            </p>
+                            <Badge className={getStatusColor(booking.status)}>
+                              {booking.status}
+                            </Badge>
                           </div>
-                        ))}
+                          <p className="text-muted-foreground text-sm">
+                            {new Date(
+                              `${booking.booking_date}T${booking.booking_time}`,
+                            ).toLocaleString()}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                      <div className="flex items-center justify-end gap-2">
+                        <ChevronRight className="h-4 w-4 transition-transform duration-200 group-open:rotate-90" />
+                      </div>
+                    </summary>
 
-                  {/* Products */}
-                  {booking.products.length > 0 && (
-                    <div className="border-t pt-3">
-                      <label className="text-muted-foreground text-sm font-medium">
-                        Products
-                      </label>
-                      <div className="mt-2 space-y-1">
-                        {booking.products.map((product) => (
-                          <div
-                            key={product.uid}
-                            className="bg-secondary/10 flex items-center justify-between rounded px-2 py-3 text-sm"
-                          >
-                            <span>{product.name}</span>
-                            <span className="font-semibold">
-                              £{product.price}
-                            </span>
+                    <div className="space-y-3 border-t p-4">
+                      {/* Salon Info */}
+                      <div className="space-y-2">
+                        <div className="text-sm">
+                          <label className="text-muted-foreground font-medium">
+                            Salon
+                          </label>
+                          <p>{booking.salon?.name ?? "-"}</p>
+                        </div>
+                      </div>
+
+                      {/* Employee & Chair Info */}
+                      <div className="grid gap-3 text-sm md:grid-cols-2">
+                        <div>
+                          <label className="text-muted-foreground font-medium">
+                            Employee
+                          </label>
+                          <p>{booking.employee?.name ?? "-"}</p>
+                          <p className="text-muted-foreground text-xs">
+                            {booking.employee?.designation ?? "-"}
+                          </p>
+                        </div>
+                        <div>
+                          <label className="text-muted-foreground font-medium">
+                            Chair
+                          </label>
+                          <p>{booking.chair?.name ?? "-"}</p>
+                          <p className="text-muted-foreground text-xs">
+                            {booking.chair?.type ?? "-"}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Services */}
+                      {(booking.services ?? []).length > 0 && (
+                        <div>
+                          <label className="text-muted-foreground text-sm font-medium">
+                            Services
+                          </label>
+                          <div className="mt-2 space-y-1">
+                            {(booking.services ?? []).map((service) => (
+                              <div
+                                key={service.uid}
+                                className="bg-primary/10 flex items-center justify-between rounded px-2 py-3 text-sm"
+                              >
+                                <span>{service.name}</span>
+                                <span className="font-semibold">
+                                  £{service.price}
+                                </span>
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                        </div>
+                      )}
 
-                  {/* Notes */}
-                  {booking.notes && (
-                    <div className="border-t pt-3">
-                      <label className="text-muted-foreground text-sm font-medium">
-                        Notes
-                      </label>
-                      <p className="bg-secondary/30 mt-1 rounded p-2 text-sm">
-                        {booking.notes}
-                      </p>
+                      {/* Products */}
+                      {(booking.products ?? []).length > 0 && (
+                        <div>
+                          <label className="text-muted-foreground text-sm font-medium">
+                            Products
+                          </label>
+                          <div className="mt-2 space-y-1">
+                            {(booking.products ?? []).map((product) => (
+                              <div
+                                key={product.uid}
+                                className="bg-secondary/10 flex items-center justify-between rounded px-2 py-3 text-sm"
+                              >
+                                <span>{product.name}</span>
+                                <span className="font-semibold">
+                                  £{product.price}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Notes */}
+                      {booking.notes && (
+                        <div>
+                          <label className="text-muted-foreground text-sm font-medium">
+                            Notes
+                          </label>
+                          <p className="bg-secondary/30 mt-1 rounded p-2 text-sm">
+                            {booking.notes}
+                          </p>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              ))}
+                  </details>
+                );
+              })}
             </div>
           )}
         </CardContent>

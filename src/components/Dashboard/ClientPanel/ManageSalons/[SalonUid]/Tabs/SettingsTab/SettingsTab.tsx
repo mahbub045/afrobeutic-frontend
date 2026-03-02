@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   useEditSingleSalonMutation,
   useGetSingleSalonDataQuery,
@@ -16,6 +17,7 @@ import AboutAndProfessional from "./AboutAndProfessional/AboutAndProfessional";
 import AddressSection from "./AddressSection/AddressSection";
 import ContactAndSocialLinks from "./ContactAndSocialLinks/ContactAndSocialLinks";
 import DeleteSalonDialog from "./Dialogs/DeleteSalonDialog";
+import OpeningHours from "./OpeningHours/OpeningHours";
 import ProfessionalCareer from "./ProfessionalCareer/ProfessionalCareer";
 import SalonProfileCard from "./SalonProfileCard/SalonProfileCard";
 import WhatsApp from "./WhatsApp/WhatsApp";
@@ -148,6 +150,11 @@ const SettingsTab: React.FC = () => {
           />
         ) : null}
       </div>
+
+      {/* Opening Hours */}
+      <Card className="p-4 shadow-md dark:shadow-gray-600">
+        <OpeningHours />
+      </Card>
 
       <hr />
       {/* Action Buttons */}
