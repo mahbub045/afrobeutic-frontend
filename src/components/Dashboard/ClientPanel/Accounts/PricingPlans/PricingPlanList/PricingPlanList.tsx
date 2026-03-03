@@ -112,8 +112,9 @@ const PricingPlanList: React.FC = () => {
                         setSelectedPricingPlan(plan);
                         setSubscribeOpen(true);
                       }}
+                      disabled={plan.is_current_plan === true}
                     >
-                      Get Now
+                      {plan.is_current_plan === true ? "Current Plan" : "Get Now"}
                     </Button>
                   </CardFooter>
                 )}

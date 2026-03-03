@@ -25,7 +25,7 @@ interface Props {
 const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
   if (status === "loading")
     return (
-      <div className="flex h-8 w-8 items-center justify-center">
+      <div className="text-primary flex h-8 w-8 items-center justify-center">
         <LoaderPinwheel className="h-5 w-5 animate-spin" />
       </div>
     );
