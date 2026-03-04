@@ -206,7 +206,10 @@ const SideBar: React.FC<SideBarProps> = ({
           aria-busy="true"
           className="flex h-full w-full items-center justify-center"
         >
-          <LoaderPinwheel className="h-8 w-8 animate-spin" aria-hidden="true" />
+          <LoaderPinwheel
+            className="text-primary h-8 w-8 animate-spin"
+            aria-hidden="true"
+          />
           <span className="sr-only">Loading sidebar…</span>
         </div>
       );

@@ -95,12 +95,12 @@ const PricingPlanList: React.FC = () => {
                       <strong>Chatbot Messages Limit -&gt;</strong>{" "}
                       {plan.whatsapp_messages_per_chatbot}
                     </li>
-                    <li>
+                    {/* <li>
                       <strong>Broadcasting -&gt;</strong>{" "}
                       {plan.has_broadcasting
                         ? `Yes (limit ${plan.broadcasting_message_limit})`
                         : "No"}
-                    </li>
+                    </li> */}
                   </ul>
                 </CardContent>
                 {plan.price === "0.00" ? null : (
@@ -112,8 +112,9 @@ const PricingPlanList: React.FC = () => {
                         setSelectedPricingPlan(plan);
                         setSubscribeOpen(true);
                       }}
+                      disabled={plan.is_current_plan === true}
                     >
-                      Get Now
+                      {plan.is_current_plan === true ? "Current Plan" : "Get Now"}
                     </Button>
                   </CardFooter>
                 )}

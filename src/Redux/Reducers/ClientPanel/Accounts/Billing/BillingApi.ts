@@ -34,7 +34,7 @@ export const BillingApi = baseApi.injectEndpoints({
           body: formData,
         };
       },
-      invalidatesTags: ["BillingInfo"],
+      invalidatesTags: ["BillingInfo", "PricingPlans"],
     }),
 
     // New: update auto-renew for the current subscription. Backend accepts

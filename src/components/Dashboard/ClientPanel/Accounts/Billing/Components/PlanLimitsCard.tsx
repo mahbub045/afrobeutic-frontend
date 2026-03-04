@@ -52,14 +52,14 @@ export default function PlanLimitsCard({ plan }: { plan: PricingPlan }) {
                   {safe(plan?.whatsapp_messages_per_chatbot)}
                 </TableCell>
               </TableRow>
-              <TableRow>
+              {/* <TableRow>
                 <TableCell>Broadcasting</TableCell>
                 <TableCell className="text-right">
                   {plan?.has_broadcasting
                     ? `Yes (Limit -> ${safe(plan?.broadcasting_message_limit)})`
                     : "No"}
                 </TableCell>
-              </TableRow>
+              </TableRow> */}
             </TableBody>
           </Table>
         </div>
