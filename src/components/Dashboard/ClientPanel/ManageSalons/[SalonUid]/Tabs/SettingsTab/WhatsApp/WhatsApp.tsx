@@ -3,6 +3,7 @@ import { getWhatsAppStatusBadge } from "@/components/Dashboard/ClientPanel/Commo
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatDateTime } from "@/lib/utils";
 import {
   useGetWhatsAppOnboardDataQuery,
   useWhatsAppOnboardMutation,
@@ -32,6 +33,9 @@ const WhatsApp: React.FC = () => {
     useWhatsAppOnboardMutation();
 
   const whatsappStatus = whatsAppOnboardData?.status?.toUpperCase() ?? null;
+  const whatsappNumber =
+    whatsAppOnboardData?.whatsapp_sender_number ??
+    whatsAppOnboardData?.whatsapp_number;
 
   // if the server returns 404, treat it as no sender registered so the
   // "connect" button is shown rather than the remove button
@@ -40,8 +44,7 @@ const WhatsApp: React.FC = () => {
   // treat as connected only when we actually have a sender number and
   // there isn't a 'no sender' error.  sometimes the API returns an object
   // without a number which should behave like not-connected.
-  const isConnected =
-    !!whatsAppOnboardData?.whatsapp_sender_number && !noSenderError;
+  const isConnected = !!whatsappNumber && !noSenderError;
 
   const getStatusBadge = () => getWhatsAppStatusBadge(whatsappStatus);
 
@@ -325,10 +328,10 @@ const WhatsApp: React.FC = () => {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-1">
                 <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                  Chatbot Name
+                  Salon
                 </span>
                 <span className="text-sm text-gray-900 dark:text-gray-100">
-                  {whatsAppOnboardData?.chatbot_name ?? "Not Available"}
+                  {whatsAppOnboardData?.salon ?? "Not Available"}
                 </span>
               </div>
 
@@ -337,7 +340,25 @@ const WhatsApp: React.FC = () => {
                   WhatsApp Number
                 </span>
                 <span className="text-sm text-gray-900 dark:text-gray-100">
-                  {whatsAppOnboardData?.whatsapp_sender_number ??
+                  {whatsappNumber ?? "Not Available"}
+                </span>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                  Created By
+                </span>
+                <span className="text-sm text-gray-900 dark:text-gray-100">
+                  {whatsAppOnboardData?.created_by ?? "Not Available"}
+                </span>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                  Created At
+                </span>
+                <span className="text-sm text-gray-900 dark:text-gray-100">
+                  {formatDateTime(whatsAppOnboardData?.created_at) ??
                     "Not Available"}
                 </span>
               </div>
