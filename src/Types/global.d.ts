@@ -18,6 +18,7 @@ declare module "*.module.sass" {
 interface FBLoginResponse {
   authResponse?: {
     accessToken: string;
+    code?: string;
     userID: string;
     expiresIn: number;
     signedRequest: string;
