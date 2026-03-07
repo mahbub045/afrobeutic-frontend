@@ -116,7 +116,7 @@ const ChatBotList = () => {
                   {chatbot.chatbot_name}
                 </h3>
                 <p className="text-muted-foreground truncate text-sm">
-                  {chatbot.whatsapp_sender_number || "-"}
+                  {chatbot.whatsapp_number || "-"}
                 </p>
               </div>
             </Card>

@@ -1,6 +1,6 @@
 export interface ChatBot {
   chatbot_name: string;
-  whatsapp_sender_number: string;
+  whatsapp_number: string;
   status: string;
   salon: string;
 }
