@@ -11,7 +11,7 @@ import {
 import { WhatsAppOnboardData } from "@/Types/ClientPanel/ManageSalonTypes/WhatsAppTypes/WhatsAppTypes";
 import { Plus, Trash } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import DeleteWhatsAppDialog from "./Dialogs/DeleteWhatsAppDialog";
 
@@ -23,11 +23,17 @@ const WhatsApp: React.FC = () => {
     WhatsAppOnboardData | undefined
   >(undefined);
   const metaAuthCodeRef = useRef<string | null>(null);
+  const pendingMetaSignupRef = useRef<{
+    waba_id: string;
+    phone_number_id: string;
+  } | null>(null);
+  const metaConfigInFlightRef = useRef(false);
 
   const {
     data: whatsAppOnboardData,
     isLoading,
     error: whatsAppError,
+    refetch,
   } = useGetWhatsAppOnboardDataQuery({ salonUid: salonuid });
   const [metaConfig, { isLoading: isMetaConfigLoading }] =
     useWhatsAppOnboardMutation();
@@ -45,6 +51,106 @@ const WhatsApp: React.FC = () => {
   // there isn't a 'no sender' error.  sometimes the API returns an object
   // without a number which should behave like not-connected.
   const isConnected = !!whatsappNumber && !noSenderError;
+
+  const submitMetaConfig = useCallback(
+    (
+      signupData: { waba_id: string; phone_number_id: string },
+      authCode: string,
+    ) => {
+      if (metaConfigInFlightRef.current) return;
+
+      metaConfigInFlightRef.current = true;
+      metaConfig({
+        salonUid: salonuid,
+        waba_id: signupData.waba_id,
+        phone_number_id: signupData.phone_number_id,
+        code: authCode,
+      })
+        .unwrap()
+        .then(() => {
+          toast.success("Meta account connected successfully!");
+          pendingMetaSignupRef.current = null;
+          metaAuthCodeRef.current = null;
+        })
+        .catch((err: unknown) => {
+          console.error("Error sending Meta config info:", err);
+
+          interface ApiErrorResponse {
+            data?: unknown;
+            message?: string;
+            status?: number;
+          }
+
+          const isApiError = (obj: unknown): obj is ApiErrorResponse =>
+            typeof obj === "object" &&
+            obj !== null &&
+            ("data" in (obj as object) || "message" in (obj as object));
+
+          const apiError: ApiErrorResponse = isApiError(err)
+            ? (err as ApiErrorResponse)
+            : { message: String(err) };
+
+          let message = "Failed to save Meta account information";
+
+          if (apiError.data) {
+            if (typeof apiError.data === "string") {
+              message = apiError.data;
+            } else if (Array.isArray(apiError.data)) {
+              message = apiError.data.map(String).join(" ");
+            } else if (
+              typeof apiError.data === "object" &&
+              apiError.data !== null
+            ) {
+              const keys = Object.keys(apiError.data as object);
+              if (keys.length === 1) {
+                const dataObj = apiError.data as Record<string, unknown>;
+                const maybeValue = dataObj[keys[0]];
+                if (typeof maybeValue === "string") {
+                  message = maybeValue;
+                } else {
+                  let maybeMsg: unknown;
+                  if ("message" in dataObj) {
+                    maybeMsg = (dataObj as { message?: unknown }).message;
+                  }
+                  if (typeof maybeMsg === "string") {
+                    message = maybeMsg;
+                  } else {
+                    message = JSON.stringify(dataObj);
+                  }
+                }
+              } else {
+                let maybeMsg: unknown;
+                if ("message" in apiError.data) {
+                  maybeMsg = (apiError.data as { message?: unknown }).message;
+                }
+                if (typeof maybeMsg === "string") {
+                  message = maybeMsg;
+                } else {
+                  message = JSON.stringify(apiError.data);
+                }
+              }
+            }
+          } else if (apiError.message) {
+            message = apiError.message;
+          }
+
+          message = message.replace(/^\s*\w+:\s*/, "");
+          toast.error(`Failed: ${message}`);
+        })
+        .finally(() => {
+          metaConfigInFlightRef.current = false;
+        });
+    },
+    [metaConfig, salonuid],
+  );
+
+  const trySubmitPendingMetaConfig = useCallback(() => {
+    const pendingSignup = pendingMetaSignupRef.current;
+    const authCode = metaAuthCodeRef.current;
+
+    if (!pendingSignup || !authCode) return;
+    submitMetaConfig(pendingSignup, authCode);
+  }, [submitMetaConfig]);
 
   const getStatusBadge = () => getWhatsAppStatusBadge(whatsappStatus);
 
@@ -105,106 +211,18 @@ const WhatsApp: React.FC = () => {
             console.log("Dataset IDs:", dataset_ids);
             console.log("Instagram Account IDs:", instagram_account_ids);
 
-            const authCode = metaAuthCodeRef.current;
-
-            // Send Meta config info to backend
-            if (waba_id && business_id && phone_number_id && authCode) {
-              metaConfig({
+            if (waba_id && phone_number_id) {
+              pendingMetaSignupRef.current = {
                 waba_id,
                 phone_number_id,
-                code: authCode,
-              })
-                .unwrap()
-                .then(() => {
-                  toast.success("Meta account connected successfully!");
-                  metaAuthCodeRef.current = null;
-                })
-                .catch((err: unknown) => {
-                  console.error("Error sending Meta config info:", err);
-
-                  // Normalize error structure similar to other dialogs
-                  interface ApiErrorResponse {
-                    data?: unknown;
-                    message?: string;
-                    status?: number;
-                  }
-
-                  const isApiError = (obj: unknown): obj is ApiErrorResponse =>
-                    typeof obj === "object" &&
-                    obj !== null &&
-                    ("data" in (obj as object) || "message" in (obj as object));
-
-                  const apiError: ApiErrorResponse = isApiError(err)
-                    ? (err as ApiErrorResponse)
-                    : { message: String(err) };
-
-                  let message = "Failed to save Meta account information";
-
-                  if (apiError.data) {
-                    if (typeof apiError.data === "string") {
-                      message = apiError.data;
-                    } else if (Array.isArray(apiError.data)) {
-                      message = apiError.data.map(String).join(" ");
-                    } else if (
-                      typeof apiError.data === "object" &&
-                      apiError.data !== null
-                    ) {
-                      // If the object is simple with a single key, prefer its value.
-                      const keys = Object.keys(apiError.data as object);
-                      if (keys.length === 1) {
-                        const dataObj = apiError.data as Record<
-                          string,
-                          unknown
-                        >;
-                        const maybeValue = dataObj[keys[0]];
-                        if (typeof maybeValue === "string") {
-                          message = maybeValue;
-                        } else {
-                          // try to dig for message property inside
-                          let maybeMsg: unknown;
-                          if ("message" in dataObj) {
-                            // safe access when key exists
-                            maybeMsg = (dataObj as { message?: unknown })
-                              .message;
-                          }
-                          if (typeof maybeMsg === "string") {
-                            message = maybeMsg;
-                          } else {
-                            // fallback to JSON
-                            message = JSON.stringify(dataObj);
-                          }
-                        }
-                      } else {
-                        // try to dig for message property inside
-                        let maybeMsg: unknown;
-                        if ("message" in apiError.data) {
-                          // safe access when key exists
-                          maybeMsg = (apiError.data as { message?: unknown })
-                            .message;
-                        }
-                        if (typeof maybeMsg === "string") {
-                          message = maybeMsg;
-                        } else {
-                          // fallback to JSON
-                          message = JSON.stringify(apiError.data);
-                        }
-                      }
-                    }
-                  } else if (apiError.message) {
-                    message = apiError.message;
-                  }
-
-                  // remove any leading key labels like "error: " to keep messages clean
-                  message = message.replace(/^\s*\w+:\s*/, "");
-
-                  toast.error(`Failed: ${message}`);
-                });
+              };
+              trySubmitPendingMetaConfig();
             } else {
               console.warn(
-                "Cannot send Meta config info - missing required data (waba_id, business_id, phone_number_id, or code)",
+                "Cannot send Meta config info - missing required data (waba_id or phone_number_id)",
               );
               toast.error(
-                "Could not complete Meta connection. Missing phone number ID or auth code.",
+                "Could not complete Meta connection. Missing phone number ID.",
               );
             }
 
@@ -232,7 +250,7 @@ const WhatsApp: React.FC = () => {
     return () => {
       window.removeEventListener("message", embeddedSignupInfoListener);
     };
-  }, [metaConfig]);
+  }, [trySubmitPendingMetaConfig]);
 
   // Handle Meta Embedded Signup
   const launchEmbeddedSignup = () => {
@@ -245,6 +263,9 @@ const WhatsApp: React.FC = () => {
 
           if (authCode) {
             metaAuthCodeRef.current = authCode;
+            trySubmitPendingMetaConfig();
+          } else {
+            console.warn("Meta auth code not returned in FB.login response");
           }
         },
         {
@@ -370,6 +391,7 @@ const WhatsApp: React.FC = () => {
         isOpen={deleteWhatsAppDialogOpen}
         onClose={setDeleteWhatsAppDialogOpen}
         whatsappData={selectedWhatsAppData}
+        onDeleted={refetch}
       />
     </Card>
   );

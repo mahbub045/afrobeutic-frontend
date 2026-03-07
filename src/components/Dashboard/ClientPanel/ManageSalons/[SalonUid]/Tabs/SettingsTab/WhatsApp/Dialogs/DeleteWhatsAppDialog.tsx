@@ -16,6 +16,7 @@ const DeleteWhatsAppDialog: React.FC<DeleteWhatsAppDialogProps> = ({
   isOpen,
   onClose,
   whatsappData,
+  onDeleted,
 }) => {
   const { salonuid } = useParams();
   const [deleteWhatsApp, { isLoading }] = useDeleteWhatsAppOnboardMutation();
@@ -23,6 +24,7 @@ const DeleteWhatsAppDialog: React.FC<DeleteWhatsAppDialogProps> = ({
   const handleDelete = async () => {
     try {
       await deleteWhatsApp(salonuid as string).unwrap();
+      await onDeleted?.();
       toast.success("WhatsApp connection removed.");
       onClose(false);
     } catch (err) {
@@ -41,27 +43,27 @@ const DeleteWhatsAppDialog: React.FC<DeleteWhatsAppDialogProps> = ({
       <DialogContent className="max-w-md shadow-md dark:shadow-gray-600">
         <DialogHeader>
           {/* Icon + Title */}
-          <div className="flex flex-col items-center text-center mb-2">
+          <div className="mb-2 flex flex-col items-center text-center">
             <div className="relative mb-4">
-              <div className="absolute inset-0 bg-red-500/20 rounded-full animate-ping" />
-              <div className="relative flex items-center justify-center w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full border-2 border-red-200 dark:border-red-800">
-                <ShieldAlert className="w-8 h-8 text-red-500" />
+              <div className="absolute inset-0 animate-ping rounded-full bg-red-500/20" />
+              <div className="relative flex h-16 w-16 items-center justify-center rounded-full border-2 border-red-200 bg-red-100 dark:border-red-800 dark:bg-red-900/30">
+                <ShieldAlert className="h-8 w-8 text-red-500" />
               </div>
             </div>
 
-            <DialogTitle className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-1">
+            <DialogTitle className="mb-1 text-xl font-bold text-gray-800 dark:text-gray-100">
               Remove WhatsApp Connection?
             </DialogTitle>
 
             {/* Badge */}
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-widest uppercase bg-red-50 dark:bg-red-900/20 text-red-500 border border-red-200 dark:border-red-800 mt-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+            <span className="mt-1 inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold tracking-widest text-red-500 uppercase dark:border-red-800 dark:bg-red-900/20">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-400" />
               Irreversible Action
             </span>
           </div>
 
           {/* Description */}
-          <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400 text-center leading-relaxed px-1">
+          <div className="space-y-2 px-1 text-center text-sm leading-relaxed text-gray-500 dark:text-gray-400">
             {whatsappData?.chatbot_name ? (
               <p>
                 You&apos;re about to permanently delete the chatbot{" "}
@@ -99,22 +101,22 @@ const DeleteWhatsAppDialog: React.FC<DeleteWhatsAppDialogProps> = ({
           </div>
 
           {/* Divider */}
-          <div className="border-t border-dashed border-gray-200 dark:border-gray-700 my-4" />
+          <div className="my-4 border-t border-dashed border-gray-200 dark:border-gray-700" />
 
           {/* Warning Cards */}
           <div className="space-y-2">
-            <div className="flex items-start gap-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/50 rounded-xl px-4 py-3 text-left">
-              <Info className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
-              <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
+            <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-left dark:border-amber-800/50 dark:bg-amber-900/10">
+              <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+              <p className="text-xs leading-relaxed text-amber-700 dark:text-amber-400">
                 Your chat history and client data will remain accessible, but
                 live messaging and automated replies will be{" "}
                 <span className="font-semibold">disabled immediately</span>.
               </p>
             </div>
 
-            <div className="flex items-start gap-3 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800/50 rounded-xl px-4 py-3 text-left">
-              <BotOff className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
-              <p className="text-xs text-red-700 dark:text-red-400 leading-relaxed">
+            <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-left dark:border-red-800/50 dark:bg-red-900/10">
+              <BotOff className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
+              <p className="text-xs leading-relaxed text-red-700 dark:text-red-400">
                 {whatsappData?.chatbot_name ? (
                   <>
                     The chatbot{" "}
@@ -134,9 +136,9 @@ const DeleteWhatsAppDialog: React.FC<DeleteWhatsAppDialogProps> = ({
               </p>
             </div>
 
-            <div className="flex items-start gap-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-left">
-              <Link2Off className="w-4 h-4 text-gray-500 mt-0.5 shrink-0" />
-              <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+            <div className="flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-left dark:border-gray-700 dark:bg-gray-800/50">
+              <Link2Off className="mt-0.5 h-4 w-4 shrink-0 text-gray-500" />
+              <p className="text-xs leading-relaxed text-gray-600 dark:text-gray-400">
                 Scheduled appointment reminders and follow-up messages via
                 WhatsApp will no longer be delivered to your{" "}
                 <span className="font-semibold">clients</span>.
@@ -159,16 +161,16 @@ const DeleteWhatsAppDialog: React.FC<DeleteWhatsAppDialogProps> = ({
             variant="danger"
             onClick={handleDelete}
             disabled={isLoading}
-            className="flex-1 text-white flex items-center justify-center gap-2"
+            className="flex flex-1 items-center justify-center gap-2 text-white"
           >
             {isLoading ? (
               <>
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                 Removing...
               </>
             ) : (
               <>
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="h-4 w-4" />
                 Yes, Remove
               </>
             )}
