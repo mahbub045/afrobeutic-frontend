@@ -7,6 +7,7 @@ import { formatDateTime } from "@/lib/utils";
 import {
   useGetWhatsAppOnboardDataQuery,
   useWhatsAppOnboardMutation,
+  useWhatsAppWebhookQuery,
 } from "@/Redux/Reducers/ClientPanel/ManageSalons/WhatsApp/WhatsAppApi";
 import { WhatsAppOnboardData } from "@/Types/ClientPanel/ManageSalonTypes/WhatsAppTypes/WhatsAppTypes";
 import { Plus, Trash } from "lucide-react";
@@ -29,6 +30,10 @@ const WhatsApp: React.FC = () => {
   } | null>(null);
   const metaConfigInFlightRef = useRef(false);
 
+  const {} = useWhatsAppWebhookQuery({
+    pollingInterval: 15000, // Poll every 15 seconds to get real-time status updates
+  });
+  
   const {
     data: whatsAppOnboardData,
     isLoading,

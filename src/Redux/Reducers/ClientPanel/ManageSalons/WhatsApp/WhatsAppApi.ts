@@ -3,7 +3,7 @@ import { baseApi } from "@/Redux/Api/BaseApi";
 export const WhatsAppApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     getWhatsAppOnboardData: build.query({
-      query: ({salonUid}) => ({
+      query: ({ salonUid }) => ({
         url: `/salons/${salonUid}/whatsapp`,
         method: "GET",
       }),
@@ -24,6 +24,13 @@ export const WhatsAppApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["WhatsAppOnBoardData"],
     }),
+    // /webhooks/whatsapp-status
+    whatsAppWebhook: build.query({
+      query: () => ({
+        url: `/webhooks/whatsapp-status`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -31,4 +38,5 @@ export const {
   useGetWhatsAppOnboardDataQuery,
   useWhatsAppOnboardMutation,
   useDeleteWhatsAppOnboardMutation,
+  useWhatsAppWebhookQuery
 } = WhatsAppApi;
