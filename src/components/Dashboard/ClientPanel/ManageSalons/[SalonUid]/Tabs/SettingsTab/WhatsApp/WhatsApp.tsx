@@ -3,33 +3,32 @@ import { getWhatsAppStatusBadge } from "@/components/Dashboard/ClientPanel/Commo
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useGetWhatsAppOnboardDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/WhatsApp/WhatsAppApi";
+import {
+  useGetWhatsAppOnboardDataQuery,
+  useWhatsAppOnboardMutation,
+} from "@/Redux/Reducers/ClientPanel/ManageSalons/WhatsApp/WhatsAppApi";
 import { WhatsAppOnboardData } from "@/Types/ClientPanel/ManageSalonTypes/WhatsAppTypes/WhatsAppTypes";
 import { Plus, Trash } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useState } from "react";
-import ConnectWhatsAppDialog from "./Dialogs/ConnectWhatsAppDialog";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import DeleteWhatsAppDialog from "./Dialogs/DeleteWhatsAppDialog";
 
 const WhatsApp: React.FC = () => {
   const { salonuid } = useParams();
-  const [connectWhatsAppDialogOpen, setConnectWhatsAppDialogOpen] =
-    useState(false);
   const [deleteWhatsAppDialogOpen, setDeleteWhatsAppDialogOpen] =
     useState(false);
   const [selectedWhatsAppData, setSelectedWhatsAppData] = useState<
     WhatsAppOnboardData | undefined
   >(undefined);
 
-  const handleConnectWhatsApp = () => {
-    setConnectWhatsAppDialogOpen(true);
-  };
-
   const {
     data: whatsAppOnboardData,
     isLoading,
     error: whatsAppError,
   } = useGetWhatsAppOnboardDataQuery({ salonUid: salonuid });
+  const [metaConfig, { isLoading: isMetaConfigLoading }] =
+    useWhatsAppOnboardMutation();
 
   const whatsappStatus = whatsAppOnboardData?.status?.toUpperCase() ?? null;
 
@@ -70,6 +69,186 @@ const WhatsApp: React.FC = () => {
         return "WhatsApp Business Account is in stubbed state.";
       default:
         return "WhatsApp Business Account status for this salon.";
+    }
+  };
+  // Define session handler for Meta embedded signup
+  useEffect(() => {
+    const embeddedSignupInfoListener = (event: MessageEvent) => {
+      if (!event.origin.endsWith("facebook.com")) return;
+      try {
+        const data = JSON.parse(event.data);
+        console.log("Received data from Facebook:", data);
+
+        if (data.type === "WA_EMBEDDED_SIGNUP") {
+          console.log("Meta Embedded Signup Event:", data.event);
+          console.log("Full data object:", JSON.stringify(data, null, 2));
+
+          // if user finishes the Embedded Signup flow
+          if (data.event === "FINISH" || data.event === "FINISH_ONLY_WABA") {
+            const {
+              phone_number_id,
+              waba_id,
+              business_id,
+              page_ids,
+              catalog_ids,
+              dataset_ids,
+              instagram_account_ids,
+            } = data.data || {};
+
+            console.log("=== Meta Business Account Setup Complete ===");
+            console.log("WABA ID:", waba_id);
+            console.log("Business ID:", business_id);
+            console.log("Phone Number ID:", phone_number_id || "Not provided");
+            console.log("Page IDs:", page_ids);
+            console.log("Catalog IDs:", catalog_ids);
+            console.log("Dataset IDs:", dataset_ids);
+            console.log("Instagram Account IDs:", instagram_account_ids);
+
+            // Send Meta config info to backend
+            if (waba_id && business_id) {
+              metaConfig({
+                waba_id,
+              })
+                .unwrap()
+                .then(() => {
+                  toast.success("Meta account connected successfully!");
+                })
+                .catch((err: unknown) => {
+                  console.error("Error sending Meta config info:", err);
+
+                  // Normalize error structure similar to other dialogs
+                  interface ApiErrorResponse {
+                    data?: unknown;
+                    message?: string;
+                    status?: number;
+                  }
+
+                  const isApiError = (obj: unknown): obj is ApiErrorResponse =>
+                    typeof obj === "object" &&
+                    obj !== null &&
+                    ("data" in (obj as object) || "message" in (obj as object));
+
+                  const apiError: ApiErrorResponse = isApiError(err)
+                    ? (err as ApiErrorResponse)
+                    : { message: String(err) };
+
+                  let message = "Failed to save Meta account information";
+
+                  if (apiError.data) {
+                    if (typeof apiError.data === "string") {
+                      message = apiError.data;
+                    } else if (Array.isArray(apiError.data)) {
+                      message = apiError.data.map(String).join(" ");
+                    } else if (
+                      typeof apiError.data === "object" &&
+                      apiError.data !== null
+                    ) {
+                      // If the object is simple with a single key, prefer its value.
+                      const keys = Object.keys(apiError.data as object);
+                      if (keys.length === 1) {
+                        const dataObj = apiError.data as Record<
+                          string,
+                          unknown
+                        >;
+                        const maybeValue = dataObj[keys[0]];
+                        if (typeof maybeValue === "string") {
+                          message = maybeValue;
+                        } else {
+                          // try to dig for message property inside
+                          let maybeMsg: unknown;
+                          if ("message" in dataObj) {
+                            // safe access when key exists
+                            maybeMsg = (dataObj as { message?: unknown })
+                              .message;
+                          }
+                          if (typeof maybeMsg === "string") {
+                            message = maybeMsg;
+                          } else {
+                            // fallback to JSON
+                            message = JSON.stringify(dataObj);
+                          }
+                        }
+                      } else {
+                        // try to dig for message property inside
+                        let maybeMsg: unknown;
+                        if ("message" in apiError.data) {
+                          // safe access when key exists
+                          maybeMsg = (apiError.data as { message?: unknown })
+                            .message;
+                        }
+                        if (typeof maybeMsg === "string") {
+                          message = maybeMsg;
+                        } else {
+                          // fallback to JSON
+                          message = JSON.stringify(apiError.data);
+                        }
+                      }
+                    }
+                  } else if (apiError.message) {
+                    message = apiError.message;
+                  }
+
+                  // remove any leading key labels like "error: " to keep messages clean
+                  message = message.replace(/^\s*\w+:\s*/, "");
+
+                  toast.error(`Failed: ${message}`);
+                });
+            } else {
+              console.warn(
+                "Cannot send Meta config info - missing required data (waba_id or business_id)",
+              );
+            }
+
+            // if user cancels the Embedded Signup flow
+          } else if (data.event === "CANCEL") {
+            const { current_step } = data.data || {};
+            console.warn("Cancel at ", current_step);
+
+            // if user reports an error during the Embedded Signup flow
+          } else if (data.event === "ERROR") {
+            const { error_message } = data.data || {};
+            console.error("error ", error_message);
+            toast.error(`Meta connection error: ${error_message}`);
+          }
+        }
+      } catch {
+        console.log("Non JSON Responses", event.data);
+      }
+    };
+
+    // Listen for Embedded Signup events
+    window.addEventListener("message", embeddedSignupInfoListener);
+
+    // When the component unmounts, remove the event listener
+    return () => {
+      window.removeEventListener("message", embeddedSignupInfoListener);
+    };
+  }, [metaConfig]);
+
+  // Handle Meta Embedded Signup
+  const launchEmbeddedSignup = () => {
+    // Launch Facebook login
+    if (typeof window !== "undefined" && window.FB) {
+      window.FB.login(
+        (response: FBLoginResponse) => {
+          console.log("Meta signup response:", response);
+        },
+        {
+          config_id: process.env.NEXT_PUBLIC_META_CONFIG_ID,
+          auth_type: "rerequest", // Avoids 'user is already logged' in errors if users click the button again before refreshing the page
+          response_type: "code",
+          override_default_response_type: true,
+          extras: {
+            sessionInfoVersion: 3, // Required to get WABA ID
+            setup: {
+              solutionID: process.env.NEXT_PUBLIC_META_SOLUTION_ID, // This is the Partner Solution ID
+            },
+          },
+        },
+      );
+    } else {
+      console.error("Facebook SDK not loaded");
+      toast.error("Facebook SDK not loaded. Please refresh the page.");
     }
   };
 
@@ -120,12 +299,9 @@ const WhatsApp: React.FC = () => {
                       Remove Chatbot
                     </Button>
                   ) : (
-                    <Button
-                      disabled={isLoading}
-                      onClick={handleConnectWhatsApp}
-                    >
+                    <Button disabled={isLoading}>
                       <Plus />
-                      Connect WhatsApp
+                      Connect With Facebook
                     </Button>
                   )}
                 </div>
@@ -155,10 +331,6 @@ const WhatsApp: React.FC = () => {
           </>
         )}
       </div>
-      <ConnectWhatsAppDialog
-        isOpen={connectWhatsAppDialogOpen}
-        onClose={setConnectWhatsAppDialogOpen}
-      />
       <DeleteWhatsAppDialog
         isOpen={deleteWhatsAppDialogOpen}
         onClose={setDeleteWhatsAppDialogOpen}
