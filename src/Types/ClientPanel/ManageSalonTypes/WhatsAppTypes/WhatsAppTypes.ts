@@ -20,4 +20,5 @@ export interface DeleteWhatsAppDialogProps {
   isOpen: boolean;
   onClose: (open: boolean) => void;
   whatsappData?: WhatsAppOnboardData;
+  onDeleted?: () => unknown;
 }
