@@ -24,9 +24,11 @@ const DeleteWhatsAppDialog: React.FC<DeleteWhatsAppDialogProps> = ({
   const handleDelete = async () => {
     try {
       await deleteWhatsApp(salonuid as string).unwrap();
-      await onDeleted?.();
       toast.success("WhatsApp connection removed.");
       onClose(false);
+      Promise.resolve(onDeleted?.()).catch((refetchError) => {
+        console.error("WhatsApp refetch after delete failed:", refetchError);
+      });
     } catch (err) {
       console.error("Failed to delete WhatsApp onboard:", err);
       const msg =

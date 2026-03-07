@@ -30,10 +30,10 @@ const WhatsApp: React.FC = () => {
   } | null>(null);
   const metaConfigInFlightRef = useRef(false);
 
-  const {} = useWhatsAppWebhookQuery({
-    pollingInterval: 15000, // Poll every 15 seconds to get real-time status updates
+  useWhatsAppWebhookQuery(undefined, {
+    pollingInterval: 15000, //15 seconds
   });
-  
+
   const {
     data: whatsAppOnboardData,
     isLoading,
@@ -43,14 +43,14 @@ const WhatsApp: React.FC = () => {
   const [metaConfig, { isLoading: isMetaConfigLoading }] =
     useWhatsAppOnboardMutation();
 
-  const whatsappStatus = whatsAppOnboardData?.status?.toUpperCase() ?? null;
-  const whatsappNumber =
-    whatsAppOnboardData?.whatsapp_sender_number ??
-    whatsAppOnboardData?.whatsapp_number;
-
   // if the server returns 404, treat it as no sender registered so the
   // "connect" button is shown rather than the remove button
   const noSenderError = (whatsAppError as { status?: number })?.status === 404;
+  const displayWhatsAppData = noSenderError ? undefined : whatsAppOnboardData;
+  const whatsappStatus = displayWhatsAppData?.status?.toUpperCase() ?? null;
+  const whatsappNumber =
+    displayWhatsAppData?.whatsapp_sender_number ??
+    displayWhatsAppData?.whatsapp_number;
 
   // treat as connected only when we actually have a sender number and
   // there isn't a 'no sender' error.  sometimes the API returns an object
@@ -331,7 +331,7 @@ const WhatsApp: React.FC = () => {
                       disabled={isLoading || isMetaConfigLoading}
                       variant="danger"
                       onClick={() => {
-                        setSelectedWhatsAppData(whatsAppOnboardData);
+                        setSelectedWhatsAppData(displayWhatsAppData);
                         setDeleteWhatsAppDialogOpen(true);
                       }}
                     >
@@ -357,7 +357,7 @@ const WhatsApp: React.FC = () => {
                   Salon
                 </span>
                 <span className="text-sm text-gray-900 dark:text-gray-100">
-                  {whatsAppOnboardData?.salon ?? "Not Available"}
+                  {displayWhatsAppData?.salon ?? "Not Available"}
                 </span>
               </div>
 
@@ -375,7 +375,7 @@ const WhatsApp: React.FC = () => {
                   Created By
                 </span>
                 <span className="text-sm text-gray-900 dark:text-gray-100">
-                  {whatsAppOnboardData?.created_by ?? "Not Available"}
+                  {displayWhatsAppData?.created_by ?? "Not Available"}
                 </span>
               </div>
 
@@ -384,7 +384,7 @@ const WhatsApp: React.FC = () => {
                   Created At
                 </span>
                 <span className="text-sm text-gray-900 dark:text-gray-100">
-                  {formatDateTime(whatsAppOnboardData?.created_at) ??
+                  {formatDateTime(displayWhatsAppData?.created_at) ??
                     "Not Available"}
                 </span>
               </div>
