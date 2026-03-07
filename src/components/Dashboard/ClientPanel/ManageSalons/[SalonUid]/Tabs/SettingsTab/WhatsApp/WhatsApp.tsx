@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDateTime } from "@/lib/utils";
 import {
+  useGetWhatsAppConfigQuery,
   useGetWhatsAppOnboardDataQuery,
   useWhatsAppOnboardMutation,
   useWhatsAppWebhookQuery,
@@ -30,10 +31,13 @@ const WhatsApp: React.FC = () => {
   } | null>(null);
   const metaConfigInFlightRef = useRef(false);
 
+  // RTK Hooks for API calls
   useWhatsAppWebhookQuery(undefined, {
     pollingInterval: 15000, //15 seconds
   });
-
+  const { data: whatsAppConfigData } = useGetWhatsAppConfigQuery({
+    salonUid: salonuid,
+  });
   const {
     data: whatsAppOnboardData,
     isLoading,

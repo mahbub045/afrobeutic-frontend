@@ -9,6 +9,12 @@ export const WhatsAppApi = baseApi.injectEndpoints({
       }),
       providesTags: ["WhatsAppOnBoardData"],
     }),
+    getWhatsAppConfig: build.query({
+      query: ({ salonUid }) => ({
+        url: `/salons/${salonUid}/whatsapp-config`,
+        method: "GET",
+      }),
+    }),
     whatsAppOnboard: build.mutation({
       query: ({ salonUid, ...wabaInfo }) => ({
         url: `/salons/${salonUid}/whatsapp`,
@@ -36,7 +42,8 @@ export const WhatsAppApi = baseApi.injectEndpoints({
 
 export const {
   useGetWhatsAppOnboardDataQuery,
+  useGetWhatsAppConfigQuery,
   useWhatsAppOnboardMutation,
   useDeleteWhatsAppOnboardMutation,
-  useWhatsAppWebhookQuery
+  useWhatsAppWebhookQuery,
 } = WhatsAppApi;
