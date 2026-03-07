@@ -10,7 +10,7 @@ import {
 import { WhatsAppOnboardData } from "@/Types/ClientPanel/ManageSalonTypes/WhatsAppTypes/WhatsAppTypes";
 import { Plus, Trash } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import DeleteWhatsAppDialog from "./Dialogs/DeleteWhatsAppDialog";
 
@@ -21,6 +21,7 @@ const WhatsApp: React.FC = () => {
   const [selectedWhatsAppData, setSelectedWhatsAppData] = useState<
     WhatsAppOnboardData | undefined
   >(undefined);
+  const metaAuthCodeRef = useRef<string | null>(null);
 
   const {
     data: whatsAppOnboardData,
@@ -32,12 +33,9 @@ const WhatsApp: React.FC = () => {
 
   const whatsappStatus = whatsAppOnboardData?.status?.toUpperCase() ?? null;
 
-  // if the server explicitly reports no sender registered we should treat
-  // that the same as having no data so the "connect" button is shown rather
-  // than the remove button
-  const noSenderError =
-    (whatsAppError as { data?: { detail?: string } })?.data?.detail ===
-    "No WhatsApp sender registered for this salon";
+  // if the server returns 404, treat it as no sender registered so the
+  // "connect" button is shown rather than the remove button
+  const noSenderError = (whatsAppError as { status?: number })?.status === 404;
 
   // treat as connected only when we actually have a sender number and
   // there isn't a 'no sender' error.  sometimes the API returns an object
@@ -104,14 +102,19 @@ const WhatsApp: React.FC = () => {
             console.log("Dataset IDs:", dataset_ids);
             console.log("Instagram Account IDs:", instagram_account_ids);
 
+            const authCode = metaAuthCodeRef.current;
+
             // Send Meta config info to backend
-            if (waba_id && business_id) {
+            if (waba_id && business_id && phone_number_id && authCode) {
               metaConfig({
                 waba_id,
+                phone_number_id,
+                code: authCode,
               })
                 .unwrap()
                 .then(() => {
                   toast.success("Meta account connected successfully!");
+                  metaAuthCodeRef.current = null;
                 })
                 .catch((err: unknown) => {
                   console.error("Error sending Meta config info:", err);
@@ -195,7 +198,10 @@ const WhatsApp: React.FC = () => {
                 });
             } else {
               console.warn(
-                "Cannot send Meta config info - missing required data (waba_id or business_id)",
+                "Cannot send Meta config info - missing required data (waba_id, business_id, phone_number_id, or code)",
+              );
+              toast.error(
+                "Could not complete Meta connection. Missing phone number ID or auth code.",
               );
             }
 
@@ -232,6 +238,11 @@ const WhatsApp: React.FC = () => {
       window.FB.login(
         (response: FBLoginResponse) => {
           console.log("Meta signup response:", response);
+          const authCode = response.authResponse?.code;
+
+          if (authCode) {
+            metaAuthCodeRef.current = authCode;
+          }
         },
         {
           config_id: process.env.NEXT_PUBLIC_META_CONFIG_ID,
@@ -288,7 +299,7 @@ const WhatsApp: React.FC = () => {
                 <div className="flex justify-end">
                   {isConnected ? (
                     <Button
-                      disabled={isLoading}
+                      disabled={isLoading || isMetaConfigLoading}
                       variant="danger"
                       onClick={() => {
                         setSelectedWhatsAppData(whatsAppOnboardData);
@@ -299,7 +310,10 @@ const WhatsApp: React.FC = () => {
                       Remove Chatbot
                     </Button>
                   ) : (
-                    <Button disabled={isLoading}>
+                    <Button
+                      disabled={isLoading || isMetaConfigLoading}
+                      onClick={launchEmbeddedSignup}
+                    >
                       <Plus />
                       Connect With Facebook
                     </Button>
