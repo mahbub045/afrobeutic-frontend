@@ -5,8 +5,8 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDateTime } from "@/lib/utils";
 import {
-  useGetWhatsAppConfigQuery,
   useGetWhatsAppOnboardDataQuery,
+  useLazyGetWhatsAppConfigQuery,
   useWhatsAppOnboardMutation,
   useWhatsAppWebhookQuery,
 } from "@/Redux/Reducers/ClientPanel/ManageSalons/WhatsApp/WhatsAppApi";
@@ -35,9 +35,8 @@ const WhatsApp: React.FC = () => {
   useWhatsAppWebhookQuery(undefined, {
     pollingInterval: 15000, //15 seconds
   });
-  const { data: whatsAppConfigData } = useGetWhatsAppConfigQuery({
-    salonUid: salonuid,
-  });
+  const [getWhatsAppConfig, { isFetching: isWhatsAppConfigLoading }] =
+    useLazyGetWhatsAppConfigQuery();
   const {
     data: whatsAppOnboardData,
     isLoading,
@@ -261,8 +260,7 @@ const WhatsApp: React.FC = () => {
     };
   }, [trySubmitPendingMetaConfig]);
 
-  // Handle Meta Embedded Signup
-  const launchEmbeddedSignup = () => {
+  const openFacebookSdkSignup = () => {
     // Launch Facebook login
     if (typeof window !== "undefined" && window.FB) {
       window.FB.login(
@@ -293,6 +291,26 @@ const WhatsApp: React.FC = () => {
     } else {
       console.error("Facebook SDK not loaded");
       toast.error("Facebook SDK not loaded. Please refresh the page.");
+    }
+  };
+
+  // Handle Meta Embedded Signup
+  const launchEmbeddedSignup = async () => {
+    try {
+      await getWhatsAppConfig({ salonUid: salonuid }).unwrap();
+      openFacebookSdkSignup();
+    } catch (err) {
+      const status = (err as { status?: number })?.status;
+      const apiMessage =
+        ((err as { data?: { message?: string } })?.data?.message as
+          | string
+          | undefined) ?? "Unable to validate WhatsApp configuration.";
+
+      if (status === 400) {
+        toast.error(apiMessage);
+      } else {
+        toast.error("Could not validate WhatsApp configuration.");
+      }
     }
   };
 
@@ -344,7 +362,11 @@ const WhatsApp: React.FC = () => {
                     </Button>
                   ) : (
                     <Button
-                      disabled={isLoading || isMetaConfigLoading}
+                      disabled={
+                        isLoading ||
+                        isMetaConfigLoading ||
+                        isWhatsAppConfigLoading
+                      }
                       onClick={launchEmbeddedSignup}
                     >
                       <Plus />

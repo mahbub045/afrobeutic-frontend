@@ -42,7 +42,7 @@ export const WhatsAppApi = baseApi.injectEndpoints({
 
 export const {
   useGetWhatsAppOnboardDataQuery,
-  useGetWhatsAppConfigQuery,
+  useLazyGetWhatsAppConfigQuery,
   useWhatsAppOnboardMutation,
   useDeleteWhatsAppOnboardMutation,
   useWhatsAppWebhookQuery,
