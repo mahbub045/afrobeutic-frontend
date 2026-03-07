@@ -13,21 +13,36 @@ let refreshPromise: Promise<string | null> | null = null;
 const baseQuery = fetchBaseQuery({
   baseUrl: process.env.NEXT_PUBLIC_APIBASE_URL,
   prepareHeaders: async (headers) => {
-    // Prioritize localStorage for tokens (single source of truth)
-    const token =
+    let token: string | null =
       typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
-    const accountId =
+    let accountId: string | null =
       typeof window !== "undefined"
         ? localStorage.getItem("activeAccountId")
         : null;
+
+    // Fallback to NextAuth session when local storage is not hydrated yet
+    if (!token || !accountId) {
+      const session = await getSession();
+      token = token || session?.user?.accessToken || null;
+      accountId = accountId || session?.user?.account_id || null;
+
+      if (typeof window !== "undefined") {
+        if (token && !localStorage.getItem("token")) {
+          localStorage.setItem("token", token);
+        }
+        if (accountId && !localStorage.getItem("activeAccountId")) {
+          localStorage.setItem("activeAccountId", accountId);
+        }
+      }
+    }
 
     if (token) {
       headers.set("Authorization", `Bearer ${token}`);
     }
     if (accountId) {
       headers.set("X-ACCOUNT-ID", accountId);
-    }else {
+    } else {
       headers.delete("X-ACCOUNT-ID");
     }
     return headers;

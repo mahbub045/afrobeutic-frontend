@@ -15,6 +15,14 @@ export const AccountPersistence = () => {
       status === "authenticated" &&
       session?.user
     ) {
+      if (session.user.accessToken) {
+        localStorage.setItem("token", session.user.accessToken);
+      }
+
+      if (session.user.refreshToken) {
+        localStorage.setItem("refreshToken", session.user.refreshToken);
+      }
+
       // Check if there's a stored active account
       const storedAccountId = localStorage.getItem("activeAccountId");
 
