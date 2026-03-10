@@ -177,6 +177,7 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
             <TableHead className="text-primary">Booking ID</TableHead>
             <TableHead className="text-primary">Customer</TableHead>
             <TableHead className="text-primary">Phone</TableHead>
+            <TableHead className="text-primary">Source</TableHead>
             <TableHead className="text-primary">Employee</TableHead>
             <TableHead className="text-primary">Date</TableHead>
             <TableHead className="text-primary">Time</TableHead>
@@ -198,6 +199,7 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
                   {booking.customer.first_name} {booking.customer.last_name}
                 </TableCell>
                 <TableCell>{booking.customer?.phone}</TableCell>
+                <TableCell>{booking.customer?.source}</TableCell>
                 <TableCell>
                   {booking.employee?.name ? (
                     booking.employee.name
@@ -317,6 +319,10 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
                   <p className="text-sm">
                     <span className="font-medium">Phone:</span>{" "}
                     {selectedBooking.customer.phone}
+                  </p>
+                  <p className="text-sm">
+                    <span className="font-medium">Source:</span>{" "}
+                    {selectedBooking.customer.source || "N/A"}
                   </p>
                 </div>
               </div>

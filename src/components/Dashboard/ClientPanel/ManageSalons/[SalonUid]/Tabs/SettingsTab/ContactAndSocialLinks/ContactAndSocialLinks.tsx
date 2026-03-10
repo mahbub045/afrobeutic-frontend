@@ -13,11 +13,19 @@ import {
 import React, { useState } from "react";
 import EditContactAndSocialLinkDialog from "../Dialogs/EditContactAndSocialLinkDialog";
 
+const hasSocialLink = (link?: string | null) => Boolean(link?.trim());
+
 const ContactAndSocialLinks: React.FC<DashboardTabProps> = ({
   singleSalonData,
   isLoading,
 }) => {
   const [openContactDialog, setOpenContactDialog] = useState(false);
+  const facebookLink = singleSalonData?.facebook?.trim() || undefined;
+  const instagramLink = singleSalonData?.instagram?.trim() || undefined;
+  const youtubeLink = singleSalonData?.youtube?.trim() || undefined;
+  const hasAnySocialLinks = Boolean(
+    facebookLink || instagramLink || youtubeLink,
+  );
 
   return (
     <Card className="border-0 py-2 shadow-md transition-shadow duration-300 hover:shadow-lg dark:shadow-gray-600">
@@ -97,51 +105,62 @@ const ContactAndSocialLinks: React.FC<DashboardTabProps> = ({
           )}
 
           {/* Social Links */}
-          <div>
-            <p className="mb-2 text-xs font-semibold tracking-wide text-gray-500 uppercase dark:text-gray-400">
-              Follow Us
-            </p>
+          {(isLoading || hasAnySocialLinks) && (
+            <div>
+              <p className="mb-2 text-xs font-semibold tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                Follow Us
+              </p>
 
-            <div className="flex gap-3">
-              {isLoading ? (
-                <>
-                  <Skeleton className="h-8 w-16 rounded" />
-                  <Skeleton className="h-8 w-16 rounded" />
-                  <Skeleton className="h-8 w-16 rounded" />
-                </>
-              ) : (
-                <>
-                  <Button variant="outline" size="sm">
-                    <a
-                      href={singleSalonData?.facebook || "#"}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Facebook className="text-blue-500" />
-                    </a>
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <a
-                      href={singleSalonData?.instagram || "#"}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Instagram className="text-pink-500" />
-                    </a>
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <a
-                      href={singleSalonData?.youtube || "#"}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Youtube className="text-red-600" />
-                    </a>
-                  </Button>
-                </>
-              )}
+              <div className="flex gap-3">
+                {isLoading ? (
+                  <>
+                    <Skeleton className="h-8 w-16 rounded" />
+                    <Skeleton className="h-8 w-16 rounded" />
+                    <Skeleton className="h-8 w-16 rounded" />
+                  </>
+                ) : (
+                  <>
+                    {hasSocialLink(facebookLink) && (
+                      <Button variant="outline" size="sm" asChild>
+                        <a
+                          href={facebookLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label="Open Facebook page"
+                        >
+                          <Facebook className="text-blue-500" />
+                        </a>
+                      </Button>
+                    )}
+                    {hasSocialLink(instagramLink) && (
+                      <Button variant="outline" size="sm" asChild>
+                        <a
+                          href={instagramLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label="Open Instagram page"
+                        >
+                          <Instagram className="text-pink-500" />
+                        </a>
+                      </Button>
+                    )}
+                    {hasSocialLink(youtubeLink) && (
+                      <Button variant="outline" size="sm" asChild>
+                        <a
+                          href={youtubeLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label="Open YouTube page"
+                        >
+                          <Youtube className="text-red-600" />
+                        </a>
+                      </Button>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </CardContent>
       {/* Dialog */}
