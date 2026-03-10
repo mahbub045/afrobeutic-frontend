@@ -157,6 +157,7 @@ const ManageSalonsContainer: React.FC = () => {
         <div className="flex flex-col items-end gap-2">
           {(session?.user?.role === "OWNER" ||
             session?.user?.role === "ADMIN") &&
+            session?.user?.is_salon_limit_reached !== true &&
             (session?.user?.account_type !== "INDIVIDUAL_STYLIST" ||
               (salonListData?.count || 0) < 1) && (
               <Button
