@@ -76,7 +76,7 @@ const SalonsCard: React.FC = () => {
           </div>
         ) : (
           <div className="max-h-[340px] space-y-3 overflow-y-auto pr-2">
-            {salonsData.results.slice(0, 7).map((salon) => (
+            {salonsData.results.slice(0, 5).map((salon) => (
               <Link
                 key={salon.uid}
                 href={`/dashboard/client-panel/manage-salons/${salon.uid}`}
