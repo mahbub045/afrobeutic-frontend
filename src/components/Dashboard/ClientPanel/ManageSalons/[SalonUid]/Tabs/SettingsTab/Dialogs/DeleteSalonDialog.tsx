@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { useDeleteSingleSalonMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/SingleSalon/SingleSalonApi";
 import { EditDashboardProps } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
+import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { useParams, useRouter } from "next/navigation";
 import React from "react";
@@ -22,6 +23,7 @@ const DeleteSalonDialog: React.FC<EditDashboardProps> = ({
 }) => {
   const { salonuid } = useParams();
   const { resolvedTheme } = useTheme();
+  const { update: updateSession } = useSession();
   const router = useRouter();
 
   const [deleteSalon, { isLoading }] = useDeleteSingleSalonMutation();
@@ -31,6 +33,7 @@ const DeleteSalonDialog: React.FC<EditDashboardProps> = ({
       if (!salonuid) return;
 
       await deleteSalon({ salonUid: salonuid }).unwrap();
+      await updateSession({ refreshUserData: true });
 
       onClose();
 

@@ -29,6 +29,7 @@ import {
   Form as FormikForm,
   FormikProps,
 } from "formik";
+import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { useState } from "react";
 import PhoneInput from "react-phone-input-2";
@@ -204,6 +205,7 @@ const validationSchema = Yup.object().shape({
 
 const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
   const { resolvedTheme } = useTheme();
+  const { update: updateSession } = useSession();
   const [addSalon, { isLoading }] = useAddSalonMutation();
   const [activeTab, setActiveTab] = useState("salon-category");
   const [showBridalInServicesTab, setShowBridalInServicesTab] = useState(false);
@@ -404,6 +406,7 @@ const AddSalonDialog: React.FC<AddSalonDialogProps> = ({ isOpen, onClose }) => {
       console.log("Sending payload to API:", JSON.stringify(payload, null, 2));
 
       await addSalon(payload).unwrap();
+      await updateSession({ refreshUserData: true });
       // toast.success("Salon added successfully");
       Swal.fire({
         icon: "success",

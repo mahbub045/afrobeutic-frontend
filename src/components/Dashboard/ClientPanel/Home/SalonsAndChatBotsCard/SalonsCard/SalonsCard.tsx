@@ -25,6 +25,7 @@ const SalonsCard: React.FC = () => {
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <CardTitle className="text-xl font-semibold">My Salons</CardTitle>
         {(session?.user?.role === "OWNER" || session?.user?.role === "ADMIN") &&
+          session?.user?.is_salon_limit_reached !== true &&
           (session?.user?.account_type !== "INDIVIDUAL_STYLIST" ||
             (salonsData?.count || 0) < 1) && (
             <Button

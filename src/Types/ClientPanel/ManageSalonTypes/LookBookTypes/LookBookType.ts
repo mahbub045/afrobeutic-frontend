@@ -25,3 +25,10 @@ export interface EditLookBookImageDialogProps {
   selectedLookBook: LookBookProps | null;
   onEditSuccess: () => void;
 }
+
+export interface DeleteLookbookDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  selectedLookBook: LookBookProps | null;
+  onDeleted?: () => void;
+}

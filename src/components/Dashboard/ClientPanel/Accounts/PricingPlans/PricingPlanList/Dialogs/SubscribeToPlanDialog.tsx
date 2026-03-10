@@ -107,6 +107,45 @@ function normalizeCardUid(value: unknown): string | null {
   return cleaned;
 }
 
+function collectApiErrorMessages(value: unknown): string[] {
+  if (value == null) return [];
+  if (typeof value === "string") {
+    const message = value.trim();
+    return message ? [message] : [];
+  }
+  if (Array.isArray(value)) {
+    return value.flatMap((item) => collectApiErrorMessages(item));
+  }
+  if (typeof value === "object") {
+    return Object.values(value as Record<string, unknown>).flatMap((item) =>
+      collectApiErrorMessages(item),
+    );
+  }
+  return [];
+}
+
+function getApiErrorMessage(error: unknown): string {
+  if (typeof error === "string" && error.trim()) {
+    return error.trim();
+  }
+
+  if (typeof error === "object" && error !== null) {
+    const errorObject = error as Record<string, unknown>;
+    const data = errorObject.data;
+
+    const dataMessages = collectApiErrorMessages(data);
+    if (dataMessages.length > 0) {
+      return Array.from(new Set(dataMessages)).join(", ");
+    }
+
+    if (typeof errorObject.message === "string" && errorObject.message.trim()) {
+      return errorObject.message.trim();
+    }
+  }
+
+  return "Failed to create subscription. Please try again.";
+}
+
 export default function SubscribeToPlanDialog({
   open,
   onOpenChange,
@@ -116,7 +155,7 @@ export default function SubscribeToPlanDialog({
   const router = useRouter();
   const stripe = useStripe();
   const elements = useElements();
-  const { data: session } = useSession();
+  const { data: session, update: updateSession } = useSession();
   const { resolvedTheme } = useTheme();
 
   const [createOrUpdateSubscription, { isLoading }] =
@@ -370,14 +409,13 @@ export default function SubscribeToPlanDialog({
       }
 
       toast.success("Subscription created successfully.");
+      await updateSession({ refreshUserData: true });
       onOpenChange(false);
       onSuccess?.();
       router.push("/dashboard/client-panel/accounts/billing");
     } catch (e) {
       console.error(e);
-      const message =
-        (e as { data?: { message?: string } })?.data?.message ||
-        "Failed to create subscription. Please try again.";
+      const message = getApiErrorMessage(e);
       toast.error(message);
     } finally {
       setIsSubmitting(false);

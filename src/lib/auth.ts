@@ -11,6 +11,7 @@ interface UserWithToken extends NextAuthUser {
   account_id?: string; // Added account id from login response
   account_name?: string;
   account_type?: string;
+  is_salon_limit_reached?: boolean;
   avatar?: string | null;
   first_name?: string;
   last_name?: string;
@@ -18,9 +19,45 @@ interface UserWithToken extends NextAuthUser {
   role?: string;
 }
 
+type AuthenticatedUserInfo = {
+  uid?: string;
+  email?: string;
+  avatar?: string | null;
+  first_name?: string;
+  last_name?: string;
+  country?: string;
+  role?: string;
+  account?: {
+    uid?: string;
+    name?: string;
+    account_type?: string;
+  };
+  account_type?: string;
+  is_salon_limit_reached?: boolean;
+};
+
+async function fetchAuthenticatedUser(
+  accessToken: string,
+  accountId?: string,
+): Promise<AuthenticatedUserInfo> {
+  const userInfoResponse = await axios.get(
+    `${process.env.NEXT_PUBLIC_APIBASE_URL}/auth/me`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+        "X-ACCOUNT-ID": accountId || "",
+      },
+    },
+  );
+
+  return userInfoResponse.data as AuthenticatedUserInfo;
+}
+
 // TypeScript Declaration Module for Custom Session and User Properties
 declare module "next-auth" {
   interface Session {
+    refreshUserData?: boolean;
     user: {
       name?: string | null;
       email?: string | null;
@@ -28,6 +65,7 @@ declare module "next-auth" {
       account_id?: string; // session account id
       account_name?: string;
       account_type?: string;
+      is_salon_limit_reached?: boolean;
       avatar?: string | null;
       first_name?: string;
       last_name?: string;
@@ -45,6 +83,7 @@ declare module "next-auth" {
     account_id?: string;
     account_name?: string;
     account_type?: string;
+    is_salon_limit_reached?: boolean;
     avatar?: string | null;
     first_name?: string;
     last_name?: string;
@@ -59,6 +98,7 @@ declare module "next-auth" {
     account_id?: string;
     account_name?: string;
     account_type?: string;
+    is_salon_limit_reached?: boolean;
     avatar?: string | null;
     first_name?: string;
     last_name?: string;
@@ -100,19 +140,10 @@ export const authOptions: NextAuthOptions = {
 
           if (loginResponse.data?.access) {
             // Then fetch user info using the access token
-            const userInfoResponse = await axios.get(
-              `${process.env.NEXT_PUBLIC_APIBASE_URL}/auth/me`,
-              {
-                headers: {
-                  Authorization: `Bearer ${loginResponse.data.access}`,
-                  "Content-Type": "application/json",
-                  "X-ACCOUNT-ID": loginResponse.data.account_id || "",
-                },
-              },
+            const userInfo = await fetchAuthenticatedUser(
+              loginResponse.data.access,
+              loginResponse.data.account_id,
             );
-            // console.log("User Info Response:", userInfoResponse.data);
-
-            const userInfo = userInfoResponse.data;
 
             return {
               id: userInfo.uid || "default_id",
@@ -135,6 +166,7 @@ export const authOptions: NextAuthOptions = {
                 loginResponse.data.account_type ||
                 userInfo.account?.account_type ||
                 userInfo.account_type,
+              is_salon_limit_reached: userInfo.is_salon_limit_reached,
             };
           }
           return null;
@@ -183,6 +215,9 @@ export const authOptions: NextAuthOptions = {
         if (userWithToken.account_type) {
           token.account_type = userWithToken.account_type;
         }
+        if (userWithToken.is_salon_limit_reached !== undefined) {
+          token.is_salon_limit_reached = userWithToken.is_salon_limit_reached;
+        }
         if (userWithToken.avatar !== undefined) {
           token.avatar = userWithToken.avatar;
         }
@@ -201,24 +236,48 @@ export const authOptions: NextAuthOptions = {
       }
 
       // Handle session updates (e.g., when profile is edited)
-      if (trigger === "update" && session?.user) {
-        if (session.user.first_name !== undefined) {
+      if (trigger === "update") {
+        if (session?.refreshUserData && token.accessToken) {
+          const userInfo = await fetchAuthenticatedUser(
+            token.accessToken as string,
+            (token.account_id as string | undefined) ?? undefined,
+          );
+
+          token.uid = userInfo.uid ?? token.uid;
+          token.account_name = userInfo.account?.name ?? token.account_name;
+          token.account_type =
+            userInfo.account?.account_type ??
+            userInfo.account_type ??
+            token.account_type;
+          token.avatar = userInfo.avatar ?? token.avatar;
+          token.first_name = userInfo.first_name ?? token.first_name;
+          token.last_name = userInfo.last_name ?? token.last_name;
+          token.country = userInfo.country ?? token.country;
+          token.role = userInfo.role ?? token.role;
+          token.is_salon_limit_reached =
+            userInfo.is_salon_limit_reached ?? token.is_salon_limit_reached;
+        }
+
+        if (session?.user?.first_name !== undefined) {
           token.first_name = session.user.first_name;
         }
-        if (session.user.last_name !== undefined) {
+        if (session?.user?.last_name !== undefined) {
           token.last_name = session.user.last_name;
         }
-        if (session.user.country !== undefined) {
+        if (session?.user?.country !== undefined) {
           token.country = session.user.country;
         }
-        if (session.user.avatar !== undefined) {
+        if (session?.user?.avatar !== undefined) {
           token.avatar = session.user.avatar;
         }
-        if (session.user.account_type !== undefined) {
+        if (session?.user?.account_type !== undefined) {
           token.account_type = session.user.account_type;
         }
-        if (session.user.account_name !== undefined) {
+        if (session?.user?.account_name !== undefined) {
           token.account_name = session.user.account_name;
+        }
+        if (session?.user?.is_salon_limit_reached !== undefined) {
+          token.is_salon_limit_reached = session.user.is_salon_limit_reached;
         }
       }
 
@@ -232,6 +291,9 @@ export const authOptions: NextAuthOptions = {
         account_id: token.account_id as string | undefined,
         account_name: token.account_name as string | undefined,
         account_type: token.account_type as string | undefined,
+        is_salon_limit_reached: token.is_salon_limit_reached as
+          | boolean
+          | undefined,
         avatar: token.avatar as string | null | undefined,
         first_name: token.first_name as string | undefined,
         last_name: token.last_name as string | undefined,

@@ -103,7 +103,8 @@ const PricingPlanList: React.FC = () => {
                     </li> */}
                   </ul>
                 </CardContent>
-                {plan.price === "0.00" ? null : (
+
+                {plan.name.trim().toLowerCase() === "free" ? null : (
                   <CardFooter className="flex justify-center gap-2">
                     <Button
                       variant="default"
@@ -114,7 +115,9 @@ const PricingPlanList: React.FC = () => {
                       }}
                       disabled={plan.is_current_plan === true}
                     >
-                      {plan.is_current_plan === true ? "Current Plan" : "Get Now"}
+                      {plan.is_current_plan === true
+                        ? "Current Plan"
+                        : "Get Now"}
                     </Button>
                   </CardFooter>
                 )}
