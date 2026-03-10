@@ -23,7 +23,7 @@ import {
   useGetRevenueAnalyticsQuery,
 } from "@/Redux/Reducers/ClientPanel/ManageSalons/Analytics/AnalyticsApi";
 import { RevenueProps } from "@/Types/ClientPanel/ManageSalonTypes/AnalyticsTypes/AnalyticsTypes";
-import { LoaderPinwheel } from "lucide-react";
+import { Download, LoaderPinwheel } from "lucide-react";
 import { useParams } from "next/navigation";
 
 const Revenue: React.FC = () => {
@@ -149,11 +149,13 @@ const Revenue: React.FC = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Booking ID</TableHead>
-              <TableHead>Customer Name</TableHead>
-              <TableHead>Finished At</TableHead>
-              <TableHead>Revenue</TableHead>
-              <TableHead className="text-center">Download Invoice</TableHead>
+              <TableHead className="text-primary">Booking ID</TableHead>
+              <TableHead className="text-primary">Customer Name</TableHead>
+              <TableHead className="text-primary">Finished At</TableHead>
+              <TableHead className="text-primary">Revenue</TableHead>
+              <TableHead className="text-primary text-center">
+                Download Invoice
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -174,14 +176,17 @@ const Revenue: React.FC = () => {
                   <TableCell>${rev.final_price}</TableCell>
                   <TableCell className="text-center">
                     <Button
-                      variant="link"
+                      variant="outline"
                       onClick={() => handleDownload(rev)}
                       disabled={downloadingId === rev.uid}
                     >
                       {downloadingId === rev.uid ? (
                         <LoaderPinwheel className="inline-block h-4 w-4 animate-spin" />
                       ) : (
-                        "Download"
+                        <span className="flex items-center gap-1">
+                          <Download />
+                          Download
+                        </span>
                       )}
                     </Button>
                   </TableCell>

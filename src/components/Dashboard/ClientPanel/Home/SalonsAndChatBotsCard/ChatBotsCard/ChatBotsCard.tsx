@@ -1,13 +1,15 @@
 "use client";
 import { getWhatsAppStatusBadge } from "@/components/Dashboard/ClientPanel/CommonComponents/whatsapp-status-badge";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGetChatBotsQuery } from "@/Redux/Reducers/ClientPanel/ChatBots/ChatBotsApi";
 import {
   ChatBot,
   ChatBotsListResponse,
 } from "@/Types/ClientPanel/ChatBots/ChatBotsTypes";
-import { Bot } from "lucide-react";
+import { Bot, Eye } from "lucide-react";
+import Link from "next/link";
 
 const ChatBotsCard: React.FC = () => {
   const {
@@ -28,6 +30,12 @@ const ChatBotsCard: React.FC = () => {
     <Card className="h-full shadow-md dark:shadow-gray-600">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <CardTitle className="text-xl font-semibold">My ChatBots</CardTitle>
+        <Button variant="default" size="sm" asChild>
+          <Link href="/dashboard/client-panel/chatbots">
+            <Eye />
+            View All
+          </Link>
+        </Button>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -60,7 +68,7 @@ const ChatBotsCard: React.FC = () => {
           </div>
         ) : (
           <div className="max-h-[340px] space-y-3 overflow-y-auto pr-2">
-            {chatbots.map((chatbot: ChatBot, index: number) => (
+            {chatbots.slice(0, 5).map((chatbot: ChatBot, index: number) => (
               <div
                 key={index}
                 className="bg-card hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-4 shadow-md transition-colors dark:shadow-gray-600"
@@ -85,8 +93,16 @@ const ChatBotsCard: React.FC = () => {
                     </div>
                   </div>
 
-                  <p className="text-muted-foreground truncate text-xs">
-                    {chatbot?.whatsapp_number}
+                  <p className="text-muted-foreground flex items-center gap-2 truncate text-xs">
+                    <span className="truncate">
+                      {chatbot?.whatsapp_number || "—"}
+                    </span>
+                    {chatbot?.message_limit != null && (
+                      <span className="shrink-0 tabular-nums">
+                        · Msgs {chatbot.remaining_messages ?? "—"}/
+                        {chatbot.message_limit}
+                      </span>
+                    )}
                   </p>
                 </div>
               </div>
