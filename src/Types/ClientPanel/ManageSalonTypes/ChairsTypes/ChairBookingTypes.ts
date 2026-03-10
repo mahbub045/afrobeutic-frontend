@@ -5,6 +5,7 @@ export interface ChairBookingProps {
     first_name: string;
     last_name: string;
     phone: string;
+    source: string | null;
     created_at: string;
     updated_at: string;
   };
