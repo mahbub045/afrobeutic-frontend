@@ -34,7 +34,24 @@ export const LookBookApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["LookBook"],
     }),
+    deleteLookBook: builder.mutation({
+      query: ({
+        salonUid,
+        lookBookUid,
+      }: {
+        salonUid: string;
+        lookBookUid: string;
+      }) => ({
+        url: `/salons/${salonUid}/lookbook/${lookBookUid}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["LookBook"],
+    }),
   }),
 });
 
-export const { useGetLookBookDataQuery, useEditLookBookMutation } = LookBookApi;
+export const {
+  useGetLookBookDataQuery,
+  useEditLookBookMutation,
+  useDeleteLookBookMutation,
+} = LookBookApi;
