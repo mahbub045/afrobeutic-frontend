@@ -380,28 +380,10 @@ const WhatsApp: React.FC = () => {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-1">
                 <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                  Salon
-                </span>
-                <span className="text-sm text-gray-900 dark:text-gray-100">
-                  {displayWhatsAppData?.salon ?? "Not Available"}
-                </span>
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
                   WhatsApp Number
                 </span>
                 <span className="text-sm text-gray-900 dark:text-gray-100">
                   {whatsappNumber ?? "Not Available"}
-                </span>
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                  Created By
-                </span>
-                <span className="text-sm text-gray-900 dark:text-gray-100">
-                  {displayWhatsAppData?.created_by ?? "Not Available"}
                 </span>
               </div>
 
@@ -412,6 +394,24 @@ const WhatsApp: React.FC = () => {
                 <span className="text-sm text-gray-900 dark:text-gray-100">
                   {formatDateTime(displayWhatsAppData?.created_at) ??
                     "Not Available"}
+                </span>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                  Message Limit
+                </span>
+                <span className="text-sm text-gray-900 dark:text-gray-100">
+                  {displayWhatsAppData?.message_limit ?? 0}
+                </span>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                  Remaining Messages
+                </span>
+                <span className="text-sm text-gray-900 dark:text-gray-100">
+                  {displayWhatsAppData?.remaining_messages ?? "Not Available"}
                 </span>
               </div>
             </div>
