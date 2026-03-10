@@ -20,12 +20,16 @@ import {
   Eye,
   LoaderPinwheel,
   Search,
+  Trash,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import DeleteLookbookDialog from "./Dialogs/DeleteLookbookDialog";
 import ViewLookBookPanel from "./LookBookDetails/ViewLookBookPanel";
 
 const LookbookTab: React.FC = () => {
+  const { data: session } = useSession();
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -33,6 +37,9 @@ const LookbookTab: React.FC = () => {
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [selectedLookBookToView, setSelectedLookBookToView] =
     useState<LookBookProps | null>(null);
+  const [selectedLookBookToDelete, setSelectedLookBookToDelete] =
+    useState<LookBookProps | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
   const [viewTab, setViewTab] = useState<string>("list");
 
   // RTK Hook
@@ -71,6 +78,16 @@ const LookbookTab: React.FC = () => {
     } else {
       setSelectedLookBookToView(null);
     }
+  };
+
+  const handleOpenDeleteDialog = (lookBook: LookBookProps) => {
+    setSelectedLookBookToDelete(lookBook);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setIsDeleteDialogOpen(false);
+    setSelectedLookBookToDelete(null);
   };
 
   return (
@@ -158,6 +175,19 @@ const LookbookTab: React.FC = () => {
                         <Eye />
                       </Button>
                     </div>
+                    {(session?.user?.role === "OWNER" ||
+                      session?.user?.role === "ADMIN") && (
+                      <div>
+                        <Button
+                          size="sm"
+                          variant="danger"
+                          className="shadow-md dark:shadow-gray-600"
+                          onClick={() => handleOpenDeleteDialog(lookBook)}
+                        >
+                          <Trash />
+                        </Button>
+                      </div>
+                    )}
                   </TableCell>
                 </TableRow>
               ))
@@ -225,6 +255,18 @@ const LookbookTab: React.FC = () => {
           </div>
         )}
       </TabsContent>
+
+      <DeleteLookbookDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        selectedLookBook={selectedLookBookToDelete}
+        onDeleted={() => {
+          if (selectedLookBookToView?.uid === selectedLookBookToDelete?.uid) {
+            setSelectedLookBookToView(null);
+            setViewTab("list");
+          }
+        }}
+      />
     </Tabs>
   );
 };

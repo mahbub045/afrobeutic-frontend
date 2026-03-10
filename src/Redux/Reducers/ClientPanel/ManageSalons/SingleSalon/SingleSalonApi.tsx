@@ -17,14 +17,14 @@ export const SingleSalonApi = baseApi.injectEndpoints({
         method: "PATCH",
         body: salonData,
       }),
-      invalidatesTags: ["SingleSalon"],
+      invalidatesTags: ["SingleSalon", "SalonList"],
     }),
     deleteSingleSalon: builder.mutation({
       query: ({ salonUid }) => ({
         url: `/salons/${salonUid}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["SingleSalon"],
+      invalidatesTags: ["SingleSalon", "SalonList"],
     }),
   }),
 });

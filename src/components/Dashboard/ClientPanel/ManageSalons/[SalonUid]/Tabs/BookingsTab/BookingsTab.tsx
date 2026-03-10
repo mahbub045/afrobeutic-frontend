@@ -490,10 +490,7 @@ const BookingsTab: React.FC = () => {
                         return (
                           <div
                             key={`${staff.id}-${slot.time}`}
-                            className={cn(
-                              "relative",
-                              colIndex < staffMembers.length - 1 && "border-r",
-                            )}
+                            className="relative border-r"
                           >
                             {/* Staff Header in first row */}
                             {index === 0 && (
