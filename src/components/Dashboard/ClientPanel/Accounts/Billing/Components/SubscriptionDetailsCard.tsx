@@ -30,13 +30,15 @@ export default function SubscriptionDetailsCard({
           <Badge className={statusColorClass}>{statusLabel}</Badge>
         </div>
 
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-muted-foreground text-sm">Auto renew</span>
-
-          <AutoRenewControl
-            subscriptionAutoRenew={!!subscription?.auto_renew}
-          />
-        </div>
+        {subscription.pricing_plan?.name?.trim().toLowerCase() ===
+        "free" ? null : (
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-muted-foreground text-sm">Auto renew</span>
+            <AutoRenewControl
+              subscriptionAutoRenew={!!subscription?.auto_renew}
+            />
+          </div>
+        )}
 
         <Separator />
         <div className="space-y-2 text-sm">
