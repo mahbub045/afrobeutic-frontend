@@ -29,10 +29,16 @@ const EnquiryDetails: React.FC = () => {
 
   const getColorBasedOnType = (type?: string | null) => {
     switch (type) {
-      case "GENERAL":
+      case "GENERAL_INQUIRY":
         return "default";
       case "EMERGENCY":
         return "danger";
+      case "CALLBACK_REQUEST":
+        return "warning";
+      case "COMPLAINT":
+        return "destructive";
+      case "SPECIAL_REQUEST":
+        return "secondary";
       default:
         return "outline";
     }

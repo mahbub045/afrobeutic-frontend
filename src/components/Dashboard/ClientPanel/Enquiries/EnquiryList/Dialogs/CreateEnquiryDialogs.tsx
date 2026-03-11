@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ENQUIRY_TYPES } from "@/constants/enquiryTypes";
 import {
   ErrorMessage,
   Field,
@@ -178,7 +179,7 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
     email: "",
     whatsapp: "",
     source: "",
-    type: "GENERAL",
+    type: ENQUIRY_TYPES[0].value,
     summary: "",
     status: "NEW",
     salon: "",
@@ -194,18 +195,58 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
     source: Yup.string().required("Source is required"),
     summary: Yup.string().required("Summary is required"),
     salon: Yup.string().required("Please select a salon"),
-    email: Yup.string()
-      .required("Email is required")
-      .email("Invalid email address")
-      .nullable(),
+    email: Yup.string().email("Invalid email address").nullable(),
   });
+
+  type ApiErrorData = {
+    non_field_errors?: string[];
+    message?: string;
+    error?: string;
+    phone?: string[] | string;
+    first_name?: string[] | string;
+    last_name?: string[] | string;
+    email?: string[] | string;
+    whatsapp?: string[] | string;
+    source?: string[] | string;
+    type?: string[] | string;
+    summary?: string[] | string;
+    salon?: string[] | string;
+    status?: string[] | string;
+    country_dial_code?: string[] | string;
+  };
+  const fieldErrorMap = [
+    "phone",
+    "first_name",
+    "last_name",
+    "email",
+    "whatsapp",
+    "source",
+    "type",
+    "summary",
+    "salon",
+  ] as const;
+  type ApiFieldErrorKey = (typeof fieldErrorMap)[number];
+
+  const getFirstErrorMessage = (value?: string[] | string) => {
+    if (Array.isArray(value)) return value[0];
+    if (typeof value === "string") return value;
+    return undefined;
+  };
 
   const handleSubmit = async (
     values: typeof initialValues,
-    { resetForm, setSubmitting }: FormikHelpers<typeof initialValues>,
+    {
+      resetForm,
+      setSubmitting,
+      setFieldError,
+    }: FormikHelpers<typeof initialValues>,
   ) => {
     setSubmitting(true);
     try {
+      // guard against blank type (shouldn't happen, but backend rejects empty)
+      if (!values.type) {
+        values.type = ENQUIRY_TYPES[0].value;
+      }
       await createEnquiry(values).unwrap();
       Swal.fire({
         icon: "success",
@@ -222,7 +263,44 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
       refetch();
     } catch (error) {
       console.error("Failed to create enquiry:", error);
-      toast.error("Failed to create enquiry. Please try again.");
+      const apiError = error as {
+        data?: ApiErrorData;
+        message?: string;
+      };
+
+      fieldErrorMap.forEach((fieldName) => {
+        const fieldError = getFirstErrorMessage(apiError.data?.[fieldName]);
+        if (fieldError) {
+          setFieldError(fieldName, fieldError);
+        }
+      });
+
+      const serverMessage =
+        getFirstErrorMessage(apiError.data?.non_field_errors) ||
+        apiError.data?.message ||
+        apiError.data?.error ||
+        getFirstErrorMessage(apiError.data?.phone) ||
+        getFirstErrorMessage(apiError.data?.first_name) ||
+        getFirstErrorMessage(apiError.data?.last_name) ||
+        getFirstErrorMessage(apiError.data?.email) ||
+        getFirstErrorMessage(apiError.data?.whatsapp) ||
+        getFirstErrorMessage(apiError.data?.source) ||
+        getFirstErrorMessage(apiError.data?.type) ||
+        getFirstErrorMessage(apiError.data?.summary) ||
+        getFirstErrorMessage(apiError.data?.salon) ||
+        apiError.message ||
+        (typeof error === "string"
+          ? error
+          : "Failed to create enquiry. Please try again.");
+
+      if (getFirstErrorMessage(apiError.data?.non_field_errors)) {
+        setFieldError(
+          "phone",
+          getFirstErrorMessage(apiError.data?.non_field_errors) as string,
+        );
+      }
+
+      toast.error(serverMessage);
     } finally {
       setSubmitting(false);
     }
@@ -437,11 +515,14 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                   required
                   disabled={!!selectedContact && !!selectedContact.last_name}
                 />
+                <div className="text-destructive text-sm">
+                  <ErrorMessage name="last_name" />
+                </div>
               </div>
 
               <div>
                 <Label htmlFor="email" className="mb-2">
-                  Email<span className="text-danger">*</span>
+                  Email
                 </Label>
                 <Field
                   id="email"
@@ -449,7 +530,6 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                   type="email"
                   as="input"
                   placeholder="Email"
-                  required
                   disabled={!!selectedContact && !!selectedContact.email}
                 />
                 <div className="text-destructive text-sm">
@@ -539,92 +619,87 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                     }: {
                       field: FieldInputProps<string>;
                       form: FormikProps<FormValues>;
-                    }) => (
-                      <>
-                        <input
-                          id="source"
-                          ref={sourceInputRef}
-                          type="text"
-                          autoComplete="off"
-                          placeholder='e.g. "Instagram", "Google", "Walk-in"'
-                          required
-                          disabled={
-                            !!selectedContact && !!selectedContact.source
-                          }
-                          className="w-full rounded-md border bg-white px-3 py-2 text-black dark:bg-[#181818] dark:text-gray-100"
-                          {...field}
-                          onFocus={() =>
-                            !selectedContact && setShowSourceSuggestions(true)
-                          }
-                          onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                            field.onChange(e);
-                            if (!selectedContact)
-                              setShowSourceSuggestions(true);
-                          }}
-                          onBlur={() => {
-                            setTimeout(
-                              () => setShowSourceSuggestions(false),
-                              150,
-                            );
-                          }}
-                        />
-
-                        {showSourceSuggestions && !selectedContact && (
-                          <div
-                            ref={sourceDropdownRef}
-                            className="bg-popover text-popover-foreground absolute right-0 left-0 z-50 mt-1 max-h-40 overflow-auto rounded-md border shadow-lg"
-                          >
-                            {(() => {
-                              const inputValue =
-                                sourceInputRef.current?.value || "";
-                              const searchTerm = inputValue
+                    }) => {
+                      const inputValue = sourceInputRef.current?.value || "";
+                      const searchTerm = inputValue.toLowerCase().trim();
+                      const filteredAndSorted = searchTerm
+                        ? sourceSuggestions
+                            .map((value) => ({
+                              value,
+                              matches: value.toLowerCase().includes(searchTerm),
+                              startsWithMatch: value
                                 .toLowerCase()
-                                .trim();
+                                .startsWith(searchTerm),
+                            }))
+                            .sort((a, b) => {
+                              if (a.startsWithMatch && !b.startsWithMatch) {
+                                return -1;
+                              }
+                              if (!a.startsWithMatch && b.startsWithMatch) {
+                                return 1;
+                              }
+                              if (a.matches && !b.matches) {
+                                return -1;
+                              }
+                              if (!a.matches && b.matches) {
+                                return 1;
+                              }
+                              return 0;
+                            })
+                            .map((item) => item.value)
+                        : sourceSuggestions;
 
-                              const filteredAndSorted = searchTerm
-                                ? sourceSuggestions
-                                    .map((v) => ({
-                                      value: v,
-                                      matches: v
-                                        .toLowerCase()
-                                        .includes(searchTerm),
-                                      startsWithMatch: v
-                                        .toLowerCase()
-                                        .startsWith(searchTerm),
-                                    }))
-                                    .sort((a, b) => {
-                                      if (
-                                        a.startsWithMatch &&
-                                        !b.startsWithMatch
-                                      )
-                                        return -1;
-                                      if (
-                                        !a.startsWithMatch &&
-                                        b.startsWithMatch
-                                      )
-                                        return 1;
-                                      if (a.matches && !b.matches) return -1;
-                                      if (!a.matches && b.matches) return 1;
-                                      return 0;
-                                    })
-                                    .map((item) => item.value)
-                                : sourceSuggestions;
+                      return (
+                        <>
+                          <input
+                            id="source"
+                            ref={sourceInputRef}
+                            type="text"
+                            autoComplete="off"
+                            placeholder='e.g. "Instagram", "Google", "Walk-in"'
+                            required
+                            disabled={
+                              !!selectedContact && !!selectedContact.source
+                            }
+                            className="w-full rounded-md border bg-white px-3 py-2 text-black dark:bg-[#181818] dark:text-gray-100"
+                            {...field}
+                            onFocus={() =>
+                              !selectedContact && setShowSourceSuggestions(true)
+                            }
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                              field.onChange(e);
+                              if (!selectedContact) {
+                                setShowSourceSuggestions(true);
+                              }
+                            }}
+                            onBlur={() => {
+                              setTimeout(
+                                () => setShowSourceSuggestions(false),
+                                150,
+                              );
+                            }}
+                          />
 
-                              return filteredAndSorted.length > 0 ? (
+                          {showSourceSuggestions && !selectedContact && (
+                            <div
+                              ref={sourceDropdownRef}
+                              className="bg-popover text-popover-foreground absolute right-0 left-0 z-50 mt-1 max-h-40 overflow-auto rounded-md border shadow-lg"
+                            >
+                              {filteredAndSorted.length > 0 ? (
                                 <ul className="divide-y p-2">
-                                  {filteredAndSorted.map((v) => (
-                                    <li key={v}>
+                                  {filteredAndSorted.map((value) => (
+                                    <li key={value}>
                                       <button
                                         type="button"
                                         className="hover:bg-accent hover:text-accent-foreground my-1 w-full px-3 py-2 text-left"
                                         onMouseDown={(e) => e.preventDefault()}
                                         onClick={() => {
-                                          form.setFieldValue("source", v);
+                                          form.setFieldValue("source", value);
                                           setShowSourceSuggestions(false);
                                           sourceInputRef.current?.blur();
                                         }}
                                       >
-                                        {v}
+                                        {value}
                                       </button>
                                     </li>
                                   ))}
@@ -633,13 +708,16 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                                 <div className="p-2 text-sm">
                                   {searchTerm ? "No match found" : "No sources"}
                                 </div>
-                              );
-                            })()}
-                          </div>
-                        )}
-                      </>
-                    )}
+                              )}
+                            </div>
+                          )}
+                        </>
+                      );
+                    }}
                   </Field>
+                  <div className="text-destructive text-sm">
+                    <ErrorMessage name="source" />
+                  </div>
                 </div>
               </div>
 
@@ -650,9 +728,15 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                   Type
                 </Label>
                 <Field as="select" id="type" name="type">
-                  <option value="GENERAL">General</option>
-                  <option value="EMERGENCY">Emergency</option>
+                  {ENQUIRY_TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
                 </Field>
+                <div className="text-destructive text-sm">
+                  <ErrorMessage name="type" />
+                </div>
               </div>
               {session?.user?.account_type === "INDIVIDUAL_STYLIST" ? null : (
                 <div>
