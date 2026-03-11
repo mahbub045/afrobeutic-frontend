@@ -29,6 +29,7 @@ const BillingContainer: React.FC = () => {
     data: billingData,
     isLoading,
     isError,
+    error,
     refetch,
   } = useGetBillingInfoQuery(undefined);
 
@@ -41,6 +42,7 @@ const BillingContainer: React.FC = () => {
     data: billingHistoryData,
     isLoading: isBillingHistoryLoading,
     isError: isBillingHistoryError,
+    error: billingHistoryError,
     refetch: refetchBillingHistory,
   } = useGetbillingHistoryQuery(billingHistoryParams);
 
@@ -116,7 +118,12 @@ const BillingContainer: React.FC = () => {
           {isLoading ? (
             <BillingLoadingSkeleton />
           ) : isError ? (
-            <BillingErrorAlert onRetry={() => refetch()} />
+            <BillingErrorAlert
+              onRetry={() => refetch()}
+              errorMessage={
+                (error as { data?: { detail?: string } })?.data?.detail
+              }
+            />
           ) : !subscription ? (
             <NoSubscriptionCard />
           ) : (
@@ -168,7 +175,13 @@ const BillingContainer: React.FC = () => {
           {isBillingHistoryLoading ? (
             <BillingLoadingSkeleton />
           ) : isBillingHistoryError ? (
-            <BillingErrorAlert onRetry={() => refetchBillingHistory()} />
+            <BillingErrorAlert
+              onRetry={() => refetchBillingHistory()}
+              errorMessage={
+                (billingHistoryError as { data?: { detail?: string } })?.data
+                  ?.detail
+              }
+            />
           ) : billingHistoryData ? (
             <BillingHistoryCard
               data={billingHistoryData}
