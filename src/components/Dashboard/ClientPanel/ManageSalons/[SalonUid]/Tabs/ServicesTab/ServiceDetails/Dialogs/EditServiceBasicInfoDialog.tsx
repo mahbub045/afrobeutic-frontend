@@ -20,17 +20,28 @@ import {
 import {
   EditServiceBasicInfoDialogProps,
   ServiceCategory,
+  ServiceFormValues,
   ServiceProps,
 } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
-import { ErrorMessage, Field, Form, Formik } from "formik";
+import { ErrorMessage, Field, Form, Formik, FormikProps } from "formik";
 import { X } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
+
+const buildInitialValues = (
+  service?: ServiceProps | null,
+): ServiceFormValues => ({
+  name: service?.name || "",
+  category: service?.category || "",
+  sub_category: service?.sub_category || "",
+  price: service?.price || "",
+  description: service?.description || "",
+});
 
 const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
   isOpen,
@@ -44,6 +55,10 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
   const [selectedCategoryUid, setSelectedCategoryUid] = useState<string>("");
   const [showSubCategoryInput, setShowSubCategoryInput] = useState(false);
   const [newSubCategoryName, setNewSubCategoryName] = useState("");
+  const [formInitialValues, setFormInitialValues] = useState<ServiceFormValues>(
+    () => buildInitialValues(selectedService),
+  );
+  const formikRef = useRef<FormikProps<ServiceFormValues>>(null);
   // RTK Hooks
   const [editService, { isLoading: isEditingService }] =
     useEditServiceMutation();
@@ -89,10 +104,13 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
 
   useEffect(() => {
     if (!isOpen) return;
+
+    setFormInitialValues(buildInitialValues(selectedService));
     setSelectedCategoryUid(resolvedCategoryFromService || "");
     setShowSubCategoryInput(false);
     setNewSubCategoryName("");
-  }, [isOpen, resolvedCategoryFromService]);
+    setUploadedImages([]);
+  }, [isOpen, resolvedCategoryFromService, selectedService]);
 
   const resolvedSubCategoryFromService = useMemo(() => {
     const rawSub = selectedService?.sub_category || "";
@@ -115,6 +133,38 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
 
     return match ? match.uid : "";
   }, [selectedService, commonSubCategoriesData]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const formik = formikRef.current;
+    if (!formik) return;
+
+    if (
+      resolvedCategoryFromService &&
+      formik.values.category !== resolvedCategoryFromService &&
+      formik.values.category === (selectedService?.category || "")
+    ) {
+      formik.setFieldValue("category", resolvedCategoryFromService, false);
+    }
+
+    if (
+      resolvedSubCategoryFromService &&
+      formik.values.sub_category !== resolvedSubCategoryFromService &&
+      formik.values.sub_category === (selectedService?.sub_category || "")
+    ) {
+      formik.setFieldValue(
+        "sub_category",
+        resolvedSubCategoryFromService,
+        false,
+      );
+    }
+  }, [
+    isOpen,
+    resolvedCategoryFromService,
+    resolvedSubCategoryFromService,
+    selectedService,
+  ]);
 
   const validationSchema = Yup.object().shape({
     name: Yup.string().required("Service name is required"),
@@ -174,7 +224,7 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
     }
   }
 
-  const handleSubmit = async (values: ServiceProps) => {
+  const handleSubmit = async (values: ServiceFormValues) => {
     try {
       const formData = new FormData();
       formData.append("name", values.name);
@@ -223,15 +273,8 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
 
         <Formik
           enableReinitialize
-          initialValues={
-            {
-              name: selectedService?.name || "",
-              category: resolvedCategoryFromService || "",
-              sub_category: resolvedSubCategoryFromService || "",
-              price: selectedService?.price || "",
-              description: selectedService?.description || "",
-            } as ServiceProps
-          }
+          innerRef={formikRef}
+          initialValues={formInitialValues}
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >

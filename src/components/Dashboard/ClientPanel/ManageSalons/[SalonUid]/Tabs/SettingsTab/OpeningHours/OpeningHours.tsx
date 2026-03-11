@@ -1,4 +1,3 @@
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -180,15 +179,7 @@ const OpeningHours: React.FC = () => {
         {sorted.map((entry: OpeningEntry) => (
           <Card key={entry.uid} className="py-2 shadow-md dark:shadow-gray-600">
             <CardHeader className="flex items-center justify-between">
-              <CardTitle className="relative">
-                {entry.day}
-                <Badge
-                  className="absolute -top-1 px-1 text-[10px] shadow-md dark:shadow-gray-600"
-                  variant={entry.is_closed ? "warning" : "default"}
-                >
-                  {entry.is_closed ? "Closed" : "Open"}
-                </Badge>
-              </CardTitle>
+              <CardTitle className="relative">{entry.day}</CardTitle>
               <div className="flex items-center gap-2">
                 {(session?.user?.role === "OWNER" ||
                   session?.user?.role === "ADMIN") && (

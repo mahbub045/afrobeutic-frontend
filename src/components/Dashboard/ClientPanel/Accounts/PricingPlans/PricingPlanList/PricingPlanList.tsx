@@ -1,4 +1,5 @@
 "use client";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,7 +12,7 @@ import {
 import { formatPrice } from "@/lib/utils";
 import { useGetPricingPlansQuery } from "@/Redux/Reducers/ClientPanel/Accounts/PricingPlans/PricingPlansApi";
 import { PricingPlanTypes } from "@/Types/AdminPanel/PricingPlansTypes/PricingPlansTypes";
-import { LoaderPinwheel } from "lucide-react";
+import { CircleAlert, LoaderPinwheel } from "lucide-react";
 import { useState } from "react";
 import SubscribeToPlanDialog from "./Dialogs/SubscribeToPlanDialog";
 
@@ -24,6 +25,8 @@ const PricingPlanList: React.FC = () => {
   const {
     data: pricingPlanData,
     isLoading,
+    isError,
+    error,
     isFetching,
   } = useGetPricingPlansQuery({ page: currentPage });
 
@@ -48,6 +51,17 @@ const PricingPlanList: React.FC = () => {
         <div className="flex items-center justify-center">
           <LoaderPinwheel size={30} className="text-primary animate-spin" />
         </div>
+      ) : isError ? (
+        <Alert
+          variant="destructive"
+          className="flex flex-col items-center text-center"
+        >
+          <CircleAlert className="mb-2 !h-10 !w-10" />
+          <AlertDescription>
+            {(error as { data?: { detail?: string } })?.data?.detail ??
+              "Please try again. If the issue persists, contact support."}
+          </AlertDescription>
+        </Alert>
       ) : !pricingPlanData || pricingPlanData.results.length === 0 ? (
         <div className="text-muted-foreground text-center">
           No pricing plans available.

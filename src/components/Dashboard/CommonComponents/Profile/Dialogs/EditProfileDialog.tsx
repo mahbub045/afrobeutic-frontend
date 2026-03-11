@@ -226,7 +226,9 @@ const EditProfileDialog: React.FC<{
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm">Edit Profile</Button>
+        <Button size="sm" className="w-full sm:w-auto">
+          Edit Profile
+        </Button>
       </DialogTrigger>
 
       <DialogContent className="shadow-md dark:shadow-gray-500">

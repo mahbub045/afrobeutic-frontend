@@ -96,11 +96,12 @@ const ProfileConatiner: React.FC = () => {
                   </Badge>
                 </div>
 
-                <div className="mt-2 flex gap-2">
+                <div className="mt-2 flex w-full flex-wrap justify-center gap-2">
                   <EditProfileDialog data={userData} isFetching={isLoading} />
                   <Button
                     variant="outline"
                     size="sm"
+                    className="w-full sm:w-auto"
                     onClick={toggleChangePasswordDialog}
                   >
                     Change Password

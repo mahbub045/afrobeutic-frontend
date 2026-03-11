@@ -28,6 +28,7 @@ const PAYMENT_TYPES = [
   { value: "VENMO", label: "Venmo" },
   { value: "OTHER", label: "Other" },
 ];
+const ACTIVE_PAYMENT_TYPE = "CASH";
 
 const EditBookingCheckoutDialog: React.FC<CommonEditBookingDataProps> = ({
   isOpen,
@@ -49,7 +50,7 @@ const EditBookingCheckoutDialog: React.FC<CommonEditBookingDataProps> = ({
   useEffect(() => {
     if (bookingData) {
       setTipsAmount(bookingData.tips_amount?.toString() || "");
-      setPaymentType(bookingData.payment_type || "");
+      setPaymentType(ACTIVE_PAYMENT_TYPE);
     }
   }, [bookingData]);
 
@@ -62,7 +63,7 @@ const EditBookingCheckoutDialog: React.FC<CommonEditBookingDataProps> = ({
         bookingUid: bookingData.uid,
         data: {
           tips_amount: parseFloat(tipsAmount) || 0,
-          payment_type: paymentType,
+          payment_type: ACTIVE_PAYMENT_TYPE,
           status: "COMPLETED",
         },
       }).unwrap();
@@ -158,11 +159,19 @@ const EditBookingCheckoutDialog: React.FC<CommonEditBookingDataProps> = ({
                 {PAYMENT_TYPES.map((type) => (
                   <button
                     key={type.value}
-                    onClick={() => setPaymentType(type.value)}
+                    type="button"
+                    onClick={() => {
+                      if (type.value === ACTIVE_PAYMENT_TYPE) {
+                        setPaymentType(type.value);
+                      }
+                    }}
+                    disabled={type.value !== ACTIVE_PAYMENT_TYPE}
                     className={`rounded-lg px-4 py-3 text-sm font-medium transition-all ${
                       paymentType === type.value
                         ? "bg-primary text-white shadow-md"
-                        : "bg-slate-200 text-gray-800 hover:bg-slate-300 dark:bg-slate-700 dark:text-gray-200 dark:hover:bg-slate-600"
+                        : type.value === ACTIVE_PAYMENT_TYPE
+                          ? "bg-slate-200 text-gray-800 hover:bg-slate-300 dark:bg-slate-700 dark:text-gray-200 dark:hover:bg-slate-600"
+                          : "cursor-not-allowed bg-slate-200/70 text-gray-500 opacity-60 dark:bg-slate-800 dark:text-gray-400"
                     }`}
                   >
                     {type.label}
