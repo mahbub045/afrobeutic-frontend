@@ -1,6 +1,7 @@
 "use client";
 
 import Breadcrumbs from "@/components/Dashboard/CommonComponents/Breadcrumbs";
+import { useGetSingleSalonDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SingleSalon/SingleSalonApi";
 import {
   Armchair,
   BarChart2,
@@ -32,35 +33,57 @@ const SingleSalonContainer: React.FC = () => {
   const { salonuid } = useParams();
   const { data: session } = useSession();
 
+  // RTK Hooks
+  const {
+    data: singleSalonData,
+    isLoading,
+    isError,
+  } = useGetSingleSalonDataQuery({ salonUid: salonuid });
+
   interface MenuItemProps {
     label: string;
     href?: string;
     Icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   }
 
-  const salonNavMenus: MenuItemProps[] = useMemo(
-    () => [
+  const salonNavMenus: MenuItemProps[] = useMemo(() => {
+    const menus: MenuItemProps[] = [
       { label: "Dashboard", href: `dashboard`, Icon: Home },
       { label: "Services", href: `services`, Icon: Scissors },
       { label: "Products", href: `products`, Icon: Box },
-      ...(session?.user?.account_type !== "INDIVIDUAL_STYLIST"
-        ? [
-            { label: "Chairs", href: `chairs`, Icon: Armchair },
-            { label: "Bookings", href: `bookings`, Icon: Calendar },
-          ]
-        : []),
-      ...(session?.user?.account_type === "INDIVIDUAL_STYLIST"
-        ? [{ label: "Bookings", href: `indBookings`, Icon: Calendar }]
-        : []),
+    ];
 
+    if (session?.user?.account_type !== "INDIVIDUAL_STYLIST") {
+      menus.push(
+        { label: "Chairs", href: `chairs`, Icon: Armchair },
+        { label: "Bookings", href: `bookings`, Icon: Calendar },
+      );
+    }
+
+    if (session?.user?.account_type === "INDIVIDUAL_STYLIST") {
+      menus.push({ label: "Bookings", href: `indBookings`, Icon: Calendar });
+    }
+
+    menus.push(
       { label: "Lookbooks", href: `lookbooks`, Icon: Image },
       { label: "Employees", href: `employees`, Icon: Users },
-      { label: "WhatsApp Messages", href: `messages`, Icon: MessageCircle },
+    );
+
+    if (singleSalonData?.is_chatbot_configured) {
+      menus.push({
+        label: "WhatsApp Messages",
+        href: `messages`,
+        Icon: MessageCircle,
+      });
+    }
+
+    menus.push(
       { label: "Analytics", href: `analytics`, Icon: BarChart2 },
       { label: "Settings", href: `settings`, Icon: Settings },
-    ],
-    [session?.user?.account_type],
-  );
+    );
+
+    return menus;
+  }, [session?.user?.account_type, singleSalonData?.is_chatbot_configured]);
 
   const pathname = usePathname();
   const [activeTab, setActiveTab] = useState<string>("dashboard");
