@@ -356,7 +356,7 @@ const LeadList: React.FC = () => {
 
                 <TableCell className="flex justify-center gap-2">
                   <div>
-                    {canManageClientAccount && (
+                    {canManageClientAccount ? (
                       <Button
                         size="sm"
                         variant="ghost"
@@ -365,6 +365,8 @@ const LeadList: React.FC = () => {
                       >
                         <Edit />
                       </Button>
+                    ) : (
+                      <small className="text-muted-foreground">Access Denied</small>
                     )}
                   </div>
                 </TableCell>

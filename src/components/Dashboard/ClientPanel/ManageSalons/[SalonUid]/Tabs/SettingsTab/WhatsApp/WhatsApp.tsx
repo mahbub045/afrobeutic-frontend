@@ -3,6 +3,7 @@ import { getWhatsAppStatusBadge } from "@/components/Dashboard/ClientPanel/Commo
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEffectiveRole } from "@/hooks/use-effective-role";
 import { formatDateTime } from "@/lib/utils";
 import {
   useGetWhatsAppOnboardDataQuery,
@@ -54,6 +55,10 @@ const WhatsApp: React.FC = () => {
   const whatsappNumber =
     displayWhatsAppData?.whatsapp_sender_number ??
     displayWhatsAppData?.whatsapp_number;
+
+  // hide certain actions for staff users
+  const { role } = useEffectiveRole();
+  const isStaff = role === "STAFF";
 
   // treat as connected only when we actually have a sender number and
   // there isn't a 'no sender' error.  sometimes the API returns an object
@@ -361,17 +366,20 @@ const WhatsApp: React.FC = () => {
                       Remove Chatbot
                     </Button>
                   ) : (
-                    <Button
-                      disabled={
-                        isLoading ||
-                        isMetaConfigLoading ||
-                        isWhatsAppConfigLoading
-                      }
-                      onClick={launchEmbeddedSignup}
-                    >
-                      <Plus />
-                      Connect With Facebook
-                    </Button>
+                    // staff users should not see the connect option
+                    !isStaff && (
+                      <Button
+                        disabled={
+                          isLoading ||
+                          isMetaConfigLoading ||
+                          isWhatsAppConfigLoading
+                        }
+                        onClick={launchEmbeddedSignup}
+                      >
+                        <Plus />
+                        Connect With Facebook
+                      </Button>
+                    )
                   )}
                 </div>
               </div>
