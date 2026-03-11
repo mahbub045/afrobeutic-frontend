@@ -69,6 +69,7 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
 
   const [viewReceipt, { isLoading: isViewReceiptLoading }] =
     useViewReceiptMutation();
+  const isStatusEditDisabled = effectiveStatus === "completed";
 
   const handleViewReceipt = async () => {
     if (!singleBookingData?.uid) {
@@ -146,6 +147,7 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                   variant="ghost"
                   size="icon"
                   className="h-6 w-6 p-0"
+                  disabled={isStatusEditDisabled}
                   onClick={() => onOpenEditStatus(true)}
                 >
                   <Edit size={14} />
@@ -533,6 +535,7 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                         variant="ghost"
                         size="icon"
                         className="h-6 w-6 p-0"
+                        disabled={isStatusEditDisabled}
                         onClick={() => onOpenEditStatus(true)}
                       >
                         <Edit size={14} />

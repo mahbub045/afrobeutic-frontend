@@ -56,6 +56,7 @@ const IndividualAppointmentDetailsPanel: React.FC<
     useViewReceiptMutation();
   const effectiveStatus: IndBookingUiStatus | undefined =
     selectedAppointment?.status;
+  const isStatusEditDisabled = effectiveStatus === "completed";
 
   const handleViewReceipt = async () => {
     if (!selectedAppointment?.id) {
@@ -475,6 +476,7 @@ const IndividualAppointmentDetailsPanel: React.FC<
                   size="icon"
                   className="h-6 w-6 p-0"
                   type="button"
+                  disabled={isStatusEditDisabled}
                   onClick={() => setIsStatusDialogOpen(true)}
                 >
                   <Edit size={14} />
@@ -523,6 +525,7 @@ const IndividualAppointmentDetailsPanel: React.FC<
                         size="icon"
                         className="h-6 w-6 p-0"
                         type="button"
+                        disabled={isStatusEditDisabled}
                         onClick={() => setIsStatusDialogOpen(true)}
                       >
                         <Edit size={14} />
