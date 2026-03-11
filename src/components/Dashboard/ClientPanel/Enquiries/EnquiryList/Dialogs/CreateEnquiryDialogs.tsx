@@ -225,7 +225,6 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
     "summary",
     "salon",
   ] as const;
-  type ApiFieldErrorKey = (typeof fieldErrorMap)[number];
 
   const getFirstErrorMessage = (value?: string[] | string) => {
     if (Array.isArray(value)) return value[0];

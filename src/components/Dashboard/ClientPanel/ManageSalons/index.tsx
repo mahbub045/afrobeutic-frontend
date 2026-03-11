@@ -85,6 +85,7 @@ const ManageSalonsContainer: React.FC = () => {
     : 0;
 
   // Helper: Determine if salon is open today based on opening_hours array
+  // considers is_closed flag and compares current time against opening/closing
   const isSalonOpenToday = (opening_hours?: OpeningHour[]) => {
     if (!opening_hours || opening_hours.length === 0) return false;
 
@@ -99,7 +100,8 @@ const ManageSalonsContainer: React.FC = () => {
       SATURDAY: 6,
     };
 
-    const todayIndex = new Date().getDay();
+    const now = new Date();
+    const todayIndex = now.getDay();
 
     // Find entry for today
     const todaysEntry = opening_hours.find((oh) => {
@@ -109,17 +111,38 @@ const ManageSalonsContainer: React.FC = () => {
 
     if (!todaysEntry) return false;
 
-    // If is_closed flag is present and true -> closed
+    // Explicit closed flag takes precedence
     if (typeof todaysEntry.is_closed === "boolean") {
-      return !todaysEntry.is_closed;
+      if (todaysEntry.is_closed) return false;
     }
 
-    // Fallback: if opening and closing times are both 00:00:00 treat as closed
+    // parse times; if unavailable, assume open unless flagged closed above
+    const parse = (t: string) => {
+      const [h, m, s] = t.split(":").map(Number);
+      const d = new Date(now);
+      d.setHours(h, m, s, 0);
+      return d;
+    };
+
     if (
-      todaysEntry.opening_time === "00:00:00" &&
-      todaysEntry.closing_time === "00:00:00"
+      todaysEntry.opening_time &&
+      todaysEntry.closing_time &&
+      !(
+        todaysEntry.opening_time === "00:00:00" &&
+        todaysEntry.closing_time === "00:00:00"
+      )
     ) {
-      return false;
+      const openTime = parse(todaysEntry.opening_time);
+      const closeTime = parse(todaysEntry.closing_time);
+
+      // handle overnight spans (closing <= opening)
+      if (closeTime <= openTime) {
+        closeTime.setDate(closeTime.getDate() + 1);
+      }
+
+      if (now < openTime || now > closeTime) {
+        return false;
+      }
     }
 
     return true;
