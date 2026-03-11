@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useEffectiveRole } from "@/hooks/use-effective-role";
 import {
   useEditSingleSalonMutation,
   useGetSingleSalonDataQuery,
@@ -24,13 +25,16 @@ import WhatsApp from "./WhatsApp/WhatsApp";
 
 const SettingsTab: React.FC = () => {
   const { data: session } = useSession();
+  const { canManageClientAccount } = useEffectiveRole(session);
   const params = useParams();
   const { salonuid } = params;
   const { resolvedTheme } = useTheme();
+  const isIndividualStylist =
+    session?.user?.account_type === "INDIVIDUAL_STYLIST";
 
   // RTK hooks
   const [editProfile, { isLoading: isEditing }] = useEditSingleSalonMutation();
-  // RTK Hooks
+
   const {
     data: singleSalonData,
     isLoading,
@@ -38,6 +42,7 @@ const SettingsTab: React.FC = () => {
   } = useGetSingleSalonDataQuery({
     salonUid: salonuid,
   });
+  const hasWhatsAppCard = Boolean(singleSalonData?.is_chatbot_available);
 
   const handleToggleStatus = async () => {
     const isInactive = singleSalonData?.status === "INACTIVE";
@@ -99,107 +104,110 @@ const SettingsTab: React.FC = () => {
         </p>
       </div>
       {/* Profile Header Section */}
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-        {/* Left Column - Salon Profile */}
-        {/* Salon Profile Card */}
-        <div className="space-y-6">
-          <SalonProfileCard
+      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-2">
+        <SalonProfileCard
+          singleSalonData={singleSalonData}
+          isLoading={isLoading}
+        />
+
+        {hasWhatsAppCard ? (
+          <div className="space-y-1">
+            <WhatsApp />
+          </div>
+        ) : (
+          <ContactAndSocialLinks
             singleSalonData={singleSalonData}
             isLoading={isLoading}
           />
+        )}
 
-          {/* Address Section */}
+        <div className={hasWhatsAppCard ? undefined : "xl:col-span-2"}>
           <AddressSection
             singleSalonData={singleSalonData}
             isLoading={isLoading}
           />
         </div>
 
-        {/* Right Column - WhatsApp & Contact */}
-        <div className="space-y-6">
-          {/* WhatsApp Section */}
-          <div className="space-y-1">
-            <WhatsApp />
-          </div>
-
-          {/* Contact & Social Links Section */}
-          <div className="space-y-6">
-            <ContactAndSocialLinks
-              singleSalonData={singleSalonData}
-              isLoading={isLoading}
-            />
-          </div>
-        </div>
+        {hasWhatsAppCard && (
+          <ContactAndSocialLinks
+            singleSalonData={singleSalonData}
+            isLoading={isLoading}
+          />
+        )}
       </div>
 
       {/* About Salon */}
-      <div>
-        {session?.user?.account_type === "INDIVIDUAL_STYLIST" ? (
-          <AboutAndProfessional
-            singleSalonData={singleSalonData}
-            isLoading={isLoading}
-          />
-        ) : null}
-      </div>
+      {isIndividualStylist && (
+        <AboutAndProfessional
+          singleSalonData={singleSalonData}
+          isLoading={isLoading}
+        />
+      )}
+
       {/* Professional Career Details */}
-      <div>
-        {session?.user?.account_type === "INDIVIDUAL_STYLIST" ? (
-          <ProfessionalCareer
-            singleSalonData={singleSalonData}
-            isLoading={isLoading}
-          />
-        ) : null}
-      </div>
+      {isIndividualStylist && (
+        <ProfessionalCareer
+          singleSalonData={singleSalonData}
+          isLoading={isLoading}
+        />
+      )}
 
       {/* Opening Hours */}
       <Card className="p-4 shadow-md dark:shadow-gray-600">
         <OpeningHours />
       </Card>
 
-      <hr />
-      {/* Action Buttons */}
-      <div className="flex justify-end gap-3">
-        {(() => {
-          const isInactive = singleSalonData?.status === "INACTIVE";
-          return (
+      {canManageClientAccount && (
+        <>
+          <hr />
+          {/* Action Buttons */}
+          <div className="flex flex-wrap justify-end gap-3">
+            {(() => {
+              const isInactive = singleSalonData?.status === "INACTIVE";
+              return (
+                <Button
+                  variant={isInactive ? "default" : "warning"}
+                  onClick={handleToggleStatus}
+                  disabled={isEditing}
+                  aria-label={
+                    isInactive ? "Activate salon" : "Deactivate salon"
+                  }
+                  className={
+                    isInactive
+                      ? "bg-green-600 text-white hover:bg-green-700"
+                      : undefined
+                  }
+                >
+                  {isInactive ? (
+                    <>
+                      <Check /> {isEditing ? "Processing..." : "Activate Salon"}
+                    </>
+                  ) : (
+                    <>
+                      <Pause />{" "}
+                      {isEditing ? "Processing..." : "Deactivate Salon"}
+                    </>
+                  )}
+                </Button>
+              );
+            })()}
+
             <Button
-              variant={isInactive ? "default" : "warning"}
-              onClick={handleToggleStatus}
-              disabled={isEditing}
-              aria-label={isInactive ? "Activate salon" : "Deactivate salon"}
-              className={
-                isInactive
-                  ? "bg-green-600 text-white hover:bg-green-700"
-                  : undefined
-              }
+              variant="danger"
+              onClick={() => setOpenDeleteDialog(true)}
+              aria-label="Delete salon"
             >
-              {isInactive ? (
-                <>
-                  <Check /> {isEditing ? "Processing..." : "Activate Salon"}
-                </>
-              ) : (
-                <>
-                  <Pause /> {isEditing ? "Processing..." : "Deactivate Salon"}
-                </>
-              )}
+              <Trash /> Delete Salon
             </Button>
-          );
-        })()}
 
-        <Button
-          variant="danger"
-          onClick={() => setOpenDeleteDialog(true)}
-          aria-label="Delete salon"
-        >
-          <Trash /> Delete Salon
-        </Button>
-
-        <DeleteSalonDialog
-          singleSalonData={singleSalonData}
-          isOpen={openDeleteDialog}
-          onClose={() => setOpenDeleteDialog(false)}
-        />
-      </div>
+            <DeleteSalonDialog
+              singleSalonData={singleSalonData}
+              isOpen={openDeleteDialog}
+              onClose={() => setOpenDeleteDialog(false)}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 };

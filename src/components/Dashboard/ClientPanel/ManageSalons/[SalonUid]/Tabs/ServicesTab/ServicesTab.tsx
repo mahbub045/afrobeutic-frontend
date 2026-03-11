@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { useEffectiveRole } from "@/hooks/use-effective-role";
 import { formatChoiceFieldValue, formatDateTime } from "@/lib/utils";
 import { useGetServicesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
 import { ServiceProps } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
@@ -34,6 +35,7 @@ import ViewServicePanel from "./ServiceDetails/ViewServicePanel";
 
 const ServicesTab: React.FC = () => {
   const { data: session } = useSession();
+  const { canManageClientAccount } = useEffectiveRole(session);
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
 
@@ -123,8 +125,7 @@ const ServicesTab: React.FC = () => {
             />
           </div>
           <div>
-            {(session?.user?.role === "OWNER" ||
-              session?.user?.role === "ADMIN") && (
+            {canManageClientAccount && (
               <Button
                 size="sm"
                 variant="default"
@@ -203,8 +204,12 @@ const ServicesTab: React.FC = () => {
                 <TableRow key={service.uid}>
                   <TableCell className="font-medium">{index + 1}</TableCell>
                   <TableCell className="font-medium">{service.name}</TableCell>
-                  <TableCell>{formatChoiceFieldValue(service.category) || "-"}</TableCell>
-                  <TableCell>{formatChoiceFieldValue(service.sub_category) || "-"}</TableCell>
+                  <TableCell>
+                    {formatChoiceFieldValue(service.category) || "-"}
+                  </TableCell>
+                  <TableCell>
+                    {formatChoiceFieldValue(service.sub_category) || "-"}
+                  </TableCell>
                   <TableCell>${service.price}</TableCell>
                   <TableCell>
                     {formatDateTime(service?.created_at ?? null)}
@@ -226,8 +231,7 @@ const ServicesTab: React.FC = () => {
                       </Button>
                     </div>
                     <div>
-                      {(session?.user?.role === "OWNER" ||
-                        session?.user?.role === "ADMIN") && (
+                      {canManageClientAccount && (
                         <Button
                           size="sm"
                           variant="ghost"

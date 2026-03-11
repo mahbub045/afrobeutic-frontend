@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useEffectiveRole } from "@/hooks/use-effective-role";
 import { formatChoiceFieldValue, safe } from "@/lib/utils";
 import { useGetProductsDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Products/ProductsApi";
 import {
@@ -27,6 +28,7 @@ const ViewProductPanel: React.FC<ViewProductPanelProps> = ({
   onClose,
 }) => {
   const { data: session } = useSession();
+  const { canManageClientAccount } = useEffectiveRole(session);
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
 
@@ -211,8 +213,7 @@ const ViewProductPanel: React.FC<ViewProductPanelProps> = ({
             <div className="mb-3 flex items-center justify-between">
               <h4 className="text-base font-semibold">Basic info</h4>
               <div>
-                {(session?.user?.role === "OWNER" ||
-                  session?.user?.role === "ADMIN") && (
+                {canManageClientAccount && (
                   <Button
                     variant="outline"
                     size="sm"

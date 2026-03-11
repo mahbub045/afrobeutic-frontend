@@ -1,29 +1,25 @@
 "use client";
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CircleAlert } from "lucide-react";
-import Link from "next/link";
 
 export default function BillingErrorAlert({
-  onRetry,
+  errorMessage,
 }: {
   onRetry: () => void;
+  errorMessage?: string;
 }) {
   return (
-    <Alert variant="destructive">
-      <CircleAlert />
-      <AlertTitle>Couldn’t load billing information</AlertTitle>
+    <Alert
+      variant="destructive"
+      className="flex flex-col items-center text-center"
+    >
+      <CircleAlert className="mb-2 !h-10 !w-10" />
       <AlertDescription>
-        <p>Please try again. If the issue persists, contact support.</p>
-        <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-          <Button type="button" variant="destructive" onClick={onRetry}>
-            Retry
-          </Button>
-          <Button asChild variant="outline">
-            <Link href="/dashboard/client-panel">Back to dashboard</Link>
-          </Button>
-        </div>
+        <p>
+          {errorMessage ??
+            "Please try again. If the issue persists, contact support."}
+        </p>
       </AlertDescription>
     </Alert>
   );

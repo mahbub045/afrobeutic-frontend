@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useEffectiveRole } from "@/hooks/use-effective-role";
 import { formatDateTime, safe } from "@/lib/utils";
 import { useGetEmployeesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Employees/EmployeesApi";
 import {
@@ -19,6 +20,7 @@ const ViewEmployeePanel: React.FC<ViewEmployeePanelProps> = ({
   onClose,
 }) => {
   const { data: session } = useSession();
+  const { canManageClientAccount } = useEffectiveRole(session);
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
 
@@ -131,8 +133,7 @@ const ViewEmployeePanel: React.FC<ViewEmployeePanelProps> = ({
             <div className="mb-3 flex items-center justify-between">
               <h4 className="text-base font-semibold">Basic info</h4>
               <div>
-                {(session?.user?.role === "OWNER" ||
-                  session?.user?.role === "ADMIN") && (
+                {canManageClientAccount && (
                   <Button
                     variant="outline"
                     size="sm"

@@ -86,7 +86,9 @@ const AccountList: React.FC = () => {
             {accountAccesserData.results.map((account) => (
               <Card
                 key={account.uid}
-                onClick={() => switchAccount(account.uid, account.owner_name)}
+                onClick={() =>
+                  switchAccount(account.uid, account.owner_name, account.role)
+                }
                 className={`group hover:shadow-primary/10 h-full min-h-20 w-full transform cursor-pointer overflow-hidden border bg-white/80 p-4 shadow-md backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:scale-105 hover:shadow-lg dark:bg-gray-900/80 dark:shadow-gray-600 ${
                   activeAccountId === account.uid
                     ? "border-primary border-2 shadow-lg"

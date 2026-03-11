@@ -158,6 +158,7 @@ const PaymentMethodsCard: React.FC = () => {
     data: cardListData,
     isLoading,
     isError,
+    error,
     isFetching,
     refetch,
   } = useGetAddCardListQuery(params);
@@ -176,7 +177,13 @@ const PaymentMethodsCard: React.FC = () => {
     .map((x) => x.card);
 
   if (isLoading) return <LoadingState />;
-  if (isError) return <BillingErrorAlert onRetry={() => refetch()} />;
+  if (isError)
+    return (
+      <BillingErrorAlert
+        onRetry={() => refetch()}
+        errorMessage={(error as { data?: { detail?: string } })?.data?.detail}
+      />
+    );
 
   const nextPage =
     parsePageFromUrl(payload?.next ?? null) ??

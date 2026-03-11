@@ -56,6 +56,12 @@ const IndividualAppointmentDetailsPanel: React.FC<
     useViewReceiptMutation();
   const effectiveStatus: IndBookingUiStatus | undefined =
     selectedAppointment?.status;
+  const isStatusEditDisabled = effectiveStatus === "completed";
+  const selectedServiceNames =
+    selectedAppointment?.services
+      ?.map((service) => formatChoiceFieldValue(service.name)?.trim())
+      .filter((serviceName): serviceName is string => Boolean(serviceName)) ??
+    [];
 
   const handleViewReceipt = async () => {
     if (!selectedAppointment?.id) {
@@ -252,7 +258,7 @@ const IndividualAppointmentDetailsPanel: React.FC<
           </div>
           {servicesCount === 0 ? (
             <p className="text-muted-foreground text-xs">
-              No services added to this booking.
+              Services not selected yet.
             </p>
           ) : (
             <div className="space-y-1 rounded-lg border p-3">
@@ -440,7 +446,10 @@ const IndividualAppointmentDetailsPanel: React.FC<
     );
   };
 
-  const title = selectedAppointment?.service || "Appointment details";
+  const title =
+    selectedServiceNames.length > 0
+      ? selectedServiceNames.join(", ")
+      : "Services not selected yet";
 
   // Convert selectedAppointment to booking data format for the dialog
   const bookingDataForDialog = selectedAppointment
@@ -461,7 +470,7 @@ const IndividualAppointmentDetailsPanel: React.FC<
       <div className="bg-card hidden max-h-[600px] overflow-hidden lg:flex lg:flex-col">
         <div className="flex-shrink-0 border-b px-6 py-3">
           <div className="mb-3 flex items-start justify-between">
-            <h3 className="text-foreground text-base font-semibold">{title}</h3>
+            <h5 className="text-foreground text-xs font-semibold">{title}</h5>
           </div>
           {selectedAppointment && effectiveStatus && (
             <div className="flex items-center gap-2">
@@ -475,6 +484,7 @@ const IndividualAppointmentDetailsPanel: React.FC<
                   size="icon"
                   className="h-6 w-6 p-0"
                   type="button"
+                  disabled={isStatusEditDisabled}
                   onClick={() => setIsStatusDialogOpen(true)}
                 >
                   <Edit size={14} />
@@ -507,9 +517,9 @@ const IndividualAppointmentDetailsPanel: React.FC<
             <div className="flex h-full flex-col">
               <div className="border-b px-4 py-3">
                 <div className="mb-1 flex items-start justify-start">
-                  <h3 className="text-foreground text-base font-semibold">
+                  <h5 className="text-foreground text-xs font-semibold">
                     {title}
-                  </h3>
+                  </h5>
                 </div>
                 {selectedAppointment && effectiveStatus && (
                   <div className="mt-1 flex items-center gap-2">
@@ -523,6 +533,7 @@ const IndividualAppointmentDetailsPanel: React.FC<
                         size="icon"
                         className="h-6 w-6 p-0"
                         type="button"
+                        disabled={isStatusEditDisabled}
                         onClick={() => setIsStatusDialogOpen(true)}
                       >
                         <Edit size={14} />

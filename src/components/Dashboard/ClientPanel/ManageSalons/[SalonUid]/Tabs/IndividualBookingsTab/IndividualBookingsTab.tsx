@@ -35,7 +35,7 @@ import {
   Plus,
 } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AddIndividualBookingDialog from "./Dialogs/AddIndividualBookingDialog";
 import IndividualAppointmentDetailsPanel from "./IndividualAppointmentDetailsPanel";
 
@@ -161,10 +161,11 @@ const IndividualBookingsTab: React.FC = () => {
   }
 
   // RTK Hooks
-  const { data: individualBookingsData } = useGetIndividualBookingsQuery({
-    salonUid: salonuid as string,
-    params: filters,
-  });
+  const { data: individualBookingsData, refetch: refetchIndividualBookings } =
+    useGetIndividualBookingsQuery({
+      salonUid: salonuid as string,
+      params: filters,
+    });
 
   // Normalize paginated API response into a flat bookings array
   const bookings: IndividualBookingApi[] =
@@ -175,15 +176,8 @@ const IndividualBookingsTab: React.FC = () => {
     return booking.status === statusFilter;
   });
 
-  const handleStatusUpdated = (newApiStatus: string) => {
-    const apiStatus = newApiStatus as IndBookingApiStatus;
-    setSelectedAppointment((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        status: statusMap[apiStatus] ?? prev.status,
-      };
-    });
+  const handleStatusUpdated = () => {
+    refetchIndividualBookings();
   };
 
   const handleDateTimeUpdated = (data: {
@@ -283,14 +277,19 @@ const IndividualBookingsTab: React.FC = () => {
       ? `${booking.customer.first_name ?? ""} ${booking.customer.last_name ?? ""}`.trim()
       : "";
 
+    const serviceNames =
+      booking.services
+        ?.map((service) => formatChoiceFieldValue(service.name)?.trim())
+        .filter((serviceName): serviceName is string => Boolean(serviceName)) ??
+      [];
     const serviceName =
-      booking.services && booking.services.length > 0
-        ? booking.services[0].name
-        : "Service";
+      serviceNames.length > 0
+        ? serviceNames.join(", ")
+        : "Services not selected yet";
 
     return {
       id: booking.uid ?? booking.booking_id,
-      service: serviceName.toUpperCase(),
+      service: serviceName,
       client: customerName || booking.customer?.phone || "Unknown Customer",
       startTime: booking.booking_time,
       status: (statusMap[apiStatus] ?? "placed") as IndBookingUiStatus,
@@ -315,6 +314,38 @@ const IndividualBookingsTab: React.FC = () => {
       paymentType: booking.payment_type,
     };
   });
+
+  useEffect(() => {
+    if (!selectedAppointment?.id) return;
+
+    const updatedAppointment = appointments.find(
+      (appointment) => appointment.id === selectedAppointment.id,
+    );
+
+    if (!updatedAppointment) return;
+
+    setSelectedAppointment((currentAppointment) => {
+      if (!currentAppointment) return currentAppointment;
+
+      const hasChanged =
+        currentAppointment.status !== updatedAppointment.status ||
+        currentAppointment.startTime !== updatedAppointment.startTime ||
+        currentAppointment.bookingDate !== updatedAppointment.bookingDate ||
+        currentAppointment.bookingDuration !==
+          (updatedAppointment.bookingDuration || null) ||
+        currentAppointment.notes !== updatedAppointment.notes ||
+        currentAppointment.final_price !== updatedAppointment.final_price ||
+        currentAppointment.tips_amount !== updatedAppointment.tips_amount ||
+        currentAppointment.paymentType !== updatedAppointment.paymentType;
+
+      if (!hasChanged) return currentAppointment;
+
+      return {
+        ...currentAppointment,
+        ...updatedAppointment,
+      };
+    });
+  }, [appointments, selectedAppointment?.id]);
 
   const isCancelled = selectedAppointment?.status === "cancelled";
 

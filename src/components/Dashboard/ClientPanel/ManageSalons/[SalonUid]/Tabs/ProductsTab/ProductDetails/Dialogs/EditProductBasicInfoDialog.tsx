@@ -20,17 +20,28 @@ import {
 import {
   EditProductBasicInfoDialogProps,
   ProductCategory,
+  ProductFormValues,
   ProductProps,
 } from "@/Types/ClientPanel/ManageSalonTypes/ProductsTypes/ProductsType";
-import { ErrorMessage, Field, Form, Formik } from "formik";
+import { ErrorMessage, Field, Form, Formik, FormikProps } from "formik";
 import { X } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
+
+const buildInitialValues = (
+  product?: ProductProps | null,
+): ProductFormValues => ({
+  name: product?.name || "",
+  category: product?.category || "",
+  sub_category: product?.sub_category || "",
+  price: product?.price || "",
+  description: product?.description || "",
+});
 
 const EditProductBasicInfoDialog: React.FC<EditProductBasicInfoDialogProps> = ({
   isOpen,
@@ -44,6 +55,10 @@ const EditProductBasicInfoDialog: React.FC<EditProductBasicInfoDialogProps> = ({
   const [selectedCategoryUid, setSelectedCategoryUid] = useState<string>("");
   const [showSubCategoryInput, setShowSubCategoryInput] = useState(false);
   const [newSubCategoryName, setNewSubCategoryName] = useState("");
+  const [formInitialValues, setFormInitialValues] = useState<ProductFormValues>(
+    () => buildInitialValues(selectedProduct),
+  );
+  const formikRef = useRef<FormikProps<ProductFormValues>>(null);
 
   // RTK Hooks
   const [editProduct, { isLoading: isEditingProduct }] =
@@ -90,10 +105,13 @@ const EditProductBasicInfoDialog: React.FC<EditProductBasicInfoDialogProps> = ({
 
   useEffect(() => {
     if (!isOpen) return;
+
+    setFormInitialValues(buildInitialValues(selectedProduct));
     setSelectedCategoryUid(resolvedCategoryFromProduct || "");
     setShowSubCategoryInput(false);
     setNewSubCategoryName("");
-  }, [isOpen, resolvedCategoryFromProduct]);
+    setUploadedImages([]);
+  }, [isOpen, resolvedCategoryFromProduct, selectedProduct]);
 
   const resolvedSubCategoryFromProduct = useMemo(() => {
     const rawSub = selectedProduct?.sub_category || "";
@@ -116,6 +134,38 @@ const EditProductBasicInfoDialog: React.FC<EditProductBasicInfoDialogProps> = ({
 
     return match ? match.uid : "";
   }, [selectedProduct, commonSubCategoriesData]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const formik = formikRef.current;
+    if (!formik) return;
+
+    if (
+      resolvedCategoryFromProduct &&
+      formik.values.category !== resolvedCategoryFromProduct &&
+      formik.values.category === (selectedProduct?.category || "")
+    ) {
+      formik.setFieldValue("category", resolvedCategoryFromProduct, false);
+    }
+
+    if (
+      resolvedSubCategoryFromProduct &&
+      formik.values.sub_category !== resolvedSubCategoryFromProduct &&
+      formik.values.sub_category === (selectedProduct?.sub_category || "")
+    ) {
+      formik.setFieldValue(
+        "sub_category",
+        resolvedSubCategoryFromProduct,
+        false,
+      );
+    }
+  }, [
+    isOpen,
+    resolvedCategoryFromProduct,
+    resolvedSubCategoryFromProduct,
+    selectedProduct,
+  ]);
 
   const validationSchema = Yup.object().shape({
     name: Yup.string().required("Product name is required"),
@@ -175,7 +225,7 @@ const EditProductBasicInfoDialog: React.FC<EditProductBasicInfoDialogProps> = ({
     }
   }
 
-  const handleSubmit = async (values: ProductProps) => {
+  const handleSubmit = async (values: ProductFormValues) => {
     try {
       const formData = new FormData();
       formData.append("name", values.name);
@@ -225,19 +275,8 @@ const EditProductBasicInfoDialog: React.FC<EditProductBasicInfoDialogProps> = ({
 
         <Formik
           enableReinitialize
-          initialValues={
-            {
-              name: selectedProduct?.name || "",
-              category:
-                resolvedCategoryFromProduct || selectedProduct?.category || "",
-              sub_category:
-                resolvedSubCategoryFromProduct ||
-                selectedProduct?.sub_category ||
-                "",
-              price: selectedProduct?.price || "",
-              description: selectedProduct?.description || "",
-            } as ProductProps
-          }
+          innerRef={formikRef}
+          initialValues={formInitialValues}
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >

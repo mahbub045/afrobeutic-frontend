@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ENQUIRY_STATUSES } from "@/constants/enquiryStatuses";
+import { ENQUIRY_TYPES } from "@/constants/enquiryTypes";
 import { useEditEnquiryMutation } from "@/Redux/Reducers/ClientPanel/Enquiries/EnquiriesApi";
 import { EnquiryDialogsProps } from "@/Types/EnquiriesTypes/EnquiryType";
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
@@ -28,7 +30,7 @@ const EditEnquiryDialog: React.FC<EnquiryDialogsProps> = ({
   const [editEnquiry, { isLoading }] = useEditEnquiryMutation();
 
   const initialValues = {
-    type: enquiryData?.type ?? "",
+    type: enquiryData?.type ?? ENQUIRY_TYPES[0].value,
     summary: enquiryData?.summary ?? "",
     status: enquiryData?.status ?? "",
   };
@@ -51,6 +53,10 @@ const EditEnquiryDialog: React.FC<EnquiryDialogsProps> = ({
     }
 
     try {
+      // fallback in case type somehow became empty
+      if (!values.type) {
+        values.type = ENQUIRY_TYPES[0].value;
+      }
       await editEnquiry({ enquiryuid: enquiryData.uid, ...values }).unwrap();
       Swal.fire({
         icon: "success",
@@ -94,8 +100,11 @@ const EditEnquiryDialog: React.FC<EnquiryDialogsProps> = ({
                   Type
                 </Label>
                 <Field as="select" id="type" name="type">
-                  <option value="GENERAL">General</option>
-                  <option value="EMERGENCY">Emergency</option>
+                  {ENQUIRY_TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
                 </Field>
                 <div className="text-destructive text-sm">
                   <ErrorMessage name="type" />
@@ -107,10 +116,11 @@ const EditEnquiryDialog: React.FC<EnquiryDialogsProps> = ({
                   Status
                 </Label>
                 <Field as="select" id="status" name="status">
-                  <option value="NEW">New</option>
-                  <option value="IN_REVIEW">In Review</option>
-                  <option value="CANCELLED">Cancelled</option>
-                  <option value="RESOLVED">Resolved</option>
+                  {ENQUIRY_STATUSES.map((s) => (
+                    <option key={s.value} value={s.value}>
+                      {s.label}
+                    </option>
+                  ))}
                 </Field>
                 <div className="text-destructive text-sm">
                   <ErrorMessage name="status" />

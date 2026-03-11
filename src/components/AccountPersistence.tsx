@@ -25,14 +25,28 @@ export const AccountPersistence = () => {
 
       // Check if there's a stored active account
       const storedAccountId = localStorage.getItem("activeAccountId");
+      const storedAccountRole = localStorage.getItem("activeAccountRole");
 
       if (storedAccountId) {
         // Use the stored account if it exists
-        dispatch(setActiveAccount(storedAccountId));
+        dispatch(
+          setActiveAccount({
+            id: storedAccountId,
+            role: storedAccountRole,
+          }),
+        );
       } else if (session.user.account_id) {
         // If no stored account, default to user's own account
-        dispatch(setActiveAccount(session.user.account_id));
+        dispatch(
+          setActiveAccount({
+            id: session.user.account_id,
+            role: session.user.role,
+          }),
+        );
         localStorage.setItem("activeAccountId", session.user.account_id);
+        if (session.user.role) {
+          localStorage.setItem("activeAccountRole", session.user.role);
+        }
       }
     }
   }, [dispatch, session, status]);

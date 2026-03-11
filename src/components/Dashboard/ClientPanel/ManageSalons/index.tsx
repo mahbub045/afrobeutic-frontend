@@ -21,6 +21,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 // import * as React from "react";
+import { useEffectiveRole } from "@/hooks/use-effective-role";
 import { formatChoiceFieldValue } from "@/lib/utils";
 import { useGetSalonListQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonApi";
 import type { OpeningHour } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
@@ -31,6 +32,7 @@ import AddSalonDialog from "./Dialogs/AddSalonDialog";
 
 const ManageSalonsContainer: React.FC = () => {
   const { data: session } = useSession();
+  const { canManageClientAccount } = useEffectiveRole(session);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -85,6 +87,7 @@ const ManageSalonsContainer: React.FC = () => {
     : 0;
 
   // Helper: Determine if salon is open today based on opening_hours array
+  // considers is_closed flag and compares current time against opening/closing
   const isSalonOpenToday = (opening_hours?: OpeningHour[]) => {
     if (!opening_hours || opening_hours.length === 0) return false;
 
@@ -99,7 +102,8 @@ const ManageSalonsContainer: React.FC = () => {
       SATURDAY: 6,
     };
 
-    const todayIndex = new Date().getDay();
+    const now = new Date();
+    const todayIndex = now.getDay();
 
     // Find entry for today
     const todaysEntry = opening_hours.find((oh) => {
@@ -109,17 +113,38 @@ const ManageSalonsContainer: React.FC = () => {
 
     if (!todaysEntry) return false;
 
-    // If is_closed flag is present and true -> closed
+    // Explicit closed flag takes precedence
     if (typeof todaysEntry.is_closed === "boolean") {
-      return !todaysEntry.is_closed;
+      if (todaysEntry.is_closed) return false;
     }
 
-    // Fallback: if opening and closing times are both 00:00:00 treat as closed
+    // parse times; if unavailable, assume open unless flagged closed above
+    const parse = (t: string) => {
+      const [h, m, s] = t.split(":").map(Number);
+      const d = new Date(now);
+      d.setHours(h, m, s, 0);
+      return d;
+    };
+
     if (
-      todaysEntry.opening_time === "00:00:00" &&
-      todaysEntry.closing_time === "00:00:00"
+      todaysEntry.opening_time &&
+      todaysEntry.closing_time &&
+      !(
+        todaysEntry.opening_time === "00:00:00" &&
+        todaysEntry.closing_time === "00:00:00"
+      )
     ) {
-      return false;
+      const openTime = parse(todaysEntry.opening_time);
+      const closeTime = parse(todaysEntry.closing_time);
+
+      // handle overnight spans (closing <= opening)
+      if (closeTime <= openTime) {
+        closeTime.setDate(closeTime.getDate() + 1);
+      }
+
+      if (now < openTime || now > closeTime) {
+        return false;
+      }
     }
 
     return true;
@@ -155,8 +180,7 @@ const ManageSalonsContainer: React.FC = () => {
         </div> */}
 
         <div className="flex flex-col items-end gap-2">
-          {(session?.user?.role === "OWNER" ||
-            session?.user?.role === "ADMIN") &&
+          {canManageClientAccount &&
             session?.user?.is_salon_limit_reached !== true &&
             (session?.user?.account_type !== "INDIVIDUAL_STYLIST" ||
               (salonListData?.count || 0) < 1) && (
