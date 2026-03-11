@@ -30,7 +30,7 @@ const SettingsTab: React.FC = () => {
 
   // RTK hooks
   const [editProfile, { isLoading: isEditing }] = useEditSingleSalonMutation();
-  // RTK Hooks
+
   const {
     data: singleSalonData,
     isLoading,
@@ -118,9 +118,11 @@ const SettingsTab: React.FC = () => {
         {/* Right Column - WhatsApp & Contact */}
         <div className="space-y-6">
           {/* WhatsApp Section */}
-          <div className="space-y-1">
-            <WhatsApp />
-          </div>
+          {singleSalonData?.is_chatbot_available && (
+            <div className="space-y-1">
+              <WhatsApp />
+            </div>
+          )}
 
           {/* Contact & Social Links Section */}
           <div className="space-y-6">
