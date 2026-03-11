@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEffectiveRole } from "@/hooks/use-effective-role";
 import { useGetSalonListQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonApi";
 import { AlertCircle, Plus, Scissors } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -13,6 +14,7 @@ import AddSalonDialog from "../../../ManageSalons/Dialogs/AddSalonDialog";
 
 const SalonsCard: React.FC = () => {
   const { data: session } = useSession();
+  const { canManageClientAccount } = useEffectiveRole(session);
   const { data: salonsData, isLoading, isError } = useGetSalonListQuery();
   const [isAddSalonDialogOpen, setIsAddSalonDialogOpen] = useState(false);
 
@@ -24,7 +26,7 @@ const SalonsCard: React.FC = () => {
     <Card className="h-full shadow-md dark:shadow-gray-600">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <CardTitle className="text-xl font-semibold">My Salons</CardTitle>
-        {(session?.user?.role === "OWNER" || session?.user?.role === "ADMIN") &&
+        {canManageClientAccount &&
           session?.user?.is_salon_limit_reached !== true &&
           (session?.user?.account_type !== "INDIVIDUAL_STYLIST" ||
             (salonsData?.count || 0) < 1) && (

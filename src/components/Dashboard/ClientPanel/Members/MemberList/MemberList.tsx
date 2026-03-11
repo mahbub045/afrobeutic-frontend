@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEffectiveRole } from "@/hooks/use-effective-role";
 import { formatChoiceFieldValue } from "@/lib/utils";
 import { useGetMembersQuery } from "@/Redux/Reducers/ClientPanel/Members/MembersApi";
 import { MemberProps } from "@/Types/ClientPanel/ManageSalonTypes/MemberTypes/MemberType";
@@ -28,6 +29,7 @@ import EditMemberInfoDialog from "./Dialogs/EditMemberInfoDialog";
 
 const MemberList: React.FC = () => {
   const { data: session } = useSession();
+  const { canManageClientAccount } = useEffectiveRole(session);
   const [isOpenAddMemberModal, setIsOpenAddMemberModal] = useState(false);
   const [isOpenEditMemberModal, setIsOpenEditMemberModal] = useState(false);
   const [isOpenDeleteMemberModal, setIsOpenDeleteMemberModal] = useState(false);
@@ -101,8 +103,7 @@ const MemberList: React.FC = () => {
           />
         </div> */}
         <div>
-          {(session?.user?.role === "OWNER" ||
-            session?.user?.role === "ADMIN") && (
+          {canManageClientAccount && (
             <Button
               variant="default"
               size="sm"
@@ -151,9 +152,7 @@ const MemberList: React.FC = () => {
                   </Badge>
                 </div>
                 <div>
-                  {(session?.user?.role === "OWNER" ||
-                    session?.user?.role === "ADMIN") &&
-                    member.role !== "OWNER" && (
+                  {canManageClientAccount && member.role !== "OWNER" && (
                     <div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>

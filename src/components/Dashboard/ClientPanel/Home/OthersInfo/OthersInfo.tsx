@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAccountSwitch } from "@/hooks/use-account-switch";
+import { useEffectiveRole } from "@/hooks/use-effective-role";
 import { formatChoiceFieldValue } from "@/lib/utils";
 import { useGetAccountAccesserQuery } from "@/Redux/Reducers/ClientPanel/Accounts/SwitchAccount/SwitchAccountApi";
 import { ArrowRight, LoaderPinwheel, Star } from "lucide-react";
@@ -13,6 +14,7 @@ import { useMemo } from "react";
 
 const OthersInfo: React.FC = () => {
   const { data: session } = useSession();
+  const { role } = useEffectiveRole(session);
   const { activeAccountId } = useAccountSwitch();
   const { data: accountsData } = useGetAccountAccesserQuery();
 
@@ -89,7 +91,7 @@ const OthersInfo: React.FC = () => {
                 <Badge variant="secondary" className="font-semibold text-white">
                   {(isViewingDifferentAccount && activeAccount
                     ? formatChoiceFieldValue(activeAccount.role)
-                    : formatChoiceFieldValue(session?.user?.role)) || "N/A"}
+                    : formatChoiceFieldValue(role)) || "N/A"}
                 </Badge>
               </div>
             </>

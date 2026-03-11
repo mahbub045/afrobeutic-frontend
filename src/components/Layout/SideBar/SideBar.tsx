@@ -6,6 +6,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { useEffectiveRole } from "@/hooks/use-effective-role";
 import {
   BadgeQuestionMark,
   Banknote,
@@ -55,12 +56,8 @@ const SideBar: React.FC<SideBarProps> = ({
 }) => {
   const pathname = usePathname();
   const { data: session, status } = useSession();
+  const { role } = useEffectiveRole(session);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
-
-  // Get user role directly from session
-  const role: string | null = session?.user?.role
-    ? String(session.user.role).toUpperCase()
-    : null;
 
   const toggleExpand = (label: string) => {
     const newExpanded = new Set(expandedItems);

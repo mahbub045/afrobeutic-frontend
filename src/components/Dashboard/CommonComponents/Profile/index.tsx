@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useEffectiveRole } from "@/hooks/use-effective-role";
 import {
   formatChoiceFieldValue,
   formatDateTime,
@@ -34,6 +35,7 @@ function initials(name = "") {
 
 const ProfileConatiner: React.FC = () => {
   const { data: session } = useSession();
+  const { role, isManagementRole } = useEffectiveRole(session);
   const [isOpenChangePassword, setIsOpenChangePassword] = useState(false);
   const { data: userData, isLoading } = useGetProfileDataQuery(undefined);
 
@@ -47,10 +49,11 @@ const ProfileConatiner: React.FC = () => {
   // Roles that should see the client panel
   const clientRoles = ["OWNER", "ADMIN", "STAFF"];
   const adminRoles = ["MANAGEMENT_ADMIN", "MANAGEMENT_STAFF"];
+  const effectiveRole = role || userData?.role;
 
-  const panelHref = clientRoles.includes(userData?.role)
+  const panelHref = clientRoles.includes(effectiveRole || "")
     ? "/dashboard/client-panel"
-    : adminRoles.includes(userData?.role)
+    : adminRoles.includes(effectiveRole || "")
       ? "/dashboard/admin-panel"
       : "/dashboard/client-panel";
 
@@ -146,8 +149,7 @@ const ProfileConatiner: React.FC = () => {
               </CardContent>
             </Card>
 
-            {session?.user?.role === "MANAGEMENT_ADMIN" ||
-            session?.user?.role === "MANAGEMENT_STAFF" ? null : (
+            {isManagementRole ? null : (
               <Card className="shadow-md dark:shadow-gray-500">
                 <CardHeader>
                   <div className="flex items-start justify-between gap-2">

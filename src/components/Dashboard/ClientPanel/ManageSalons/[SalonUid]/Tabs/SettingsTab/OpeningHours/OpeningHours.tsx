@@ -7,6 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEffectiveRole } from "@/hooks/use-effective-role";
 import { useGetSingleSalonDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SingleSalon/SingleSalonApi";
 import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
@@ -70,6 +71,7 @@ function formatTimeShort(time?: string | null) {
 
 const OpeningHours: React.FC = () => {
   const { data: session } = useSession();
+  const { canManageClientAccount } = useEffectiveRole(session);
   const { salonuid } = useParams();
 
   // RTK Hook - single salon data (which includes opening_hours)
@@ -161,8 +163,7 @@ const OpeningHours: React.FC = () => {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Opening Hours</h2>
         <div className="flex items-center gap-2">
-          {(session?.user?.role === "OWNER" ||
-            session?.user?.role === "ADMIN") && (
+          {canManageClientAccount && (
             <Button
               size="sm"
               variant="outline"
@@ -181,8 +182,7 @@ const OpeningHours: React.FC = () => {
             <CardHeader className="flex items-center justify-between">
               <CardTitle className="relative">{entry.day}</CardTitle>
               <div className="flex items-center gap-2">
-                {(session?.user?.role === "OWNER" ||
-                  session?.user?.role === "ADMIN") && (
+                {canManageClientAccount && (
                   <Button
                     size="xs"
                     variant="outline"

@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEffectiveRole } from "@/hooks/use-effective-role";
 import { DashboardTabProps } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
 import { Check, Copy, PenSquare } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -22,6 +23,7 @@ const ContactsCard: React.FC<DashboardTabProps> = ({
   isLoading,
 }) => {
   const { data: session } = useSession();
+  const { canManageClientAccount } = useEffectiveRole(session);
   const [openContactInfoDialog, setOpenContactInfoDialog] = useState(false);
 
   const handleOpenContactInfoDialog = () => {
@@ -66,8 +68,7 @@ const ContactsCard: React.FC<DashboardTabProps> = ({
             <Skeleton className="h-8 w-16 rounded-md" />
           ) : (
             <div>
-              {(session?.user?.role === "OWNER" ||
-                session?.user?.role === "ADMIN") && (
+              {canManageClientAccount && (
                 <Button
                   variant="outline"
                   size="sm"

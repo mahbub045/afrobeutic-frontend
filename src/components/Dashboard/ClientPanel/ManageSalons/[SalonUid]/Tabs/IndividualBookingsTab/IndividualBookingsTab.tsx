@@ -277,14 +277,19 @@ const IndividualBookingsTab: React.FC = () => {
       ? `${booking.customer.first_name ?? ""} ${booking.customer.last_name ?? ""}`.trim()
       : "";
 
+    const serviceNames =
+      booking.services
+        ?.map((service) => formatChoiceFieldValue(service.name)?.trim())
+        .filter((serviceName): serviceName is string => Boolean(serviceName)) ??
+      [];
     const serviceName =
-      booking.services && booking.services.length > 0
-        ? booking.services[0].name
-        : "Service";
+      serviceNames.length > 0
+        ? serviceNames.join(", ")
+        : "Services not selected yet";
 
     return {
       id: booking.uid ?? booking.booking_id,
-      service: serviceName.toUpperCase(),
+      service: serviceName,
       client: customerName || booking.customer?.phone || "Unknown Customer",
       startTime: booking.booking_time,
       status: (statusMap[apiStatus] ?? "placed") as IndBookingUiStatus,

@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useEffectiveRole } from "@/hooks/use-effective-role";
 import { formatChoiceFieldValue } from "@/lib/utils";
 import { LoaderPinwheel } from "lucide-react";
 import Link from "next/link";
@@ -23,6 +24,8 @@ interface Props {
 }
 
 const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
+  const { role, isClientRole, isManagementRole } = useEffectiveRole(session);
+
   if (status === "loading")
     return (
       <div className="text-primary flex h-8 w-8 items-center justify-center">
@@ -48,13 +51,6 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
     (session.user.first_name && session.user.last_name
       ? `${session.user.first_name} ${session.user.last_name}`
       : session.user.name || "");
-
-  // Role helpers
-  const role: string | undefined = session.user.role;
-  const isClientRole = ["OWNER", "ADMIN", "STAFF"].includes(role || "");
-  const isManagementRole = ["MANAGEMENT_ADMIN", "MANAGEMENT_STAFF"].includes(
-    role || "",
-  );
 
   return (
     <DropdownMenu>
@@ -92,9 +88,9 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
             <p className="text-muted-foreground text-xs leading-none">
               {session.user.email}
             </p>
-            {session.user.role && (
+            {role && (
               <Badge variant="secondary" className="w-fit text-xs">
-                {formatChoiceFieldValue(session.user.role)}
+                {formatChoiceFieldValue(role)}
               </Badge>
             )}
           </div>

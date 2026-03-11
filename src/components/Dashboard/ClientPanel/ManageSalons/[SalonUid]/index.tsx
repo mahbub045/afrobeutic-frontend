@@ -34,11 +34,9 @@ const SingleSalonContainer: React.FC = () => {
   const { data: session } = useSession();
 
   // RTK Hooks
-  const {
-    data: singleSalonData,
-    isLoading,
-    isError,
-  } = useGetSingleSalonDataQuery({ salonUid: salonuid });
+  const { data: singleSalonData } = useGetSingleSalonDataQuery({
+    salonUid: salonuid,
+  });
 
   interface MenuItemProps {
     label: string;

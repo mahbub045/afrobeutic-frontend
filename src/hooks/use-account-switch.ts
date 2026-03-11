@@ -2,6 +2,7 @@ import { baseApi } from "@/Redux/Api/BaseApi";
 import {
   clearActiveAccount,
   selectActiveAccountId,
+  selectActiveAccountRole,
   setActiveAccount,
 } from "@/Redux/Reducers/CommonReducer/accountSlice";
 import { useRouter } from "next/navigation";
@@ -13,15 +14,26 @@ export const useAccountSwitch = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const activeAccountId = useSelector(selectActiveAccountId);
+  const activeAccountRole = useSelector(selectActiveAccountRole);
 
   const switchAccount = useCallback(
-    (accountId: string, accountName?: string) => {
+    (accountId: string, accountName?: string, accountRole?: string | null) => {
       // Store in Redux
-      dispatch(setActiveAccount(accountId));
+      dispatch(
+        setActiveAccount({
+          id: accountId,
+          role: accountRole,
+        }),
+      );
 
       // Persist to localStorage so it survives page reloads
       if (typeof window !== "undefined") {
         localStorage.setItem("activeAccountId", accountId);
+        if (accountRole) {
+          localStorage.setItem("activeAccountRole", accountRole);
+        } else {
+          localStorage.removeItem("activeAccountRole");
+        }
       }
 
       // Invalidate all RTK Query cache to refetch data with new account
@@ -47,6 +59,7 @@ export const useAccountSwitch = () => {
     // Remove from localStorage
     if (typeof window !== "undefined") {
       localStorage.removeItem("activeAccountId");
+      localStorage.removeItem("activeAccountRole");
     }
 
     // Invalidate all RTK Query cache to refetch data with main account
@@ -67,9 +80,17 @@ export const useAccountSwitch = () => {
     return activeAccountId;
   }, [activeAccountId]);
 
+  const getActiveAccountRole = useCallback(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("activeAccountRole");
+    }
+    return activeAccountRole;
+  }, [activeAccountRole]);
+
   return {
     switchAccount,
     resetToMainAccount,
     activeAccountId: getActiveAccountId(),
+    activeAccountRole: getActiveAccountRole(),
   };
 };

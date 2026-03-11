@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/table";
 import { ENQUIRY_STATUSES } from "@/constants/enquiryStatuses";
 import { ENQUIRY_TYPES } from "@/constants/enquiryTypes";
+import { useEffectiveRole } from "@/hooks/use-effective-role";
 import { formatChoiceFieldValue, formatDateTime, safe } from "@/lib/utils";
 import {
   ChevronLeft,
@@ -48,6 +49,7 @@ import EditEnquiryDialog from "./Dialogs/EditEnquiryDialog";
 
 const EnquiryList: React.FC = () => {
   const { data: session } = useSession();
+  const { canManageClientAccount } = useEffectiveRole(session);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
@@ -446,8 +448,7 @@ const EnquiryList: React.FC = () => {
                       </Link>
                     </div>
                     <div>
-                      {(session?.user?.role === "OWNER" ||
-                        session?.user?.role === "ADMIN") && (
+                      {canManageClientAccount && (
                         <Button
                           variant="outline"
                           size="sm"

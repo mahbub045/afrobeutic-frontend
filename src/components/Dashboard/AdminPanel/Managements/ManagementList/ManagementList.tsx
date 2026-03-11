@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useEffectiveRole } from "@/hooks/use-effective-role";
 import {
   formatChoiceFieldValue,
   formatDateTime,
@@ -44,6 +45,7 @@ import RegisterManagementDialog from "./Dialogs/RegisterManagementDialog";
 
 const ManagementList: React.FC = () => {
   const { data: session } = useSession();
+  const { isManagementAdmin } = useEffectiveRole(session);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
@@ -153,7 +155,7 @@ const ManagementList: React.FC = () => {
           </div>
 
           <div>
-            {session?.user?.role === "MANAGEMENT_ADMIN" && (
+            {isManagementAdmin && (
               <Button
                 variant="default"
                 size="sm"
@@ -178,7 +180,7 @@ const ManagementList: React.FC = () => {
             <TableHead className="text-primary text-center">
               Last Login
             </TableHead>
-            {session?.user?.role === "MANAGEMENT_ADMIN" && (
+            {isManagementAdmin && (
               <TableHead className="text-primary text-center">
                 Actions
               </TableHead>
@@ -239,7 +241,7 @@ const ManagementList: React.FC = () => {
                 <TableCell>
                   {m.last_login ? formatDateTime(m.last_login) : "Never"}
                 </TableCell>
-                {session?.user?.role === "MANAGEMENT_ADMIN" &&
+                {isManagementAdmin &&
                   (session?.user?.uid !== m.uid ? (
                     <TableCell className="flex items-center justify-center gap-2">
                       <div>

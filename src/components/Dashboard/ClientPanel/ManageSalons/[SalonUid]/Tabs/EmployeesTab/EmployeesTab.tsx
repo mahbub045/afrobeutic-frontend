@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { useEffectiveRole } from "@/hooks/use-effective-role";
 import { formatDateTime } from "@/lib/utils";
 import { useGetEmployeesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Employees/EmployeesApi";
 import { EmployeeProps } from "@/Types/ClientPanel/ManageSalonTypes/EmployeesTypes/EmployeesType";
@@ -31,6 +32,7 @@ import ViewEmployeePanel from "./EmployeeDetails/ViewEmployeePanel";
 
 const EmployeesTab: React.FC = () => {
   const { data: session } = useSession();
+  const { canManageClientAccount } = useEffectiveRole(session);
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
 
@@ -112,8 +114,7 @@ const EmployeesTab: React.FC = () => {
             />
           </div>
           <div>
-            {(session?.user?.role === "OWNER" ||
-              session?.user?.role === "ADMIN") && (
+            {canManageClientAccount && (
               <Button
                 size="sm"
                 variant="default"
@@ -185,8 +186,7 @@ const EmployeesTab: React.FC = () => {
                       </Button>
                     </div>
                     <div>
-                      {(session?.user?.role === "OWNER" ||
-                        session?.user?.role === "ADMIN") && (
+                      {canManageClientAccount && (
                         <Button
                           size="sm"
                           variant="ghost"

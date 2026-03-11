@@ -21,6 +21,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 // import * as React from "react";
+import { useEffectiveRole } from "@/hooks/use-effective-role";
 import { formatChoiceFieldValue } from "@/lib/utils";
 import { useGetSalonListQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/SalonApi";
 import type { OpeningHour } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
@@ -31,6 +32,7 @@ import AddSalonDialog from "./Dialogs/AddSalonDialog";
 
 const ManageSalonsContainer: React.FC = () => {
   const { data: session } = useSession();
+  const { canManageClientAccount } = useEffectiveRole(session);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -178,8 +180,7 @@ const ManageSalonsContainer: React.FC = () => {
         </div> */}
 
         <div className="flex flex-col items-end gap-2">
-          {(session?.user?.role === "OWNER" ||
-            session?.user?.role === "ADMIN") &&
+          {canManageClientAccount &&
             session?.user?.is_salon_limit_reached !== true &&
             (session?.user?.account_type !== "INDIVIDUAL_STYLIST" ||
               (salonListData?.count || 0) < 1) && (

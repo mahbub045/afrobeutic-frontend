@@ -29,6 +29,8 @@ const PAYMENT_TYPES = [
   { value: "OTHER", label: "Other" },
 ];
 
+const ACTIVE_PAYMENT_TYPE = "CASH";
+
 const EditBookingCheckoutDialog: React.FC<CommonEditBookingDataProps> = ({
   isOpen,
   onOpenChange,
@@ -51,7 +53,11 @@ const EditBookingCheckoutDialog: React.FC<CommonEditBookingDataProps> = ({
   useEffect(() => {
     if (bookingData) {
       setTipsAmount(bookingData.tips_amount?.toString() || "");
-      setPaymentType(bookingData.payment_type || "");
+      setPaymentType(
+        bookingData.payment_type === ACTIVE_PAYMENT_TYPE
+          ? bookingData.payment_type
+          : ACTIVE_PAYMENT_TYPE,
+      );
     }
   }, [bookingData]);
 
@@ -166,11 +172,18 @@ const EditBookingCheckoutDialog: React.FC<CommonEditBookingDataProps> = ({
                 {PAYMENT_TYPES.map((type) => (
                   <button
                     key={type.value}
-                    onClick={() => setPaymentType(type.value)}
+                    type="button"
+                    onClick={() =>
+                      type.value === ACTIVE_PAYMENT_TYPE &&
+                      setPaymentType(type.value)
+                    }
+                    disabled={type.value !== ACTIVE_PAYMENT_TYPE}
                     className={`rounded-lg px-4 py-3 text-sm font-medium transition-all ${
                       paymentType === type.value
                         ? "bg-primary text-white shadow-md"
-                        : "bg-slate-200 text-gray-800 hover:bg-slate-300 dark:bg-slate-700 dark:text-gray-200 dark:hover:bg-slate-600"
+                        : type.value !== ACTIVE_PAYMENT_TYPE
+                          ? "cursor-not-allowed bg-slate-100 text-gray-400 opacity-60 dark:bg-slate-800 dark:text-gray-500"
+                          : "bg-slate-200 text-gray-800 hover:bg-slate-300 dark:bg-slate-700 dark:text-gray-200 dark:hover:bg-slate-600"
                     }`}
                   >
                     {type.label}

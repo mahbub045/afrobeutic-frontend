@@ -11,6 +11,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { countries } from "@/data/countries";
+import { useEffectiveRole } from "@/hooks/use-effective-role";
 import { formatChoiceFieldValue } from "@/lib/utils";
 import { DashboardTabProps } from "@/Types/ClientPanel/ManageSalonTypes/SalonListType";
 import { MapPin, PenSquare, Scissors } from "lucide-react";
@@ -23,6 +24,7 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
   isLoading,
 }) => {
   const { data: session } = useSession();
+  const { canManageClientAccount } = useEffectiveRole(session);
   const [openBasicInfoEditDialog, setOpenBasicInfoEditDialog] = useState(false);
 
   const handleOpenBasicInfoEditDialog = () => {
@@ -73,8 +75,7 @@ const BasicInformationCard: React.FC<DashboardTabProps> = ({
                   ? formatChoiceFieldValue(singleSalonData.salon_type)
                   : "Not Specified"}
               </Badge>
-              {(session?.user?.role === "OWNER" ||
-                session?.user?.role === "ADMIN") && (
+              {canManageClientAccount && (
                 <Button
                   variant="outline"
                   size="sm"

@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { useEffectiveRole } from "@/hooks/use-effective-role";
 import { formatChoiceFieldValue, formatDateTime } from "@/lib/utils";
 import { useGetProductsDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Products/ProductsApi";
 import { ProductProps } from "@/Types/ClientPanel/ManageSalonTypes/ProductsTypes/ProductsType";
@@ -34,6 +35,7 @@ import ViewProductPanel from "./ProductDetails/ViewProductPanel";
 
 const ProductsTab: React.FC = () => {
   const { data: session } = useSession();
+  const { canManageClientAccount } = useEffectiveRole(session);
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
 
@@ -123,8 +125,7 @@ const ProductsTab: React.FC = () => {
             />
           </div>
           <div>
-            {(session?.user?.role === "OWNER" ||
-              session?.user?.role === "ADMIN") && (
+            {canManageClientAccount && (
               <Button
                 size="sm"
                 variant="default"
@@ -230,8 +231,7 @@ const ProductsTab: React.FC = () => {
                       </Button>
                     </div>
                     <div>
-                      {(session?.user?.role === "OWNER" ||
-                        session?.user?.role === "ADMIN") && (
+                      {canManageClientAccount && (
                         <Button
                           size="sm"
                           variant="ghost"
