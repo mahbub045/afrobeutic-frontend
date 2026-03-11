@@ -4,7 +4,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CircleAlert } from "lucide-react";
 
 export default function BillingErrorAlert({
-  onRetry,
   errorMessage,
 }: {
   onRetry: () => void;
