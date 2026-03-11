@@ -40,8 +40,60 @@ const AVAILABLE_SLOTS = [
   "AFTER_EVENING",
   "ANYTIME",
 ];
+const ANYTIME_SLOT = "ANYTIME";
 
-const GENDER_OPTIONS = ["UNISEX", "MALE", "FEMALE"];
+const GENDER_OPTIONS = ["BARBERSHOP", "UNISEX_SALON", "LADIES_SALON"];
+
+const normalizeAssignedEmployees = (service: ServiceProps): string[] => {
+  const raw =
+    (
+      service as unknown as {
+        assign_employees?: unknown;
+        assigned_employees?: unknown;
+      }
+    ).assign_employees ??
+    (
+      service as unknown as {
+        assign_employees?: unknown;
+        assigned_employees?: unknown;
+      }
+    ).assigned_employees;
+
+  if (!Array.isArray(raw) || raw.length === 0) return [];
+
+  if (typeof raw[0] === "object") {
+    return (raw as Employee[])
+      .map((employee) => employee?.uid)
+      .filter(Boolean) as string[];
+  }
+
+  return raw.filter(
+    (employeeUid): employeeUid is string => typeof employeeUid === "string",
+  );
+};
+
+const normalizeGenderSpecific = (value: unknown): string => {
+  if (typeof value !== "string") return "UNISEX_SALON";
+
+  const normalizedValue = value.toUpperCase();
+  return GENDER_OPTIONS.includes(normalizedValue)
+    ? normalizedValue
+    : "UNISEX_SALON";
+};
+
+const normalizeAvailableTimeSlots = (value: unknown): string[] => {
+  if (!Array.isArray(value)) return [];
+
+  return value.reduce<string[]>((slots, slot) => {
+    if (typeof slot !== "string") return slots;
+
+    const normalizedSlot = slot.toUpperCase();
+    if (!AVAILABLE_SLOTS.includes(normalizedSlot)) return slots;
+
+    slots.push(normalizedSlot);
+    return slots;
+  }, []);
+};
 
 const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
   isOpen,
@@ -58,25 +110,10 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
     useGetEmployeesDataQuery({ salonUid });
   const [editService, { isLoading: isEditingService }] =
     useEditServiceMutation();
-
-  // normalize assigned employees to array of uids for the form
-  const initialAssigned: string[] = (() => {
-    const raw = (selectedService as unknown as { assign_employees?: unknown })
-      ?.assign_employees;
-    if (!raw) return [];
-    if (Array.isArray(raw)) {
-      if (raw.length === 0) return [];
-      // if entries are objects
-      if (typeof raw[0] === "object") {
-        return (raw as Employee[])
-          .map((e) => e?.uid)
-          .filter(Boolean) as string[];
-      }
-      // assume array of strings
-      return raw as string[];
-    }
-    return [];
-  })();
+  const employeeResults = Array.isArray(employeesData?.results)
+    ? (employeesData.results as Employee[])
+    : [];
+  const initialAssigned = normalizeAssignedEmployees(selectedService);
 
   interface MoreInfoFormValues {
     service_duration: string;
@@ -109,7 +146,7 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
         service_duration: values.service_duration,
         available_time_slots: values.available_time_slots,
         gender_specific: values.gender_specific,
-        discount_percentage: values.discount_percentage,
+        discount_percentage: Number(values.discount_percentage) || 0,
         assign_employees: values.assign_employees,
       };
 
@@ -153,10 +190,12 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
         <Formik
           initialValues={{
             service_duration: selectedService?.service_duration || "00:30:00",
-            available_time_slots: selectedService?.available_time_slots || [],
-            gender_specific:
-              (selectedService?.gender_specific as unknown as string) ||
-              "UNISEX",
+            available_time_slots: normalizeAvailableTimeSlots(
+              selectedService?.available_time_slots,
+            ),
+            gender_specific: normalizeGenderSpecific(
+              selectedService?.gender_specific,
+            ),
             discount_percentage: selectedService?.discount_percentage ?? 0,
             assign_employees: initialAssigned,
           }}
@@ -200,10 +239,22 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
                         onCheckedChange={(v) => {
                           const checked = Boolean(v);
                           if (checked) {
-                            setFieldValue("available_time_slots", [
-                              ...values.available_time_slots,
-                              slot,
-                            ]);
+                            if (slot === ANYTIME_SLOT) {
+                              setFieldValue("available_time_slots", [
+                                ANYTIME_SLOT,
+                              ]);
+                              return;
+                            }
+
+                            setFieldValue(
+                              "available_time_slots",
+                              values.available_time_slots
+                                .filter(
+                                  (selectedSlot: string) =>
+                                    selectedSlot !== ANYTIME_SLOT,
+                                )
+                                .concat(slot),
+                            );
                           } else {
                             setFieldValue(
                               "available_time_slots",
@@ -240,6 +291,11 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
                     ))}
                   </RadioGroup>
                 </div>
+                <ErrorMessage
+                  name="gender_specific"
+                  component="p"
+                  className="mt-1 text-sm text-red-500"
+                />
               </div>
 
               <div>
@@ -264,7 +320,7 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
 
               <div>
                 <Label className="mb-2">Assign Employees</Label>
-                {employeesData.results.length === 0 ? (
+                {!isLoadingEmployees && employeeResults.length === 0 ? (
                   <div className="grid grid-cols-none">
                     <p className="text-muted-foreground text-center text-xs">
                       No employees found. Please add employees to assign.
@@ -275,11 +331,9 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
                   {isLoadingEmployees ? (
                     <div>Loading employees...</div>
                   ) : (
-                    (() => {
-                      const list = (employeesData?.results || []).filter(
-                        (e: Employee) => !!e?.uid,
-                      ) as Employee[];
-                      return list.map((emp) => {
+                    employeeResults
+                      .filter((employee) => !!employee?.uid)
+                      .map((emp) => {
                         const uid = emp.uid as string;
                         return (
                           <label
@@ -317,8 +371,7 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
                             </div>
                           </label>
                         );
-                      });
-                    })()
+                      })
                   )}
                 </div>
               </div>

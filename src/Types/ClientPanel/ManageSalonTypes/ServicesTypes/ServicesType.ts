@@ -9,8 +9,14 @@ export interface ServiceProps {
   available_time_slots?: string[];
   service_duration?: string;
   cancellation_policy?: boolean;
-  gender_specific?: boolean;
+  gender_specific?:
+    | "BARBERSHOP"
+    | "UNISEX_SALON"
+    | "LADIES_SALON"
+    | boolean
+    | null;
   discount_percentage?: number;
+  assign_employees?: Employee[] | string[];
   assigned_employees?: Employee[] | string[];
   created_at: string;
   updated_at: string;
@@ -38,7 +44,7 @@ export interface ServiceFormValues {
   uploaded_images?: string;
 }
 
-export interface ServiceCategory{
+export interface ServiceCategory {
   uid: string;
   name: string;
 }
