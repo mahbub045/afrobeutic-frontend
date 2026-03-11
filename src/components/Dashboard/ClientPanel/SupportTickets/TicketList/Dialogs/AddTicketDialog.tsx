@@ -1,7 +1,5 @@
 "use client";
 
-import { useAddSupportTicketMutation } from "@/Redux/Reducers/ClientPanel/SupportTickets/SupportTicketsApi";
-import { TicketProps } from "@/Types/ClientPanel/SupportTicketsTypes/SupportTicketsType";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,6 +11,9 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useEffectiveRole } from "@/hooks/use-effective-role";
+import { useAddSupportTicketMutation } from "@/Redux/Reducers/ClientPanel/SupportTickets/SupportTicketsApi";
+import { TicketProps } from "@/Types/ClientPanel/SupportTicketsTypes/SupportTicketsType";
 import { ErrorMessage, Field, FieldProps, Form, Formik } from "formik";
 import { Plus } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -32,6 +33,7 @@ const schema = Yup.object().shape({
 
 const AddTicketDialog: React.FC = () => {
   const { data: session } = useSession();
+  const { canManageClientAccount } = useEffectiveRole(session);
   const { resolvedTheme } = useTheme();
   const [open, setOpen] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -132,8 +134,7 @@ const AddTicketDialog: React.FC = () => {
   };
 
   // Check if user has permission to create tickets
-  const canCreateTicket =
-    session?.user?.role === "OWNER" || session?.user?.role === "ADMIN";
+  const canCreateTicket = canManageClientAccount;
 
   if (!canCreateTicket) {
     return null;

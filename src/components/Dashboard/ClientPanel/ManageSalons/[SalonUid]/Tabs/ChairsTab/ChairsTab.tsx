@@ -11,6 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { useEffectiveRole } from "@/hooks/use-effective-role";
 import { formatChoiceFieldValue } from "@/lib/utils";
 import { useGetChairsDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Chairs/ChairsApi";
 import { ChairProps } from "@/Types/ClientPanel/ManageSalonTypes/ChairsTypes/ChairsType";
@@ -37,6 +38,7 @@ import ViewBookingPanel from "./ViewBookingPanel/ViewBookingPanel";
 
 const ChairsTab: React.FC = () => {
   const { data: session } = useSession();
+  const { canManageClientAccount } = useEffectiveRole(session);
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
   const [currentPage, setCurrentPage] = useState(1);
@@ -195,8 +197,7 @@ const ChairsTab: React.FC = () => {
               </div>
             </div>
             <div>
-              {(session?.user?.role === "OWNER" ||
-                session?.user?.role === "ADMIN") && (
+              {canManageClientAccount && (
                 <Button
                   variant="default"
                   size="sm"
@@ -250,9 +251,6 @@ const ChairsTab: React.FC = () => {
           </div>
         ) : extractedChairs?.length === 0 ? (
           <div className="w-full rounded-xl border-2 border-dashed border-gray-400/60 bg-white/80 p-8 text-center dark:border-gray-700/60 dark:bg-gray-900/80">
-            <div className="bg-primary/5 mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full">
-              <Armchair className="text-primary h-6 w-6" />
-            </div>
             <h3 className="mb-1 text-lg font-semibold text-gray-900 dark:text-white">
               No chairs yet
             </h3>
@@ -306,8 +304,7 @@ const ChairsTab: React.FC = () => {
                             <span>View Bookings</span>
                           </DropdownMenuItem>
                           <div>
-                            {(session?.user?.role === "OWNER" ||
-                              session?.user?.role === "ADMIN") && (
+                            {canManageClientAccount && (
                               <>
                                 <DropdownMenuItem
                                   className="cursor-pointer"

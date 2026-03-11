@@ -17,6 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useEffectiveRole } from "@/hooks/use-effective-role";
 import { formatDateTime } from "@/lib/utils";
 import { useGetLeadsDataQuery } from "@/Redux/Reducers/ClientPanel/Leads/LeadsApi";
 import { useGetCommonCategoriesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Common/CategoriesApi";
@@ -39,6 +40,7 @@ import EditLeadDialog from "./Dialogs/EditLeadDialog";
 
 const LeadList: React.FC = () => {
   const { data: session } = useSession();
+  const { canManageClientAccount } = useEffectiveRole(session);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
@@ -354,8 +356,7 @@ const LeadList: React.FC = () => {
 
                 <TableCell className="flex justify-center gap-2">
                   <div>
-                    {(session?.user?.role === "OWNER" ||
-                      session?.user?.role === "ADMIN") && (
+                    {canManageClientAccount && (
                       <Button
                         size="sm"
                         variant="ghost"

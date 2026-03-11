@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useEffectiveRole } from "@/hooks/use-effective-role";
 import { useEditProfileMutation } from "@/Redux/Reducers/Common/ProfileApi";
 import { ErrorMessage, Field, FieldProps, Form, Formik } from "formik";
 import { useSession } from "next-auth/react";
@@ -29,6 +30,7 @@ const EditAccountNameDialog: React.FC<{
   isFetching?: boolean;
 }> = ({ accountName, isFetching }) => {
   const { data: session } = useSession();
+  const { canManageClientAccount } = useEffectiveRole(session);
   const [open, setOpen] = useState(false);
   const { resolvedTheme } = useTheme();
 
@@ -70,7 +72,7 @@ const EditAccountNameDialog: React.FC<{
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {session?.user?.role === "OWNER" && (
+      {canManageClientAccount && (
         <DialogTrigger asChild>
           <Button size="sm" variant="outline">
             Edit

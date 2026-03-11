@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useEffectiveRole } from "@/hooks/use-effective-role";
 import { formatChoiceFieldValue, formatDateTime, safe } from "@/lib/utils";
 import { useGetServicesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
 import {
@@ -30,6 +31,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
   onClose,
 }) => {
   const { data: session } = useSession();
+  const { canManageClientAccount } = useEffectiveRole(session);
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
 
@@ -229,8 +231,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
             <div className="mb-3 flex items-center justify-between">
               <h4 className="text-base font-semibold">Basic info</h4>
               <div>
-                {(session?.user?.role === "OWNER" ||
-                  session?.user?.role === "ADMIN") && (
+                {canManageClientAccount && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -292,8 +293,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
             <div className="mb-3 flex items-center justify-between">
               <h4 className="text-base font-semibold">More info</h4>
               <div>
-                {(session?.user?.role === "OWNER" ||
-                  session?.user?.role === "ADMIN") && (
+                {canManageClientAccount && (
                   <Button
                     variant="outline"
                     size="sm"

@@ -11,9 +11,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAccountSwitch } from "@/hooks/use-account-switch";
+import { useEffectiveRole } from "@/hooks/use-effective-role";
 import { formatChoiceFieldValue } from "@/lib/utils";
-import { useGetAccountAccesserQuery } from "@/Redux/Reducers/ClientPanel/Accounts/SwitchAccount/SwitchAccountApi";
 import { LoaderPinwheel } from "lucide-react";
 import Link from "next/link";
 interface Props {
@@ -25,13 +24,7 @@ interface Props {
 }
 
 const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
-  const { activeAccountId, activeAccountRole } = useAccountSwitch();
-  const shouldLoadAccounts = ["OWNER", "ADMIN", "STAFF"].includes(
-    session?.user?.role || "",
-  );
-  const { data: accountAccesserData } = useGetAccountAccesserQuery(undefined, {
-    skip: !shouldLoadAccounts,
-  });
+  const { role, isClientRole, isManagementRole } = useEffectiveRole(session);
 
   if (status === "loading")
     return (
@@ -53,29 +46,11 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
     );
   }
 
-  const hasSwitchedAccount =
-    !!activeAccountId && activeAccountId !== session.user.account_id;
-
-  const switchedAccount = hasSwitchedAccount
-    ? accountAccesserData?.results?.find(
-        (account) => account.uid === activeAccountId,
-      )
-    : null;
-
   const displayName =
     session.user &&
     (session.user.first_name && session.user.last_name
       ? `${session.user.first_name} ${session.user.last_name}`
       : session.user.name || "");
-
-  // Role helpers
-  const role: string | undefined = hasSwitchedAccount
-    ? switchedAccount?.role || activeAccountRole || session.user.role
-    : session.user.role;
-  const isClientRole = ["OWNER", "ADMIN", "STAFF"].includes(role || "");
-  const isManagementRole = ["MANAGEMENT_ADMIN", "MANAGEMENT_STAFF"].includes(
-    role || "",
-  );
 
   return (
     <DropdownMenu>

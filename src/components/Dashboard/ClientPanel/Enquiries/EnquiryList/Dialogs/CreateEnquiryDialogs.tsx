@@ -78,6 +78,8 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
   const { data: salonsData, isLoading: isSalonsLoading } =
     useGetSalonListQuery();
   const [createEnquiry, { isLoading }] = useCreateEnquiryMutation();
+  const isIndividualStylist =
+    session?.user?.account_type === "INDIVIDUAL_STYLIST";
 
   const leadAndCustomerOptions: Array<{
     uid?: string;
@@ -182,7 +184,7 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
     type: ENQUIRY_TYPES[0].value,
     summary: "",
     status: "NEW",
-    salon: "",
+    salon: isIndividualStylist ? salonOptions[0]?.uid || "" : "",
     country_dial_code: "",
   };
 
@@ -194,7 +196,9 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
     last_name: Yup.string().required("Last name is required"),
     source: Yup.string().required("Source is required"),
     summary: Yup.string().required("Summary is required"),
-    salon: Yup.string().required("Please select a salon"),
+    salon: isIndividualStylist
+      ? Yup.string().nullable()
+      : Yup.string().required("Please select a salon"),
     email: Yup.string().email("Invalid email address").nullable(),
   });
 
@@ -242,16 +246,29 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
   ) => {
     setSubmitting(true);
     try {
-      // guard against blank type (shouldn't happen, but backend rejects empty)
-      if (!values.type) {
-        values.type = ENQUIRY_TYPES[0].value;
+      const payload = {
+        ...values,
+        salon: isIndividualStylist
+          ? values.salon || salonOptions[0]?.uid || undefined
+          : values.salon,
+      };
+
+      if (!payload.salon && !isIndividualStylist) {
+        setFieldError("salon", "Please select a salon");
+        setSubmitting(false);
+        return;
       }
-      await createEnquiry(values).unwrap();
+
+      // guard against blank type (shouldn't happen, but backend rejects empty)
+      if (!payload.type) {
+        payload.type = ENQUIRY_TYPES[0].value;
+      }
+      await createEnquiry(payload).unwrap();
       Swal.fire({
         icon: "success",
         iconColor: "#037375",
         title: "Enquiry Created",
-        html: `Enquiry for <b>${values.phone}</b> created successfully`,
+        html: `Enquiry for <b>${payload.phone}</b> created successfully`,
         background: resolvedTheme === "dark" ? "#0f1724" : undefined,
         color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
         confirmButtonColor: "#037375",
@@ -317,6 +334,7 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
 
         <Formik
           initialValues={initialValues}
+          enableReinitialize
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
@@ -785,10 +803,10 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                   </Button>
                   <Button
                     type="submit"
-                    disabled={isSubmitting || isLoading}
+                    disabled={isSubmitting || isLoading || isSalonsLoading}
                     className="w-40 text-white"
                   >
-                    {isSubmitting || isLoading
+                    {isSubmitting || isLoading || isSalonsLoading
                       ? "Creating..."
                       : "Create Enquiry"}
                   </Button>
