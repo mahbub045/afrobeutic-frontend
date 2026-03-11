@@ -11,7 +11,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAccountSwitch } from "@/hooks/use-account-switch";
 import { formatChoiceFieldValue } from "@/lib/utils";
+import { useGetAccountAccesserQuery } from "@/Redux/Reducers/ClientPanel/Accounts/SwitchAccount/SwitchAccountApi";
 import { LoaderPinwheel } from "lucide-react";
 import Link from "next/link";
 interface Props {
@@ -23,6 +25,14 @@ interface Props {
 }
 
 const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
+  const { activeAccountId, activeAccountRole } = useAccountSwitch();
+  const shouldLoadAccounts = ["OWNER", "ADMIN", "STAFF"].includes(
+    session?.user?.role || "",
+  );
+  const { data: accountAccesserData } = useGetAccountAccesserQuery(undefined, {
+    skip: !shouldLoadAccounts,
+  });
+
   if (status === "loading")
     return (
       <div className="text-primary flex h-8 w-8 items-center justify-center">
@@ -43,6 +53,15 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
     );
   }
 
+  const hasSwitchedAccount =
+    !!activeAccountId && activeAccountId !== session.user.account_id;
+
+  const switchedAccount = hasSwitchedAccount
+    ? accountAccesserData?.results?.find(
+        (account) => account.uid === activeAccountId,
+      )
+    : null;
+
   const displayName =
     session.user &&
     (session.user.first_name && session.user.last_name
@@ -50,7 +69,9 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
       : session.user.name || "");
 
   // Role helpers
-  const role: string | undefined = session.user.role;
+  const role: string | undefined = hasSwitchedAccount
+    ? switchedAccount?.role || activeAccountRole || session.user.role
+    : session.user.role;
   const isClientRole = ["OWNER", "ADMIN", "STAFF"].includes(role || "");
   const isManagementRole = ["MANAGEMENT_ADMIN", "MANAGEMENT_STAFF"].includes(
     role || "",
@@ -92,9 +113,9 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
             <p className="text-muted-foreground text-xs leading-none">
               {session.user.email}
             </p>
-            {session.user.role && (
+            {role && (
               <Badge variant="secondary" className="w-fit text-xs">
-                {formatChoiceFieldValue(session.user.role)}
+                {formatChoiceFieldValue(role)}
               </Badge>
             )}
           </div>
