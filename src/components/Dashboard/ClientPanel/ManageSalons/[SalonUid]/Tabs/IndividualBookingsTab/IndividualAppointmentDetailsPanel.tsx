@@ -57,6 +57,11 @@ const IndividualAppointmentDetailsPanel: React.FC<
   const effectiveStatus: IndBookingUiStatus | undefined =
     selectedAppointment?.status;
   const isStatusEditDisabled = effectiveStatus === "completed";
+  const selectedServiceNames =
+    selectedAppointment?.services
+      ?.map((service) => formatChoiceFieldValue(service.name)?.trim())
+      .filter((serviceName): serviceName is string => Boolean(serviceName)) ??
+    [];
 
   const handleViewReceipt = async () => {
     if (!selectedAppointment?.id) {
@@ -253,7 +258,7 @@ const IndividualAppointmentDetailsPanel: React.FC<
           </div>
           {servicesCount === 0 ? (
             <p className="text-muted-foreground text-xs">
-              No services added to this booking.
+              Services not selected yet.
             </p>
           ) : (
             <div className="space-y-1 rounded-lg border p-3">
@@ -441,7 +446,10 @@ const IndividualAppointmentDetailsPanel: React.FC<
     );
   };
 
-  const title = selectedAppointment?.service || "Appointment details";
+  const title =
+    selectedServiceNames.length > 0
+      ? selectedServiceNames.join(", ")
+      : "Services not selected yet";
 
   // Convert selectedAppointment to booking data format for the dialog
   const bookingDataForDialog = selectedAppointment
