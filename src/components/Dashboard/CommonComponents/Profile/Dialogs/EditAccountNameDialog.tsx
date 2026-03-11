@@ -28,7 +28,7 @@ const EditAccountNameDialog: React.FC<{
   accountName?: string | null;
   isFetching?: boolean;
 }> = ({ accountName, isFetching }) => {
-  const {data:session} = useSession();
+  const { data: session } = useSession();
   const [open, setOpen] = useState(false);
   const { resolvedTheme } = useTheme();
 
@@ -45,7 +45,7 @@ const EditAccountNameDialog: React.FC<{
     try {
       const formData = new FormData();
       // Backend convention: update account name via the profile endpoint.
-      formData.append("account.name", values.name);
+      formData.append("account", values.name);
       await editProfile(formData).unwrap();
 
       Swal.fire({
@@ -71,11 +71,11 @@ const EditAccountNameDialog: React.FC<{
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {session?.user?.role === "OWNER" && (
-      <DialogTrigger asChild>
-        <Button size="sm" variant="outline">
-          Edit
-        </Button>
-      </DialogTrigger>
+        <DialogTrigger asChild>
+          <Button size="sm" variant="outline">
+            Edit
+          </Button>
+        </DialogTrigger>
       )}
 
       <DialogContent className="shadow-md dark:shadow-gray-500">
