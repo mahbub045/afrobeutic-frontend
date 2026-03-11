@@ -24,6 +24,7 @@ const EditBookingStatusDialog: React.FC<EditBookingStatusDialogProps> = ({
   isOpen,
   onClose,
   bookingData,
+  onStatusUpdated,
 }) => {
   const { salonuid } = useParams();
   const { resolvedTheme } = useTheme();
@@ -105,6 +106,10 @@ const EditBookingStatusDialog: React.FC<EditBookingStatusDialogProps> = ({
         bookingUid: bookingData.uid,
         data: requestBody,
       }).unwrap();
+
+      if (bookingData?.uid) {
+        onStatusUpdated?.(values.status, values.cancellation_reason || "");
+      }
 
       try {
         dispatch(baseApi.util.invalidateTags(["ChairsBooking"]));

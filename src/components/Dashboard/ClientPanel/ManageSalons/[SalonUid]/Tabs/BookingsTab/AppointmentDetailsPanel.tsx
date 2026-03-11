@@ -116,9 +116,9 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
       <div className="bg-card hidden max-h-[600px] overflow-hidden lg:flex lg:flex-col">
         <div className="flex-shrink-0 border-b px-6 py-3">
           <div className="mb-3 flex items-start justify-between">
-            <h3 className="text-foreground text-base font-semibold">
+            <h5 className="text-foreground text-xs font-semibold">
               {serviceTitle}
-            </h3>
+            </h5>
           </div>
           {selectedAppointment && (
             <div className="flex items-center gap-2">
@@ -504,7 +504,7 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
             <div className="flex h-full flex-col">
               <div className="border-b px-4 py-3">
                 <div className="mb-3 flex items-start justify-start gap-4">
-                  <h3 className="text-foreground text-base font-semibold">
+                  <h3 className="text-foreground text-xs font-semibold">
                     {serviceTitle}
                   </h3>
                 </div>

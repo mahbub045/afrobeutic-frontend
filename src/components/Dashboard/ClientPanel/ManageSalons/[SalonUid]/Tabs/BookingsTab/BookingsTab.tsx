@@ -83,23 +83,29 @@ const BookingsTab: React.FC = () => {
   }
 
   // RTK Hooks
-  const { data: bookingsData, isLoading: isBookingsLoading } =
-    useGetBookingQuery({
-      salonUid: salonuid as string,
-      filters,
-    });
+  const {
+    data: bookingsData,
+    isLoading: isBookingsLoading,
+    refetch: refetchBookings,
+  } = useGetBookingQuery({
+    salonUid: salonuid as string,
+    filters,
+  });
 
   // Fetch single booking details when a booking is selected
-  const { data: singleBookingData, isLoading: isSingleBookingLoading } =
-    useGetSingleBookingQuery(
-      {
-        salonUid: salonuid as string,
-        bookingUid: selectedBookingUid!,
-      },
-      {
-        skip: !selectedBookingUid, // Only fetch when a booking is selected
-      },
-    );
+  const {
+    data: singleBookingData,
+    isLoading: isSingleBookingLoading,
+    refetch: refetchSingleBooking,
+  } = useGetSingleBookingQuery(
+    {
+      salonUid: salonuid as string,
+      bookingUid: selectedBookingUid!,
+    },
+    {
+      skip: !selectedBookingUid, // Only fetch when a booking is selected
+    },
+  );
 
   const extractBookingData = bookingsData?.results || [];
 
@@ -167,6 +173,31 @@ const BookingsTab: React.FC = () => {
         };
       }),
   );
+
+  useEffect(() => {
+    if (!selectedBookingUid) return;
+
+    const updatedAppointment = appointments.find(
+      (appointment) => appointment.id === selectedBookingUid,
+    );
+
+    if (!updatedAppointment) return;
+
+    setSelectedAppointment((currentAppointment) => {
+      if (!currentAppointment) return updatedAppointment;
+
+      const hasChanged =
+        currentAppointment.id !== updatedAppointment.id ||
+        currentAppointment.status !== updatedAppointment.status ||
+        currentAppointment.startTime !== updatedAppointment.startTime ||
+        currentAppointment.staff !== updatedAppointment.staff ||
+        currentAppointment.service !== updatedAppointment.service ||
+        currentAppointment.client !== updatedAppointment.client ||
+        currentAppointment.color !== updatedAppointment.color;
+
+      return hasChanged ? updatedAppointment : currentAppointment;
+    });
+  }, [appointments, selectedBookingUid]);
 
   // Generate time slots programmatically so we can easily change the step (hours)
   // Produces 24-hour ranges like "10:00-12:00". Times are stored in minutes for precise matching.
@@ -679,6 +710,12 @@ const BookingsTab: React.FC = () => {
       <EditBookingStatusDialog
         isOpen={isEditStatusDialogOpen}
         onClose={() => handleIsEditStatusDialogOpen(false)}
+        onStatusUpdated={() => {
+          refetchBookings();
+          if (selectedBookingUid) {
+            refetchSingleBooking();
+          }
+        }}
         bookingData={
           selectedAppointment
             ? {
