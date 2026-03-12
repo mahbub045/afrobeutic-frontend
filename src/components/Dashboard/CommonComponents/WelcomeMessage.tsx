@@ -298,12 +298,12 @@ const WelcomeMessage: React.FC = () => {
           </h1>
           <div>
             {hasMounted && isClientRole && (
-              <p className="text-muted-foreground small -mt-4">
+              <p className="text-muted-foreground -mt-4 text-sm">
                 Manage your salons, bookings and clients from one dashboard
               </p>
             )}
             {hasMounted && isManagementRole && (
-              <p className="text-muted-foreground -mt-4">
+              <p className="text-muted-foreground -mt-4 text-sm">
                 Access and manage all your client accounts from one dashboard
               </p>
             )}
