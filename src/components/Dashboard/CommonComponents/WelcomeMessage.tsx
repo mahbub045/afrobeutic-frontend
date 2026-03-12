@@ -3,16 +3,23 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { useAccountSwitch } from "@/hooks/use-account-switch";
+import { useEffectiveRole } from "@/hooks/use-effective-role";
 import { useGetAccountAccesserQuery } from "@/Redux/Reducers/ClientPanel/Accounts/SwitchAccount/SwitchAccountApi";
 import { LoaderPinwheel } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const WelcomeMessage: React.FC = () => {
   const { data: session, status } = useSession();
   const { activeAccountId } = useAccountSwitch();
   const { data: accountsData } = useGetAccountAccesserQuery();
+  const { isClientRole, isManagementRole } = useEffectiveRole(session);
+
+  const [hasMounted, setHasMounted] = useState(false);
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   const isViewingDifferentAccount =
     activeAccountId && activeAccountId !== session?.user?.account_id;
@@ -287,8 +294,20 @@ const WelcomeMessage: React.FC = () => {
         {/* Left: Welcome Text Section */}
         <div className="flex-1 space-y-3 sm:space-y-4">
           <h1 className="text-foreground text-2xl font-semibold sm:text-3xl md:text-xl">
-            Welcome to Afrobeutic!
+            Welcome
           </h1>
+          <div>
+            {hasMounted && isClientRole && (
+              <p className="text-muted-foreground -mt-4 text-sm">
+                Manage your salons, bookings and clients from one dashboard
+              </p>
+            )}
+            {hasMounted && isManagementRole && (
+              <p className="text-muted-foreground -mt-4 text-sm">
+                Access and manage all your client accounts from one dashboard
+              </p>
+            )}
+          </div>
           <Badge
             variant="secondary"
             className="bg-secondary hover:bg-secondary/90 inline-flex rounded-md px-4 py-1 text-sm font-semibold text-white sm:px-3 sm:py-1 sm:text-base"

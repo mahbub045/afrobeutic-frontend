@@ -192,7 +192,7 @@ const MemberList: React.FC = () => {
                   alt={member.name}
                   width={80}
                   height={80}
-                  className="mb-2 rounded-full object-cover"
+                  className="mb-2 rounded-full h-20 w-20 object-cover"
                 />
 
                 <h3 className="relative text-xl font-bold md:text-base lg:text-lg xl:text-xl">

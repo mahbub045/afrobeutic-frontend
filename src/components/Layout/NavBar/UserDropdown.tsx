@@ -112,7 +112,7 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
                 className="cursor-pointer"
                 href="/dashboard/client-panel/members"
               >
-                Members
+                Staff Members
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
