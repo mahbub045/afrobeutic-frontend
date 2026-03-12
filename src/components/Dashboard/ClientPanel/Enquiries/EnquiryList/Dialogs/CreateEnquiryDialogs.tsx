@@ -183,7 +183,11 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
       }
 
       const payload = isIndividualStylist
-        ? (({ salon: _salon, ...rest }) => rest)(values)
+        ? (() => {
+            const { salon, ...rest } = values;
+            void salon;
+            return rest;
+          })()
         : values;
 
       // guard against blank type (shouldn't happen, but backend rejects empty)
