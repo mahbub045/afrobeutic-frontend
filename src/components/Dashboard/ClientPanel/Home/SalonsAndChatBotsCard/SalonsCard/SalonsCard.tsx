@@ -9,7 +9,7 @@ import { AlertCircle, Plus, Scissors } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AddSalonDialog from "../../../ManageSalons/Dialogs/AddSalonDialog";
 
 const SalonsCard: React.FC = () => {
@@ -17,6 +17,13 @@ const SalonsCard: React.FC = () => {
   const { canManageClientAccount } = useEffectiveRole(session);
   const { data: salonsData, isLoading, isError } = useGetSalonListQuery();
   const [isAddSalonDialogOpen, setIsAddSalonDialogOpen] = useState(false);
+
+  const [hasMounted, setHasMounted] = useState(false);
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  const showLoading = !hasMounted || isLoading;
 
   const handleOpenAddSalonDialog = () => {
     setIsAddSalonDialogOpen(true);
@@ -26,7 +33,8 @@ const SalonsCard: React.FC = () => {
     <Card className="h-full shadow-md dark:shadow-gray-600">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <CardTitle className="text-xl font-semibold">My Salons</CardTitle>
-        {canManageClientAccount &&
+        {hasMounted &&
+          canManageClientAccount &&
           session?.user?.is_salon_limit_reached !== true &&
           (session?.user?.account_type !== "INDIVIDUAL_STYLIST" ||
             (salonsData?.count || 0) < 1) && (
@@ -42,7 +50,7 @@ const SalonsCard: React.FC = () => {
           )}
       </CardHeader>
       <CardContent>
-        {isLoading ? (
+        {showLoading ? (
           <div className="space-y-3">
             {[...Array(3)].map((_, index) => (
               <div

@@ -10,13 +10,18 @@ import { useGetAccountAccesserQuery } from "@/Redux/Reducers/ClientPanel/Account
 import { ArrowRight, LoaderPinwheel, Star } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const OthersInfo: React.FC = () => {
   const { data: session } = useSession();
   const { role } = useEffectiveRole(session);
   const { activeAccountId } = useAccountSwitch();
   const { data: accountsData } = useGetAccountAccesserQuery();
+
+  const [hasMounted, setHasMounted] = useState(false);
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   const isViewingDifferentAccount =
     activeAccountId && activeAccountId !== session?.user?.account_id;
@@ -72,30 +77,34 @@ const OthersInfo: React.FC = () => {
           <CardTitle className="text-xl font-bold">Account Details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 pt-2">
-          {!session ? (
-            <div className="flex items-center justify-center py-8">
-              <LoaderPinwheel className="text-primary h-5 w-5 animate-spin" />
-            </div>
-          ) : (
-            <>
-              <div>
-                <p className="text-muted-foreground mb-1 text-sm">
-                  Account name:
-                </p>
-                <p className="font-semibold">{accountDisplayName}</p>
+          {hasMounted &&
+            (!session ? (
+              <div className="flex items-center justify-center py-8">
+                <LoaderPinwheel className="text-primary h-5 w-5 animate-spin" />
               </div>
-              <div>
-                <p className="text-muted-foreground mb-1 text-sm">
-                  Access Role:
-                </p>
-                <Badge variant="secondary" className="font-semibold text-white">
-                  {(isViewingDifferentAccount && activeAccount
-                    ? formatChoiceFieldValue(activeAccount.role)
-                    : formatChoiceFieldValue(role)) || "N/A"}
-                </Badge>
-              </div>
-            </>
-          )}
+            ) : (
+              <>
+                <div>
+                  <p className="text-muted-foreground mb-1 text-sm">
+                    Account name:
+                  </p>
+                  <p className="font-semibold">{accountDisplayName}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground mb-1 text-sm">
+                    Access Role:
+                  </p>
+                  <Badge
+                    variant="secondary"
+                    className="font-semibold text-white"
+                  >
+                    {(isViewingDifferentAccount && activeAccount
+                      ? formatChoiceFieldValue(activeAccount.role)
+                      : formatChoiceFieldValue(role)) || "N/A"}
+                  </Badge>
+                </div>
+              </>
+            ))}
         </CardContent>
       </Card>
     </div>
