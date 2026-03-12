@@ -10,11 +10,66 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { formatPrice } from "@/lib/utils";
-import { useGetPricingPlansQuery } from "@/Redux/Reducers/ClientPanel/Accounts/PricingPlans/PricingPlansApi";
+import {
+  useGetPricingPlansQuery,
+  useValidateSubscriptionMutation,
+} from "@/Redux/Reducers/ClientPanel/Accounts/PricingPlans/PricingPlansApi";
 import { PricingPlanTypes } from "@/Types/AdminPanel/PricingPlansTypes/PricingPlansTypes";
 import { CircleAlert, LoaderPinwheel } from "lucide-react";
 import { useState } from "react";
+import { toast } from "react-toastify";
 import SubscribeToPlanDialog from "./Dialogs/SubscribeToPlanDialog";
+
+type ValidationResponse = {
+  valid?: boolean;
+  is_valid?: boolean;
+  can_subscribe?: boolean;
+  message?: string;
+  detail?: string;
+  errors?: string[];
+};
+
+function combineValidationMessages(parts: Array<string | undefined>): string {
+  return Array.from(
+    new Set(
+      parts
+        .map((part) => part?.trim())
+        .filter((part): part is string => Boolean(part)),
+    ),
+  ).join(" ");
+}
+
+function getValidationErrorMessage(error: unknown): string {
+  if (typeof error === "string" && error.trim()) {
+    return error.trim();
+  }
+
+  if (typeof error === "object" && error !== null) {
+    const errorObject = error as {
+      data?: {
+        message?: string;
+        detail?: string;
+        non_field_errors?: string[];
+        errors?: string[];
+      };
+      message?: string;
+    };
+
+    const combinedMessage = combineValidationMessages([
+      errorObject.data?.message,
+      errorObject.data?.detail,
+      errorObject.data?.non_field_errors?.join(" "),
+      errorObject.data?.errors?.join(" "),
+      errorObject.message,
+    ]);
+
+    if (combinedMessage) {
+      return combinedMessage;
+    }
+  }
+
+  return "Unable to validate this subscription right now. Please try again.";
+}
 
 const PricingPlanList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -29,8 +84,38 @@ const PricingPlanList: React.FC = () => {
     error,
     isFetching,
   } = useGetPricingPlansQuery({ page: currentPage });
+  const [validateSubscription, { isLoading: isValidating }] =
+    useValidateSubscriptionMutation();
 
   const pricingPlans = pricingPlanData?.results ?? [];
+
+  const handleGetNow = async (plan: PricingPlanTypes) => {
+    try {
+      const response = (await validateSubscription({
+        pricing_plan: plan.uid,
+      }).unwrap()) as ValidationResponse;
+
+      const isValid =
+        response.valid ?? response.is_valid ?? response.can_subscribe ?? true;
+
+      if (!isValid) {
+        toast.error(
+          combineValidationMessages([
+            response.message,
+            response.detail,
+            response.errors?.join(" "),
+            "This subscription cannot be started right now.",
+          ]),
+        );
+        return;
+      }
+
+      setSelectedPricingPlan(plan);
+      setSubscribeOpen(true);
+    } catch (error) {
+      toast.error(getValidationErrorMessage(error));
+    }
+  };
 
   return (
     <>
@@ -123,15 +208,14 @@ const PricingPlanList: React.FC = () => {
                     <Button
                       variant="default"
                       className="w-full shadow-md dark:shadow-gray-600"
-                      onClick={() => {
-                        setSelectedPricingPlan(plan);
-                        setSubscribeOpen(true);
-                      }}
-                      disabled={plan.is_current_plan === true}
+                      onClick={() => handleGetNow(plan)}
+                      disabled={plan.is_current_plan === true || isValidating}
                     >
                       {plan.is_current_plan === true
                         ? "Current Plan"
-                        : "Get Now"}
+                        : isValidating
+                          ? "Checking..."
+                          : "Get Now"}
                     </Button>
                   </CardFooter>
                 )}
