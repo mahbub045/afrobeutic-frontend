@@ -17,7 +17,6 @@ import BillingHistoryCard from "./Components/BillingHistoryCard";
 import BillingLoadingSkeleton from "./Components/BillingLoadingSkeleton";
 import CurrentPlanCard from "./Components/CurrentPlanCard";
 import NoSubscriptionCard from "./Components/NoSubscriptionCard";
-import NotesCard from "./Components/NotesCard";
 import PaymentMethodsCard from "./Components/PaymentMethodsCard";
 import PlanLimitsCard from "./Components/PlanLimitsCard";
 import SubscriptionDetailsCard from "./Components/SubscriptionDetailsCard";
@@ -161,7 +160,7 @@ const BillingContainer: React.FC = () => {
                   statusLabel={statusLabel}
                 />
 
-                <NotesCard notes={subscription.notes} />
+                {/* <NotesCard notes={subscription.notes} /> */}
               </div>
             </div>
           )}
