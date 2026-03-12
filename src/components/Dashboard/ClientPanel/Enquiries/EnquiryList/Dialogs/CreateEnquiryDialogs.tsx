@@ -112,11 +112,16 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
     type: ENQUIRY_TYPES[0].value,
     summary: "",
     status: "NEW",
-    salon: isIndividualStylist ? salonOptions[0]?.uid || "" : "",
+    salon: "",
     country_dial_code: "",
   };
 
   type FormValues = typeof initialValues;
+
+  const fieldClassName =
+    "border-input bg-background ring-offset-background placeholder:text-muted-foreground hover:border-primary/50 focus-visible:ring-primary w-full rounded-md border px-3 py-2 text-sm transition-all focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50";
+
+  const selectClassName = `${fieldClassName} pr-10`;
 
   const validationSchema = Yup.object().shape({
     phone: Yup.string().required("Phone is required"),
@@ -171,18 +176,15 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
   ) => {
     setSubmitting(true);
     try {
-      const payload = {
-        ...values,
-        salon: isIndividualStylist
-          ? values.salon || salonOptions[0]?.uid || undefined
-          : values.salon,
-      };
-
-      if (!payload.salon && !isIndividualStylist) {
+      if (!isIndividualStylist && !values.salon) {
         setFieldError("salon", "Please select a salon");
         setSubmitting(false);
         return;
       }
+
+      const payload = isIndividualStylist
+        ? (({ salon: _salon, ...rest }) => rest)(values)
+        : values;
 
       // guard against blank type (shouldn't happen, but backend rejects empty)
       if (!payload.type) {
@@ -402,7 +404,7 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                         className="text-destructive mt-1 text-xs"
                       />
                       {selectedContact && (
-                        <div className="text-muted-foreground mt-1 flex items-center justify-between gap-2 text-xs">
+                        <div className="text-muted-foreground mt-1 flex flex-col items-start gap-1 text-xs sm:flex-row sm:items-center sm:justify-between sm:gap-2">
                           <span>
                             Contact selected. Fields auto-filled and locked.
                           </span>
@@ -429,6 +431,7 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                   name="first_name"
                   type="text"
                   as="input"
+                  className={fieldClassName}
                   placeholder="First name"
                   required
                   disabled={!!selectedContact && !!selectedContact.first_name}
@@ -447,6 +450,7 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                   name="last_name"
                   type="text"
                   as="input"
+                  className={fieldClassName}
                   placeholder="Last name"
                   required
                   disabled={!!selectedContact && !!selectedContact.last_name}
@@ -465,6 +469,7 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                   name="email"
                   type="email"
                   as="input"
+                  className={fieldClassName}
                   placeholder="Email"
                   disabled={!!selectedContact && !!selectedContact.email}
                 />
@@ -543,13 +548,16 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                 </Field>
               </div>
 
-              <div
-                className={`${session?.user?.account_type === "INDIVIDUAL_STYLIST" ? "md:col-span-2" : ""}`}
-              >
+              <div>
                 <Label htmlFor="type" className="mb-2">
                   Type
                 </Label>
-                <Field as="select" id="type" name="type">
+                <Field
+                  as="select"
+                  id="type"
+                  name="type"
+                  className={selectClassName}
+                >
                   {ENQUIRY_TYPES.map((t) => (
                     <option key={t.value} value={t.value}>
                       {t.label}
@@ -561,11 +569,17 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                 </div>
               </div>
               {session?.user?.account_type === "INDIVIDUAL_STYLIST" ? null : (
-                <div>
+                <div className="md:col-span-2">
                   <Label htmlFor="salon" className="mb-2">
                     Salon<span className="text-danger">*</span>
                   </Label>
-                  <Field as="select" id="salon" name="salon" required>
+                  <Field
+                    as="select"
+                    id="salon"
+                    name="salon"
+                    required
+                    className={selectClassName}
+                  >
                     <option value="">
                       {isSalonsLoading ? "Loading salons..." : "Select a salon"}
                     </option>
@@ -588,6 +602,7 @@ const CreateEnquiryDialogs: React.FC<EnquiryDialogsProps> = ({
                   as={Textarea}
                   id="summary"
                   name="summary"
+                  className={fieldClassName}
                   placeholder="Short summary"
                   required
                 />
