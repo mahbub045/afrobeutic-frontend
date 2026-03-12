@@ -18,21 +18,11 @@ const ACCOUNT_TYPES = [
   { value: "INDIVIDUAL_STYLIST", label: "Individual Stylist" },
 ];
 
-// Timezone Choices (matching Django backend)
-const TIMEZONES = [
-  { value: "UTC", label: "UTC (Coordinated Universal Time)" },
-  { value: "EST", label: "EST (Eastern Standard Time)" },
-  { value: "CST", label: "CST (Central Standard Time)" },
-  { value: "MST", label: "MST (Mountain Standard Time)" },
-  { value: "PST", label: "PST (Pacific Standard Time)" },
-];
-
 const validationSchema = Yup.object({
   firstName: Yup.string().required("Required"),
   lastName: Yup.string().required("Required"),
   email: Yup.string().email("Invalid email address").required("Required"),
   country: Yup.string(),
-  account_timezone: Yup.string().required("Required"),
   account_type: Yup.string().required("Required"),
   // gender: Yup.string().required("Required"),
   password: Yup.string()
@@ -71,7 +61,6 @@ const SignUp: React.FC = () => {
     country: string;
     password: string;
     confirm_password: string;
-    account_timezone?: string;
     account_type?: string;
   }) => {
     const response = await apiClient.post("/auth/register", userData);
@@ -93,7 +82,6 @@ const SignUp: React.FC = () => {
         country: values.country,
         password: values.password,
         confirm_password: values.confirmPassword,
-        account_timezone: values.account_timezone,
         account_type: values.account_type,
       };
 
@@ -197,7 +185,7 @@ const SignUp: React.FC = () => {
       <div className="pointer-events-none absolute -right-32 -bottom-24 h-96 w-96 rounded-full bg-gradient-to-br from-purple-700/30 to-pink-600/20 opacity-50 blur-3xl" />
 
       <div className="flex h-full min-h-screen w-full flex-col items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
-        <div className="w-full max-w-2xl">
+        <div className="w-full max-w-4xl">
           {/* Card Container */}
           <div className="relative rounded-2xl border border-white/20 bg-white/70 p-8 shadow-2xl backdrop-blur-md dark:border-slate-700/50 dark:bg-slate-900/40 dark:shadow-2xl dark:shadow-black/50">
             {/* Theme Toggle */}
@@ -255,7 +243,6 @@ const SignUp: React.FC = () => {
                   lastName: "",
                   email: "",
                   country: "",
-                  account_timezone: "",
                   account_type: "",
                   password: "",
                   confirmPassword: "",
@@ -338,34 +325,34 @@ const SignUp: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Email */}
-                      <div className="flex flex-col">
-                        <label
-                          htmlFor="email"
-                          className="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-200"
-                        >
-                          Email Address <span className="text-red-500">*</span>
-                        </label>
-                        <Field
-                          type="email"
-                          name="email"
-                          id="email"
-                          placeholder="you@company.com"
-                          className={`rounded-lg border-2 bg-white px-4 py-3 text-gray-900 transition-all placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-gray-500 dark:focus:ring-blue-900 ${
-                            touched.email && errors.email
-                              ? "border-red-500"
-                              : "border-gray-300"
-                          }`}
-                        />
-                        <ErrorMessage
-                          name="email"
-                          component="div"
-                          className="mt-1 text-xs font-medium text-red-500"
-                        />
-                      </div>
-
-                      {/* Country & Timezone Row */}
+                      {/* Email & Country */}
                       <div className="grid gap-4 sm:grid-cols-2">
+                        {/* Email */}
+                        <div className="flex flex-col">
+                          <label
+                            htmlFor="email"
+                            className="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-200"
+                          >
+                            Email Address{" "}
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <Field
+                            type="email"
+                            name="email"
+                            id="email"
+                            placeholder="you@company.com"
+                            className={`rounded-lg border-2 bg-white px-4 py-3 text-gray-900 transition-all placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-gray-500 dark:focus:ring-blue-900 ${
+                              touched.email && errors.email
+                                ? "border-red-500"
+                                : "border-gray-300"
+                            }`}
+                          />
+                          <ErrorMessage
+                            name="email"
+                            component="div"
+                            className="mt-1 text-xs font-medium text-red-500"
+                          />
+                        </div>
                         {/* Country */}
                         <div className="flex flex-col">
                           <label
@@ -393,39 +380,6 @@ const SignUp: React.FC = () => {
                           </Field>
                           <ErrorMessage
                             name="country"
-                            component="div"
-                            className="mt-1 text-xs font-medium text-red-500"
-                          />
-                        </div>
-
-                        {/* Timezone */}
-                        <div className="flex flex-col">
-                          <label
-                            htmlFor="account_timezone"
-                            className="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-200"
-                          >
-                            Time Zone <span className="text-red-500">*</span>
-                          </label>
-                          <Field
-                            as="select"
-                            name="account_timezone"
-                            id="account_timezone"
-                            className={`rounded-lg border-2 bg-white px-4 py-3 text-gray-900 transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:focus:ring-blue-900 ${
-                              touched.account_timezone &&
-                              errors.account_timezone
-                                ? "border-red-500"
-                                : "border-gray-300"
-                            }`}
-                          >
-                            <option value="">Select a time zone</option>
-                            {TIMEZONES.map((tz) => (
-                              <option key={tz.value} value={tz.value}>
-                                {tz.label}
-                              </option>
-                            ))}
-                          </Field>
-                          <ErrorMessage
-                            name="account_timezone"
                             component="div"
                             className="mt-1 text-xs font-medium text-red-500"
                           />
