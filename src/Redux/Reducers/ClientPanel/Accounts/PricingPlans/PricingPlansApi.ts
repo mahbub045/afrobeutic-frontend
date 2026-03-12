@@ -10,6 +10,15 @@ export const PricingPlansApi = baseApi.injectEndpoints({
       }),
       providesTags: ["PricingPlans"],
     }),
+    // validate subscription endpoint to check if user can subscribe to a plan before showing the subscribe dialog
+    validateSubscription: builder.mutation({
+      query: (payload) => ({
+        url: `/accounts/subscription/validation`,
+        method: "POST",
+        body: payload,
+      }),
+    }),
   }),
 });
-export const { useGetPricingPlansQuery } = PricingPlansApi;
+export const { useGetPricingPlansQuery, useValidateSubscriptionMutation } =
+  PricingPlansApi;
