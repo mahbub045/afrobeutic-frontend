@@ -19,7 +19,14 @@ import type {
   DashboardFilterValue,
   OverviewStatsResponse,
 } from "@/Types/ClientPanel/Home/OverviewTypes";
-import { Calendar, ChevronDown, DollarSign, Inbox, LoaderPinwheel, Users } from "lucide-react";
+import {
+  Calendar,
+  ChevronDown,
+  DollarSign,
+  Inbox,
+  LoaderPinwheel,
+  Users,
+} from "lucide-react";
 import React from "react";
 
 const Overview: React.FC = () => {
@@ -187,7 +194,7 @@ const Overview: React.FC = () => {
             </CardAction>
           </CardHeader>
           <CardContent>
-            <h6 className="text-white">TOTAL INCOME</h6>
+            <h6 className="text-white">TOTAL SALE</h6>
             <div className="text-2xl font-bold text-white dark:text-green-100">
               {showIncomeFallback ? (
                 <LoaderPinwheel className="h-6 w-6 animate-spin" />
