@@ -19,7 +19,9 @@ import {
   LifeBuoy,
   LoaderPinwheel,
   MessageSquare,
+  Package,
   Podcast,
+  Receipt,
   ShieldUser,
   UserCog,
   Users,
@@ -135,6 +137,16 @@ const SideBar: React.FC<SideBarProps> = ({
         //   href: "/dashboard/client-panel/broadcast",
         //   Icon: Megaphone,
         // },
+        {
+          label: "Billing",
+          href: "/dashboard/client-panel/accounts/billing",
+          Icon: Receipt,
+        },
+        {
+          label: "Pricing Plans",
+          href: "/dashboard/client-panel/accounts/pricing-plans",
+          Icon: Package,
+        },
         {
           label: "Help",
           Icon: HelpCircle,
