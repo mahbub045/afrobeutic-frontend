@@ -160,7 +160,7 @@ const CustomerList: React.FC = () => {
                 className="text-primary shadow-md dark:shadow-gray-600"
               >
                 <CalendarRange />
-                Date Range
+                Join Date Range
               </Button>
             </PopoverTrigger>
             <PopoverContent className="mt-2 w-48">
@@ -222,6 +222,7 @@ const CustomerList: React.FC = () => {
               </>
             )}
             <TableHead className="text-primary text-center">Bookings</TableHead>
+            <TableHead className="text-primary text-center">Source</TableHead>
             <TableHead className="text-primary text-center">
               Recent booking
             </TableHead>
@@ -266,6 +267,7 @@ const CustomerList: React.FC = () => {
                     </>
                   )}
                   <TableCell>{c.booking?.length ?? 0}</TableCell>
+                  <TableCell>{c?.source ?? "—"}</TableCell>
                   <TableCell>
                     {latest
                       ? formatDateTime(

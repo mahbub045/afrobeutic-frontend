@@ -199,7 +199,9 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
                   {booking.customer.first_name} {booking.customer.last_name}
                 </TableCell>
                 <TableCell>{booking.customer?.phone}</TableCell>
-                <TableCell>{booking.customer?.source}</TableCell>
+                <TableCell>
+                  {formatChoiceFieldValue(booking.source) || "-"}
+                </TableCell>
                 <TableCell>
                   {booking.employee?.name ? (
                     booking.employee.name
@@ -322,7 +324,7 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
                   </p>
                   <p className="text-sm">
                     <span className="font-medium">Source:</span>{" "}
-                    {selectedBooking.customer.source || "N/A"}
+                    {formatChoiceFieldValue(selectedBooking.source) || "N/A"}
                   </p>
                 </div>
               </div>
