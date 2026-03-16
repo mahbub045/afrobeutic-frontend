@@ -181,7 +181,7 @@ const EditProductBasicInfoDialog: React.FC<EditProductBasicInfoDialogProps> = ({
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
-          {({ handleSubmit, isSubmitting, setFieldValue }) => (
+          {({ handleSubmit, isSubmitting }) => (
             <Form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="product-name" className="mb-2">
