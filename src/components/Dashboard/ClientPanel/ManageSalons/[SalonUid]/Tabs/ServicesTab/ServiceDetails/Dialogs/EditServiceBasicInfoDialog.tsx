@@ -12,10 +12,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { formatChoiceFieldValue } from "@/lib/utils";
 import {
-  useAddServiceSubCategoryMutation,
   useEditServiceMutation,
   useGetServiceCategoriesQuery,
-  useGetServiceSubCategoriesQuery,
 } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
 import {
   EditServiceBasicInfoDialogProps,
@@ -38,7 +36,7 @@ const buildInitialValues = (
 ): ServiceFormValues => ({
   name: service?.name || "",
   category: service?.category || "",
-  sub_category: service?.sub_category || "",
+  sub_category: "",
   price: service?.price || "",
   description: service?.description || "",
 });
@@ -52,9 +50,6 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
   const { salonuid } = useParams();
   const { resolvedTheme } = useTheme();
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
-  const [selectedCategoryUid, setSelectedCategoryUid] = useState<string>("");
-  const [showSubCategoryInput, setShowSubCategoryInput] = useState(false);
-  const [newSubCategoryName, setNewSubCategoryName] = useState("");
   const [formInitialValues, setFormInitialValues] = useState<ServiceFormValues>(
     () => buildInitialValues(selectedService),
   );
@@ -64,20 +59,6 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
     useEditServiceMutation();
   const { data: commonCategoriesData } =
     useGetServiceCategoriesQuery(undefined);
-  const {
-    data: commonSubCategoriesData,
-    isLoading: isLoadingSubCategories,
-    refetch,
-  } = useGetServiceSubCategoriesQuery(selectedCategoryUid || "", {
-    skip: !selectedCategoryUid,
-  });
-  const [addServiceSubCategory, { isLoading: isAddingSubCategory }] =
-    useAddServiceSubCategoryMutation();
-
-  const selectedCategory = commonCategoriesData?.results.find(
-    (cat: ServiceCategory) => cat.uid === selectedCategoryUid,
-  );
-  const canAddCustomSubCategory = selectedCategory?.name === "OTHER_SERVICES";
 
   const resolvedCategoryFromService = useMemo(() => {
     const rawCategory = selectedService?.category || "";
@@ -106,33 +87,8 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
     if (!isOpen) return;
 
     setFormInitialValues(buildInitialValues(selectedService));
-    setSelectedCategoryUid(resolvedCategoryFromService || "");
-    setShowSubCategoryInput(false);
-    setNewSubCategoryName("");
     setUploadedImages([]);
   }, [isOpen, resolvedCategoryFromService, selectedService]);
-
-  const resolvedSubCategoryFromService = useMemo(() => {
-    const rawSub = selectedService?.sub_category || "";
-    if (!rawSub) return "";
-
-    const subs =
-      (commonSubCategoriesData?.results as ServiceCategory[] | undefined) || [];
-    if (subs.length === 0) return "";
-
-    // If already a uid, keep it
-    if (subs.some((s) => s.uid === rawSub)) return rawSub;
-
-    const match = subs.find((s) => {
-      if (s.name === rawSub) return true;
-      return (
-        formatChoiceFieldValue(s.name) ===
-        formatChoiceFieldValue(rawSub as string)
-      );
-    });
-
-    return match ? match.uid : "";
-  }, [selectedService, commonSubCategoriesData]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -147,29 +103,11 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
     ) {
       formik.setFieldValue("category", resolvedCategoryFromService, false);
     }
-
-    if (
-      resolvedSubCategoryFromService &&
-      formik.values.sub_category !== resolvedSubCategoryFromService &&
-      formik.values.sub_category === (selectedService?.sub_category || "")
-    ) {
-      formik.setFieldValue(
-        "sub_category",
-        resolvedSubCategoryFromService,
-        false,
-      );
-    }
-  }, [
-    isOpen,
-    resolvedCategoryFromService,
-    resolvedSubCategoryFromService,
-    selectedService,
-  ]);
+  }, [isOpen, resolvedCategoryFromService, selectedService]);
 
   const validationSchema = Yup.object().shape({
     name: Yup.string().required("Service name is required"),
     category: Yup.string().required("Category is required"),
-    sub_category: Yup.string().required("Sub-category is required"),
     price: Yup.number()
       .typeError("Price must be a number")
       .required("Price is required"),
@@ -189,47 +127,11 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
     setUploadedImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  async function handleAddSubCategory() {
-    if (!selectedCategoryUid) {
-      toast.error("Please select a category first.");
-      return;
-    }
-
-    if (!canAddCustomSubCategory) {
-      toast.error(
-        "Custom sub-categories can only be created under the 'Other Services' service category.",
-      );
-      return;
-    }
-
-    const name = newSubCategoryName.trim();
-    if (!name) {
-      toast.error("Please enter a sub-category name.");
-      return;
-    }
-
-    try {
-      await addServiceSubCategory({
-        categoryUid: selectedCategoryUid,
-        subCategoryData: { name },
-      }).unwrap();
-
-      toast.success("Sub-category added successfully.");
-      setNewSubCategoryName("");
-      setShowSubCategoryInput(false);
-      refetch();
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to add sub-category. Please try again.");
-    }
-  }
-
   const handleSubmit = async (values: ServiceFormValues) => {
     try {
       const formData = new FormData();
       formData.append("name", values.name);
       formData.append("category", values.category);
-      formData.append("sub_category", values.sub_category);
       formData.append("price", String(values.price));
       formData.append("description", values.description || "");
       uploadedImages.forEach((file) =>
@@ -307,9 +209,7 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
                   name="category"
                   onChange={(e: ChangeEvent<HTMLSelectElement>) => {
                     const categoryValue = e.target.value;
-                    setSelectedCategoryUid(categoryValue);
                     setFieldValue("category", categoryValue);
-                    setFieldValue("sub_category", "");
                   }}
                 >
                   <option value="" disabled>
@@ -326,86 +226,6 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
                     {errors.category as string}
                   </p>
                 ) : null}
-              </div>
-              <div>
-                <Label htmlFor="service-sub-category" className="mb-2">
-                  Sub-Category
-                </Label>
-                <Field
-                  as="select"
-                  id="service-sub-category"
-                  name="sub_category"
-                  disabled={!selectedCategoryUid || isLoadingSubCategories}
-                >
-                  <option value="" disabled>
-                    Select sub-category
-                  </option>
-                  {(
-                    commonSubCategoriesData?.results as
-                      | ServiceCategory[]
-                      | undefined
-                      | null
-                  )?.map((subCat: ServiceCategory) => (
-                    <option key={subCat.uid} value={subCat.uid}>
-                      {formatChoiceFieldValue(subCat.name)}
-                    </option>
-                  ))}
-                </Field>
-                {touched.sub_category && errors.sub_category ? (
-                  <p className="mt-1 text-sm text-red-500">
-                    {errors.sub_category as string}
-                  </p>
-                ) : null}
-                {canAddCustomSubCategory && (
-                  <div className="mt-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        if (!selectedCategoryUid) {
-                          toast.error("Please select a category first.");
-                          return;
-                        }
-                        setShowSubCategoryInput(true);
-                      }}
-                      disabled={isAddingSubCategory}
-                    >
-                      Add New Sub-Category
-                    </Button>
-                    {showSubCategoryInput ? (
-                      <div className="mt-2 flex items-center gap-2">
-                        <input
-                          type="text"
-                          value={newSubCategoryName}
-                          onChange={(e) =>
-                            setNewSubCategoryName(e.target.value)
-                          }
-                          placeholder="e.g. Hair Coloring"
-                          className="bg-background focus-visible:ring-primary flex-1 rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-2"
-                        />
-                        <Button
-                          type="button"
-                          size="lg"
-                          onClick={handleAddSubCategory}
-                          disabled={isAddingSubCategory}
-                        >
-                          {isAddingSubCategory ? "Saving..." : "Save"}
-                        </Button>
-                        <Button
-                          type="button"
-                          size="lg"
-                          variant="danger"
-                          onClick={() => {
-                            setShowSubCategoryInput(false);
-                            setNewSubCategoryName("");
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    ) : null}
-                  </div>
-                )}
               </div>
               <div>
                 <Label htmlFor="service-price" className="mb-2">
