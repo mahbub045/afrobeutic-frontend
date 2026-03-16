@@ -135,7 +135,7 @@ const FullScreenImageViewer: React.FC<FullScreenImageViewerProps> = ({
 
       {/* Image counter */}
       <div className="border-t border-white/10 bg-black/50 px-6 py-3 text-center text-sm text-white/70">
-        {currentImageIndex + 1} / {images.length}
+        {images.length > 0 ? currentImageIndex + 1 : 0} / {images.length}
       </div>
     </div>
   );

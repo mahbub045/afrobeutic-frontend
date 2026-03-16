@@ -297,16 +297,7 @@ const EditLookBookImageDialog: React.FC<EditLookBookImageDialogProps> = ({
 
       if (!result.isConfirmed) return;
 
-      Swal.fire({
-        icon: "success",
-        iconColor: "#037375",
-        title: "Deleted",
-        timer: 1500,
-        background: resolvedTheme === "dark" ? "#0f1724" : undefined,
-        color: resolvedTheme === "dark" ? "#e6eef0" : undefined,
-        confirmButtonColor: "#037375",
-        target: dialogContentRef.current ?? undefined,
-      });
+      toast.success("Image deleted successfully.");
 
       onEditSuccess?.();
     } catch (error: unknown) {
