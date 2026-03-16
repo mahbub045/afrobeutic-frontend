@@ -27,6 +27,7 @@ const WelcomeMessage: React.FC = () => {
   const userName = session?.user?.first_name
     ? `${session.user.first_name} ${session.user.last_name || ""}`
     : session?.user?.email?.split("@")[0] || "User";
+  const fullName = userName.trim();
 
   // Find the active account details
   const activeAccount = useMemo(() => {
@@ -34,10 +35,21 @@ const WelcomeMessage: React.FC = () => {
     return accountsData.results.find((acc) => acc.uid === activeAccountId);
   }, [isViewingDifferentAccount, activeAccountId, accountsData]);
 
-  const accountDisplayName =
-    isViewingDifferentAccount && activeAccount
-      ? `${activeAccount.owner_name}'s account`
-      : `${userName}'s account`;
+  const accountDisplayName = (() => {
+    if (isClientRole) {
+      if (isViewingDifferentAccount && activeAccount?.name) {
+        return `${activeAccount.name}'s account`;
+      }
+
+      return `${session?.user?.account_name || fullName}'s account`;
+    }
+
+    if (isManagementRole) {
+      return fullName;
+    }
+
+    return fullName;
+  })();
 
   return (
     <Card className="relative min-h-[200px] overflow-hidden border shadow-md sm:min-h-[250px] dark:shadow-gray-600">
