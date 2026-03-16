@@ -100,6 +100,18 @@ const ViewLookBookPanel: React.FC<ViewLookBookPanelProps> = ({
       : undefined;
 
   useEffect(() => {
+    if (imagesToShow.length === 0) {
+      setSelectedImageIndex(0);
+      setIsFullScreenOpen(false);
+      return;
+    }
+
+    if (selectedImageIndex > imagesToShow.length - 1) {
+      setSelectedImageIndex(imagesToShow.length - 1);
+    }
+  }, [imagesToShow.length, selectedImageIndex]);
+
+  useEffect(() => {
     setIsImageLoading(imagesToShow.length > 0);
   }, [selectedImageIndex, imagesToShow.length]);
 

@@ -14,7 +14,7 @@ import { useEffect, useMemo, useState } from "react";
 
 const OthersInfo: React.FC = () => {
   const { data: session } = useSession();
-  const { role } = useEffectiveRole(session);
+  const { role, isClientRole, isManagementRole } = useEffectiveRole(session);
   const { activeAccountId } = useAccountSwitch();
   const { data: accountsData } = useGetAccountAccesserQuery();
 
@@ -29,6 +29,7 @@ const OthersInfo: React.FC = () => {
   const userName = session?.user?.first_name
     ? `${session.user.first_name} ${session.user.last_name || ""}`
     : session?.user?.email?.split("@")[0] || "User";
+  const fullName = userName.trim();
 
   // Find the active account details
   const activeAccount = useMemo(() => {
@@ -36,10 +37,21 @@ const OthersInfo: React.FC = () => {
     return accountsData.results.find((acc) => acc.uid === activeAccountId);
   }, [isViewingDifferentAccount, activeAccountId, accountsData]);
 
-  const accountDisplayName =
-    isViewingDifferentAccount && activeAccount
-      ? `${activeAccount.owner_name}'s account`
-      : `${userName}'s account`;
+  const accountDisplayName = (() => {
+    if (isClientRole) {
+      if (isViewingDifferentAccount && activeAccount?.name) {
+        return `${activeAccount.name}'s account`;
+      }
+
+      return `${session?.user?.account_name || fullName}'s account`;
+    }
+
+    if (isManagementRole) {
+      return fullName;
+    }
+
+    return fullName;
+  })();
 
   return (
     <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">

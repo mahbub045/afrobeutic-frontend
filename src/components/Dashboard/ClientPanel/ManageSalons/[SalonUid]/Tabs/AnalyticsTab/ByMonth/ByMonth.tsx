@@ -26,14 +26,30 @@ const ByMonth: React.FC = () => {
       params: { month: monthValue, year: yearValue },
     });
 
+  const selectedMonthName = useMemo(
+    () =>
+      new Date(yearValue, monthValue - 1).toLocaleString(undefined, {
+        month: "long",
+      }),
+    [monthValue, yearValue],
+  );
+
   const chartData = useMemo(() => {
     const raw = (appointmentByMonthData ?? {}) as Record<string, number>;
-    const header: (string | number)[] = ["Day", "Bookings"];
-    const rows: (string | number)[][] = Object.keys(raw)
+    const header = ["Day", "Bookings", { role: "tooltip", type: "string" }];
+    const rows = Object.keys(raw)
       .sort((a, b) => Number(a) - Number(b))
-      .map((k) => [k, raw[k] ?? 0]);
+      .map((k) => {
+        const day = Number(k);
+        const bookings = raw[k] ?? 0;
+        return [
+          String(day),
+          bookings,
+          `${selectedMonthName}:${day}\nBookings: ${bookings}`,
+        ];
+      });
     return [header, ...rows];
-  }, [appointmentByMonthData]);
+  }, [appointmentByMonthData, selectedMonthName]);
 
   const options = {
     chartArea: { left: 48, top: 48, width: "95%", height: "70%" },

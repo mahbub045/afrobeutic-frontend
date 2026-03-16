@@ -13,6 +13,7 @@ export interface ChairBookingProps {
   booking_date: string;
   booking_time: string;
   status: string;
+  source: string | null;
   booking_duration: string | null;
   notes: string | null;
   services: Array<{

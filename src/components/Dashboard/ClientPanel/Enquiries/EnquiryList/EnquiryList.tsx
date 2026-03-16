@@ -371,6 +371,7 @@ const EnquiryList: React.FC = () => {
             {session?.user?.account_type === "INDIVIDUAL_STYLIST" ? null : (
               <TableHead className="text-primary text-center">Salon</TableHead>
             )}
+            <TableHead className="text-primary text-center">Source</TableHead>
             <TableHead className="text-primary text-center">Status</TableHead>
             <TableHead className="text-primary text-center">Actions</TableHead>
           </TableRow>
@@ -428,6 +429,9 @@ const EnquiryList: React.FC = () => {
                       {enq.salon?.name ? safe(enq.salon.name) : "-"}
                     </TableCell>
                   )}
+                  <TableCell className="text-center">
+                    {formatChoiceFieldValue(enq.source) || "-"}
+                  </TableCell>
                   <TableCell className="text-center">
                     <Badge variant={getColorBasedOnStatus(enq.status)}>
                       {formatChoiceFieldValue(enq.status)}

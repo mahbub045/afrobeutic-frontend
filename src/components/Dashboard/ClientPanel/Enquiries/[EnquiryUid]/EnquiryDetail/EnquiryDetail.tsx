@@ -157,11 +157,7 @@ const EnquiryDetails: React.FC = () => {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground text-sm">
-              {enq.lead
-                ? enq.lead.source
-                : enq.customer
-                  ? enq.customer.source
-                  : "-"}
+              {formatChoiceFieldValue(enq.source) || "-"}
             </p>
           </CardContent>
         </Card>

@@ -29,7 +29,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatChoiceFieldValue, formatDateTime } from "@/lib/utils";
+import {
+  formatChoiceFieldValue,
+  formatDate,
+  formatDateTime,
+} from "@/lib/utils";
 import {
   CalendarRange,
   ChevronLeft,
@@ -160,7 +164,7 @@ const CustomerList: React.FC = () => {
                 className="text-primary shadow-md dark:shadow-gray-600"
               >
                 <CalendarRange />
-                Date Range
+                Joining Date Range
               </Button>
             </PopoverTrigger>
             <PopoverContent className="mt-2 w-48">
@@ -223,6 +227,10 @@ const CustomerList: React.FC = () => {
             )}
             <TableHead className="text-primary text-center">Bookings</TableHead>
             <TableHead className="text-primary text-center">
+              Joining Date
+            </TableHead>
+            <TableHead className="text-primary text-center">Source</TableHead>
+            <TableHead className="text-primary text-center">
               Recent booking
             </TableHead>
             <TableHead className="text-primary text-center">
@@ -235,7 +243,7 @@ const CustomerList: React.FC = () => {
         <TableBody className="text-center">
           {isLoadingCustomers ? (
             <TableRow>
-              <TableCell colSpan={10} className="py-8 text-center">
+              <TableCell colSpan={12} className="py-8 text-center">
                 <div className="flex items-center justify-center">
                   <LoaderPinwheel className="text-primary h-6 w-6 animate-spin" />
                 </div>
@@ -243,7 +251,7 @@ const CustomerList: React.FC = () => {
             </TableRow>
           ) : customers.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={10} className="py-8 text-center">
+              <TableCell colSpan={12} className="py-8 text-center">
                 No customers found.
               </TableCell>
             </TableRow>
@@ -266,6 +274,8 @@ const CustomerList: React.FC = () => {
                     </>
                   )}
                   <TableCell>{c.booking?.length ?? 0}</TableCell>
+                  <TableCell>{formatDate(c.created_at)}</TableCell>
+                  <TableCell>{c?.source ?? "—"}</TableCell>
                   <TableCell>
                     {latest
                       ? formatDateTime(

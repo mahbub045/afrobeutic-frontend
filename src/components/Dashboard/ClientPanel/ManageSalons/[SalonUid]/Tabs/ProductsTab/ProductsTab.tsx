@@ -144,7 +144,6 @@ const ProductsTab: React.FC = () => {
               <TableHead className="text-primary">#</TableHead>
               <TableHead className="text-primary">Product Name</TableHead>
               <TableHead className="text-primary">Category</TableHead>
-              <TableHead className="text-primary">Sub Category</TableHead>
               <TableHead className="text-primary">
                 <div className="flex items-center gap-1">
                   <span>Price</span>
@@ -206,9 +205,6 @@ const ProductsTab: React.FC = () => {
                   <TableCell className="font-medium">{product.name}</TableCell>
                   <TableCell>
                     {formatChoiceFieldValue(product.category) || "-"}
-                  </TableCell>
-                  <TableCell>
-                    {formatChoiceFieldValue(product.sub_category) || "-"}
                   </TableCell>
                   <TableCell>${product.price}</TableCell>
                   <TableCell>

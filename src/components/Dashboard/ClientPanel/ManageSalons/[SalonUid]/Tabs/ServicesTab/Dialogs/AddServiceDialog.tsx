@@ -10,9 +10,7 @@ import { Label } from "@/components/ui/label";
 import { formatChoiceFieldValue } from "@/lib/utils";
 import {
   useAddServiceMutation,
-  useAddServiceSubCategoryMutation,
   useGetServiceCategoriesQuery,
-  useGetServiceSubCategoriesQuery,
 } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
 import {
   AddServiceDialogProps,
@@ -20,7 +18,7 @@ import {
   ServiceFormValues,
 } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import { Field, Formik, type FormikHelpers } from "formik";
-import { Plus, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import { useParams } from "next/navigation";
@@ -33,7 +31,6 @@ import * as Yup from "yup";
 const ServiceSchema = Yup.object().shape({
   name: Yup.string().trim().required("Name is required"),
   category: Yup.string().trim().required("Category is required"),
-  sub_category: Yup.string().trim().required("Category is required"),
   price: Yup.number()
     .typeError("Price must be a number")
     .required("Price is required")
@@ -51,56 +48,11 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fileError, setFileError] = useState<string | null>(null);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-  const [selectedCategoryUid, setSelectedCategoryUid] = useState<string>("");
-  const [showSubCategoryInput, setShowSubCategoryInput] = useState(false);
-  const [newSubCategoryName, setNewSubCategoryName] = useState("");
 
   // rtk hooks
   const [addService, { isLoading }] = useAddServiceMutation();
   const { data: commonCategoriesData } =
     useGetServiceCategoriesQuery(undefined);
-  const {
-    data: commonSubCategoriesData,
-    isLoading: isLoadingSubCategories,
-    refetch,
-  } = useGetServiceSubCategoriesQuery(selectedCategoryUid || "", {
-    skip: !selectedCategoryUid,
-  });
-  const [addServiceSubCategory, { isLoading: isAddingSubCategory }] =
-    useAddServiceSubCategoryMutation();
-
-  const selectedCategory = commonCategoriesData?.results.find(
-    (cat: ServiceCategory) => cat.uid === selectedCategoryUid,
-  );
-  const canAddCustomSubCategory = selectedCategory?.name === "OTHER_SERVICES";
-
-  async function handleAddSubCategory() {
-    if (!selectedCategoryUid) {
-      toast.error("Please select a category first.");
-      return;
-    }
-
-    const name = newSubCategoryName.trim();
-    if (!name) {
-      toast.error("Please enter a sub-category name.");
-      return;
-    }
-
-    try {
-      await addServiceSubCategory({
-        categoryUid: selectedCategoryUid,
-        subCategoryData: { name },
-      }).unwrap();
-
-      toast.success("Sub-category added successfully.");
-      setNewSubCategoryName("");
-      setShowSubCategoryInput(false);
-      refetch();
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to add sub-category. Please try again.");
-    }
-  }
 
   async function handleAddService(
     values: ServiceFormValues,
@@ -119,7 +71,6 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
       const form = new FormData();
       form.append("name", values.name.trim());
       form.append("category", values.category.trim());
-      form.append("sub_category", values.sub_category.trim());
       form.append("price", String(parseFloat(String(values.price)) || 0));
       form.append("description", values.description?.trim() || "");
 
@@ -144,7 +95,6 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
         timer: 2000,
       });
       helpers.resetForm();
-      refetch();
       setSelectedFiles([]);
     } catch (err) {
       console.error(err);
@@ -165,7 +115,6 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
             {
               name: "",
               category: "",
-              sub_category: "",
               price: "",
               description: "",
             } as ServiceFormValues
@@ -204,9 +153,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                   placeholder="Service category"
                   onChange={(e: ChangeEvent<HTMLSelectElement>) => {
                     const categoryValue = e.target.value;
-                    setSelectedCategoryUid(categoryValue);
                     setFieldValue("category", categoryValue);
-                    setFieldValue("sub_category", "");
                   }}
                 >
                   <option value="" disabled>
@@ -221,87 +168,6 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                 {touched.category && errors.category ? (
                   <p className="text-destructive text-sm">{errors.category}</p>
                 ) : null}
-              </div>
-
-              <div>
-                <Label htmlFor="sub_category" className="mb-2">
-                  Sub-Category<span className="text-danger">*</span>
-                </Label>
-                <Field
-                  id="sub_category"
-                  name="sub_category"
-                  as="select"
-                  required
-                  placeholder="Service sub-category"
-                  disabled={!selectedCategoryUid || isLoadingSubCategories}
-                >
-                  <option value="" disabled>
-                    Select sub-category
-                  </option>
-                  {commonSubCategoriesData?.results.map(
-                    (subCat: ServiceCategory) => (
-                      <option key={subCat.uid} value={subCat.uid}>
-                        {formatChoiceFieldValue(subCat.name)}
-                      </option>
-                    ),
-                  )}
-                </Field>
-                {touched.sub_category && errors.sub_category ? (
-                  <p className="text-destructive text-sm">
-                    {errors.sub_category}
-                  </p>
-                ) : null}
-                {canAddCustomSubCategory && (
-                  <div className="mt-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        if (!selectedCategoryUid) {
-                          toast.error("Please select a category first.");
-                          return;
-                        }
-                        setShowSubCategoryInput(true);
-                      }}
-                      disabled={isAddingSubCategory}
-                    >
-                      <Plus className="mr-1 h-4 w-4" />
-                      Add New Sub-Category
-                    </Button>
-                    {showSubCategoryInput ? (
-                      <div className="mt-2 flex items-center gap-2">
-                        <input
-                          type="text"
-                          value={newSubCategoryName}
-                          onChange={(e) =>
-                            setNewSubCategoryName(e.target.value)
-                          }
-                          placeholder="e.g. Hair Coloring"
-                          className="bg-background focus-visible:ring-primary flex-1 rounded-md border px-3 py-1 text-sm outline-none focus-visible:ring-2"
-                        />
-                        <Button
-                          type="button"
-                          size="lg"
-                          onClick={handleAddSubCategory}
-                          disabled={isAddingSubCategory}
-                        >
-                          {isAddingSubCategory ? "Saving..." : "Save"}
-                        </Button>
-                        <Button
-                          type="button"
-                          size="lg"
-                          variant="danger"
-                          onClick={() => {
-                            setShowSubCategoryInput(false);
-                            setNewSubCategoryName("");
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    ) : null}
-                  </div>
-                )}
               </div>
 
               <div>

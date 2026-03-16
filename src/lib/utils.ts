@@ -28,6 +28,26 @@ export function formatDateTime(value?: string | null): string {
     }
   }
 }
+export function formatDate(value?: string | null): string {
+  if (value === undefined || value === null || value === "") return "-";
+
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return "Invalid date";
+
+  // Use user's locale with medium date style
+  try {
+    return new Intl.DateTimeFormat(undefined, {
+      dateStyle: "medium",
+    }).format(date);
+  } catch {
+    // Fallback if Intl options are unsupported in environment
+    try {
+      return date.toLocaleDateString(undefined);
+    } catch {
+      return date.toLocaleDateString();
+    }
+  }
+}
 
 export const safe = (v: unknown): string => {
   if (v === undefined || v === null || v === "") return "-";
