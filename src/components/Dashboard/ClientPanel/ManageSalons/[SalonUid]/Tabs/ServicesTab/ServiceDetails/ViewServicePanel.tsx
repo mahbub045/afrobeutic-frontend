@@ -261,14 +261,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                   {safe(formatChoiceFieldValue(displayedService.category))}
                 </div>
               </div>
-              <div>
-                <div className="text-muted-foreground text-xs uppercase">
-                  Sub Category
-                </div>
-                <div className="text-sm font-medium">
-                  {safe(formatChoiceFieldValue(displayedService.sub_category))}
-                </div>
-              </div>
+
               <div>
                 <div className="text-muted-foreground text-xs uppercase">
                   Price $

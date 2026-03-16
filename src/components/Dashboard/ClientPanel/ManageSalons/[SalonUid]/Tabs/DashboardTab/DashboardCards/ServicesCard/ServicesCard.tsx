@@ -114,13 +114,6 @@ const ServicesCard: React.FC = () => {
                             {formatChoiceFieldValue(service.category)}
                           </strong>
                         </span>{" "}
-                        |{" "}
-                        <span>
-                          Sub Category:{" "}
-                          <strong>
-                            {formatChoiceFieldValue(service.sub_category)}
-                          </strong>
-                        </span>
                       </p>
                     </div>
                   </div>
