@@ -123,22 +123,6 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
                 Switch account
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link
-                className="cursor-pointer"
-                href="/dashboard/client-panel/accounts/billing"
-              >
-                Billing
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link
-                className="cursor-pointer"
-                href="/dashboard/client-panel/accounts/pricing-plans"
-              >
-                Pricing Plans
-              </Link>
-            </DropdownMenuItem>
           </>
         )}
         {isManagementRole && (

@@ -60,6 +60,11 @@ export default function SubscriptionDetailsCard({
               {formatDateTime(subscription.next_billing_date)}
             </span>
           </div>
+          <div className="flex items-center justify-end">
+            <small className="text-muted-foreground">
+              (A month is considered to be 30 days.)
+            </small>
+          </div>
         </div>
       </CardContent>
     </Card>

@@ -10,9 +10,7 @@ import { Label } from "@/components/ui/label";
 import { formatChoiceFieldValue } from "@/lib/utils";
 import {
   useAddProductMutation,
-  useAddProductSubCategoryMutation,
   useGetProductCategoriesQuery,
-  useGetProductSubCategoriesQuery,
 } from "@/Redux/Reducers/ClientPanel/ManageSalons/Products/ProductsApi";
 import {
   AddProductDialogProps,
@@ -20,11 +18,11 @@ import {
   ProductFormValues,
 } from "@/Types/ClientPanel/ManageSalonTypes/ProductsTypes/ProductsType";
 import { Field, Formik, type FormikHelpers } from "formik";
-import { Plus, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { ChangeEvent, useState } from "react";
+import { useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
@@ -32,7 +30,6 @@ import * as Yup from "yup";
 const ProductSchema = Yup.object().shape({
   name: Yup.string().trim().required("Name is required"),
   category: Yup.string().trim().required("Category is required"),
-  sub_category: Yup.string().trim().required("Sub-category is required"),
   price: Yup.number()
     .typeError("Price must be a number")
     .required("Price is required")
@@ -50,56 +47,11 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fileError, setFileError] = useState<string | null>(null);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-  const [selectedCategoryUid, setSelectedCategoryUid] = useState<string>("");
-  const [showSubCategoryInput, setShowSubCategoryInput] = useState(false);
-  const [newSubCategoryName, setNewSubCategoryName] = useState("");
 
   // RTK hooks
   const [addProduct, { isLoading }] = useAddProductMutation();
   const { data: commonCategoriesData } =
     useGetProductCategoriesQuery(undefined);
-  const {
-    data: commonSubCategoriesData,
-    isLoading: isLoadingSubCategories,
-    refetch,
-  } = useGetProductSubCategoriesQuery(selectedCategoryUid || "", {
-    skip: !selectedCategoryUid,
-  });
-  const [addProductSubCategory, { isLoading: isAddingSubCategory }] =
-    useAddProductSubCategoryMutation();
-
-  const selectedCategory = commonCategoriesData?.results.find(
-    (cat: ProductCategory) => cat.uid === selectedCategoryUid,
-  );
-  const canAddCustomSubCategory = selectedCategory?.name === "OTHER_PRODUCTS";
-
-  async function handleAddSubCategory() {
-    if (!selectedCategoryUid) {
-      toast.error("Please select a category first.");
-      return;
-    }
-
-    const name = newSubCategoryName.trim();
-    if (!name) {
-      toast.error("Please enter a sub-category name.");
-      return;
-    }
-
-    try {
-      await addProductSubCategory({
-        categoryUid: selectedCategoryUid,
-        subCategoryData: { name },
-      }).unwrap();
-
-      toast.success("Sub-category added successfully.");
-      setNewSubCategoryName("");
-      setShowSubCategoryInput(false);
-      refetch();
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to add sub-category. Please try again.");
-    }
-  }
 
   async function handleAddProduct(
     values: ProductFormValues,
@@ -118,7 +70,6 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
       const form = new FormData();
       form.append("name", values.name.trim());
       form.append("category", values.category.trim());
-      form.append("sub_category", values.sub_category.trim());
       form.append("price", String(parseFloat(String(values.price)) || 0));
       form.append("description", values.description?.trim() || "");
 
@@ -143,7 +94,6 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
         timer: 2000,
       });
       helpers.resetForm();
-      refetch();
       setSelectedFiles([]);
     } catch (err) {
       console.error(err);
@@ -201,12 +151,6 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
                   as="select"
                   required
                   placeholder="Product category"
-                  onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-                    const categoryValue = e.target.value;
-                    setSelectedCategoryUid(categoryValue);
-                    setFieldValue("category", categoryValue);
-                    setFieldValue("sub_category", "");
-                  }}
                 >
                   <option value="" disabled>
                     Select category
@@ -220,87 +164,6 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
                 {touched.category && errors.category ? (
                   <p className="text-destructive text-sm">{errors.category}</p>
                 ) : null}
-              </div>
-
-              <div>
-                <Label htmlFor="sub_category" className="mb-2">
-                  Sub-Category<span className="text-danger">*</span>
-                </Label>
-                <Field
-                  id="sub_category"
-                  name="sub_category"
-                  as="select"
-                  required
-                  placeholder="Product sub-category"
-                  disabled={!selectedCategoryUid || isLoadingSubCategories}
-                >
-                  <option value="" disabled>
-                    Select sub-category
-                  </option>
-                  {commonSubCategoriesData?.results.map(
-                    (subCat: ProductCategory) => (
-                      <option key={subCat.uid} value={subCat.uid}>
-                        {formatChoiceFieldValue(subCat.name)}
-                      </option>
-                    ),
-                  )}
-                </Field>
-                {touched.sub_category && errors.sub_category ? (
-                  <p className="text-destructive text-sm">
-                    {errors.sub_category}
-                  </p>
-                ) : null}
-                {canAddCustomSubCategory && (
-                  <div className="mt-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        if (!selectedCategoryUid) {
-                          toast.error("Please select a category first.");
-                          return;
-                        }
-                        setShowSubCategoryInput(true);
-                      }}
-                      disabled={isAddingSubCategory}
-                    >
-                      <Plus className="mr-1 h-4 w-4" />
-                      Add New Sub-Category
-                    </Button>
-                    {showSubCategoryInput ? (
-                      <div className="mt-2 flex items-center gap-2">
-                        <input
-                          type="text"
-                          value={newSubCategoryName}
-                          onChange={(e) =>
-                            setNewSubCategoryName(e.target.value)
-                          }
-                          placeholder="e.g. Shampoo"
-                          className="bg-background focus-visible:ring-primary flex-1 rounded-md border px-3 py-1 text-sm outline-none focus-visible:ring-2"
-                        />
-                        <Button
-                          type="button"
-                          size="lg"
-                          onClick={handleAddSubCategory}
-                          disabled={isAddingSubCategory}
-                        >
-                          {isAddingSubCategory ? "Saving..." : "Save"}
-                        </Button>
-                        <Button
-                          type="button"
-                          size="lg"
-                          variant="danger"
-                          onClick={() => {
-                            setShowSubCategoryInput(false);
-                            setNewSubCategoryName("");
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    ) : null}
-                  </div>
-                )}
               </div>
 
               <div>

@@ -144,7 +144,6 @@ const ServicesTab: React.FC = () => {
               <TableHead className="text-primary">#</TableHead>
               <TableHead className="text-primary">Service Name</TableHead>
               <TableHead className="text-primary">Category</TableHead>
-              <TableHead className="text-primary">Sub-Category</TableHead>
               <TableHead className="text-primary">
                 <div className="flex items-center gap-1">
                   <span>Price</span>
@@ -207,9 +206,7 @@ const ServicesTab: React.FC = () => {
                   <TableCell>
                     {formatChoiceFieldValue(service.category) || "-"}
                   </TableCell>
-                  <TableCell>
-                    {formatChoiceFieldValue(service.sub_category) || "-"}
-                  </TableCell>
+
                   <TableCell>${service.price}</TableCell>
                   <TableCell>
                     {formatDateTime(service?.created_at ?? null)}
