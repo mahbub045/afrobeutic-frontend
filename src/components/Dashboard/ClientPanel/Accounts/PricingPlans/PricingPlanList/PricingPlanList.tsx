@@ -6,7 +6,6 @@ import {
   CardContent,
   CardDescription,
   CardFooter,
-  CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { formatPrice } from "@/lib/utils";
@@ -15,7 +14,7 @@ import {
   useValidateSubscriptionMutation,
 } from "@/Redux/Reducers/ClientPanel/Accounts/PricingPlans/PricingPlansApi";
 import { PricingPlanTypes } from "@/Types/AdminPanel/PricingPlansTypes/PricingPlansTypes";
-import { CircleAlert, LoaderPinwheel } from "lucide-react";
+import { Check, CircleAlert, LoaderPinwheel } from "lucide-react";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import SubscribeToPlanDialog from "./Dialogs/SubscribeToPlanDialog";
@@ -157,65 +156,61 @@ const PricingPlanList: React.FC = () => {
             {pricingPlans.map((plan: PricingPlanTypes) => (
               <Card
                 key={plan.uid}
-                className="mb-2 shadow-md dark:shadow-gray-600"
+                className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-950"
               >
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span className="text-primary text-2xl">{plan.name}</span>
-                  </CardTitle>
-                  <CardDescription>
-                    {plan.description ? (
-                      <span className="text-xs">{plan.description}</span>
-                    ) : (
-                      <small className="text-muted-foreground">
-                        No description provided.
-                      </small>
-                    )}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
+                <div className="space-y-4 border-b border-slate-200 px-6 py-6 dark:border-slate-800">
                   <div>
-                    <h2 className="my-10 text-center text-4xl font-bold">
-                      <span className="text-primary">
-                        {formatPrice(plan.price)}
-                      </span>
-                      <small className="text-xs">/month</small>
-                    </h2>
+                    <CardTitle className="text-2xl font-semibold text-slate-950 dark:text-slate-50">
+                      {plan.name}
+                    </CardTitle>
+                    <CardDescription className="text-primary mt-3 text-sm">
+                      {plan.description ||
+                        "A great plan for your business needs."}
+                    </CardDescription>
                   </div>
-                  <ul className="marker:text-primary list-disc space-y-1 pl-6 text-sm">
-                    <li>
-                      <strong>Salon Limit -&gt;</strong> {plan.salon_limit}
-                    </li>
-                    <li>
-                      <strong>Chatbot Limit -&gt;</strong>{" "}
-                      {plan.whatsapp_chatbot_limit}
-                    </li>
-                    <li>
-                      <strong>Chatbot Messages Limit -&gt;</strong>{" "}
-                      {plan.whatsapp_messages_per_chatbot}
-                    </li>
-                    {/* <li>
-                      <strong>Broadcasting -&gt;</strong>{" "}
-                      {plan.has_broadcasting
-                        ? `Yes (limit ${plan.broadcasting_message_limit})`
-                        : "No"}
-                    </li> */}
-                  </ul>
+                </div>
+
+                <CardContent className="px-6 py-8">
+                  <div className="text-center">
+                    <div className="text-5xl font-bold tracking-tight text-slate-950 dark:text-white">
+                      {formatPrice(plan.price)}
+                    </div>
+                    <div className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                      / month <span className="text-slate-400">+ VAT</span>
+                    </div>
+                  </div>
+
+                  <div className="text-primary mt-6 rounded-3xl border border-slate-200 bg-slate-50 px-5 py-4 text-center text-sm dark:border-slate-800 dark:bg-slate-900 dark:text-sky-300">
+                    {plan.salon_limit} Salon{plan.salon_limit === 1 ? "" : "s"}{" "}
+                    • {plan.whatsapp_chatbot_limit} Chatbot
+                    {plan.whatsapp_chatbot_limit === 1 ? "" : "s"}
+                  </div>
+
+                  <div className="mt-8 space-y-4 text-sm text-slate-700 dark:text-slate-300">
+                    <div className="flex items-start gap-3">
+                      <Check className="text-primary mt-1 h-4 w-4 shrink-0" />
+                      <span>Paid monthly in advance</span>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Check className="text-primary mt-1 h-4 w-4 shrink-0" />
+                      <span>Dedicated onboarding & customer support</span>
+                    </div>
+                  </div>
                 </CardContent>
 
                 {plan.name.trim().toLowerCase() === "free" ? null : (
-                  <CardFooter className="flex justify-center gap-2">
+                  <CardFooter className="px-6 pt-2 pb-6">
                     <Button
                       variant="default"
-                      className="w-full shadow-md dark:shadow-gray-600"
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-950 py-3 text-base font-semibold text-white shadow-sm hover:bg-slate-800 dark:border-slate-800 dark:bg-slate-50 dark:text-slate-950 dark:hover:bg-slate-100"
                       onClick={() => handleGetNow(plan)}
                       disabled={plan.is_current_plan === true || isValidating}
                     >
                       {plan.is_current_plan === true
-                        ? "Current Plan"
+                        ? "Current plan"
                         : isValidating
                           ? "Checking..."
-                          : "Get Now"}
+                          : "Get Started"}
                     </Button>
                   </CardFooter>
                 )}
