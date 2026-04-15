@@ -132,7 +132,10 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
       .max(100, "Discount cannot be more than 100")
       .typeError("Discount must be a number"),
     assign_employees: Yup.array().of(Yup.string()),
-    tags: Yup.array().of(Yup.string()),
+    tags: Yup.array()
+      .of(Yup.string())
+      .min(1, "At least one tag is required")
+      .required("Tags are required"),
   });
 
   const handleSubmit = async (values: MoreInfoFormValues) => {
@@ -202,7 +205,15 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
           onSubmit={handleSubmit}
           enableReinitialize
         >
-          {({ values, setFieldValue, handleSubmit, isSubmitting }) => (
+          {({
+            values,
+            setFieldValue,
+            setFieldError,
+            setFieldTouched,
+            validateForm,
+            handleSubmit,
+            isSubmitting,
+          }) => (
             <Form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="service-duration" className="mb-2">
@@ -347,6 +358,11 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
                     </p>
                   )}
                 </div>
+                <ErrorMessage
+                  name="tags"
+                  component="p"
+                  className="mt-1 text-sm text-red-500"
+                />
               </div>
 
               <div>
@@ -368,6 +384,9 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
                         if (!tag) return;
                         if (!values.tags.includes(tag)) {
                           setFieldValue("tags", [...values.tags, tag]);
+                          setFieldError("tags", undefined);
+                          setFieldTouched("tags", false);
+                          validateForm();
                         }
                         setFieldValue("tagInput", "");
                       }
@@ -382,6 +401,9 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
                       if (!tagValue) return;
                       if (!values.tags.includes(tagValue)) {
                         setFieldValue("tags", [...values.tags, tagValue]);
+                        setFieldError("tags", undefined);
+                        setFieldTouched("tags", false);
+                        validateForm();
                       }
                       setFieldValue("tagInput", "");
                     }}

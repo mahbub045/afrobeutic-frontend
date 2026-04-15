@@ -58,6 +58,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState<string>("");
   const [tags, setTags] = useState<string[]>([]);
+  const [tagsError, setTagsError] = useState<string | null>(null);
 
   const handleAddTag = () => {
     const rawTags = tagInput.trim();
@@ -76,6 +77,7 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
 
     setTags((prev) => [...prev, ...newTags]);
     setTagInput("");
+    setTagsError(null);
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
@@ -98,7 +100,13 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
       return;
     }
 
+    if (tags.length === 0) {
+      setTagsError("Tags are required");
+      return;
+    }
+
     setFileError(null);
+    setTagsError(null);
 
     try {
       const form = new FormData();
@@ -134,6 +142,9 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
       });
       helpers.resetForm();
       setSelectedFiles([]);
+      setTagInput("");
+      setTags([]);
+      setTagsError(null);
     } catch (err) {
       console.error(err);
       toast.error("Failed to add service. Please try again.");
@@ -246,7 +257,9 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
               </div>
 
               <div>
-                <Label className="mb-2">Tags</Label>
+                <Label className="mb-2">
+                  Tags<span className="text-danger">*</span>
+                </Label>
                 <div className="flex flex-wrap gap-2">
                   {tags.length > 0 ? (
                     tags.map((tag) => (
@@ -270,6 +283,9 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                     </p>
                   )}
                 </div>
+                {tagsError ? (
+                  <p className="text-destructive text-sm">{tagsError}</p>
+                ) : null}
               </div>
 
               <div>
