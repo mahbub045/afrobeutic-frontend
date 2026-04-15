@@ -220,7 +220,7 @@ const ViewProductPanel: React.FC<ViewProductPanelProps> = ({
                     className="shadow-md dark:shadow-gray-600"
                     onClick={handleEditProductBasicInfo}
                   >
-                    <Edit size={16} />
+                    <Edit size={16} />Edit
                   </Button>
                 )}
               </div>

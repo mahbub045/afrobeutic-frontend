@@ -223,7 +223,7 @@ const ProductsTab: React.FC = () => {
                         className="text-primary/80 hover:text-primary dark:shadow-gray-600"
                         onClick={() => handleIsOpenSingleProductTab(product)}
                       >
-                        <Eye />
+                        <Eye />View
                       </Button>
                     </div>
                     <div>
@@ -235,7 +235,7 @@ const ProductsTab: React.FC = () => {
                           color="red"
                           onClick={() => handleIsOpenDeleteDialog(product)}
                         >
-                          <Trash2 />
+                          <Trash2 />Delete
                         </Button>
                       )}
                     </div>

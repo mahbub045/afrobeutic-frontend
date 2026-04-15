@@ -233,14 +233,14 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
                     size="sm"
                     onClick={() => handleViewDetails(booking)}
                   >
-                    <EyeIcon className="size-4" />
+                    <EyeIcon className="size-4" />View
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleEditBooking(booking)}
                   >
-                    <EditIcon className="size-4" />
+                    <EditIcon className="size-4" />Delete
                   </Button>
                 </TableCell>
               </TableRow>
