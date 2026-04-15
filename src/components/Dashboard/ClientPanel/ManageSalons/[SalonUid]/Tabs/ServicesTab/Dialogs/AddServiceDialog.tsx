@@ -240,14 +240,16 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
 
               <div>
                 <Label htmlFor="service_duration" className="mb-2">
-                  Duration
+                  Duration(HH:MM)
                 </Label>
                 <Field
                   id="service_duration"
                   name="service_duration"
                   as="input"
                   type="text"
-                  placeholder="HH:MM or HH:MM:SS"
+                  placeholder="e.g. 01:30 for 1 hour 30 mins"
+                  pattern="^([0-9]{1,2}):[0-5][0-9]$"
+                  title="Duration format HH:MM"
                 />
                 {touched.service_duration && errors.service_duration ? (
                   <p className="text-destructive text-sm">

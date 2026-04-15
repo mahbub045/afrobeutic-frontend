@@ -217,17 +217,17 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
             <Form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="service-duration" className="mb-2">
-                  Service Duration
+                  Service Duration(HH:MM)
                 </Label>
-                {/* duration input (HH:MM or HH:MM:SS) */}
+                {/* duration input (HH:MM) */}
                 <Field
                   as="input"
                   id="service-duration"
                   name="service_duration"
                   type="text"
-                  placeholder="e.g. 00:30:00 or 0:30"
-                  pattern="^([0-9]{1,2}):[0-5][0-9](:[0-5][0-9])?$"
-                  title="Duration format HH:MM or HH:MM:SS"
+                  placeholder="e.g. 01:30 for 1 hour 30 mins"
+                  pattern="^([0-9]{1,2}):[0-5][0-9]$"
+                  title="Duration format HH:MM"
                 />
                 <ErrorMessage
                   name="service_duration"
