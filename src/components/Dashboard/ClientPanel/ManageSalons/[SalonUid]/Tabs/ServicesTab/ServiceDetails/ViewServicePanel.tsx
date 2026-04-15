@@ -239,6 +239,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                     onClick={handleEditServiceBasicInfo}
                   >
                     <Edit size={16} />
+                    Edit
                   </Button>
                 )}
               </div>
@@ -294,6 +295,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                     onClick={handleEditServiceMoreInfo}
                   >
                     <Edit size={16} />
+                    Edit
                   </Button>
                 )}
               </div>
@@ -350,9 +352,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
                 </div>
                 <div className="mt-1 text-sm font-medium">
                   {safe(displayedService.service_duration)}{" "}
-                  <span className="text-muted-foreground text-xs">
-                    (HH:MM:SS)
-                  </span>
+                  <span className="text-muted-foreground text-xs">(HH:MM)</span>
                 </div>
               </div>
               <div>

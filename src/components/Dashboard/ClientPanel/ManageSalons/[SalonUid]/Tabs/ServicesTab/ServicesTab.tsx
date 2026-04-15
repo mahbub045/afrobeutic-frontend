@@ -142,7 +142,7 @@ const ServicesTab: React.FC = () => {
           <TableHeader className="text-xs">
             <TableRow>
               <TableHead className="text-primary">#</TableHead>
-              <TableHead className="text-primary">Service Name</TableHead>
+              <TableHead className="text-primary">Service</TableHead>
               <TableHead className="text-primary">Category</TableHead>
               <TableHead className="text-primary">Duration</TableHead>
               <TableHead className="text-primary">
@@ -173,8 +173,6 @@ const ServicesTab: React.FC = () => {
                   </Button>
                 </div>
               </TableHead>
-              <TableHead className="text-primary">Tags</TableHead>
-              <TableHead className="text-primary">Created At</TableHead>
               <TableHead className="text-primary">Updated At</TableHead>
               <TableHead className="text-primary text-center">
                 Actions
@@ -208,17 +206,8 @@ const ServicesTab: React.FC = () => {
                   <TableCell>
                     {formatChoiceFieldValue(service.category) || "-"}
                   </TableCell>
-
                   <TableCell>{service.service_duration}</TableCell>
                   <TableCell>${service.price}</TableCell>
-                  <TableCell>
-                    {Array.isArray(service.tags) && service.tags.length > 0
-                      ? service.tags.join(", ")
-                      : "-"}
-                  </TableCell>
-                  <TableCell>
-                    {formatDateTime(service?.created_at ?? null)}
-                  </TableCell>
                   <TableCell>
                     {formatDateTime(service?.updated_at ?? null)}
                   </TableCell>
@@ -233,6 +222,7 @@ const ServicesTab: React.FC = () => {
                         onClick={() => handleIsOpenSingleServiceTab(service)}
                       >
                         <Eye />
+                        View
                       </Button>
                     </div>
                     <div>
@@ -245,6 +235,7 @@ const ServicesTab: React.FC = () => {
                           onClick={() => handleIsOpenDeleteDialog(service)}
                         >
                           <Trash2 />
+                          Delete
                         </Button>
                       )}
                     </div>
