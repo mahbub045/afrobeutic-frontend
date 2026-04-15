@@ -53,7 +53,13 @@ const BookingsTab: React.FC = () => {
     null,
   );
   const [statusFilter, setStatusFilter] = useState<
-    "ALL" | "PLACED" | "INPROGRESS" | "COMPLETED" | "RESCHEDULED" | "CANCELLED"
+    | "ALL"
+    | "CONFIRMED"
+    | "INPROGRESS"
+    | "COMPLETED"
+    | "RESCHEDULED"
+    | "CANCELLED"
+    | "NO_SHOW"
   >("ALL");
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -133,27 +139,30 @@ const BookingsTab: React.FC = () => {
 
         // Assign colors based on status
         const statusColorMap: { [key: string]: string } = {
-          PLACED: "bg-gradient-to-r from-blue-400 to-cyan-300",
+          CONFIRMED: "bg-gradient-to-r from-cyan-400 to-emerald-300",
           INPROGRESS: "bg-gradient-to-r from-amber-300 to-orange-400",
           COMPLETED: "bg-gradient-to-r from-emerald-300 to-teal-400",
           RESCHEDULED: "bg-gradient-to-r from-purple-300 to-pink-400",
           CANCELLED: "bg-gradient-to-r from-red-400 to-rose-500",
+          NO_SHOW: "bg-gradient-to-r from-slate-400 to-slate-600",
         };
 
         // Map status enum to display format
         const statusMap: {
           [key: string]:
-            | "placed"
+            | "confirmed"
             | "in-progress"
             | "rescheduled"
             | "completed"
-            | "cancelled";
+            | "cancelled"
+            | "no-show";
         } = {
-          PLACED: "placed",
+          CONFIRMED: "confirmed",
           INPROGRESS: "in-progress",
           COMPLETED: "completed",
           RESCHEDULED: "rescheduled",
           CANCELLED: "cancelled",
+          NO_SHOW: "no-show",
         };
 
         return {
@@ -325,15 +334,16 @@ const BookingsTab: React.FC = () => {
   const getUiStatus = (
     status?: string,
   ):
-    | "placed"
+    | "confirmed"
     | "in-progress"
     | "rescheduled"
     | "completed"
     | "cancelled"
+    | "no-show"
     | undefined => {
     switch (status) {
-      case "PLACED":
-        return "placed";
+      case "CONFIRMED":
+        return "confirmed";
       case "INPROGRESS":
         return "in-progress";
       case "COMPLETED":
@@ -342,6 +352,8 @@ const BookingsTab: React.FC = () => {
         return "rescheduled";
       case "CANCELLED":
         return "cancelled";
+      case "NO_SHOW":
+        return "no-show";
       default:
         return undefined;
     }
@@ -410,11 +422,12 @@ const BookingsTab: React.FC = () => {
               setStatusFilter(
                 v as
                   | "ALL"
-                  | "PLACED"
+                  | "CONFIRMED"
                   | "INPROGRESS"
                   | "COMPLETED"
                   | "RESCHEDULED"
-                  | "CANCELLED",
+                  | "CANCELLED"
+                  | "NO_SHOW",
               )
             }
           >
@@ -423,11 +436,12 @@ const BookingsTab: React.FC = () => {
             </SelectTrigger>
             <SelectContent align="end">
               <SelectItem value="ALL">All Status</SelectItem>
-              <SelectItem value="PLACED">Placed</SelectItem>
+              <SelectItem value="CONFIRMED">Confirmed</SelectItem>
               <SelectItem value="INPROGRESS">In-progress</SelectItem>
               <SelectItem value="COMPLETED">Completed</SelectItem>
               <SelectItem value="RESCHEDULED">Rescheduled</SelectItem>
               <SelectItem value="CANCELLED">Cancelled</SelectItem>
+              <SelectItem value="NO_SHOW">No-Show</SelectItem>
             </SelectContent>
           </Select>
 
@@ -648,7 +662,7 @@ const BookingsTab: React.FC = () => {
                 status:
                   singleBookingData?.status ||
                   selectedAppointment.fullBookingData?.status ||
-                  "PLACED",
+                  "CONFIRMED",
                 cancellation_reason:
                   (
                     singleBookingData as unknown as {
@@ -728,7 +742,7 @@ const BookingsTab: React.FC = () => {
                       status?: string;
                     }
                   )?.status ||
-                  "PLACED",
+                  "CONFIRMED",
                 cancellation_reason:
                   (
                     singleBookingData as unknown as {

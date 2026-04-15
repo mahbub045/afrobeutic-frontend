@@ -452,11 +452,12 @@ const CreateBookingDialog: React.FC<ChairDialogsProps> = ({
                       <option value="" disabled>
                         Select status
                       </option>
-                      <option value="PLACED">Placed</option>
+                      <option value="CONFIRMED">Confirmed</option>
                       <option value="INPROGRESS">In-progress</option>
                       <option value="COMPLETED">Completed</option>
                       <option value="RESCHEDULED">Rescheduled</option>
                       <option value="CANCELLED">Cancelled</option>
+                      <option value="NO_SHOW">No-Show</option>
                       <option value="ABSENT">Absent</option>
                     </Field>
                   </div> */}

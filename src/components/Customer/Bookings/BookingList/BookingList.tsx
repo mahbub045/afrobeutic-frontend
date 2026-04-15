@@ -62,7 +62,7 @@ const BookingList: React.FC = () => {
 
   const getStatusVariant = (status?: string) => {
     switch (status) {
-      case "PLACED":
+      case "CONFIRMED":
         return "default";
       case "INPROGRESS":
         return "warning";
