@@ -16,6 +16,7 @@ export interface ServiceProps {
     | boolean
     | null;
   discount_percentage?: number;
+  tags?: string[];
   assign_employees?: Employee[] | string[];
   assigned_employees?: Employee[] | string[];
   created_at: string;
@@ -40,6 +41,8 @@ export interface ServiceFormValues {
   category: string;
   sub_category: string;
   price: string;
+  service_duration?: string;
+  tags?: string;
   description: string;
   uploaded_images?: string;
 }

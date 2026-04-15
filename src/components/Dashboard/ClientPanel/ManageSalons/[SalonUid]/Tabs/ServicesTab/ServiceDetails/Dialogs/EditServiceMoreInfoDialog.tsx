@@ -20,8 +20,10 @@ import {
   ServiceProps,
 } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import { ErrorMessage, Field, Form, Formik } from "formik";
+import { X } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useParams } from "next/navigation";
+import type { KeyboardEvent } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
@@ -95,6 +97,11 @@ const normalizeAvailableTimeSlots = (value: unknown): string[] => {
   }, []);
 };
 
+const normalizeTags = (value: unknown): string[] => {
+  if (!Array.isArray(value)) return [];
+  return value.filter((tag): tag is string => typeof tag === "string");
+};
+
 const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
   isOpen,
   onClose,
@@ -114,6 +121,7 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
     ? (employeesData.results as Employee[])
     : [];
   const initialAssigned = normalizeAssignedEmployees(selectedService);
+  const initialTags = normalizeTags(selectedService?.tags);
 
   interface MoreInfoFormValues {
     service_duration: string;
@@ -121,6 +129,8 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
     gender_specific: string;
     discount_percentage: number;
     assign_employees: string[];
+    tags: string[];
+    tagInput?: string;
   }
 
   // duration format: HH:MM or HH:MM:SS (allow single-digit hours)
@@ -137,17 +147,19 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
       .max(100, "Discount cannot be more than 100")
       .typeError("Discount must be a number"),
     assign_employees: Yup.array().of(Yup.string()),
+    tags: Yup.array().of(Yup.string()),
   });
 
   const handleSubmit = async (values: MoreInfoFormValues) => {
     try {
       // Prepare payload - send as JSON object
-      const payload: MoreInfoFormValues = {
+      const payload: Omit<MoreInfoFormValues, "tagInput"> = {
         service_duration: values.service_duration,
         available_time_slots: values.available_time_slots,
         gender_specific: values.gender_specific,
         discount_percentage: Number(values.discount_percentage) || 0,
         assign_employees: values.assign_employees,
+        tags: values.tags,
       };
 
       await editService({
@@ -198,6 +210,8 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
             ),
             discount_percentage: selectedService?.discount_percentage ?? 0,
             assign_employees: initialAssigned,
+            tags: initialTags,
+            tagInput: "",
           }}
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
@@ -316,6 +330,80 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
                   component="p"
                   className="mt-1 text-sm text-red-500"
                 />
+              </div>
+
+              <div>
+                <Label className="mb-2">Tags</Label>
+                <div className="flex flex-wrap gap-2">
+                  {values.tags.length > 0 ? (
+                    values.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm"
+                      >
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setFieldValue(
+                              "tags",
+                              values.tags.filter((current) => current !== tag),
+                            )
+                          }
+                          className="text-muted-foreground hover:bg-muted inline-flex h-5 w-5 items-center justify-center rounded-full"
+                        >
+                          <X size={14} />
+                        </button>
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-muted-foreground text-sm">
+                      No tags assigned.
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="tags-input" className="mb-2">
+                  Add Tag
+                </Label>
+                <div className="flex items-center gap-2">
+                  <Field
+                    as="input"
+                    id="tags-input"
+                    name="tagInput"
+                    type="text"
+                    placeholder="Enter a tag"
+                    className="flex-1"
+                    onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        const tag = e.currentTarget.value.trim();
+                        if (!tag) return;
+                        if (!values.tags.includes(tag)) {
+                          setFieldValue("tags", [...values.tags, tag]);
+                        }
+                        setFieldValue("tagInput", "");
+                      }
+                    }}
+                  />
+                  <Button
+                    size={"lg"}
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      const tagValue = values.tagInput.trim();
+                      if (!tagValue) return;
+                      if (!values.tags.includes(tagValue)) {
+                        setFieldValue("tags", [...values.tags, tagValue]);
+                      }
+                      setFieldValue("tagInput", "");
+                    }}
+                  >
+                    Add
+                  </Button>
+                </div>
               </div>
 
               <div>

@@ -327,6 +327,25 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
               </div>
               <div>
                 <div className="text-muted-foreground text-xs uppercase">
+                  Tags
+                </div>
+                <div className="mt-1 text-sm font-medium">
+                  {Array.isArray(displayedService.tags) &&
+                  displayedService.tags.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {displayedService.tags.map((tag, idx) => (
+                        <Badge key={idx} variant="outline">
+                          {safe(tag)}
+                        </Badge>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="text-sm">-</span>
+                  )}
+                </div>
+              </div>
+              <div>
+                <div className="text-muted-foreground text-xs uppercase">
                   Service Duration
                 </div>
                 <div className="mt-1 text-sm font-medium">
