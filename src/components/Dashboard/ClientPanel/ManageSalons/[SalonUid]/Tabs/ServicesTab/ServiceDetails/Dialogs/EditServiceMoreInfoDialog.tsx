@@ -16,7 +16,9 @@ import { formatChoiceFieldValue } from "@/lib/utils";
 import { useGetEmployeesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Employees/EmployeesApi";
 import { useEditServiceMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
 import {
+  EditServiceMoreInfoDialogProps,
   Employee,
+  MoreInfoFormValues,
   ServiceProps,
 } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import { ErrorMessage, Field, Form, Formik } from "formik";
@@ -27,13 +29,6 @@ import type { KeyboardEvent } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
-
-export interface EditServiceMoreInfoDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  selectedService: ServiceProps;
-  onEditSuccess?: () => void;
-}
 
 const AVAILABLE_SLOTS = [
   "MORNING",
@@ -122,16 +117,6 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
     : [];
   const initialAssigned = normalizeAssignedEmployees(selectedService);
   const initialTags = normalizeTags(selectedService?.tags);
-
-  interface MoreInfoFormValues {
-    service_duration: string;
-    available_time_slots: string[];
-    gender_specific: string;
-    discount_percentage: number;
-    assign_employees: string[];
-    tags: string[];
-    tagInput?: string;
-  }
 
   // duration format: HH:MM or HH:MM:SS (allow single-digit hours)
   const durationRegex = /^([0-9]{1,2}):[0-5][0-9](:[0-5][0-9])?$/;

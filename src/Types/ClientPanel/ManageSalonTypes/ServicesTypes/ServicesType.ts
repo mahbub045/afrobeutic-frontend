@@ -78,3 +78,20 @@ export interface FullScreenImageViewerProps {
   onImageChange: (index: number) => void;
   serviceName?: string;
 }
+
+export interface MoreInfoFormValues {
+  service_duration: string;
+  available_time_slots: string[];
+  gender_specific: string;
+  discount_percentage: number;
+  assign_employees: string[];
+  tags: string[];
+  tagInput?: string;
+}
+
+export interface EditServiceMoreInfoDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  selectedService: ServiceProps;
+  onEditSuccess?: () => void;
+}
