@@ -63,8 +63,6 @@ const BookingsTab: React.FC = () => {
   >("ALL");
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const middleSlotRef = useRef<HTMLDivElement | null>(null);
-  const [hasScrolled, setHasScrolled] = useState(false);
 
   const handleIsEditDialogOpen = (open: boolean) => {
     setIsEditDialogOpen(open);
@@ -277,39 +275,7 @@ const BookingsTab: React.FC = () => {
       newDate.setDate(newDate.getDate() + (direction === "next" ? 7 : -7));
     }
     setSelectedDate(newDate);
-    setHasScrolled(false); // Reset scroll flag when date changes
   };
-
-  // On first load (and when date changes), scroll the calendar so the middle time slot is centered
-  useEffect(() => {
-    // Don't scroll if already scrolled for this date or if no staff members
-    if (hasScrolled || !staffMembers.length) return;
-
-    const container = scrollContainerRef.current;
-    const middle = middleSlotRef.current;
-    if (!container || !middle) return;
-
-    // Wait for layout to complete, then scroll
-    const timeoutId = setTimeout(() => {
-      const containerRect = container.getBoundingClientRect();
-      const middleRect = middle.getBoundingClientRect();
-
-      // Calculate the offset of the middle slot relative to the container's current scroll position
-      const offsetWithinContainer =
-        middleRect.top - containerRect.top + container.scrollTop;
-
-      // Calculate target scroll position to center the middle slot
-      const targetScrollTop =
-        offsetWithinContainer -
-        container.clientHeight / 2 +
-        middleRect.height / 2;
-
-      container.scrollTop = targetScrollTop;
-      setHasScrolled(true);
-    }, 100);
-
-    return () => clearTimeout(timeoutId);
-  }, [selectedDate, staffMembers.length, hasScrolled]);
 
   // Helpers to safely handle cancelled status and reason from possibly under-typed API shapes
   const isCancelled = (() => {
@@ -496,15 +462,7 @@ const BookingsTab: React.FC = () => {
             >
               <div className="relative min-w-max">
                 {timeSlots.map((slot, index) => (
-                  <div
-                    key={index}
-                    ref={
-                      index === Math.floor(timeSlots.length / 2)
-                        ? middleSlotRef
-                        : undefined
-                    }
-                    className="flex border-b last:border-b-0"
-                  >
+                  <div key={index} className="flex border-b last:border-b-0">
                     <div className="bg-muted/50 text-muted-foreground w-10 flex-shrink-0 border-r text-[10px] sm:w-12 sm:text-xs lg:w-16">
                       {index === 0 && (
                         <div className="border-b px-1 py-2 sm:px-2 sm:py-[22px] lg:px-3">
