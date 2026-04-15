@@ -16,6 +16,7 @@ export interface ServiceProps {
     | boolean
     | null;
   discount_percentage?: number;
+  tags?: string[];
   assign_employees?: Employee[] | string[];
   assigned_employees?: Employee[] | string[];
   created_at: string;
@@ -40,6 +41,8 @@ export interface ServiceFormValues {
   category: string;
   sub_category: string;
   price: string;
+  service_duration?: string;
+  tags?: string;
   description: string;
   uploaded_images?: string;
 }
@@ -74,4 +77,21 @@ export interface FullScreenImageViewerProps {
   onClose: () => void;
   onImageChange: (index: number) => void;
   serviceName?: string;
+}
+
+export interface MoreInfoFormValues {
+  service_duration: string;
+  available_time_slots: string[];
+  gender_specific: string;
+  discount_percentage: number;
+  assign_employees: string[];
+  tags: string[];
+  tagInput?: string;
+}
+
+export interface EditServiceMoreInfoDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  selectedService: ServiceProps;
+  onEditSuccess?: () => void;
 }

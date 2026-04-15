@@ -35,6 +35,14 @@ const ServiceSchema = Yup.object().shape({
     .typeError("Price must be a number")
     .required("Price is required")
     .min(0, "Price must be greater than or equal to 0"),
+  service_duration: Yup.string()
+    .trim()
+    .matches(
+      /^\s*$|^\d{1,2}:\d{2}(?::\d{2})?$/,
+      "Duration must be in HH:MM or HH:MM:SS format",
+    )
+    .nullable(),
+  tags: Yup.string().trim().nullable(),
   description: Yup.string().trim().nullable(),
   uploaded_images: Yup.string().nullable(),
 });
@@ -48,6 +56,33 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fileError, setFileError] = useState<string | null>(null);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState<string>("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagsError, setTagsError] = useState<string | null>(null);
+
+  const handleAddTag = () => {
+    const rawTags = tagInput.trim();
+    if (!rawTags) return;
+
+    const newTags = rawTags
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean)
+      .filter((tag) => !tags.includes(tag));
+
+    if (newTags.length === 0) {
+      setTagInput("");
+      return;
+    }
+
+    setTags((prev) => [...prev, ...newTags]);
+    setTagInput("");
+    setTagsError(null);
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    setTags((prev) => prev.filter((tag) => tag !== tagToRemove));
+  };
 
   // rtk hooks
   const [addService, { isLoading }] = useAddServiceMutation();
@@ -65,14 +100,25 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
       return;
     }
 
+    if (tags.length === 0) {
+      setTagsError("Tags are required");
+      return;
+    }
+
     setFileError(null);
+    setTagsError(null);
 
     try {
       const form = new FormData();
       form.append("name", values.name.trim());
       form.append("category", values.category.trim());
       form.append("price", String(parseFloat(String(values.price)) || 0));
+      form.append("service_duration", values.service_duration?.trim() || "");
       form.append("description", values.description?.trim() || "");
+
+      if (tags.length > 0) {
+        tags.forEach((tag) => form.append("tags", tag));
+      }
 
       selectedFiles
         .slice(0, 2)
@@ -96,6 +142,9 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
       });
       helpers.resetForm();
       setSelectedFiles([]);
+      setTagInput("");
+      setTags([]);
+      setTagsError(null);
     } catch (err) {
       console.error(err);
       toast.error("Failed to add service. Please try again.");
@@ -116,6 +165,8 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
               name: "",
               category: "",
               price: "",
+              service_duration: "",
+              tags: "",
               description: "",
             } as ServiceFormValues
           }
@@ -185,6 +236,90 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
                 {touched.price && errors.price ? (
                   <p className="text-destructive text-sm">{errors.price}</p>
                 ) : null}
+              </div>
+
+              <div>
+                <Label htmlFor="service_duration" className="mb-2">
+                  Duration(HH:MM)
+                </Label>
+                <Field
+                  id="service_duration"
+                  name="service_duration"
+                  as="input"
+                  type="text"
+                  placeholder="e.g. 01:30 for 1 hour 30 mins"
+                  pattern="^([0-9]{1,2}):[0-5][0-9]$"
+                  title="Duration format HH:MM"
+                />
+                {touched.service_duration && errors.service_duration ? (
+                  <p className="text-destructive text-sm">
+                    {errors.service_duration}
+                  </p>
+                ) : null}
+              </div>
+
+              <div>
+                <Label className="mb-2">
+                  Tags<span className="text-danger">*</span>
+                </Label>
+                <div className="flex flex-wrap gap-2">
+                  {tags.length > 0 ? (
+                    tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm"
+                      >
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveTag(tag)}
+                          className="text-muted-foreground hover:bg-muted inline-flex h-5 w-5 items-center justify-center rounded-full"
+                        >
+                          <X size={14} />
+                        </button>
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-muted-foreground text-sm">
+                      No tags added yet.
+                    </p>
+                  )}
+                </div>
+                {tagsError ? (
+                  <p className="text-destructive text-sm">{tagsError}</p>
+                ) : null}
+              </div>
+
+              <div>
+                <Label htmlFor="tagInput" className="mb-2">
+                  Add Tag
+                </Label>
+                <div className="flex items-center gap-2">
+                  <input
+                    id="tagInput"
+                    name="tagInput"
+                    type="text"
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddTag();
+                      }
+                    }}
+                    placeholder="Enter a tag"
+                    className="border-input focus:border-primary focus:ring-primary/10 flex-1 rounded-md border px-3 py-2 shadow-sm focus:ring-2 focus:outline-none"
+                  />
+                  <Button
+                    size="sm"
+                    type="button"
+                    variant="outline"
+                    onClick={handleAddTag}
+                    className="h-10 px-4"
+                  >
+                    Add
+                  </Button>
+                </div>
               </div>
 
               <div>

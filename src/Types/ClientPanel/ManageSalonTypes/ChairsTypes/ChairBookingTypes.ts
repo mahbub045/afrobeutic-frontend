@@ -53,12 +53,12 @@ export interface BookingFormValues {
   booking_time: string;
   // Optional status for edit dialog; create flow may omit it
   status?:
-    | "PLACED"
+    | "CONFIRMED"
     | "INPROGRESS"
     | "COMPLETED"
     | "RESCHEDULED"
     | "CANCELLED"
-    | "ABSENT";
+    | "NO_SHOW";
   notes: string;
   services: string[];
   products: string[];

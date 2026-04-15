@@ -34,7 +34,14 @@ const EditBookingStatusDialog: React.FC<EditBookingStatusDialogProps> = ({
 
   const validationSchema = Yup.object({
     status: Yup.string()
-      .oneOf(["PLACED", "INPROGRESS", "RESCHEDULED", "COMPLETED", "CANCELLED"])
+      .oneOf([
+        "CONFIRMED",
+        "INPROGRESS",
+        "RESCHEDULED",
+        "COMPLETED",
+        "CANCELLED",
+        "NO_SHOW",
+      ])
       .required("Status is required"),
     cancellation_reason: Yup.string().when("status", {
       is: "CANCELLED",
@@ -49,7 +56,7 @@ const EditBookingStatusDialog: React.FC<EditBookingStatusDialogProps> = ({
   });
 
   const initialValues = {
-    status: bookingData?.status || "PLACED",
+    status: bookingData?.status || "CONFIRMED",
     cancellation_reason: bookingData?.cancellation_reason || "",
     images: [] as File[],
   };
@@ -170,10 +177,11 @@ const EditBookingStatusDialog: React.FC<EditBookingStatusDialogProps> = ({
                       <option value="" disabled>
                         Select status
                       </option>
-                      <option value="PLACED">Placed</option>
+                      <option value="CONFIRMED">Confirmed</option>
                       <option value="INPROGRESS">In-progress</option>
                       <option value="RESCHEDULED">Rescheduled</option>
                       <option value="CANCELLED">Cancelled</option>
+                      <option value="NO_SHOW">No-Show</option>
                     </Field>
                     <ErrorMessage
                       name="status"

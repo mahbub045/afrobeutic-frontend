@@ -123,19 +123,21 @@ const toLocalYMD = (date: Date) => {
 const timeSlots = generateTimeSlots(8, 20, 1); // 08:00–20:00 hourly
 
 const statusColorMap: Record<IndBookingApiStatus, string> = {
-  PLACED: "bg-gradient-to-r from-blue-400 to-cyan-300",
+  CONFIRMED: "bg-gradient-to-r from-cyan-400 to-emerald-300",
   INPROGRESS: "bg-gradient-to-r from-amber-300 to-orange-400",
   COMPLETED: "bg-gradient-to-r from-emerald-300 to-teal-400",
   RESCHEDULED: "bg-gradient-to-r from-purple-300 to-pink-400",
   CANCELLED: "bg-gradient-to-r from-red-400 to-rose-500",
+  NO_SHOW: "bg-gradient-to-r from-slate-400 to-slate-600",
 };
 
 const statusMap: Record<IndBookingApiStatus, IndBookingUiStatus> = {
-  PLACED: "placed",
+  CONFIRMED: "confirmed",
   INPROGRESS: "in-progress",
   COMPLETED: "completed",
   RESCHEDULED: "rescheduled",
   CANCELLED: "cancelled",
+  NO_SHOW: "no-show",
 };
 
 const IndividualBookingsTab: React.FC = () => {
@@ -292,8 +294,8 @@ const IndividualBookingsTab: React.FC = () => {
       service: serviceName,
       client: customerName || booking.customer?.phone || "Unknown Customer",
       startTime: booking.booking_time,
-      status: (statusMap[apiStatus] ?? "placed") as IndBookingUiStatus,
-      color: statusColorMap[apiStatus] ?? statusColorMap["PLACED"],
+      status: (statusMap[apiStatus] ?? "confirmed") as IndBookingUiStatus,
+      color: statusColorMap[apiStatus] ?? statusColorMap["CONFIRMED"],
       bookingDate: booking.booking_date,
       bookingDuration: booking.booking_duration || null,
       services: booking.services,
@@ -413,11 +415,12 @@ const IndividualBookingsTab: React.FC = () => {
             </SelectTrigger>
             <SelectContent align="end">
               <SelectItem value="ALL">All Status</SelectItem>
-              <SelectItem value="PLACED">Placed</SelectItem>
+              <SelectItem value="CONFIRMED">Confirmed</SelectItem>
               <SelectItem value="INPROGRESS">In-progress</SelectItem>
               <SelectItem value="COMPLETED">Completed</SelectItem>
               <SelectItem value="RESCHEDULED">Rescheduled</SelectItem>
               <SelectItem value="CANCELLED">Cancelled</SelectItem>
+              <SelectItem value="NO_SHOW">No-Show</SelectItem>
             </SelectContent>
           </Select>
 

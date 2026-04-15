@@ -235,6 +235,7 @@ const ViewLookBookPanel: React.FC<ViewLookBookPanelProps> = ({
                     onClick={handleEditLookBookBasicInfo}
                   >
                     <Edit size={16} />
+                    Edit
                   </Button>
                 )}
               </div>

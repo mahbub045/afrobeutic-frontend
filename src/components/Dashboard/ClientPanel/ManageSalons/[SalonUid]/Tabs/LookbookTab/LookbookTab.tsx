@@ -153,7 +153,7 @@ const LookbookTab: React.FC = () => {
                         className="text-primary/80 hover:text-primary dark:shadow-gray-600"
                         onClick={() => handleIsOpenSingleLookBookTab(lookBook)}
                       >
-                        <Eye />
+                        <Eye />View
                       </Button>
                     </div>
                   </TableCell>

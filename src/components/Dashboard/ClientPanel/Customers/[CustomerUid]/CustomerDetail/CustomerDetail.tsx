@@ -25,7 +25,7 @@ import React from "react";
 
 const getStatusColor = (status: string) => {
   switch (status.toUpperCase()) {
-    case "PLACED":
+    case "CONFIRMED":
       return "bg-blue-100 text-blue-800";
     case "INPROGRESS":
       return "bg-yellow-100 text-yellow-800";
@@ -153,7 +153,7 @@ const CustomerDetail: React.FC = () => {
                   {
                     (customerData.booking ?? []).filter(
                       (b) =>
-                        b.status === "PLACED" || b.status === "RESCHEDULED",
+                        b.status === "CONFIRMED" || b.status === "RESCHEDULED",
                     ).length
                   }
                 </p>

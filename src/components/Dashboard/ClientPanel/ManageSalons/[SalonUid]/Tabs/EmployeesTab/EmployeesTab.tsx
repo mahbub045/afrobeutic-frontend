@@ -182,7 +182,7 @@ const EmployeesTab: React.FC = () => {
                         className="text-primary/80 hover:text-primary dark:shadow-gray-600"
                         onClick={() => handleIsOpenSingleEmployeeTab(employee)}
                       >
-                        <Eye />
+                        <Eye />View
                       </Button>
                     </div>
                     <div>
@@ -194,7 +194,7 @@ const EmployeesTab: React.FC = () => {
                           color="red"
                           onClick={() => handleIsOpenDeleteDialog(employee)}
                         >
-                          <Trash2 />
+                          <Trash2 />Delete
                         </Button>
                       )}
                     </div>

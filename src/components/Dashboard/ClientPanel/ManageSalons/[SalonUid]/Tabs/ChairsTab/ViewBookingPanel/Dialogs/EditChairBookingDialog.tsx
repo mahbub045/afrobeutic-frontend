@@ -158,7 +158,7 @@ const EditChairBookingDialog: React.FC<EditChairBookingDialogProps> = ({
           selectedChairBookingData.booking_date ||
           new Date().toISOString().split("T")[0],
         booking_time: initialBookingTime,
-        status: selectedChairBookingData.status || "PLACED",
+        status: selectedChairBookingData.status || "CONFIRMED",
         notes: selectedChairBookingData.notes || "",
         services: Array.isArray(selectedChairBookingData.services)
           ? selectedChairBookingData.services.map((s) => s.uid)
@@ -333,7 +333,7 @@ const EditChairBookingDialog: React.FC<EditChairBookingDialogProps> = ({
                 selectedChairBookingData?.booking_date ||
                 new Date().toISOString().split("T")[0],
               booking_time: initialBookingTime,
-              status: selectedChairBookingData?.status || "PLACED",
+              status: selectedChairBookingData?.status || "CONFIRMED",
               notes: selectedChairBookingData?.notes || "",
               // ensure services/products are arrays of uids (strings) as expected by BookingFormValues
               services: Array.isArray(selectedChairBookingData?.services)
@@ -519,11 +519,12 @@ const EditChairBookingDialog: React.FC<EditChairBookingDialogProps> = ({
                       <option value="" disabled>
                         Select status
                       </option>
-                      <option value="PLACED">Placed</option>
+                      <option value="CONFIRMED">Confirmed</option>
                       <option value="INPROGRESS">In-progress</option>
                       <option value="COMPLETED">Completed</option>
                       <option value="RESCHEDULED">Rescheduled</option>
                       <option value="CANCELLED">Cancelled</option>
+                      <option value="NO_SHOW">No-Show</option>
                       <option value="ABSENT">Absent</option>
                     </Field>
                   </div>

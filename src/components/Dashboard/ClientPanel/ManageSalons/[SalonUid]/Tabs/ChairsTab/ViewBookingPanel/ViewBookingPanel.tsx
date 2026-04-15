@@ -97,8 +97,8 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
 
   const getStatusVariant = (status: string) => {
     switch (status) {
-      case "PLACED":
-        return "default";
+      case "CONFIRMED":
+        return "secondary";
       case "INPROGRESS":
         return "warning";
       case "COMPLETED":
@@ -106,6 +106,8 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
       case "RESCHEDULED":
         return "secondary";
       case "CANCELLED":
+        return "danger";
+      case "NO_SHOW":
         return "danger";
       default:
         return "outline";
@@ -234,6 +236,7 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
                     onClick={() => handleViewDetails(booking)}
                   >
                     <EyeIcon className="size-4" />
+                    View
                   </Button>
                   <Button
                     variant="outline"
@@ -241,6 +244,7 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
                     onClick={() => handleEditBooking(booking)}
                   >
                     <EditIcon className="size-4" />
+                    Delete
                   </Button>
                 </TableCell>
               </TableRow>

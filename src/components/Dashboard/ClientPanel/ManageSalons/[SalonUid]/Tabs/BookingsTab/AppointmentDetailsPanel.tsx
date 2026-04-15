@@ -30,10 +30,12 @@ interface AppointmentDetailsPanelProps {
   selectedAppointment: Appointment | null;
   effectiveStatus?:
     | "placed"
+    | "confirmed"
     | "in-progress"
     | "rescheduled"
     | "completed"
-    | "cancelled";
+    | "cancelled"
+    | "no-show";
   isCancelled: boolean;
   cancellationReason?: string;
   isDetailsOpen: boolean;
@@ -132,10 +134,14 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                     "bg-gradient-to-r from-amber-600 to-orange-600 text-white",
                   effectiveStatus === "rescheduled" &&
                     "bg-gradient-to-r from-purple-600 to-pink-600 text-white",
+                  effectiveStatus === "confirmed" &&
+                    "bg-gradient-to-r from-cyan-600 to-emerald-600 text-white",
                   effectiveStatus === "completed" &&
                     "bg-gradient-to-r from-emerald-600 to-teal-600 text-white",
                   effectiveStatus === "cancelled" &&
                     "bg-gradient-to-r from-red-400 to-rose-600 text-white",
+                  effectiveStatus === "no-show" &&
+                    "bg-gradient-to-r from-slate-500 to-slate-700 text-white",
                 )}
               >
                 <div className={cn("h-2 w-2 rounded-full bg-white")} />
