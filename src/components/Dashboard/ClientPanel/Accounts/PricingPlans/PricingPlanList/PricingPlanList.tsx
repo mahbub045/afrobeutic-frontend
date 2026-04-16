@@ -156,7 +156,7 @@ const PricingPlanList: React.FC = () => {
             {pricingPlans.map((plan: PricingPlanTypes) => (
               <Card
                 key={plan.uid}
-                className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-950"
+                className="hover:border-primary hover:ring-primary/20 flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-[0_0_30px_rgba(59,130,246,0.25)] hover:ring-2 dark:border-slate-800 dark:bg-slate-950"
               >
                 <div className="space-y-4 border-b border-slate-200 px-6 py-6 dark:border-slate-800">
                   <div>
@@ -170,7 +170,7 @@ const PricingPlanList: React.FC = () => {
                   </div>
                 </div>
 
-                <CardContent className="px-6 py-8">
+                <CardContent className="flex-1 px-6 py-8">
                   <div className="text-center">
                     <div className="text-5xl font-bold tracking-tight text-slate-950 dark:text-white">
                       {formatPrice(plan.price)}
@@ -203,7 +203,7 @@ const PricingPlanList: React.FC = () => {
                 </CardContent>
 
                 {plan.name.trim().toLowerCase() === "free" ? null : (
-                  <CardFooter className="px-6 pt-2 pb-6">
+                  <CardFooter className="mt-auto px-6 pt-2 pb-6">
                     <Button
                       variant="default"
                       className="w-full rounded-2xl border border-slate-200 bg-slate-950 py-3 text-base font-semibold text-white shadow-sm hover:bg-slate-800 dark:border-slate-800 dark:bg-slate-50 dark:text-slate-950 dark:hover:bg-slate-100"

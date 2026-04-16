@@ -108,7 +108,7 @@ const PricingPlanList: React.FC = () => {
                     (plan: PricingPlanTypes) => (
                       <Card
                         key={plan.uid}
-                        className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-950"
+                        className="hover:border-primary hover:ring-primary/20 flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-[0_0_30px_rgba(59,130,246,0.25)] hover:ring-2 dark:border-slate-800 dark:bg-slate-950"
                       >
                         <div className="space-y-4 border-b border-slate-200 px-6 py-6 dark:border-slate-800">
                           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -129,7 +129,7 @@ const PricingPlanList: React.FC = () => {
                           </div>
                         </div>
 
-                        <CardContent className="px-6 py-8">
+                        <CardContent className="flex-1 px-6 py-8">
                           <div className="text-center">
                             <div className="text-5xl font-bold tracking-tight text-slate-950 dark:text-white">
                               {formatPrice(plan.price)}
@@ -163,11 +163,11 @@ const PricingPlanList: React.FC = () => {
                           </div>
                         </CardContent>
 
-                        <CardFooter className="px-6 pt-2 pb-6">
-                          <div className="flex flex-col gap-2 sm:flex-row">
+                        <CardFooter className="mt-auto px-6 pt-2 pb-6">
+                          <div className="grid w-full grid-cols-1 gap-3 lg:grid-cols-2">
                             <Button
                               variant="danger"
-                              className="w-full shadow-md sm:w-1/2 dark:shadow-gray-600"
+                              className="shadow-md dark:shadow-gray-600"
                               onClick={() => handleDeleteDialogOpen(plan)}
                             >
                               <Trash />
@@ -175,7 +175,7 @@ const PricingPlanList: React.FC = () => {
                             </Button>
                             <Button
                               variant="default"
-                              className="w-full shadow-md sm:w-1/2 dark:shadow-gray-600"
+                              className="shadow-md dark:shadow-gray-600"
                               onClick={() => handleEditDialogOpen(plan)}
                             >
                               <Edit />
