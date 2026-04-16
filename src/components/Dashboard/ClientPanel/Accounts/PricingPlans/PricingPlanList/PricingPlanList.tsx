@@ -156,9 +156,15 @@ const PricingPlanList: React.FC = () => {
             {pricingPlans.map((plan: PricingPlanTypes) => (
               <Card
                 key={plan.uid}
-                className="hover:border-primary hover:ring-primary/20 flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-[0_0_30px_rgba(59,130,246,0.25)] hover:ring-2 dark:border-slate-800 dark:bg-slate-950"
+                className="group hover:border-primary hover:ring-primary/20 relative flex h-full flex-col overflow-visible rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-[0_0_30px_rgba(59,130,246,0.25)] hover:ring-2 dark:border-slate-800 dark:bg-slate-950"
               >
-                <div className="space-y-4 border-b border-slate-200 px-6 py-6 dark:border-slate-800">
+                {(plan.name.trim().toLowerCase() === "gold" ||
+                  plan.name.trim().toLowerCase() === "freelancer pro") && (
+                  <div className="bg-primary absolute top-0 left-1/2 z-50 -translate-x-1/2 -translate-y-1/2 rounded-full px-3 py-1 text-xs font-semibold text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                    Most Popular
+                  </div>
+                )}
+                <div className="space-y-4 border-b border-slate-200 px-6 py-6 pt-10 dark:border-slate-800">
                   <div>
                     <CardTitle className="text-2xl font-semibold text-slate-950 dark:text-slate-50">
                       {plan.name}
