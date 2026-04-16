@@ -12,6 +12,7 @@ interface UserWithToken extends NextAuthUser {
   account_name?: string;
   account_type?: string;
   is_salon_limit_reached?: boolean;
+  is_free?: boolean;
   avatar?: string | null;
   first_name?: string;
   last_name?: string;
@@ -34,6 +35,7 @@ type AuthenticatedUserInfo = {
   };
   account_type?: string;
   is_salon_limit_reached?: boolean;
+  is_free?: boolean;
 };
 
 async function fetchAuthenticatedUser(
@@ -66,6 +68,7 @@ declare module "next-auth" {
       account_name?: string;
       account_type?: string;
       is_salon_limit_reached?: boolean;
+      is_free?: boolean;
       avatar?: string | null;
       first_name?: string;
       last_name?: string;
@@ -84,6 +87,7 @@ declare module "next-auth" {
     account_name?: string;
     account_type?: string;
     is_salon_limit_reached?: boolean;
+    is_free?: boolean;
     avatar?: string | null;
     first_name?: string;
     last_name?: string;
@@ -99,6 +103,7 @@ declare module "next-auth" {
     account_name?: string;
     account_type?: string;
     is_salon_limit_reached?: boolean;
+    is_free?: boolean;
     avatar?: string | null;
     first_name?: string;
     last_name?: string;
@@ -167,6 +172,7 @@ export const authOptions: NextAuthOptions = {
                 userInfo.account?.account_type ||
                 userInfo.account_type,
               is_salon_limit_reached: userInfo.is_salon_limit_reached,
+              is_free: userInfo.is_free,
             };
           }
           return null;
@@ -218,6 +224,9 @@ export const authOptions: NextAuthOptions = {
         if (userWithToken.is_salon_limit_reached !== undefined) {
           token.is_salon_limit_reached = userWithToken.is_salon_limit_reached;
         }
+        if (userWithToken.is_free !== undefined) {
+          token.is_free = userWithToken.is_free;
+        }
         if (userWithToken.avatar !== undefined) {
           token.avatar = userWithToken.avatar;
         }
@@ -256,6 +265,7 @@ export const authOptions: NextAuthOptions = {
           token.role = userInfo.role ?? token.role;
           token.is_salon_limit_reached =
             userInfo.is_salon_limit_reached ?? token.is_salon_limit_reached;
+          token.is_free = userInfo.is_free ?? token.is_free;
         }
 
         if (session?.user?.first_name !== undefined) {
@@ -279,6 +289,9 @@ export const authOptions: NextAuthOptions = {
         if (session?.user?.is_salon_limit_reached !== undefined) {
           token.is_salon_limit_reached = session.user.is_salon_limit_reached;
         }
+        if (session?.user?.is_free !== undefined) {
+          token.is_free = session.user.is_free;
+        }
       }
 
       return token;
@@ -294,6 +307,7 @@ export const authOptions: NextAuthOptions = {
         is_salon_limit_reached: token.is_salon_limit_reached as
           | boolean
           | undefined,
+        is_free: token.is_free as boolean | undefined,
         avatar: token.avatar as string | null | undefined,
         first_name: token.first_name as string | undefined,
         last_name: token.last_name as string | undefined,

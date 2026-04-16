@@ -39,6 +39,7 @@ import ViewBookingPanel from "./ViewBookingPanel/ViewBookingPanel";
 const ChairsTab: React.FC = () => {
   const { data: session } = useSession();
   const { canManageClientAccount } = useEffectiveRole(session);
+  const isFreeUser = session?.user?.is_free === true;
   const { salonuid } = useParams();
   const salonUid = Array.isArray(salonuid) ? salonuid[0] : (salonuid ?? "");
   const [currentPage, setCurrentPage] = useState(1);
@@ -169,15 +170,17 @@ const ChairsTab: React.FC = () => {
               <Button variant="outline" size="sm" onClick={handleBackToChairs}>
                 <ArrowLeft className="mr-1 h-4 w-4" /> Back to Chairs
               </Button>
-              <Button
-                variant="default"
-                size="sm"
-                onClick={() =>
-                  handleCreateBookingDialogOpen(selectedChairForBooking!)
-                }
-              >
-                <Plus className="mr-1 h-4 w-4" /> Create Booking
-              </Button>
+              {!isFreeUser && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() =>
+                    handleCreateBookingDialogOpen(selectedChairForBooking!)
+                  }
+                >
+                  <Plus className="mr-1 h-4 w-4" /> Create Booking
+                </Button>
+              )}
             </div>
           </>
         ) : (
@@ -289,20 +292,26 @@ const ChairsTab: React.FC = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            className="cursor-pointer"
-                            onClick={() => handleCreateBookingDialogOpen(chair)}
-                          >
-                            <Plus className="mr-1 h-4 w-4" />
-                            <span>Create Booking</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="cursor-pointer"
-                            onClick={() => handleViewBooking(chair)}
-                          >
-                            <Eye className="mr-1 h-4 w-4" />
-                            <span>View Bookings</span>
-                          </DropdownMenuItem>
+                          {!isFreeUser && (
+                            <>
+                              <DropdownMenuItem
+                                className="cursor-pointer"
+                                onClick={() =>
+                                  handleCreateBookingDialogOpen(chair)
+                                }
+                              >
+                                <Plus className="mr-1 h-4 w-4" />
+                                <span>Create Booking</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="cursor-pointer"
+                                onClick={() => handleViewBooking(chair)}
+                              >
+                                <Eye className="mr-1 h-4 w-4" />
+                                <span>View Bookings</span>
+                              </DropdownMenuItem>
+                            </>
+                          )}
                           <div>
                             {canManageClientAccount && (
                               <>
