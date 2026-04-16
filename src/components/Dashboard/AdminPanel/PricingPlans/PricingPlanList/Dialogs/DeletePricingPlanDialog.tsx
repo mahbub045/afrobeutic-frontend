@@ -53,9 +53,9 @@ const DeletePricingPlanDialog: React.FC<DeletePricingPlanDialogProps> = ({
           <DialogDescription className="text-xs">
             Are you sure you want to delete{" "}
             <b className="text-danger">{pricingPlanData?.name}</b>?
-            <p className="text-muted-foreground mt-2 text-xs">
+            <span className="text-muted-foreground mt-2 block text-xs">
               This action cannot be undone.
-            </p>
+            </span>
           </DialogDescription>
 
           <div className="mt-4 flex justify-end gap-2">
