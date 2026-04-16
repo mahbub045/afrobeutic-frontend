@@ -7,13 +7,12 @@ import {
   CardContent,
   CardDescription,
   CardFooter,
-  CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { formatChoiceFieldValue, formatPrice } from "@/lib/utils";
 import { useGetPricingPlansQuery } from "@/Redux/Reducers/AdminPanel/PricingPlans/PricingPlansApi";
 import { PricingPlanTypes } from "@/Types/AdminPanel/PricingPlansTypes/PricingPlansTypes";
-import { Edit, LoaderPinwheel, Plus, Trash } from "lucide-react";
+import { Check, Edit, LoaderPinwheel, Plus, Trash } from "lucide-react";
 import { useState } from "react";
 import AddPricingPlanDialog from "./Dialogs/AddPricingPlanDialog";
 import DeletePricingPlanDialog from "./Dialogs/DeletePricingPlanDialog";
@@ -45,6 +44,29 @@ const PricingPlanList: React.FC = () => {
 
   const pricingPlans = pricingPlanData?.results ?? [];
 
+  const categoryOrder = ["SALON_SHOP", "INDIVIDUAL_STYLIST"];
+  const pricingPlansByCategory = pricingPlans.reduce(
+    (acc: Record<string, PricingPlanTypes[]>, plan: PricingPlanTypes) => {
+      const category = plan.account_category ?? "OTHER";
+      if (!acc[category]) acc[category] = [];
+      acc[category].push(plan);
+      return acc;
+    },
+    {} as Record<string, PricingPlanTypes[]>,
+  );
+
+  const sortedCategories = Object.keys(pricingPlansByCategory).sort((a, b) => {
+    const indexA = categoryOrder.indexOf(a);
+    const indexB = categoryOrder.indexOf(b);
+    if (indexA !== -1 || indexB !== -1) {
+      return (
+        (indexA === -1 ? Infinity : indexA) -
+        (indexB === -1 ? Infinity : indexB)
+      );
+    }
+    return a.localeCompare(b);
+  });
+
   const getStausColorMap = (is_status: boolean) => {
     switch (is_status) {
       case true:
@@ -75,83 +97,97 @@ const PricingPlanList: React.FC = () => {
         </div>
       ) : (
         <>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {pricingPlans.map((plan: PricingPlanTypes) => (
-              <Card
-                key={plan.uid}
-                className="mb-2 shadow-md dark:shadow-gray-600"
-              >
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span className="text-primary text-2xl">{plan.name}</span>
-                  </CardTitle>
-                  <CardDescription>
-                    {plan.description ? (
-                      <span className="text-xs">{plan.description}</span>
-                    ) : (
-                      <small className="text-muted-foreground">
-                        No description provided.
-                      </small>
-                    )}
-                  </CardDescription>
-                  <CardAction>
-                    <Badge variant={getStausColorMap(plan.is_active)}>
-                      {plan.is_active ? "Active" : "Inactive"}
-                    </Badge>
-                  </CardAction>
-                </CardHeader>
-                <CardContent>
-                  <div>
-                    <h2 className="my-10 text-center text-4xl font-bold">
-                      <span className="text-primary">
-                        {formatPrice(plan.price)}
-                      </span>
-                      <small className="text-xs">/month</small>
-                    </h2>
-                  </div>
-                  <ul className="marker:text-primary list-disc space-y-1 pl-6 text-sm">
-                    <li>
-                      <strong>Category -&gt; </strong>{" "}
-                      {formatChoiceFieldValue(plan.account_category)}
-                    </li>
-                    <li>
-                      <strong>Salon Limit -&gt;</strong> {plan.salon_limit}
-                    </li>
-                    <li>
-                      <strong>Chatbot Limit -&gt;</strong>{" "}
-                      {plan.whatsapp_chatbot_limit}
-                    </li>
-                    <li>
-                      <strong>Chatbot Messages Limit -&gt;</strong>{" "}
-                      {plan.whatsapp_messages_per_chatbot}
-                    </li>
-                    <li>
-                      <strong>Broadcasting -&gt;</strong>{" "}
-                      {plan.has_broadcasting
-                        ? `Yes (limit ${plan.broadcasting_message_limit})`
-                        : "No"}
-                    </li>
-                  </ul>
-                </CardContent>
-                <CardFooter className="flex justify-center gap-2">
-                  <Button
-                    variant="danger"
-                    className="w-1/2 shadow-md dark:shadow-gray-600"
-                    onClick={() => handleDeleteDialogOpen(plan)}
-                  >
-                    <Trash />
-                    Delete Plan
-                  </Button>
-                  <Button
-                    variant="default"
-                    className="w-1/2 shadow-md dark:shadow-gray-600"
-                    onClick={() => handleEditDialogOpen(plan)}
-                  >
-                    <Edit />
-                    Edit Plan
-                  </Button>
-                </CardFooter>
-              </Card>
+          <div className="space-y-10">
+            {sortedCategories.map((category) => (
+              <section key={category}>
+                <h3 className="mb-4 text-lg font-semibold text-slate-950 dark:text-slate-50">
+                  {formatChoiceFieldValue(category)}
+                </h3>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {pricingPlansByCategory[category].map(
+                    (plan: PricingPlanTypes) => (
+                      <Card
+                        key={plan.uid}
+                        className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-950"
+                      >
+                        <div className="space-y-4 border-b border-slate-200 px-6 py-6 dark:border-slate-800">
+                          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                            <div>
+                              <CardTitle className="text-2xl font-semibold text-slate-950 dark:text-slate-50">
+                                {plan.name}
+                              </CardTitle>
+                              <CardDescription className="text-primary mt-3 text-sm">
+                                {plan.description ||
+                                  "A great plan for your business needs."}
+                              </CardDescription>
+                            </div>
+                            <CardAction>
+                              <Badge variant={getStausColorMap(plan.is_active)}>
+                                {plan.is_active ? "Active" : "Inactive"}
+                              </Badge>
+                            </CardAction>
+                          </div>
+                        </div>
+
+                        <CardContent className="px-6 py-8">
+                          <div className="text-center">
+                            <div className="text-5xl font-bold tracking-tight text-slate-950 dark:text-white">
+                              {formatPrice(plan.price)}
+                            </div>
+                            <div className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                              / month{" "}
+                              <span className="text-slate-400">+ VAT</span>
+                            </div>
+                          </div>
+
+                          <div className="text-primary mt-6 rounded-3xl border border-slate-200 bg-slate-50 px-5 py-4 text-center text-sm dark:border-slate-800 dark:bg-slate-900 dark:text-sky-300">
+                            {plan.salon_limit} Salon
+                            {plan.salon_limit === 1 ? "" : "s"} •{" "}
+                            {plan.whatsapp_chatbot_limit} Chatbot
+                            {plan.whatsapp_chatbot_limit === 1 ? "" : "s"}
+                          </div>
+
+                          <div className="mt-8 space-y-4 text-sm text-slate-700 dark:text-slate-300">
+                            {(plan.features && plan.features.length > 0
+                              ? plan.features
+                              : ["No additional features listed for this plan."]
+                            )?.map((feature, index) => (
+                              <div
+                                key={`${plan.uid}-feature-${index}`}
+                                className="flex items-start gap-3"
+                              >
+                                <Check className="text-primary mt-1 h-4 w-4 shrink-0" />
+                                <span>{feature}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+
+                        <CardFooter className="px-6 pt-2 pb-6">
+                          <div className="flex flex-col gap-2 sm:flex-row">
+                            <Button
+                              variant="danger"
+                              className="w-full shadow-md sm:w-1/2 dark:shadow-gray-600"
+                              onClick={() => handleDeleteDialogOpen(plan)}
+                            >
+                              <Trash />
+                              Delete Plan
+                            </Button>
+                            <Button
+                              variant="default"
+                              className="w-full shadow-md sm:w-1/2 dark:shadow-gray-600"
+                              onClick={() => handleEditDialogOpen(plan)}
+                            >
+                              <Edit />
+                              Edit Plan
+                            </Button>
+                          </div>
+                        </CardFooter>
+                      </Card>
+                    ),
+                  )}
+                </div>
+              </section>
             ))}
           </div>
 

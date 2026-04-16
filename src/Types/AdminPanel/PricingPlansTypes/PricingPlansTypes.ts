@@ -10,6 +10,7 @@ export interface PricingPlanTypes {
   broadcasting_message_limit: number;
   is_active: boolean;
   description: string;
+  features?: string[];
   is_current_plan?: boolean;
 }
 

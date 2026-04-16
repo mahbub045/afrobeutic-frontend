@@ -19,7 +19,9 @@ import {
   FormikErrors,
   FormikHelpers,
 } from "formik";
+import { X } from "lucide-react";
 import { useTheme } from "next-themes";
+import React, { useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
@@ -30,6 +32,8 @@ const AddPricingPlanDialog: React.FC<AddPricingPlanDialogProps> = ({
 }) => {
   const { resolvedTheme } = useTheme();
   const [addPricingPlan, { isLoading }] = useAddPricingPlanMutation();
+  const [featureInput, setFeatureInput] = useState<string>("");
+  const [featureError, setFeatureError] = useState<string | null>(null);
 
   const initialValues = {
     account_category: "",
@@ -37,11 +41,12 @@ const AddPricingPlanDialog: React.FC<AddPricingPlanDialogProps> = ({
     price: "",
     salon_limit: "",
     whatsapp_chatbot_limit: "",
-    whatsapp_messages_per_chatbot: "",
-    has_broadcasting: true,
-    broadcasting_message_limit: "",
+    // whatsapp_messages_per_chatbot: "",
+    // has_broadcasting: true,
+    // broadcasting_message_limit: "",
     is_active: true,
     description: "",
+    features: [] as string[],
   };
   const validationSchema = Yup.object({
     account_category: Yup.string().required("Account category is required"),
@@ -60,8 +65,8 @@ const AddPricingPlanDialog: React.FC<AddPricingPlanDialogProps> = ({
       .required("Chatbot limit is required"),
     whatsapp_messages_per_chatbot: Yup.number()
       .typeError("Messages per chatbot must be a number")
-      .min(0)
-      .required("Messages per chatbot is required"),
+      .min(0),
+
     has_broadcasting: Yup.boolean(),
     broadcasting_message_limit: Yup.number()
       .typeError("Broadcasting message limit must be a number")
@@ -72,6 +77,7 @@ const AddPricingPlanDialog: React.FC<AddPricingPlanDialogProps> = ({
       }),
     is_active: Yup.boolean(),
     description: Yup.string().nullable(),
+    features: Yup.array().of(Yup.string().trim()),
   });
 
   const handleSubmit = async (
@@ -86,16 +92,17 @@ const AddPricingPlanDialog: React.FC<AddPricingPlanDialogProps> = ({
         name: values.name,
         price: Number(values.price),
         salon_limit: Number(values.salon_limit),
-        has_broadcasting: Boolean(values.has_broadcasting),
+        // has_broadcasting: Boolean(values.has_broadcasting),
         is_active: Boolean(values.is_active),
         description: values.description || "",
         whatsapp_chatbot_limit: Number(values.whatsapp_chatbot_limit),
-        whatsapp_messages_per_chatbot: Number(
-          values.whatsapp_messages_per_chatbot,
-        ),
-        broadcasting_message_limit: values.has_broadcasting
-          ? Number(values.broadcasting_message_limit)
-          : 0,
+        // whatsapp_messages_per_chatbot: Number(
+        //   values.whatsapp_messages_per_chatbot,
+        // ),
+        // broadcasting_message_limit: values.has_broadcasting
+        //   ? Number(values.broadcasting_message_limit)
+        //   : 0,
+        features: values.features,
       };
 
       await addPricingPlan({ payload }).unwrap();
@@ -175,7 +182,7 @@ const AddPricingPlanDialog: React.FC<AddPricingPlanDialogProps> = ({
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
-          {({ values, errors, touched }) => (
+          {({ values, errors, touched, setFieldValue }) => (
             <Form>
               <div className="grid gap-4">
                 <div>
@@ -283,7 +290,7 @@ const AddPricingPlanDialog: React.FC<AddPricingPlanDialogProps> = ({
                   </div>
                 </div>
 
-                <div>
+                {/* <div>
                   <Label
                     htmlFor="whatsapp_messages_per_chatbot"
                     className="mb-2"
@@ -305,9 +312,105 @@ const AddPricingPlanDialog: React.FC<AddPricingPlanDialogProps> = ({
                         {String(errors.whatsapp_messages_per_chatbot)}
                       </p>
                     )}
+                </div> */}
+
+                <div>
+                  <Label className="mb-2">Features</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {values.features.length > 0 ? (
+                      values.features.map((feature) => (
+                        <span
+                          key={feature}
+                          className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm"
+                        >
+                          {feature}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFieldValue(
+                                "features",
+                                values.features.filter(
+                                  (item) => item !== feature,
+                                ),
+                              );
+                            }}
+                            className="text-muted-foreground hover:bg-muted inline-flex h-5 w-5 items-center justify-center rounded-full"
+                          >
+                            <X size={14} />
+                          </button>
+                        </span>
+                      ))
+                    ) : (
+                      <p className="text-muted-foreground text-sm">
+                        No features added yet.
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="mt-3 flex items-center gap-2">
+                    <input
+                      id="featureInput"
+                      type="text"
+                      value={featureInput}
+                      onChange={(e) => {
+                        setFeatureInput(e.target.value);
+                        setFeatureError(null);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          const feature = featureInput.trim();
+                          if (!feature) {
+                            setFeatureError("Feature cannot be blank.");
+                            return;
+                          }
+                          if (values.features.includes(feature)) {
+                            setFeatureError("Feature already added.");
+                            return;
+                          }
+                          setFieldValue("features", [
+                            ...values.features,
+                            feature,
+                          ]);
+                          setFeatureInput("");
+                        }
+                      }}
+                      placeholder="Enter a feature"
+                      className="border-input focus:border-primary focus:ring-primary/10 flex-1 rounded-md border px-3 py-2 shadow-sm focus:ring-2 focus:outline-none"
+                    />
+                    <Button
+                      size="sm"
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        const feature = featureInput.trim();
+                        if (!feature) {
+                          setFeatureError("Feature cannot be blank.");
+                          return;
+                        }
+                        if (values.features.includes(feature)) {
+                          setFeatureError("Feature already added.");
+                          return;
+                        }
+                        setFieldValue("features", [
+                          ...values.features,
+                          feature,
+                        ]);
+                        setFeatureInput("");
+                      }}
+                      className="h-10 px-4"
+                    >
+                      Add
+                    </Button>
+                  </div>
+                  {featureError ? (
+                    <p className="text-destructive mt-1 text-sm">
+                      {featureError}
+                    </p>
+                  ) : null}
                 </div>
 
-                <div className="flex items-center justify-between gap-4">
+                {/* <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
                     <Label htmlFor="has_broadcasting" className="mb-2">
                       Has Broadcasting
@@ -351,7 +454,7 @@ const AddPricingPlanDialog: React.FC<AddPricingPlanDialogProps> = ({
                         </p>
                       )}
                   </div>
-                </div>
+                </div> */}
 
                 <div className="flex items-center gap-3">
                   <Label htmlFor="is_active" className="mb-2">

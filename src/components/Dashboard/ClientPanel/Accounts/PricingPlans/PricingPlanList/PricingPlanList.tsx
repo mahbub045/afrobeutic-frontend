@@ -187,14 +187,18 @@ const PricingPlanList: React.FC = () => {
                   </div>
 
                   <div className="mt-8 space-y-4 text-sm text-slate-700 dark:text-slate-300">
-                    <div className="flex items-start gap-3">
-                      <Check className="text-primary mt-1 h-4 w-4 shrink-0" />
-                      <span>Paid monthly in advance</span>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <Check className="text-primary mt-1 h-4 w-4 shrink-0" />
-                      <span>Dedicated onboarding & customer support</span>
-                    </div>
+                    {(plan.features && plan.features.length > 0
+                      ? plan.features
+                      : ["No additional features listed for this plan."]
+                    )?.map((feature, index) => (
+                      <div
+                        key={`${plan.uid}-feature-${index}`}
+                        className="flex items-start gap-3"
+                      >
+                        <Check className="text-primary mt-1 h-4 w-4 shrink-0" />
+                        <span>{feature}</span>
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
 
