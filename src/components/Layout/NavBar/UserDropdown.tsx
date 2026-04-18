@@ -25,6 +25,7 @@ interface Props {
 
 const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
   const { role, isClientRole, isManagementRole } = useEffectiveRole(session);
+  const isFreeUser = session?.user?.is_free === true;
 
   if (status === "loading")
     return (
@@ -107,22 +108,26 @@ const UserDropdown: React.FC<Props> = ({ status, session, onSignOut }) => {
                 Profile
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link
-                className="cursor-pointer"
-                href="/dashboard/client-panel/members"
-              >
-                Staff Members
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link
-                className="cursor-pointer"
-                href="/dashboard/client-panel/accounts/switch-account"
-              >
-                Switch account
-              </Link>
-            </DropdownMenuItem>
+            {!isFreeUser && (
+              <DropdownMenuItem asChild>
+                <Link
+                  className="cursor-pointer"
+                  href="/dashboard/client-panel/members"
+                >
+                  Staff Members
+                </Link>
+              </DropdownMenuItem>
+            )}
+            {!isFreeUser && (
+              <DropdownMenuItem asChild>
+                <Link
+                  className="cursor-pointer"
+                  href="/dashboard/client-panel/accounts/switch-account"
+                >
+                  Switch account
+                </Link>
+              </DropdownMenuItem>
+            )}
           </>
         )}
         {isManagementRole && (

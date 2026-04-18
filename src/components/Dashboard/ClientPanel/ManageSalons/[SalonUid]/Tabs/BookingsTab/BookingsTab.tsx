@@ -53,12 +53,16 @@ const BookingsTab: React.FC = () => {
     null,
   );
   const [statusFilter, setStatusFilter] = useState<
-    "ALL" | "PLACED" | "INPROGRESS" | "COMPLETED" | "RESCHEDULED" | "CANCELLED"
+    | "ALL"
+    | "CONFIRMED"
+    | "INPROGRESS"
+    | "COMPLETED"
+    | "RESCHEDULED"
+    | "CANCELLED"
+    | "NO_SHOW"
   >("ALL");
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const middleSlotRef = useRef<HTMLDivElement | null>(null);
-  const [hasScrolled, setHasScrolled] = useState(false);
 
   const handleIsEditDialogOpen = (open: boolean) => {
     setIsEditDialogOpen(open);
@@ -133,27 +137,30 @@ const BookingsTab: React.FC = () => {
 
         // Assign colors based on status
         const statusColorMap: { [key: string]: string } = {
-          PLACED: "bg-gradient-to-r from-blue-400 to-cyan-300",
+          CONFIRMED: "bg-gradient-to-r from-cyan-400 to-emerald-300",
           INPROGRESS: "bg-gradient-to-r from-amber-300 to-orange-400",
           COMPLETED: "bg-gradient-to-r from-emerald-300 to-teal-400",
           RESCHEDULED: "bg-gradient-to-r from-purple-300 to-pink-400",
           CANCELLED: "bg-gradient-to-r from-red-400 to-rose-500",
+          NO_SHOW: "bg-gradient-to-r from-slate-400 to-slate-600",
         };
 
         // Map status enum to display format
         const statusMap: {
           [key: string]:
-            | "placed"
+            | "confirmed"
             | "in-progress"
             | "rescheduled"
             | "completed"
-            | "cancelled";
+            | "cancelled"
+            | "no-show";
         } = {
-          PLACED: "placed",
+          CONFIRMED: "confirmed",
           INPROGRESS: "in-progress",
           COMPLETED: "completed",
           RESCHEDULED: "rescheduled",
           CANCELLED: "cancelled",
+          NO_SHOW: "no-show",
         };
 
         return {
@@ -268,39 +275,7 @@ const BookingsTab: React.FC = () => {
       newDate.setDate(newDate.getDate() + (direction === "next" ? 7 : -7));
     }
     setSelectedDate(newDate);
-    setHasScrolled(false); // Reset scroll flag when date changes
   };
-
-  // On first load (and when date changes), scroll the calendar so the middle time slot is centered
-  useEffect(() => {
-    // Don't scroll if already scrolled for this date or if no staff members
-    if (hasScrolled || !staffMembers.length) return;
-
-    const container = scrollContainerRef.current;
-    const middle = middleSlotRef.current;
-    if (!container || !middle) return;
-
-    // Wait for layout to complete, then scroll
-    const timeoutId = setTimeout(() => {
-      const containerRect = container.getBoundingClientRect();
-      const middleRect = middle.getBoundingClientRect();
-
-      // Calculate the offset of the middle slot relative to the container's current scroll position
-      const offsetWithinContainer =
-        middleRect.top - containerRect.top + container.scrollTop;
-
-      // Calculate target scroll position to center the middle slot
-      const targetScrollTop =
-        offsetWithinContainer -
-        container.clientHeight / 2 +
-        middleRect.height / 2;
-
-      container.scrollTop = targetScrollTop;
-      setHasScrolled(true);
-    }, 100);
-
-    return () => clearTimeout(timeoutId);
-  }, [selectedDate, staffMembers.length, hasScrolled]);
 
   // Helpers to safely handle cancelled status and reason from possibly under-typed API shapes
   const isCancelled = (() => {
@@ -325,15 +300,16 @@ const BookingsTab: React.FC = () => {
   const getUiStatus = (
     status?: string,
   ):
-    | "placed"
+    | "confirmed"
     | "in-progress"
     | "rescheduled"
     | "completed"
     | "cancelled"
+    | "no-show"
     | undefined => {
     switch (status) {
-      case "PLACED":
-        return "placed";
+      case "CONFIRMED":
+        return "confirmed";
       case "INPROGRESS":
         return "in-progress";
       case "COMPLETED":
@@ -342,6 +318,8 @@ const BookingsTab: React.FC = () => {
         return "rescheduled";
       case "CANCELLED":
         return "cancelled";
+      case "NO_SHOW":
+        return "no-show";
       default:
         return undefined;
     }
@@ -410,11 +388,12 @@ const BookingsTab: React.FC = () => {
               setStatusFilter(
                 v as
                   | "ALL"
-                  | "PLACED"
+                  | "CONFIRMED"
                   | "INPROGRESS"
                   | "COMPLETED"
                   | "RESCHEDULED"
-                  | "CANCELLED",
+                  | "CANCELLED"
+                  | "NO_SHOW",
               )
             }
           >
@@ -423,11 +402,12 @@ const BookingsTab: React.FC = () => {
             </SelectTrigger>
             <SelectContent align="end">
               <SelectItem value="ALL">All Status</SelectItem>
-              <SelectItem value="PLACED">Placed</SelectItem>
+              <SelectItem value="CONFIRMED">Confirmed</SelectItem>
               <SelectItem value="INPROGRESS">In-progress</SelectItem>
               <SelectItem value="COMPLETED">Completed</SelectItem>
               <SelectItem value="RESCHEDULED">Rescheduled</SelectItem>
               <SelectItem value="CANCELLED">Cancelled</SelectItem>
+              <SelectItem value="NO_SHOW">No-Show</SelectItem>
             </SelectContent>
           </Select>
 
@@ -482,15 +462,7 @@ const BookingsTab: React.FC = () => {
             >
               <div className="relative min-w-max">
                 {timeSlots.map((slot, index) => (
-                  <div
-                    key={index}
-                    ref={
-                      index === Math.floor(timeSlots.length / 2)
-                        ? middleSlotRef
-                        : undefined
-                    }
-                    className="flex border-b last:border-b-0"
-                  >
+                  <div key={index} className="flex border-b last:border-b-0">
                     <div className="bg-muted/50 text-muted-foreground w-10 flex-shrink-0 border-r text-[10px] sm:w-12 sm:text-xs lg:w-16">
                       {index === 0 && (
                         <div className="border-b px-1 py-2 sm:px-2 sm:py-[22px] lg:px-3">
@@ -648,7 +620,7 @@ const BookingsTab: React.FC = () => {
                 status:
                   singleBookingData?.status ||
                   selectedAppointment.fullBookingData?.status ||
-                  "PLACED",
+                  "CONFIRMED",
                 cancellation_reason:
                   (
                     singleBookingData as unknown as {
@@ -728,7 +700,7 @@ const BookingsTab: React.FC = () => {
                       status?: string;
                     }
                   )?.status ||
-                  "PLACED",
+                  "CONFIRMED",
                 cancellation_reason:
                   (
                     singleBookingData as unknown as {

@@ -32,6 +32,7 @@ import SettingsTab from "./Tabs/SettingsTab/SettingsTab";
 const SingleSalonContainer: React.FC = () => {
   const { salonuid } = useParams();
   const { data: session } = useSession();
+  const isFreeUser = session?.user?.is_free === true;
 
   // RTK Hooks
   const { data: singleSalonData } = useGetSingleSalonDataQuery({
@@ -52,13 +53,13 @@ const SingleSalonContainer: React.FC = () => {
     ];
 
     if (session?.user?.account_type !== "INDIVIDUAL_STYLIST") {
-      menus.push(
-        { label: "Chairs", href: `chairs`, Icon: Armchair },
-        { label: "Bookings", href: `bookings`, Icon: Calendar },
-      );
+      menus.push({ label: "Chairs", href: `chairs`, Icon: Armchair });
+      if (!isFreeUser) {
+        menus.push({ label: "Bookings", href: `bookings`, Icon: Calendar });
+      }
     }
 
-    if (session?.user?.account_type === "INDIVIDUAL_STYLIST") {
+    if (session?.user?.account_type === "INDIVIDUAL_STYLIST" && !isFreeUser) {
       menus.push({ label: "Bookings", href: `indBookings`, Icon: Calendar });
     }
 
@@ -75,13 +76,17 @@ const SingleSalonContainer: React.FC = () => {
       });
     }
 
-    menus.push(
-      { label: "Analytics", href: `analytics`, Icon: BarChart2 },
-      { label: "Settings", href: `settings`, Icon: Settings },
-    );
+    if (!isFreeUser) {
+      menus.push({ label: "Analytics", href: `analytics`, Icon: BarChart2 });
+    }
+    menus.push({ label: "Settings", href: `settings`, Icon: Settings });
 
     return menus;
-  }, [session?.user?.account_type, singleSalonData?.is_chatbot_configured]);
+  }, [
+    isFreeUser,
+    session?.user?.account_type,
+    singleSalonData?.is_chatbot_configured,
+  ]);
 
   const pathname = usePathname();
   const [activeTab, setActiveTab] = useState<string>("dashboard");
@@ -155,13 +160,15 @@ const SingleSalonContainer: React.FC = () => {
         {session?.user?.account_type !== "INDIVIDUAL_STYLIST" &&
           activeTab === "chairs" && <ChairsTab />}
         {session?.user?.account_type !== "INDIVIDUAL_STYLIST" &&
+          !isFreeUser &&
           activeTab === "bookings" && <BookingsTab />}
         {session?.user?.account_type === "INDIVIDUAL_STYLIST" &&
+          !isFreeUser &&
           activeTab === "indBookings" && <IndividualBookingsTab />}
         {activeTab === "lookbooks" && <LookbookTab />}
         {activeTab === "employees" && <EmployeesTab />}
         {activeTab === "messages" && <MessagesTab />}
-        {activeTab === "analytics" && <AnalyticsTab />}
+        {!isFreeUser && activeTab === "analytics" && <AnalyticsTab />}
         {activeTab === "settings" && <SettingsTab />}
       </section>
     </div>

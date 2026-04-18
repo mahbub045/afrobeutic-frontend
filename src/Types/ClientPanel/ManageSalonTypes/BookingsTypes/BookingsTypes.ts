@@ -42,7 +42,12 @@ export interface Booking {
   booking_time: string;
   booking_duration: string | null;
   completed_at: string | null;
-  status: "PLACED" | "INPROGRESS" | "RESCHEDULED" | "COMPLETED";
+  status:
+    | "CONFIRMED"
+    | "INPROGRESS"
+    | "RESCHEDULED"
+    | "COMPLETED"
+    | "NO_SHOW";
   notes: string;
   customer: BookingCustomer;
   services: BookingService[];
@@ -137,7 +142,14 @@ export interface Appointment {
   staff: string;
   startTime: string;
   endTime: string;
-  status: "placed" | "in-progress" | "rescheduled" | "completed" | "cancelled";
+  status:
+    | "placed"
+    | "confirmed"
+    | "in-progress"
+    | "rescheduled"
+    | "completed"
+    | "cancelled"
+    | "no-show";
   color: string;
   column: number;
   fullBookingData?: Booking;

@@ -59,6 +59,7 @@ const SideBar: React.FC<SideBarProps> = ({
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const { role } = useEffectiveRole(session);
+  const isFreeUser = session?.user?.is_free === true;
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
   const toggleExpand = (label: string) => {
@@ -112,11 +113,15 @@ const SideBar: React.FC<SideBarProps> = ({
           href: "/dashboard/client-panel/manage-salons",
           Icon: LifeBuoy,
         },
-        {
-          label: "Chatbots",
-          href: "/dashboard/client-panel/chatbots",
-          Icon: MessageSquare,
-        },
+        ...(!isFreeUser
+          ? [
+              {
+                label: "Chatbots",
+                href: "/dashboard/client-panel/chatbots",
+                Icon: MessageSquare,
+              },
+            ]
+          : []),
         {
           label: "Customers",
           href: "/dashboard/client-panel/customers",

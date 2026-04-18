@@ -16,22 +16,19 @@ import { formatChoiceFieldValue } from "@/lib/utils";
 import { useGetEmployeesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Employees/EmployeesApi";
 import { useEditServiceMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
 import {
+  EditServiceMoreInfoDialogProps,
   Employee,
+  MoreInfoFormValues,
   ServiceProps,
 } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import { ErrorMessage, Field, Form, Formik } from "formik";
+import { X } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useParams } from "next/navigation";
+import type { KeyboardEvent } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
-
-export interface EditServiceMoreInfoDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  selectedService: ServiceProps;
-  onEditSuccess?: () => void;
-}
 
 const AVAILABLE_SLOTS = [
   "MORNING",
@@ -95,6 +92,11 @@ const normalizeAvailableTimeSlots = (value: unknown): string[] => {
   }, []);
 };
 
+const normalizeTags = (value: unknown): string[] => {
+  if (!Array.isArray(value)) return [];
+  return value.filter((tag): tag is string => typeof tag === "string");
+};
+
 const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
   isOpen,
   onClose,
@@ -114,14 +116,7 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
     ? (employeesData.results as Employee[])
     : [];
   const initialAssigned = normalizeAssignedEmployees(selectedService);
-
-  interface MoreInfoFormValues {
-    service_duration: string;
-    available_time_slots: string[];
-    gender_specific: string;
-    discount_percentage: number;
-    assign_employees: string[];
-  }
+  const initialTags = normalizeTags(selectedService?.tags);
 
   // duration format: HH:MM or HH:MM:SS (allow single-digit hours)
   const durationRegex = /^([0-9]{1,2}):[0-5][0-9](:[0-5][0-9])?$/;
@@ -137,17 +132,22 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
       .max(100, "Discount cannot be more than 100")
       .typeError("Discount must be a number"),
     assign_employees: Yup.array().of(Yup.string()),
+    tags: Yup.array()
+      .of(Yup.string())
+      .min(1, "At least one tag is required")
+      .required("Tags are required"),
   });
 
   const handleSubmit = async (values: MoreInfoFormValues) => {
     try {
       // Prepare payload - send as JSON object
-      const payload: MoreInfoFormValues = {
+      const payload: Omit<MoreInfoFormValues, "tagInput"> = {
         service_duration: values.service_duration,
         available_time_slots: values.available_time_slots,
         gender_specific: values.gender_specific,
         discount_percentage: Number(values.discount_percentage) || 0,
         assign_employees: values.assign_employees,
+        tags: values.tags,
       };
 
       await editService({
@@ -198,26 +198,36 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
             ),
             discount_percentage: selectedService?.discount_percentage ?? 0,
             assign_employees: initialAssigned,
+            tags: initialTags,
+            tagInput: "",
           }}
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
           enableReinitialize
         >
-          {({ values, setFieldValue, handleSubmit, isSubmitting }) => (
+          {({
+            values,
+            setFieldValue,
+            setFieldError,
+            setFieldTouched,
+            validateForm,
+            handleSubmit,
+            isSubmitting,
+          }) => (
             <Form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="service-duration" className="mb-2">
-                  Service Duration
+                  Service Duration(HH:MM)
                 </Label>
-                {/* duration input (HH:MM or HH:MM:SS) */}
+                {/* duration input (HH:MM) */}
                 <Field
                   as="input"
                   id="service-duration"
                   name="service_duration"
                   type="text"
-                  placeholder="e.g. 00:30:00 or 0:30"
-                  pattern="^([0-9]{1,2}):[0-5][0-9](:[0-5][0-9])?$"
-                  title="Duration format HH:MM or HH:MM:SS"
+                  placeholder="e.g. 01:30 for 1 hour 30 mins"
+                  pattern="^([0-9]{1,2}):[0-5][0-9]$"
+                  title="Duration format HH:MM"
                 />
                 <ErrorMessage
                   name="service_duration"
@@ -316,6 +326,91 @@ const EditServiceMoreInfoDialog: React.FC<EditServiceMoreInfoDialogProps> = ({
                   component="p"
                   className="mt-1 text-sm text-red-500"
                 />
+              </div>
+
+              <div>
+                <Label className="mb-2">Tags</Label>
+                <div className="flex flex-wrap gap-2">
+                  {values.tags.length > 0 ? (
+                    values.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm"
+                      >
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setFieldValue(
+                              "tags",
+                              values.tags.filter((current) => current !== tag),
+                            )
+                          }
+                          className="text-muted-foreground hover:bg-muted inline-flex h-5 w-5 items-center justify-center rounded-full"
+                        >
+                          <X size={14} />
+                        </button>
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-muted-foreground text-sm">
+                      No tags assigned.
+                    </p>
+                  )}
+                </div>
+                <ErrorMessage
+                  name="tags"
+                  component="p"
+                  className="mt-1 text-sm text-red-500"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="tags-input" className="mb-2">
+                  Add Tag
+                </Label>
+                <div className="flex items-center gap-2">
+                  <Field
+                    as="input"
+                    id="tags-input"
+                    name="tagInput"
+                    type="text"
+                    placeholder="Enter a tag"
+                    className="flex-1"
+                    onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        const tag = e.currentTarget.value.trim();
+                        if (!tag) return;
+                        if (!values.tags.includes(tag)) {
+                          setFieldValue("tags", [...values.tags, tag]);
+                          setFieldError("tags", undefined);
+                          setFieldTouched("tags", false);
+                          validateForm();
+                        }
+                        setFieldValue("tagInput", "");
+                      }
+                    }}
+                  />
+                  <Button
+                    size={"lg"}
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      const tagValue = values.tagInput.trim();
+                      if (!tagValue) return;
+                      if (!values.tags.includes(tagValue)) {
+                        setFieldValue("tags", [...values.tags, tagValue]);
+                        setFieldError("tags", undefined);
+                        setFieldTouched("tags", false);
+                        validateForm();
+                      }
+                      setFieldValue("tagInput", "");
+                    }}
+                  >
+                    Add
+                  </Button>
+                </div>
               </div>
 
               <div>

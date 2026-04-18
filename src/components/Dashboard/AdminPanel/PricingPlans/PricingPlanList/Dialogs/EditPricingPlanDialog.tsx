@@ -19,7 +19,9 @@ import {
   FormikErrors,
   FormikHelpers,
 } from "formik";
+import { X } from "lucide-react";
 import { useTheme } from "next-themes";
+import React, { useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
@@ -30,11 +32,12 @@ type FormValues = {
   price: string;
   salon_limit: string;
   whatsapp_chatbot_limit: string;
-  whatsapp_messages_per_chatbot: string;
-  has_broadcasting: boolean;
-  broadcasting_message_limit: string;
+  // whatsapp_messages_per_chatbot: string;
+  // has_broadcasting: boolean;
+  // broadcasting_message_limit: string;
   is_active: boolean;
   description: string;
+  features: string[];
 };
 
 const EditPricingPlanDialog: React.FC<EditPricingPlanDialogProps> = ({
@@ -44,6 +47,8 @@ const EditPricingPlanDialog: React.FC<EditPricingPlanDialogProps> = ({
 }) => {
   const { resolvedTheme } = useTheme();
   const [editPricingPlan, { isLoading }] = useEditPricingPlanMutation();
+  const [featureInput, setFeatureInput] = useState<string>("");
+  const [featureError, setFeatureError] = useState<string | null>(null);
 
   const initialValues: FormValues = {
     account_category: pricingPlanData.account_category || "",
@@ -53,15 +58,16 @@ const EditPricingPlanDialog: React.FC<EditPricingPlanDialogProps> = ({
     whatsapp_chatbot_limit: String(
       pricingPlanData.whatsapp_chatbot_limit ?? "",
     ),
-    whatsapp_messages_per_chatbot: String(
-      pricingPlanData.whatsapp_messages_per_chatbot ?? "",
-    ),
-    has_broadcasting: Boolean(pricingPlanData.has_broadcasting),
-    broadcasting_message_limit: String(
-      pricingPlanData.broadcasting_message_limit ?? "",
-    ),
+    // whatsapp_messages_per_chatbot: String(
+    //   pricingPlanData.whatsapp_messages_per_chatbot ?? "",
+    // ),
+    // has_broadcasting: Boolean(pricingPlanData.has_broadcasting),
+    // broadcasting_message_limit: String(
+    //   pricingPlanData.broadcasting_message_limit ?? "",
+    // ),
     is_active: Boolean(pricingPlanData.is_active),
     description: pricingPlanData.description ?? "",
+    features: pricingPlanData.features ?? [],
   };
 
   const validationSchema = Yup.object({
@@ -79,20 +85,21 @@ const EditPricingPlanDialog: React.FC<EditPricingPlanDialogProps> = ({
       .typeError("Chatbot limit must be a number")
       .min(0)
       .required("Chatbot limit is required"),
-    whatsapp_messages_per_chatbot: Yup.number()
-      .typeError("Messages per chatbot must be a number")
-      .min(0)
-      .required("Messages per chatbot is required"),
-    has_broadcasting: Yup.boolean(),
-    broadcasting_message_limit: Yup.number()
-      .typeError("Broadcasting message limit must be a number")
-      .min(0)
-      .when("has_broadcasting", {
-        is: true,
-        then: (schema) => schema.required("Broadcasting limit is required"),
-      }),
+    // whatsapp_messages_per_chatbot: Yup.number()
+    //   .typeError("Messages per chatbot must be a number")
+    //   .min(0)
+    //   .required("Messages per chatbot is required"),
+    // has_broadcasting: Yup.boolean(),
+    // broadcasting_message_limit: Yup.number()
+    //   .typeError("Broadcasting message limit must be a number")
+    //   .min(0)
+    //   .when("has_broadcasting", {
+    //     is: true,
+    //     then: (schema) => schema.required("Broadcasting limit is required"),
+    //   }),
     is_active: Yup.boolean(),
     description: Yup.string().nullable(),
+    features: Yup.array().of(Yup.string().trim()),
   });
 
   const handleSubmit = async (
@@ -113,15 +120,16 @@ const EditPricingPlanDialog: React.FC<EditPricingPlanDialogProps> = ({
         whatsapp_chatbot_limit: toNumberOrUndefined(
           pricingPlanData.whatsapp_chatbot_limit,
         ),
-        whatsapp_messages_per_chatbot: toNumberOrUndefined(
-          pricingPlanData.whatsapp_messages_per_chatbot,
-        ),
-        has_broadcasting: Boolean(pricingPlanData.has_broadcasting),
-        broadcasting_message_limit: toNumberOrUndefined(
-          pricingPlanData.broadcasting_message_limit,
-        ),
+        // whatsapp_messages_per_chatbot: toNumberOrUndefined(
+        //   pricingPlanData.whatsapp_messages_per_chatbot,
+        // ),
+        // has_broadcasting: Boolean(pricingPlanData.has_broadcasting),
+        // broadcasting_message_limit: toNumberOrUndefined(
+        //   pricingPlanData.broadcasting_message_limit,
+        // ),
         is_active: Boolean(pricingPlanData.is_active),
         description: pricingPlanData.description ?? "",
+        features: pricingPlanData.features ?? [],
       } as const;
 
       // New normalized values (what we intend to send)
@@ -131,16 +139,16 @@ const EditPricingPlanDialog: React.FC<EditPricingPlanDialogProps> = ({
         price: Number(values.price),
         salon_limit: Number(values.salon_limit),
         whatsapp_chatbot_limit: Number(values.whatsapp_chatbot_limit),
-        whatsapp_messages_per_chatbot: Number(
-          values.whatsapp_messages_per_chatbot,
-        ),
-        has_broadcasting: Boolean(values.has_broadcasting),
-        // When broadcasting is disabled, we consider its limit as 0 for clearing
-        broadcasting_message_limit: values.has_broadcasting
-          ? Number(values.broadcasting_message_limit)
-          : 0,
+        // whatsapp_messages_per_chatbot: Number(
+        //   values.whatsapp_messages_per_chatbot,
+        // ),
+        // has_broadcasting: Boolean(values.has_broadcasting),
+        // broadcasting_message_limit: values.has_broadcasting
+        //   ? Number(values.broadcasting_message_limit)
+        //   : 0,
         is_active: Boolean(values.is_active),
         description: values.description || "",
+        features: values.features,
       } as const;
 
       // Build a partial payload that includes only changed fields
@@ -173,38 +181,46 @@ const EditPricingPlanDialog: React.FC<EditPricingPlanDialogProps> = ({
         partialPayload.whatsapp_chatbot_limit =
           newNormalized.whatsapp_chatbot_limit;
       }
+      // if (
+      //   originalNormalized.whatsapp_messages_per_chatbot !==
+      //   newNormalized.whatsapp_messages_per_chatbot
+      // ) {
+      //   partialPayload.whatsapp_messages_per_chatbot =
+      //     newNormalized.whatsapp_messages_per_chatbot;
+      // }
+
+      // Array fields
+      const areFeaturesEqual = (a: string[], b: string[]) =>
+        a.length === b.length && a.every((value, index) => value === b[index]);
+
       if (
-        originalNormalized.whatsapp_messages_per_chatbot !==
-        newNormalized.whatsapp_messages_per_chatbot
+        !areFeaturesEqual(originalNormalized.features, newNormalized.features)
       ) {
-        partialPayload.whatsapp_messages_per_chatbot =
-          newNormalized.whatsapp_messages_per_chatbot;
+        partialPayload.features = newNormalized.features;
       }
 
       // Boolean fields
       if (originalNormalized.is_active !== newNormalized.is_active) {
         partialPayload.is_active = newNormalized.is_active;
       }
-      if (
-        originalNormalized.has_broadcasting !== newNormalized.has_broadcasting
-      ) {
-        partialPayload.has_broadcasting = newNormalized.has_broadcasting;
-      }
+      // if (
+      //   originalNormalized.has_broadcasting !== newNormalized.has_broadcasting
+      // ) {
+      //   partialPayload.has_broadcasting = newNormalized.has_broadcasting;
+      // }
 
       // Broadcasting limit: include only when relevant or when broadcasting toggles off
-      if (newNormalized.has_broadcasting) {
-        // Broadcasting is ON: include only if the limit changed
-        if (
-          originalNormalized.broadcasting_message_limit !==
-          newNormalized.broadcasting_message_limit
-        ) {
-          partialPayload.broadcasting_message_limit =
-            newNormalized.broadcasting_message_limit;
-        }
-      } else if (originalNormalized.has_broadcasting) {
-        // Broadcasting turned OFF from previously ON: send 0 to clear
-        partialPayload.broadcasting_message_limit = 0;
-      }
+      // if (newNormalized.has_broadcasting) {
+      //   if (
+      //     originalNormalized.broadcasting_message_limit !==
+      //     newNormalized.broadcasting_message_limit
+      //   ) {
+      //     partialPayload.broadcasting_message_limit =
+      //       newNormalized.broadcasting_message_limit;
+      //   }
+      // } else if (originalNormalized.has_broadcasting) {
+      //   partialPayload.broadcasting_message_limit = 0;
+      // }
 
       // If nothing changed, avoid making the request
       if (Object.keys(partialPayload).length === 0) {
@@ -287,7 +303,7 @@ const EditPricingPlanDialog: React.FC<EditPricingPlanDialogProps> = ({
           onSubmit={handleSubmit}
           enableReinitialize
         >
-          {({ values, errors, touched }) => (
+          {({ values, errors, touched, setFieldValue }) => (
             <Form>
               <div className="grid gap-4">
                 <div>
@@ -395,7 +411,7 @@ const EditPricingPlanDialog: React.FC<EditPricingPlanDialogProps> = ({
                   </div>
                 </div>
 
-                <div>
+                {/* <div>
                   <Label
                     htmlFor="whatsapp_messages_per_chatbot"
                     className="mb-2"
@@ -417,9 +433,105 @@ const EditPricingPlanDialog: React.FC<EditPricingPlanDialogProps> = ({
                         {String(errors.whatsapp_messages_per_chatbot)}
                       </p>
                     )}
+                </div> */}
+
+                <div>
+                  <Label className="mb-2">Features</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {values.features.length > 0 ? (
+                      values.features.map((feature) => (
+                        <span
+                          key={feature}
+                          className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm"
+                        >
+                          {feature}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFieldValue(
+                                "features",
+                                values.features.filter(
+                                  (item) => item !== feature,
+                                ),
+                              );
+                            }}
+                            className="text-muted-foreground hover:bg-muted inline-flex h-5 w-5 items-center justify-center rounded-full"
+                          >
+                            <X size={14} />
+                          </button>
+                        </span>
+                      ))
+                    ) : (
+                      <p className="text-muted-foreground text-sm">
+                        No features added yet.
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="mt-3 flex items-center gap-2">
+                    <input
+                      id="featureInput"
+                      type="text"
+                      value={featureInput}
+                      onChange={(e) => {
+                        setFeatureInput(e.target.value);
+                        setFeatureError(null);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          const feature = featureInput.trim();
+                          if (!feature) {
+                            setFeatureError("Feature cannot be blank.");
+                            return;
+                          }
+                          if (values.features.includes(feature)) {
+                            setFeatureError("Feature already added.");
+                            return;
+                          }
+                          setFieldValue("features", [
+                            ...values.features,
+                            feature,
+                          ]);
+                          setFeatureInput("");
+                        }
+                      }}
+                      placeholder="Enter a feature"
+                      className="border-input focus:border-primary focus:ring-primary/10 flex-1 rounded-md border px-3 py-2 shadow-sm focus:ring-2 focus:outline-none"
+                    />
+                    <Button
+                      size="sm"
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        const feature = featureInput.trim();
+                        if (!feature) {
+                          setFeatureError("Feature cannot be blank.");
+                          return;
+                        }
+                        if (values.features.includes(feature)) {
+                          setFeatureError("Feature already added.");
+                          return;
+                        }
+                        setFieldValue("features", [
+                          ...values.features,
+                          feature,
+                        ]);
+                        setFeatureInput("");
+                      }}
+                      className="h-10 px-4"
+                    >
+                      Add
+                    </Button>
+                  </div>
+                  {featureError ? (
+                    <p className="text-destructive mt-1 text-sm">
+                      {featureError}
+                    </p>
+                  ) : null}
                 </div>
 
-                <div className="flex items-center justify-between gap-4">
+                {/* <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
                     <Label htmlFor="has_broadcasting" className="mb-2">
                       Has Broadcasting
@@ -463,7 +575,7 @@ const EditPricingPlanDialog: React.FC<EditPricingPlanDialogProps> = ({
                         </p>
                       )}
                   </div>
-                </div>
+                </div> */}
 
                 <div className="flex items-center gap-3">
                   <Label htmlFor="is_active" className="mb-2">

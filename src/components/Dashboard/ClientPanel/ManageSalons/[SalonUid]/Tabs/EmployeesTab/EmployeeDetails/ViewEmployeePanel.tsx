@@ -141,6 +141,7 @@ const ViewEmployeePanel: React.FC<ViewEmployeePanelProps> = ({
                     onClick={handleEditEmployeeBasicInfo}
                   >
                     <Edit size={16} />
+                    Edit
                   </Button>
                 )}
               </div>

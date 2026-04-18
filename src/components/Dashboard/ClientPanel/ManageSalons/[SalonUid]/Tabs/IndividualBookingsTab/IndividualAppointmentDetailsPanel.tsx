@@ -106,8 +106,8 @@ const IndividualAppointmentDetailsPanel: React.FC<
 
   const statusClasses = cn(
     "flex items-center gap-2 rounded-full px-3 py-1",
-    effectiveStatus === "placed" &&
-      "bg-gradient-to-r from-blue-600 to-cyan-600 text-white",
+    effectiveStatus === "confirmed" &&
+      "bg-gradient-to-r from-cyan-600 to-emerald-600 text-white",
     effectiveStatus === "in-progress" &&
       "bg-gradient-to-r from-amber-600 to-orange-600 text-white",
     effectiveStatus === "rescheduled" &&
@@ -116,6 +116,8 @@ const IndividualAppointmentDetailsPanel: React.FC<
       "bg-gradient-to-r from-emerald-600 to-teal-600 text-white",
     effectiveStatus === "cancelled" &&
       "bg-gradient-to-r from-red-400 to-rose-600 text-white",
+    effectiveStatus === "no-show" &&
+      "bg-gradient-to-r from-slate-500 to-slate-700 text-white",
   );
 
   const renderContent = () => {

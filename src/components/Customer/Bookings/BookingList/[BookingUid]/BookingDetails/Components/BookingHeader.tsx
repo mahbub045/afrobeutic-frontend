@@ -12,11 +12,12 @@ const STATUS_VARIANT: Record<
   string,
   "default" | "warning" | "secondary" | "destructive" | "outline" | "danger"
 > = {
-  PLACED: "default",
+  CONFIRMED: "default",
   INPROGRESS: "warning",
   RESCHEDULED: "secondary",
   COMPLETED: "secondary",
   CANCELLED: "danger",
+  NO_SHOW: "destructive",
 };
 
 const BookingHeader: React.FC<Props> = ({ booking }) => {

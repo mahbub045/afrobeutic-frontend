@@ -1,16 +1,18 @@
 export type IndBookingApiStatus =
-  | "PLACED"
+  | "CONFIRMED"
   | "INPROGRESS"
   | "COMPLETED"
   | "RESCHEDULED"
-  | "CANCELLED";
+  | "CANCELLED"
+  | "NO_SHOW";
 
 export type IndBookingUiStatus =
-  | "placed"
+  | "confirmed"
   | "in-progress"
   | "rescheduled"
   | "completed"
-  | "cancelled";
+  | "cancelled"
+  | "no-show";
 
 export interface IndAppointment {
   id: string;
