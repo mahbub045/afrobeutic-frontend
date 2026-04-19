@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getCurrencySymbol } from "@/lib/utils";
 import { useGetTopProductsQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Analytics/AnalyticsApi";
 import { TopProduct } from "@/Types/ClientPanel/ManageSalonTypes/AnalyticsTypes/AnalyticsTypes";
 import { LoaderPinwheel } from "lucide-react";
@@ -84,7 +85,8 @@ const ProductSales: React.FC = () => {
                   {s.name}
                 </div>
                 <div className="text-primary text-xl font-semibold">
-                  ${s.total_revenue.toFixed(2)}
+                  {getCurrencySymbol()}
+                  {s.total_revenue.toFixed(2)}
                 </div>
               </Card>
             ))}

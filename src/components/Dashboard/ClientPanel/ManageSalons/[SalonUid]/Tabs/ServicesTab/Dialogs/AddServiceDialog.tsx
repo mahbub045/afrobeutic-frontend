@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { formatChoiceFieldValue } from "@/lib/utils";
+import { formatChoiceFieldValue, getCurrencySymbol } from "@/lib/utils";
 import {
   useAddServiceMutation,
   useGetServiceCategoriesQuery,
@@ -223,7 +223,8 @@ const AddServiceDialog: React.FC<AddServiceDialogProps> = ({
 
               <div>
                 <Label htmlFor="price" className="mb-2">
-                  Price($)<span className="text-danger">*</span>
+                  Price({getCurrencySymbol()})
+                  <span className="text-danger">*</span>
                 </Label>
                 <Field
                   id="price"

@@ -3,7 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffectiveRole } from "@/hooks/use-effective-role";
-import { formatChoiceFieldValue, formatDateTime, safe } from "@/lib/utils";
+import {
+  formatChoiceFieldValue,
+  formatDateTime,
+  getCurrencySymbol,
+  safe,
+} from "@/lib/utils";
 import { useGetServicesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
 import {
   Employee,
@@ -222,7 +227,8 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
               <div className="text-left md:text-right">
                 <div className="text-muted-foreground text-sm">Price</div>
                 <div className="text-lg font-semibold">
-                  ${safe(displayedService.price)}
+                  {getCurrencySymbol()}
+                  {safe(displayedService.price)}
                 </div>
               </div>
             </div>
@@ -265,7 +271,7 @@ const ViewServicePanel: React.FC<ViewServicePanelProps> = ({
 
               <div>
                 <div className="text-muted-foreground text-xs uppercase">
-                  Price $
+                  Price {getCurrencySymbol()}
                 </div>
                 <div className="text-sm font-medium">
                   {safe(displayedService.price)}

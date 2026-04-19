@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { formatChoiceFieldValue } from "@/lib/utils";
+import { formatChoiceFieldValue, getCurrencySymbol } from "@/lib/utils";
 import {
   useEditServiceMutation,
   useGetServiceCategoriesQuery,
@@ -229,7 +229,7 @@ const EditServiceBasicInfoDialog: React.FC<EditServiceBasicInfoDialogProps> = ({
               </div>
               <div>
                 <Label htmlFor="service-price" className="mb-2">
-                  Price($)
+                  Price({getCurrencySymbol()})
                 </Label>
                 <Field
                   as="input"

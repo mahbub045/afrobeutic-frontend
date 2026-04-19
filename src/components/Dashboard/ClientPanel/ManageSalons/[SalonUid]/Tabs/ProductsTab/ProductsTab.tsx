@@ -11,7 +11,11 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { useEffectiveRole } from "@/hooks/use-effective-role";
-import { formatChoiceFieldValue, formatDateTime } from "@/lib/utils";
+import {
+  formatChoiceFieldValue,
+  formatDateTime,
+  getCurrencySymbol,
+} from "@/lib/utils";
 import { useGetProductsDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Products/ProductsApi";
 import { ProductProps } from "@/Types/ClientPanel/ManageSalonTypes/ProductsTypes/ProductsType";
 import {
@@ -206,7 +210,10 @@ const ProductsTab: React.FC = () => {
                   <TableCell>
                     {formatChoiceFieldValue(product.category) || "-"}
                   </TableCell>
-                  <TableCell>${product.price}</TableCell>
+                  <TableCell>
+                    {getCurrencySymbol()}
+                    {product.price}
+                  </TableCell>
                   <TableCell>
                     {formatDateTime(product?.created_at ?? null)}
                   </TableCell>
@@ -223,7 +230,8 @@ const ProductsTab: React.FC = () => {
                         className="text-primary/80 hover:text-primary dark:shadow-gray-600"
                         onClick={() => handleIsOpenSingleProductTab(product)}
                       >
-                        <Eye />View
+                        <Eye />
+                        View
                       </Button>
                     </div>
                     <div>
@@ -235,7 +243,8 @@ const ProductsTab: React.FC = () => {
                           color="red"
                           onClick={() => handleIsOpenDeleteDialog(product)}
                         >
-                          <Trash2 />Delete
+                          <Trash2 />
+                          Delete
                         </Button>
                       )}
                     </div>

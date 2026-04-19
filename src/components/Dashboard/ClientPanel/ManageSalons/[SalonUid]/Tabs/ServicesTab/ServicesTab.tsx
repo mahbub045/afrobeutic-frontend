@@ -11,7 +11,11 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { useEffectiveRole } from "@/hooks/use-effective-role";
-import { formatChoiceFieldValue, formatDateTime } from "@/lib/utils";
+import {
+  formatChoiceFieldValue,
+  formatDateTime,
+  getCurrencySymbol,
+} from "@/lib/utils";
 import { useGetServicesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
 import { ServiceProps } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import {
@@ -207,7 +211,10 @@ const ServicesTab: React.FC = () => {
                     {formatChoiceFieldValue(service.category) || "-"}
                   </TableCell>
                   <TableCell>{service.service_duration}</TableCell>
-                  <TableCell>${service.price}</TableCell>
+                  <TableCell>
+                    {getCurrencySymbol()}
+                    {service.price}
+                  </TableCell>
                   <TableCell>
                     {formatDateTime(service?.updated_at ?? null)}
                   </TableCell>
