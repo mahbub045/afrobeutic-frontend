@@ -18,7 +18,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatChoiceFieldValue, formatDateTime } from "@/lib/utils";
+import {
+  formatChoiceFieldValue,
+  formatDateTime,
+  getCurrencySymbol,
+} from "@/lib/utils";
 import { useGetSubscriptionsQuery } from "@/Redux/Reducers/AdminPanel/Subscriptions/SubscriptionsApi";
 import { SubscriptionTypes } from "@/Types/AdminPanel/SubscriptionsTypes/SubscriptionsTypes";
 import {
@@ -209,7 +213,8 @@ const SubscriptionList: React.FC = () => {
                     {s.pricing_plan?.name ?? "--"}
                   </TableCell>
                   <TableCell className="text-center">
-                    ${s.pricing_plan?.price ?? "--"}
+                    {getCurrencySymbol()}
+                    {s.pricing_plan?.price ?? "--"}
                   </TableCell>
                   <TableCell className="text-center">
                     <Badge variant={statusColorMap(s.status)}>

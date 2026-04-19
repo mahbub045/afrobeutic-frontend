@@ -10,7 +10,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { cn, formatChoiceFieldValue } from "@/lib/utils";
+import { cn, formatChoiceFieldValue, getCurrencySymbol } from "@/lib/utils";
 import { useViewReceiptMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/ViewReceiptApi";
 import type {
   Appointment,
@@ -267,14 +267,17 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                           {service.name}
                         </span>
                         <span className="text-primary text-sm font-semibold">
-                          ${service.discount_price}
+                          {getCurrencySymbol()}
+                          {service.discount_price}
                         </span>
                       </div>
                       <div className="text-muted-foreground text-xs">
-                        Price: ${service.price} {"->"} Discount:{" "}
+                        Price: {getCurrencySymbol()}
+                        {service.price} {"->"} Discount:{" "}
                         {service.discount_percentage}% {"->"}{" "}
                         <span className="text-primary">
-                          Final: ${service.discount_price}
+                          Final: {getCurrencySymbol()}
+                          {service.discount_price}
                         </span>
                       </div>
                       {service.description && (
@@ -330,7 +333,8 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                             {product.name}
                           </span>
                           <span className="text-primary text-sm font-semibold">
-                            ${product.price}
+                            {getCurrencySymbol()}
+                            {product.price}
                           </span>
                         </div>
                         {product.description && (
@@ -355,7 +359,7 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                         Services Total
                       </span>
                       <del className="text-muted-foreground">
-                        $
+                        {getCurrencySymbol()}
                         {(
                           singleBookingData?.total_services_price ??
                           (singleBookingData?.services || []).reduce(
@@ -371,7 +375,7 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                         <small className="text-[10px]">(After Discount)</small>
                       </span>
                       <span className="text-foreground">
-                        $
+                        {getCurrencySymbol()}
                         {(
                           singleBookingData?.services_discount_price ??
                           (singleBookingData?.services || []).reduce(
@@ -388,7 +392,7 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                             Products Total
                           </span>
                           <span className="text-foreground">
-                            $
+                            {getCurrencySymbol()}
                             {(
                               singleBookingData?.total_products_price ??
                               (singleBookingData?.products || []).reduce(
@@ -404,14 +408,16 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Total Price</span>
                       <del className="text-muted-foreground font-medium">
-                        ${(singleBookingData?.total_price ?? 0).toFixed(2)}
+                        {getCurrencySymbol()}
+                        {(singleBookingData?.total_price ?? 0).toFixed(2)}
                       </del>
                     </div>
                     <Separator />
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Tips</span>
                       <span className="text-foreground font-medium">
-                        ${singleBookingData?.tips_amount ?? 0}
+                        {getCurrencySymbol()}
+                        {singleBookingData?.tips_amount ?? 0}
                       </span>
                     </div>
                     <Separator />
@@ -421,7 +427,8 @@ const AppointmentDetailsPanel: React.FC<AppointmentDetailsPanelProps> = ({
                         Final Price
                       </span>
                       <span className="text-foreground font-bold">
-                        ${(singleBookingData?.final_price ?? 0).toFixed(2)}
+                        {getCurrencySymbol()}
+                        {(singleBookingData?.final_price ?? 0).toFixed(2)}
                       </span>
                     </div>
                   </div>

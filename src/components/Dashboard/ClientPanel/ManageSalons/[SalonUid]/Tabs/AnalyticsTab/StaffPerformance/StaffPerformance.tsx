@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { getCurrencySymbol } from "@/lib/utils";
 import { useGetTopStaffPerformersQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Analytics/AnalyticsApi";
 import { TopStaffPerformer } from "@/Types/ClientPanel/ManageSalonTypes/AnalyticsTypes/AnalyticsTypes";
 import { LoaderPinwheel } from "lucide-react";
@@ -52,7 +53,8 @@ const StaffPerformance: React.FC = () => {
                   {s.name}
                 </div>
                 <div className="text-primary text-xl font-semibold">
-                  ${s.total_revenue.toFixed(2)}
+                  {getCurrencySymbol()}
+                  {s.total_revenue.toFixed(2)}
                 </div>
               </Card>
             ))}

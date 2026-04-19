@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { formatChoiceFieldValue } from "@/lib/utils";
+import { formatChoiceFieldValue, getCurrencySymbol } from "@/lib/utils";
 import {
   useEditProductMutation,
   useGetProductCategoriesQuery,
@@ -222,7 +222,7 @@ const EditProductBasicInfoDialog: React.FC<EditProductBasicInfoDialogProps> = ({
               </div>
               <div>
                 <Label htmlFor="product-price" className="mb-2">
-                  Price($)
+                  Price({getCurrencySymbol()})
                 </Label>
                 <Field
                   as="input"

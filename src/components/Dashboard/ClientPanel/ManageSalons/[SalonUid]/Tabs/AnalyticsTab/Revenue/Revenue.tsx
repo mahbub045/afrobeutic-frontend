@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatDateTime } from "@/lib/utils";
+import { formatDateTime, getCurrencySymbol } from "@/lib/utils";
 import {
   useDownloadRevenueReportMutation,
   useGetRevenueAnalyticsQuery,
@@ -173,7 +173,10 @@ const Revenue: React.FC = () => {
                     {rev.customer.first_name} {rev.customer.last_name}
                   </TableCell>
                   <TableCell>{formatDateTime(rev.completed_at)}</TableCell>
-                  <TableCell>${rev.final_price}</TableCell>
+                  <TableCell>
+                    {getCurrencySymbol()}
+                    {rev.final_price}
+                  </TableCell>
                   <TableCell className="text-center">
                     <Button
                       variant="outline"

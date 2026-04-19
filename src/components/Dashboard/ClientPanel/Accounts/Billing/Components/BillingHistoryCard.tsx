@@ -140,7 +140,7 @@ const BillingHistoryCard: React.FC<Props> = ({ data, page, onPageChange }) => {
                   <TableRow key={`${row.created_at}-${idx}`}>
                     <TableCell className="font-medium">{idx + 1}</TableCell>
                     <TableCell className="font-medium">
-                      {row.plan_name || "-"}
+                      {formatChoiceFieldValue(row.plan_name) || "-"}
                     </TableCell>
                     <TableCell>
                       <Badge
