@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatChoiceFieldValue } from "@/lib/utils";
+import { formatChoiceFieldValue, getCurrencySymbol } from "@/lib/utils";
 import { useGetChairsBookingDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Chairs/ChairsBookingApi";
 import {
   ChairBookingProps,
@@ -227,7 +227,8 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  ${calculateTotalPrice(booking?.services, booking?.products)}
+                  {getCurrencySymbol()}
+                  {calculateTotalPrice(booking?.services, booking?.products)}
                 </TableCell>
                 <TableCell className="flex items-center justify-center gap-2">
                   <Button
@@ -244,7 +245,7 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
                     onClick={() => handleEditBooking(booking)}
                   >
                     <EditIcon className="size-4" />
-                    Delete
+                    Edit
                   </Button>
                 </TableCell>
               </TableRow>
@@ -403,7 +404,8 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
                           </p>
                         </div>
                         <p className="text-sm font-semibold">
-                          ${service.price}
+                          {getCurrencySymbol()}
+                          {service.price}
                         </p>
                       </div>
                     ))}
@@ -439,7 +441,8 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
                           )}
                         </div>
                         <p className="text-sm font-semibold">
-                          ${product.price}
+                          {getCurrencySymbol()}
+                          {product.price}
                         </p>
                       </div>
                     ))}
@@ -452,7 +455,7 @@ const ViewBookingPanel: React.FC<ViewBookingPanelProps> = ({ chairUid }) => {
                 <div className="flex items-center justify-between">
                   <p className="font-semibold">Total Price:</p>
                   <p className="text-lg font-bold">
-                    $
+                    {getCurrencySymbol()}
                     {calculateTotalPrice(
                       selectedBooking.services,
                       selectedBooking.products,

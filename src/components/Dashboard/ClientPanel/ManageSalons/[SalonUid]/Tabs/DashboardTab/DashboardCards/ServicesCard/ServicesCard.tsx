@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatChoiceFieldValue } from "@/lib/utils";
+import { formatChoiceFieldValue, getCurrencySymbol } from "@/lib/utils";
 import { useGetServicesDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Services/ServicesApi";
 import { ServiceProps } from "@/Types/ClientPanel/ManageSalonTypes/ServicesTypes/ServicesType";
 import { Cog, Scissors } from "lucide-react";
@@ -120,7 +120,8 @@ const ServicesCard: React.FC = () => {
                 </div>
 
                 <p className="text-muted-foreground text-sm font-medium">
-                  ${service.price ? service.price : "0.0"}
+                  {getCurrencySymbol()}
+                  {service.price ? service.price : "0.0"}
                 </p>
               </div>
             ))}

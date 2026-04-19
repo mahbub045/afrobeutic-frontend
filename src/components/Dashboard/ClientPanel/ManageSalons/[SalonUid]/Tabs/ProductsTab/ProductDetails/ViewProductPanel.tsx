@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffectiveRole } from "@/hooks/use-effective-role";
-import { formatChoiceFieldValue, safe } from "@/lib/utils";
+import { formatChoiceFieldValue, getCurrencySymbol, safe } from "@/lib/utils";
 import { useGetProductsDataQuery } from "@/Redux/Reducers/ClientPanel/ManageSalons/Products/ProductsApi";
 import {
   ProductProps,
@@ -204,7 +204,8 @@ const ViewProductPanel: React.FC<ViewProductPanelProps> = ({
               <div className="text-left md:text-right">
                 <div className="text-muted-foreground text-sm">Price</div>
                 <div className="text-lg font-semibold">
-                  ${safe(displayedProduct.price)}
+                  {getCurrencySymbol()}
+                  {safe(displayedProduct.price)}
                 </div>
               </div>
             </div>
@@ -220,7 +221,8 @@ const ViewProductPanel: React.FC<ViewProductPanelProps> = ({
                     className="shadow-md dark:shadow-gray-600"
                     onClick={handleEditProductBasicInfo}
                   >
-                    <Edit size={16} />Edit
+                    <Edit size={16} />
+                    Edit
                   </Button>
                 )}
               </div>
@@ -246,7 +248,7 @@ const ViewProductPanel: React.FC<ViewProductPanelProps> = ({
 
               <div>
                 <div className="text-muted-foreground text-xs uppercase">
-                  Price $
+                  Price {getCurrencySymbol()}
                 </div>
                 <div className="text-sm font-medium">
                   {safe(displayedProduct.price)}

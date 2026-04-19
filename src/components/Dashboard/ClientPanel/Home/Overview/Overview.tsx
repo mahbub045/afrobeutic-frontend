@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Progress } from "@/components/ui/progress";
+import { getCurrencySymbol } from "@/lib/utils";
 import { useGetOverviewStatsQuery } from "@/Redux/Reducers/ClientPanel/Home/OverviewApi";
 import type {
   DashboardFilterValue,
@@ -80,8 +81,8 @@ const Overview: React.FC = () => {
 
   const fmtMoney = (value?: number) => {
     const n = Number(value ?? 0);
-    if (!Number.isFinite(n)) return "$0.00";
-    return `$${n.toFixed(2)}`;
+    if (!Number.isFinite(n)) return "0.00";
+    return `${getCurrencySymbol()}${n.toFixed(2)}`;
   };
 
   const data1: OverviewStatsResponse | undefined = bookingsData;

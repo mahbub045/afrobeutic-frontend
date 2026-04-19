@@ -1,7 +1,11 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatChoiceFieldValue, formatDateTime } from "@/lib/utils";
+import {
+  formatChoiceFieldValue,
+  formatDateTime,
+  getCurrencySymbol,
+} from "@/lib/utils";
 import { useGetSubscriptionDetailsQuery } from "@/Redux/Reducers/AdminPanel/Subscriptions/SubscriptionsApi";
 import { CalendarDays, CreditCard, Settings, User } from "lucide-react";
 import { useParams } from "next/navigation";
@@ -193,7 +197,8 @@ const SubscriptionDetails: React.FC = () => {
                   {subscription.pricing_plan.name}
                 </h3>
                 <p className="text-primary text-2xl font-bold">
-                  ${subscription.pricing_plan.price}
+                  {getCurrencySymbol()}
+                  {subscription.pricing_plan.price}
                   <span className="text-muted-foreground text-sm font-normal">
                     /month
                   </span>
@@ -215,7 +220,7 @@ const SubscriptionDetails: React.FC = () => {
                   Account Category
                 </span>
                 <p className="mt-1 text-sm">
-                  <span className="bg-primary/50 px-2 py-1 rounded text-white font-medium">
+                  <span className="bg-primary/50 rounded px-2 py-1 font-medium text-white">
                     {formatChoiceFieldValue(
                       subscription.pricing_plan.account_category,
                     )}
@@ -245,32 +250,6 @@ const SubscriptionDetails: React.FC = () => {
                   <span className="text-sm">WhatsApp Chatbot Limit</span>
                   <span className="text-sm font-medium">
                     {subscription.pricing_plan.whatsapp_chatbot_limit}
-                  </span>
-                </div>
-                <div className="bg-muted flex justify-between rounded p-3">
-                  <span className="text-sm">Messages per Chatbot</span>
-                  <span className="text-sm font-medium">
-                    {subscription.pricing_plan.whatsapp_messages_per_chatbot}
-                  </span>
-                </div>
-                <div className="bg-muted flex justify-between rounded p-3">
-                  <span className="text-sm">Broadcasting</span>
-                  <Badge
-                    variant={
-                      subscription.pricing_plan.has_broadcasting
-                        ? "default"
-                        : "danger"
-                    }
-                  >
-                    {subscription.pricing_plan.has_broadcasting
-                      ? "Enabled"
-                      : "Disabled"}
-                  </Badge>
-                </div>
-                <div className="bg-muted flex justify-between rounded p-3">
-                  <span className="text-sm">Broadcasting Messages</span>
-                  <span className="text-sm font-medium">
-                    {subscription.pricing_plan.broadcasting_message_limit}
                   </span>
                 </div>
               </div>

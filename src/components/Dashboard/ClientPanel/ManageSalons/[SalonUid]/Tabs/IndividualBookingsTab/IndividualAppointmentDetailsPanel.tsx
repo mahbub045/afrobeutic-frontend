@@ -9,7 +9,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { cn, formatChoiceFieldValue } from "@/lib/utils";
+import { cn, formatChoiceFieldValue, getCurrencySymbol } from "@/lib/utils";
 import { useViewReceiptMutation } from "@/Redux/Reducers/ClientPanel/ManageSalons/Bookings/ViewReceiptApi";
 import type {
   BookingProduct,
@@ -280,7 +280,8 @@ const IndividualAppointmentDetailsPanel: React.FC<
                     )}
                   </div>
                   <span className="text-foreground text-sm font-semibold">
-                    ${svc.price ?? "0.00"}
+                    {getCurrencySymbol()}
+                    {svc.price ?? "0.00"}
                   </span>
                 </div>
               ))}
@@ -321,7 +322,8 @@ const IndividualAppointmentDetailsPanel: React.FC<
                       {formatChoiceFieldValue(prod.name)}
                     </span>
                     <span className="text-foreground text-sm font-semibold">
-                      ${prod.price ?? "0.00"}
+                      {getCurrencySymbol()}
+                      {prod.price ?? "0.00"}
                     </span>
                   </div>
                 ))}
@@ -344,7 +346,8 @@ const IndividualAppointmentDetailsPanel: React.FC<
                 <div className="text-right">
                   <div>
                     <div className="text-muted-foreground text-sm line-through">
-                      ${format(servicesTotalOriginal)}
+                      {getCurrencySymbol()}
+                      {format(servicesTotalOriginal)}
                     </div>
                   </div>
                 </div>
@@ -355,7 +358,8 @@ const IndividualAppointmentDetailsPanel: React.FC<
                   Services Total (After Discount)
                 </span>
                 <span className="text-foreground">
-                  ${format(servicesTotalAfterDiscount)}
+                  {getCurrencySymbol()}
+                  {format(servicesTotalAfterDiscount)}
                 </span>
               </div>
 
@@ -364,7 +368,8 @@ const IndividualAppointmentDetailsPanel: React.FC<
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Products Total</span>
                   <span className="text-foreground">
-                    ${format(productsTotal)}
+                    {getCurrencySymbol()}
+                    {format(productsTotal)}
                   </span>
                 </div>
               )}
@@ -376,7 +381,8 @@ const IndividualAppointmentDetailsPanel: React.FC<
                 <span className="text-muted-foreground">Total Price</span>
                 <div>
                   <div className="text-muted-foreground line-through">
-                    ${format(totalPrice)}
+                    {getCurrencySymbol()}
+                    {format(totalPrice)}
                   </div>
                 </div>
               </div>
@@ -384,7 +390,10 @@ const IndividualAppointmentDetailsPanel: React.FC<
 
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Tips</span>
-                <span className="text-foreground">${format(tipsTotal)}</span>
+                <span className="text-foreground">
+                  {getCurrencySymbol()}
+                  {format(tipsTotal)}
+                </span>
               </div>
 
               <Separator />
@@ -395,7 +404,8 @@ const IndividualAppointmentDetailsPanel: React.FC<
                   Final Price
                 </span>
                 <span className="text-foreground font-bold">
-                  ${format(finalPrice)}
+                  {getCurrencySymbol()}
+                  {format(finalPrice)}
                 </span>
               </div>
             </div>

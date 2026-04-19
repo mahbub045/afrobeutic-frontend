@@ -89,7 +89,7 @@ export const formatPrice = (price?: string) => {
   const num = Number(price);
   if (Number.isNaN(num)) return price;
 
-  return `$${new Intl.NumberFormat(undefined, {
+  return `${getCurrencySymbol()}${new Intl.NumberFormat(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(num)}`;
@@ -99,3 +99,7 @@ function convertToSubCurrency(amount: number, factor = 100) {
   return Math.round(amount * factor);
 }
 export default convertToSubCurrency;
+
+export const getCurrencySymbol = () => {
+  return "$";
+};

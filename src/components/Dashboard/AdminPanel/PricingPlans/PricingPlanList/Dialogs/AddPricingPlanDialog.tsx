@@ -9,6 +9,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { getCurrencySymbol } from "@/lib/utils";
 import { useAddPricingPlanMutation } from "@/Redux/Reducers/AdminPanel/PricingPlans/PricingPlansApi";
 import { AddPricingPlanDialogProps } from "@/Types/AdminPanel/PricingPlansTypes/PricingPlansTypes";
 import {
@@ -231,7 +232,8 @@ const AddPricingPlanDialog: React.FC<AddPricingPlanDialogProps> = ({
 
                 <div>
                   <Label htmlFor="price" className="mb-2">
-                    Price<span className="text-danger">*</span>
+                    Price({getCurrencySymbol()})
+                    <span className="text-danger">*</span>
                   </Label>
                   <Field
                     id="price"
